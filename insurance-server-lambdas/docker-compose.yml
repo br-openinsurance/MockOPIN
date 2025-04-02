@@ -1,0 +1,187 @@
+services:
+
+  mtls:
+    profiles:
+      - main
+      - dev
+    build:
+      context: ../mock-service-os/mock_mtls
+    ports:
+      - "443:443"
+    volumes:
+      - ../mock-service-os/certs/:/app/certs/
+      - ./participants.json:/app/mocks/participants.json
+      - ./software_statement.json:/app/mocks/software_statement.json
+    networks:
+      default:
+        aliases:
+          - matls-auth.local
+          - auth.local
+          - matls-api.local
+          - api.local
+          - directory
+
+  mockapi:
+    profiles:
+      - main
+    image: raidiam-insurance-lambdas:latest
+    environment:
+      JAVA_HOME: ${JAVA_HOME}
+      DB_DRIVER: org.postgresql.Driver
+      DB_PASSWORD: test
+      DB_USERNAME: test
+      DB_URL: jdbc:postgresql://psql:5432/mock
+      MOCKSERVICE_URL: api.local
+      AWS_XRAY_CONTEXT_MISSING: IGNORE_ERROR
+      MICRONAUT_ENVIRONMENTS: dev
+    ports:
+      - "8080:8080"
+
+  psql:
+    profiles:
+      - main
+      - dev
+    image: postgres:16
+    environment:
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_USER=test
+      - POSTGRES_DB=mock
+    ports:
+      - "5432:5432"
+
+  auth:
+    profiles:
+      - main
+      - dev
+    build:
+      context: ../mock-service-os/mock_as
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017
+      - AWS_ACCESS_KEY_ID="test"
+      - AWS_SECRET_ACCESS_KEY="test"
+      - AWS_HOST=http://localstack:4566
+      - PORT=3000
+      - BRAND=OPIN_LOCAL
+      - AWS_XRAY_CONTEXT_MISSING=IGNORE_ERROR
+      - LOCAL_STACK_ENDPOINT=http://localstack:4566
+      - AWS_LOCAL=true
+      - DEBUG=raidiam:server:*,oidc-provider:*
+      - TRUSTFRAMEWORK_SSA_KEYSET=http://localstack:4566/keystore/jwks.json
+    ports:
+      - 3000:3000
+    command: ["node", "lambda.js"]
+    depends_on:
+      localstack:
+        condition: service_healthy
+
+  localstack:
+    profiles:
+      - main
+      - dev
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=ssm,s3
+      - AWS_ACCESS_KEY_ID="test"
+      - AWS_SECRET_ACCESS_KEY="test"
+      - DEBUG=1
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - ../mock-service-os/setup_ssm.sh:/etc/localstack/init/ready.d/init-aws.sh
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../mock-service-os/certs/op.key:/init/certs/client.key
+      - ../mock-service-os/certs/op.crt:/init/certs/client.crt
+      - config:/init/config
+    healthcheck:
+      test: [ "CMD-SHELL", "if [ -s /init/config/config.txt ]; then exit 0; else exit 1; fi" ]
+      interval: 5s
+      retries: 5
+      timeout: 5s
+
+  cs-httpd:
+    profiles:
+      - cs
+    build:
+      context: ./conformance-suite/httpd
+      dockerfile: Dockerfile-static
+    ports:
+      - "8443:8443"
+    volumes:
+      - ./conformance-suite/src/main/resources/:/usr/local/apache2/htdocs/
+    depends_on:
+      - cs-server
+    networks:
+      default:
+        aliases:
+          - localhost.emobix.co.uk
+
+  cs-server:
+    profiles:
+      - cs
+    hostname: server
+    image: openjdk:17-jdk-slim
+    build:
+      context: ./conformance-suite/server-dev
+    ports:
+      - "9999:9999"
+    volumes:
+      - ./conformance-suite/target/:/server/
+    command: >
+      java
+      -Xdebug -Xrunjdwp:transport=dt_socket,address=*:9999,server=y,suspend=n
+      -jar /server/libopin.jar
+      -Djdk.tls.maxHandshakeMessageSize=65536
+      -Dcom.sun.net.ssl.checkRevocation=false -Dcom.sun.net.ssl.trustStoreType=JKS -Dcom.sun.net.ssl.trustStorePassword=changeit
+      --fintechlabs.base_url=https://localhost.emobix.co.uk:8443
+      --fintechlabs.base_mtls_url=https://localhost.emobix.co.uk:8444
+      --fintechlabs.devmode=true
+      --fintechlabs.startredir=true
+      --fintechlabs.yacs.directory.uri=http://directory/participants
+    depends_on:
+      - mongodb
+    logging:
+      # limit logs retained on host
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "5"
+
+  mongodb:
+    profiles:
+      - main
+      - dev
+      - cs
+    image: mongo:latest
+    volumes:
+      - mongo-data:/data/db
+
+  mongo_seed:
+    profiles:
+      - main
+      - dev
+    build:
+      context: ../mock-service-os/mock_as/mongo-seed
+    command: ["/start.sh", "mongodb:27017"]
+    volumes:
+      - ../mock-service-os/certs/:/certs/
+    depends_on:
+      - mongodb
+
+  cs-builder:
+    profiles:
+      - build-only
+    image: maven:3-openjdk-17
+    volumes:
+      - maven-cache:/root/.m2
+      - ./conformance-suite:/usr/src/mymaven
+    working_dir: /usr/src/mymaven
+    command: mvn -B clean package -DskipTests=true
+
+volumes:
+  config:
+    driver: local
+  maven-cache:
+    driver: local
+  mongo-data:
+    driver: local

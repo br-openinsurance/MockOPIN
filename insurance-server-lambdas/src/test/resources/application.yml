@@ -1,0 +1,53 @@
+micronaut:
+  application:
+    name: lambdas
+  security:
+    enabled: true
+  data:
+    pageable:
+      max-page-size: 50000
+      default-page-size: 25
+      size-parameter-name: "page-size"
+  http:
+    client:
+      read-timeout: 600s
+    server:
+      read-timeout: 600s
+    services:
+        read-timeout: 600s
+  server:
+    netty:
+      server-type: full_content
+      eager-parsing: true
+
+jpa:
+  default:
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: validate
+        show_sql: true
+        bytecode:
+          provider: none
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+aws:
+  region: ${REGION:us-east-1}
+
+mockinsurance:
+  mockinsuranceUrl: "https://mockinsurance.com/api"
+  jwks-url: https://keystore.sandbox.directory.openbankingbrasil.org.br/%s/application.jwks
+  max-page-size: 25
+
+trustframework:
+  issuer: mockbank
+  audience: mockbank
+
+jackson:
+  serialization:
+    writeDatesAsTimestamps: true
+  serialization-inclusion: NON_ABSENT
+
+#datasources:
+#  default:
+#    enabled: false

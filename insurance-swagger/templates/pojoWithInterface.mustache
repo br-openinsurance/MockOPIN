@@ -1,0 +1,63 @@
+/**
+* {{#description}}{{.}}{{/description}}{{^description}}{{classname}}{{/description}}
+*/
+@Schema(description = "{{{description}}}")
+public class {{classname}} implements {{classname}}Interface {
+{{#vars}}
+    private {{{type}}} {{name}}; // Example field
+{{/vars}}
+
+public {{classname}}() {
+// Default constructor
+}
+
+// Constructor with parameters
+public {{classname}}({{#vars}}{{{type}}} {{name}}{{#hasMore}}, {{/hasMore}}{{/vars}}) {
+{{#vars}}
+    this.{{name}} = {{name}};
+{{/vars}}
+}
+
+{{#vars}}
+    public {{{type}}} get{{nameInCamelCase}}() {
+    return {{name}};
+    }
+
+    public void set{{nameInCamelCase}}({{{type}}} {{name}}) {
+    this.{{name}} = {{name}};
+    }
+{{/vars}}
+
+@Override
+public boolean equals(java.lang.Object o) {
+if (this == o) {
+return true;
+}
+if (o == null || getClass() != o.getClass()) {
+return false;
+}
+{{classname}} {{classVarName}} = ({{classname}}) o;
+return {{#vars}}Objects.equals(this.{{name}}, {{classVarName}}.{{name}}){{#hasMore}} && {{/hasMore}}{{/vars}};
+}
+
+@Override
+public int hashCode() {
+return Objects.hash({{#vars}}{{name}}{{#hasMore}}, {{/hasMore}}{{/vars}});
+}
+
+@Override
+public String toString() {
+StringBuilder sb = new StringBuilder();
+sb.append("class {{classname}} {\n");
+{{#vars}}sb.append("    {{name}}: ").append(toIndentedString({{name}})).append("\n");{{/vars}}
+sb.append("}");
+return sb.toString();
+}
+
+private String toIndentedString(java.lang.Object o) {
+if (o == null) {
+return "null";
+}
+return o.toString().replace("\n", "\n    ");
+}
+}

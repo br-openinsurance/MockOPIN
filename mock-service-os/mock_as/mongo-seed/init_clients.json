@@ -1,0 +1,94 @@
+[
+  {
+    "_id": "client_one",
+    "payload": {
+        "client_id": "client_one",
+        "grant_types": ["authorization_code", "client_credentials", "implicit", "refresh_token"],
+        "tls_client_certificate_bound_access_tokens": true,
+        "token_endpoint_auth_method": "private_key_jwt",
+        "response_types": ["code", "code id_token"],
+        "require_signed_request_object": true,
+        "require_pushed_authorization_requests": true,
+        "id_token_encrypted_response_alg": "RSA-OAEP",
+        "id_token_encrypted_response_enc": "A256GCM",
+        "id_token_signed_response_alg": "PS256",
+        "redirect_uris": ["https://localhost.emobix.co.uk:8443/test/a/mock/callback"]
+      }
+  },
+  {
+    "_id": "client_two",
+    "payload": {
+        "client_id": "client_two",
+        "grant_types": ["authorization_code", "client_credentials", "implicit", "refresh_token"],
+        "tls_client_certificate_bound_access_tokens": true,
+        "token_endpoint_auth_method": "private_key_jwt",
+        "response_types": ["code", "code id_token"],
+        "require_signed_request_object": true,
+        "require_pushed_authorization_requests": true,
+        "id_token_encrypted_response_alg": "RSA-OAEP",
+        "id_token_encrypted_response_enc": "A256GCM",
+        "id_token_signed_response_alg": "PS256",
+        "redirect_uris": ["https://localhost.emobix.co.uk:8443/test/a/mock/callback"]
+      }
+  },
+  {
+    "_id": "client",
+    "payload": {
+      "client_id": "client",
+      "client_secret": "1234",
+      "grant_types": ["authorization_code", "client_credentials", "implicit", "refresh_token"],
+      "token_endpoint_auth_method": "client_secret_basic",
+      "tls_client_certificate_bound_access_tokens": true,
+      "redirect_uris": ["https://oauth.pstmn.io/v1/callback", "https://sso-client.dev/providers/8/open_id"],
+      "jwks": {
+        "keys": [
+          {
+            "kty": "RSA",
+            "e": "AQAB",
+            "use": "sig",
+            "kid": "CfbVPtmKe6h0A29BEyHdLeCOKIs4SxhYwKKQxhidhEE",
+            "alg": "PS256",
+            "n": "nwBAiEo-6HY1eSt22s1D3GqfWVsco0Tp1ymSgMoDaSxWayr52lOEx0hluB2bKrscuJ0cfLuYrjEOY2f0ZjeHioRjl-1eDzMnHtp5bzCznWxMFEUuBnvRio7ZyuqZVGQLaY95I4sce06_Wd9lQeGytb654aYTuSJrkVwRQLtplPEQuYYMcH3DD8BADztuIC2DrYc4zJuWwXdgU_EPkObZPlu49op5kVwJav9wY-XiK-r6ruUgZ5-MxXNVFf39AnNszVw8urwMXiQ2aHijKNMy2pJHaQSPOyaeICKBcQw9L-mGtXfuT00aota054GkrPVn8V7HXdlYH3tKJY-SKfzRwQ"
+        }
+      ]
+    }
+   }
+  },
+  {
+    "_id": "client2",
+    "payload": {
+        "client_id": "client2",
+        "client_secret": "1234",
+        "grant_types": ["authorization_code", "client_credentials", "implicit", "refresh_token"],
+        "tls_client_certificate_bound_access_tokens": true,
+        "token_endpoint_auth_method": "private_key_jwt",
+        "response_types": ["code", "code id_token"],
+        "require_signed_request_object": true,
+        "require_pushed_authorization_requests": true,
+        "id_token_encrypted_response_alg": "RSA-OAEP",
+        "id_token_encrypted_response_enc": "A256GCM",
+        "id_token_signed_response_alg": "PS256",
+        "jwks": {
+          "keys": [
+            {
+              "kty": "RSA",
+              "e": "AQAB",
+              "use": "sig",
+              "kid": "CfbVPtmKe6h0A29BEyHdLeCOKIs4SxhYwKKQxhidhEE",
+              "alg": "PS256",
+              "n": "nwBAiEo-6HY1eSt22s1D3GqfWVsco0Tp1ymSgMoDaSxWayr52lOEx0hluB2bKrscuJ0cfLuYrjEOY2f0ZjeHioRjl-1eDzMnHtp5bzCznWxMFEUuBnvRio7ZyuqZVGQLaY95I4sce06_Wd9lQeGytb654aYTuSJrkVwRQLtplPEQuYYMcH3DD8BADztuIC2DrYc4zJuWwXdgU_EPkObZPlu49op5kVwJav9wY-XiK-r6ruUgZ5-MxXNVFf39AnNszVw8urwMXiQ2aHijKNMy2pJHaQSPOyaeICKBcQw9L-mGtXfuT00aota054GkrPVn8V7HXdlYH3tKJY-SKfzRwQ"
+          },
+          {
+            "kty": "RSA",
+            "e": "AQAB",
+            "use": "enc",
+            "kid": "8UNPev3ljzW43quVbZP46s3bzfhKvhlc2ErH8dAoSe4",
+            "alg": "RSA-OAEP",
+            "n": "ih92463RNAiEX0S4YkXcM6xlbQTG3-XAIzSknYomqr5Yhqqzs8W1cvH_GvTULfdeOycXh5dUYX1mA7CCZgnfRUFLbi5QY8kx8Po2bZjyB5tDTinBssRRLyed9gwD2nkmNrl8h-54YGwTNCvNtmvcyMG-f-nauXgd-GTvYb2qkTIEpNiAvk5ZuSue-N7Z8U3w3hmd9j05N6QWxlM479ErNozyDx2yvE_VQqF8HNLZHNukQcDVWKWzC2aYahUeXHkppuBDIQp8WKx9_GR1nfMDf2uJZBEj14vU-Ou202TGzU2hKHxd3GLlMQGBSuUwGWfyk1MH1KlueWCajRFlZJCSzQ"
+          }
+          ]
+        },
+        "redirect_uris": ["https://oauth.pstmn.io/v1/callback", "https://sso-client.dev/providers/8/open_id", "https://localhost.emobix.co.uk:8443/test/a/obbsb/callback"]
+      }
+  }
+]
