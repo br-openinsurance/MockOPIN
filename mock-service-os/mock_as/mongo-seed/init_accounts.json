@@ -1,0 +1,488 @@
+[
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed23"
+    },
+    "sub": "ralph.bragg@gmail.com",
+    "name": "Ralph Bragg",
+    "given_name": "Ralph",
+    "family_name": "Bragg",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "ralph.bragg@gmail.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed24"
+    },
+    "sub": "janice.matos@email.com",
+    "name": "Janice Matos",
+    "given_name": "Janice",
+    "family_name": "Matos",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "janice.matos@email.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed25"
+    },
+    "sub": "lilian.psicologia@email.com",
+    "name": "Lilian Psicologia",
+    "given_name": "Lilian",
+    "family_name": "Psicologia",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "lilian.psicologia@email.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed26"
+    },
+    "sub": "bruno.psicologia@email.com",
+    "name": "Bruno Psicologia",
+    "given_name": "Bruno",
+    "family_name": "Psicologia",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "bruno.psicologia@email.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed27"
+    },
+    "sub": "carlos.psicologia@email.com",
+    "name": "Carlos Psicologia",
+    "given_name": "Carlos",
+    "family_name": "Psicologia",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "carlos.psicologia@email.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed28"
+    },
+    "sub": "lucas.psicologia@email.com",
+    "name": "Lucas Psicologia",
+    "given_name": "Lucas",
+    "family_name": "Psicologia",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "lucas.psicologia@email.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed29"
+    },
+    "sub": "jorge.psicologia@email.com",
+    "name": "Jorge Psicologia",
+    "given_name": "Jorge",
+    "family_name": "Psicologia",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "jorge.psicologia@email.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed30"
+    },
+    "sub": "gabriel.nunes@email.com",
+    "name": "Gabriel Nunes",
+    "given_name": "Gabriel",
+    "family_name": "Nunes",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "gabriel.nunes@email.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed31"
+    },
+    "sub": "alice.silva@email.com",
+    "name": "Alice Silva",
+    "given_name": "Alice",
+    "family_name": "Silva",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "alice.silva@email.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed32"
+    },
+    "sub": "bruno.souza@email.com",
+    "name": "Bruno Souza",
+    "given_name": "Bruno",
+    "family_name": "Souza",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "bruno.souza@email.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed33"
+    },
+    "sub": "diego.santos@email.com",
+    "name": "Diego Santos",
+    "given_name": "Diego",
+    "family_name": "Santos",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "diego.santos@email.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed34"
+    },
+    "sub": "carolina.oliveira@email.com",
+    "name": "Carolina Oliveira",
+    "given_name": "Carolina",
+    "family_name": "Oliveira",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "carolina.oliveira@email.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed35"
+    },
+    "sub": "fernanda.lima@hotmail.com",
+    "name": "Fernanda Lima",
+    "given_name": "Fernanda",
+    "family_name": "Lima",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "fernanda.lima@hotmail.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed36"
+    },
+    "sub": "gustavo.ferreira@email.com",
+    "name": "Gustavo Ferreira",
+    "given_name": "Gustavo",
+    "family_name": "Ferreira",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "gustavo.ferreira@email.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed37"
+    },
+    "sub": "helena.costa@yahoo.com",
+    "name": "Helena Costa",
+    "given_name": "Helena",
+    "family_name": "Costa",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "helena.costa@yahoo.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed38"
+    },
+    "sub": "igor.rodrigues@email.com",
+    "name": "Igor Rodrigues",
+    "given_name": "Igor",
+    "family_name": "Rodrigues",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "igor.rodrigues@email.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed39"
+    },
+    "sub": "juliana.alves@email.com",
+    "name": "Juliana Alves",
+    "given_name": "Juliana",
+    "family_name": "Alves",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "juliana.alves@email.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  },
+  {
+    "_id": {
+      "$oid": "66dedde0f38d25dd98abed40"
+    },
+    "sub": "lucas.pereira@email.com",
+    "name": "Lucas Pereira",
+    "given_name": "Lucas",
+    "family_name": "Pereira",
+    "national_id_signing_device_present": false,
+    "national_id_verified": false,
+    "email": "lucas.pereira@email.com",
+    "email_verified": true,
+    "birthdate": {
+      "$date": "1985-01-27T00:00:00.000Z"
+    },
+    "companies": [],
+    "phone_number": "+441234567890",
+    "phone_number_verified": true,
+    "phone_number_verification_skipped": false,
+    "createdAt": {
+      "$date": "2024-09-09T11:31:22.244Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T11:31:25.907Z"
+    },
+    "__v": 4
+  }
+]

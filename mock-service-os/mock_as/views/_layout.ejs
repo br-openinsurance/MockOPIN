@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <link rel="stylesheet" href="/css/styles.css">
+    <script nonce="<%= nonce %>">
+      const layout = <%- JSON.stringify(layout) %>;
+    </script>
+    <script src="/js/scripts.js"></script>
+
+    <title>Sign-in</title>
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Roboto:400,100);
+
+      .toggle-switch {
+        appearance: none;
+        width: 40px;
+        height: 20px;
+        background: #ccc;
+        border-radius: 50px;
+        position: relative;
+        cursor: pointer;
+        outline: none;
+        transition: background 0.3s;
+      }
+      .toggle-switch:checked {
+        background: #3498db;
+      }
+      .toggle-switch::before {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 16px;
+        height: 16px;
+        background: white;
+        border-radius: 50%;
+        transition: all 0.3s;
+      }
+      .toggle-switch:checked::before {
+        left: 22px;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-[url('/assets/images/background.jpg')] bg-cover bg-center min-h-screen flex flex-col items-center px-4 py-8"
+  >
+    <div
+      class="w-11/12 lg:w-9/12 min-h-[85vh] md:min-h-[92vh] bg-white shadow-lg flex flex-col lg:flex-row overflow-hidden rounded-lg"
+    >
+      <!-- Left Side -->
+      <div
+        class="w-full lg:w-7/12 xl:w-6/12 py-8 px-6 md:px-12 flex flex-col justify-between bg-white"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <img
+            src="/assets/images/<%= layout.brand %>/logo-black.png"
+            alt="Logo"
+            class="h-8"
+          />
+          <button class="border border-gray-300 px-2 py-1 rounded-md text-lg">
+            🇬🇧
+          </button>
+        </div>
+
+        <% if (locals?.error) { %>
+        <p class="text-red-600 font-semibold">Error: <%= error %></p>
+        <% } %>
+
+        <%- body %>
+      </div>
+
+      <!-- Right Side -->
+      <div
+        class="hidden lg:flex lg:w-5/12 xl:w-6/12 bg-[<%= layout.rightPanelColor %>] text-white p-6 lg:p-8 flex-col justify-between"
+      >
+        <div class="flex flex-col justify-center items-center h-full mb-4">
+          <img
+            src="/assets/images/<%= layout.brand %>/aside-logo.png"
+            alt="Chart Logo"
+            class="w-28 lg:w-36 mb-4"
+          />
+        </div>
+
+        <div class="flex flex-col items-start">
+          <img
+            src="/assets/images/<%= layout.brand %>/logo-white.png"
+            alt="Logo"
+            class="h-6 mb-3"
+          />
+          <p class="text-lg font-semibold mb-2">Reference Documentation:</p>
+
+          <p class="text-gray-300 text-sm leading-6 mb-3">
+            The Brazilian <%= layout.product %> is a reference implementation of the <%= layout.ecosystem %> Brazil APIs, whose standards can be found on the
+            <a href="#" class="underline">Developer Portal</a>.
+          </p>
+
+          <p class="text-gray-300 text-sm leading-6">
+            For an usage guide of the tool, please check the usage guide on our
+            <a href="#" class="underline">GitLab page</a>. If any issues are
+            identified, please notify us on our
+            <a href="#" class="underline">Issues Page</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Debug Information -->
+    <div class="grant-debug text-white">
+      <details>
+        <summary style="text-align: center">
+          (Click to expand) DEBUG information
+        </summary>
+        <div><strong>uid</strong>: <%= uid %></div>
+
+        <% if (session) { %>
+        <div>
+          SESSION <br />
+          ========= <br />
+          <%- session %>
+        </div>
+        <% } %>
+
+        <div>
+          PARAMS <br />
+          ======== <br />
+          <%- dbg.params %>
+        </div>
+
+        <div>
+          PROMPT <br />
+          ======== <br />
+          <%- dbg.prompt %>
+        </div>
+      </details>
+    </div>
+  </body>
+</html>

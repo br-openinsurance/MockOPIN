@@ -1,0 +1,238 @@
+[
+    {
+        "OrganisationId": "76b370e3-def5-4798-8b6a-915cb5d6dd74",
+        "AuthorisationServers": [
+            {
+                "AuthorisationServerId": "ee6fd655-5bb3-4446-9fac-e1788d9c4049",
+                "OpenIDDiscoveryDocument": "https://auth.local/.well-known/openid-configuration",
+                "ApiResources": [
+                    {
+                        "ApiFamilyType": "consents",
+                        "ApiVersion": "2.7.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiDiscoveryId": "d539f39d-d4f4-4f42-ad3f-04f2017349e3",
+                                "ApiEndpoint": "https://api.local/open-insurance/consents/v2/consents"
+                            },
+                            {
+                                "ApiDiscoveryId": "33a6eace-1f01-44a7-a661-f18ddba4161d",
+                                "ApiEndpoint": "https://api.local/open-insurance/consents/v2/consents/{consentId}"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "quote-patrimonial-business",
+                        "ApiVersion": "1.8.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/business/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/business/request/{consentId}/quote-status"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/business/request/{consentId}"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/lead/request/"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/lead/request/{consentId}"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "quote-patrimonial-home",
+                        "ApiVersion": "1.8.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/home/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/home/request/{consentId}/quote-status"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/home/request/{consentId}"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/lead/request/"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/lead/request/{consentId}"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "quote-patrimonial-condominium",
+                        "ApiVersion": "1.8.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/condominium/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/condominium/request/{consentId}/quote-status"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/condominium/request/{consentId}"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/lead/request/"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/lead/request/{consentId}"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "quote-patrimonial-diverse-risks",
+                        "ApiVersion": "1.8.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/diverse-risks/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/diverse-risks/request/{consentId}/quote-status"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/diverse-risks/request/{consentId}"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/lead/request/"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-patrimonial/v1/lead/request/{consentId}"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "quote-financial-risk",
+                        "ApiVersion": "1.8.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-financial-risk/v1/lead/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-financial-risk/v1/lead/request/{consentId}"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "quote-acceptance-and-branches-abroad",
+                        "ApiVersion": "1.9.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-acceptance-and-branches-abroad/v1/lead/request/"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-acceptance-and-branches-abroad/v1/lead/request/{consentId}"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "quote-housing",
+                        "ApiVersion": "1.9.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-housing/v1/lead/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-housing/v1/lead/request/{consentId}"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "quote-responsibility",
+                        "ApiVersion": "1.9.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-responsibility/v1/lead/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-responsibility/v1/lead/request/{consentId}"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "quote-transport",
+                        "ApiVersion": "1.9.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-transport/v1/lead/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-transport/v1/lead/request/{consentId}"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "quote-rural",
+                        "ApiVersion": "1.9.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-rural/v1/lead/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-rural/v1/lead/request/{consentId}"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "quote-auto",
+                        "ApiVersion": "1.9.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-auto/v1/lead/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-auto/v1/lead/request/{consentId}"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-auto/v1/request/{consentId}/quote-status"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-auto/v1/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-auto/v1/request/{consentId}"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "contract-life-pension",
+                        "ApiVersion": "1.13.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/contract-life-pension/v1/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/contract-life-pension/v1/request/{consentId}/quote-status"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/contract-life-pension/v1/request/{consentId}"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/contract-life-pension/v1/lead/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/contract-life-pension/v1/lead/request/{consentId}"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

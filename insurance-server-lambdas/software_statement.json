@@ -1,0 +1,12 @@
+{
+  "software_id": "client_one",
+  "software_redirect_uris": [
+    "https://localhost.emobix.co.uk:8443/test/a/mock/callback"
+  ],
+  "software_api_webhook_uris": [
+    "https://localhost.emobix.co.uk:8443/test-mtls/a/mock"
+  ],
+  "org_status": "Active",
+  "software_roles": ["DADOS"],
+  "software_jwks_uri": "http://directory/76b370e3-def5-4798-8b6a-915cb5d6dd74/application.jwks"
+}
