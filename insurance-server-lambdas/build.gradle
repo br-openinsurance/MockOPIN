@@ -1,0 +1,267 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        constraints {
+            classpath("org.apache.logging.log4j:log4j-core") {
+                version {
+                    strictly("[2.16, 3[")
+                    prefer("2.16.0")
+                }
+                because("CVE-2021-44228: Log4j vulnerable to remote code execution")
+            }
+        }
+        classpath 'software.amazon.awssdk:auth:2.29.50'
+        classpath 'software.amazon.awssdk:sso:2.29.50'
+        classpath 'software.amazon.awssdk:sts:2.29.50'
+    }
+}
+
+
+import io.micronaut.gradle.MicronautRuntime
+import io.micronaut.gradle.MicronautTestRuntime
+
+plugins {
+    id "com.github.johnrengelman.shadow" version "8.1.1"
+    id "application"
+    id 'jacoco'
+    id 'groovy'
+    id 'maven-publish'
+    id "org.sonarqube" version "5.1.0.4882"
+    id "org.owasp.dependencycheck" version "8.4.0"
+    id "io.micronaut.application" version "4.4.4"
+    id "io.micronaut.aot" version "4.4.4"
+}
+
+def props = new Properties()
+file("version.properties").withInputStream { props.load(it) }
+String buildNumber = System.getenv("BUILD_NUMBER")
+
+String swaggerVersion = "1.2.0.2"
+
+version = System.getenv("CHANGE_ID") ? "${props.VERSION}-SNAPSHOT" : "${props.VERSION}.${buildNumber}"
+group "com.raidiam.trustframework.mockinsurance"
+
+dependencyCheck {
+    formats = ['HTML', 'XML']
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+configurations {
+    // for dependencies that are needed for development only
+    developmentOnly
+}
+
+configurations.configureEach {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+micronaut {
+    version "4.6.1"
+    runtime MicronautRuntime.LAMBDA_JAVA
+    runtime MicronautRuntime.NETTY
+    runtime MicronautRuntime.LAMBDA_PROVIDED
+    testRuntime MicronautTestRuntime.SPOCK_2
+    processing {
+        incremental(true)
+        annotations("com.raidiam.trustframework.mockinsurance.*")
+    }
+}
+
+dependencies {
+
+    runtimeOnly "org.yaml:snakeyaml"
+
+    // https://mvnrepository.com/artifact/io.projectreactor/reactor-core
+    implementation group: 'io.projectreactor', name: 'reactor-core', version: '3.7.1'
+
+    //These must be above the micronaut stuff, so lombok can generate the boilerplate
+    //for micronaut/hibernate to look at
+    implementation 'org.projectlombok:lombok:1.18.36'
+    annotationProcessor 'org.projectlombok:lombok:1.18.36'
+
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.780')
+    implementation platform('com.amazonaws:aws-xray-recorder-sdk-bom:2.18.2')
+
+    annotationProcessor "io.micronaut.data:micronaut-data-processor"
+    annotationProcessor "io.micronaut.validation:micronaut-validation-processor"
+    annotationProcessor "io.micronaut.data:micronaut-data-hibernate-jpa"
+    annotationProcessor "io.micronaut.security:micronaut-security-annotations"
+    annotationProcessor "io.micronaut:micronaut-inject-java"
+
+    annotationProcessor "io.micronaut:micronaut-http-validation"
+
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.40'
+    implementation 'org.bouncycastle:bcpkix-jdk18on:1.79'
+    implementation 'org.postgresql:postgresql'
+    implementation "io.micronaut.security:micronaut-security"
+    implementation "com.google.guava:guava:33.4.0-jre"
+
+    implementation("com.raidiam.trustframework.mockinsurance:insurance-swagger:${swaggerVersion}") {
+        changing = true
+    }
+
+    implementation 'com.amazonaws:aws-java-sdk-api-gateway'
+    runtimeOnly("com.amazonaws:aws-xray-recorder-sdk-core")
+    runtimeOnly("com.amazonaws:aws-xray-recorder-sdk-aws-sdk")
+    runtimeOnly("com.amazonaws:aws-xray-recorder-sdk-aws-sdk-instrumentor")
+    runtimeOnly("com.amazonaws:aws-xray-recorder-sdk-sql-postgres")
+
+    runtimeOnly 'org.jlib:jlib-awslambda-logback:1.0.0'
+    implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+
+    implementation("io.micronaut.aws:micronaut-function-aws")
+    implementation 'io.micronaut.aws:micronaut-function-aws-custom-runtime'
+    implementation 'io.micronaut.aws:micronaut-function-aws-api-proxy'
+
+    developmentOnly "io.micronaut:micronaut-http-server-netty"
+    implementation "io.micronaut:micronaut-http-client"
+    implementation "io.micronaut:micronaut-inject"
+    implementation "io.micronaut.validation:micronaut-validation"
+    implementation 'io.micronaut.data:micronaut-data-hibernate-jpa'
+    implementation 'io.micronaut.data:micronaut-data-tx-hibernate'
+    implementation 'io.micronaut.sql:micronaut-hibernate-jpa'
+    implementation "io.micronaut.flyway:micronaut-flyway"
+    implementation 'io.micronaut.sql:micronaut-jdbc-tomcat'
+    // https://mvnrepository.com/artifact/io.hypersistence/hypersistence-utils-hibernate-63
+    implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-63', version: '3.9.0'
+    // update to rxjava3 at some point
+    implementation 'io.micronaut.rxjava2:micronaut-rxjava2'
+    implementation 'io.micronaut.rxjava2:micronaut-rxjava2-http-client'
+
+    implementation 'org.hibernate.orm:hibernate-envers:6.5.2.Final'
+
+
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2"
+
+    implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.2.0'
+    implementation 'jakarta.transaction:jakarta.transaction-api:2.0.1'
+    implementation 'jakarta.inject:jakarta.inject-api:2.0.1'
+    implementation 'jakarta.validation:jakarta.validation-api:3.1.0'
+
+
+    implementation 'org.json:json:20240303'
+
+    // force versions for dep check
+    implementation 'commons-io:commons-io:2.18.0'
+
+    implementation 'com.github.mvallim:emv-qrcode:0.1.2'
+
+    // https://mvnrepository.com/artifact/com.webauthn4j/webauthn4j-core
+    implementation 'com.webauthn4j:webauthn4j-core:0.28.4.RELEASE'
+
+
+    runtimeOnly 'org.flywaydb:flyway-database-postgresql'
+
+    implementation("io.micronaut:micronaut-jackson-databind")
+
+    implementation("io.micronaut.beanvalidation:micronaut-hibernate-validator")
+
+    // -- TEST DEPS
+
+    runtimeOnly 'org.fusesource.jansi:jansi:1.18'
+
+    testAnnotationProcessor 'io.micronaut:micronaut-inject-groovy'
+    testImplementation "com.amazonaws:aws-java-sdk-core"
+    testImplementation "io.micronaut.test:micronaut-test-spock"
+    testImplementation "io.micronaut:micronaut-inject-groovy"
+
+    testImplementation "org.objenesis:objenesis:3.4"
+    testImplementation 'org.testcontainers:testcontainers'
+    testImplementation 'org.testcontainers:spock'
+    testImplementation 'org.testcontainers:localstack'
+    testImplementation 'org.testcontainers:postgresql'
+
+    testImplementation 'org.mock-server:mockserver-netty:5.15.0'
+    testImplementation 'org.mock-server:mockserver-client-java:5.15.0'
+    testImplementation 'org.mock-server:mockserver-junit-jupiter:5.15.0'
+    testImplementation 'org.mock-server:mockserver-junit-rule:5.15.0'
+
+    testImplementation "com.h2database:h2"
+
+   // testImplementation 'com.amazonaws.serverless:aws-serverless-java-container-core:1.9.4'
+}
+
+test.outputs.upToDateWhen { false }
+
+test {
+    useJUnitPlatform()
+    beforeTest { descriptor ->
+        logger.lifecycle("Running test: ${descriptor}")
+    }
+    classpath += configurations.developmentOnly
+    environment "AWS_XRAY_CONTEXT_MISSING", "LOG_ERROR"
+    finalizedBy jacocoTestReport
+    maxParallelForks = 2
+    jacoco {
+        excludes = ['com.raidiam.trustframework.bank.models.*']
+    }
+    testLogging {
+        events "started", "passed", "skipped", "failed"
+    }
+    minHeapSize = "512m"
+    maxHeapSize = "6144m"
+}
+
+mainClassName = "com.raidiam.trustframework.mockinsurance.Application"
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.compilerArgs.add('-parameters')
+}
+
+shadowJar {
+    mergeServiceFiles()
+}
+
+run {
+    classpath += configurations.developmentOnly
+    jvmArgs('-noverify', '-XX:TieredStopAtLevel=1', '-Dcom.sun.management.jmxremote')
+}
+
+
+graalvmNative.toolchainDetection = false
+micronaut {
+    runtime("netty")
+    testRuntime("junit5")
+    processing {
+        incremental(true)
+        annotations("com.raidiam.trustframework.mockinsurance.*")
+    }
+    aot {
+        // Please review carefully the optimizations enabled below
+        // Check https://micronaut-projects.github.io/micronaut-aot/latest/guide/ for more details
+        optimizeServiceLoading = false
+        convertYamlToJava = false
+        precomputeOperations = true
+        cacheEnvironment = true
+        optimizeClassLoading = true
+        deduceEnvironment = true
+        optimizeNetty = true
+        replaceLogbackXml = true
+    }
+}
+
+jacocoTestReport {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    'com/raidiam/trustframework/mockinsurance/models/**'
+            ])
+        }))
+    }
+    reports {
+        xml.required.set true
+    }
+}

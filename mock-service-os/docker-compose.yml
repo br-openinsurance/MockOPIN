@@ -1,0 +1,87 @@
+services:
+  auth:
+    build:
+      context: mock_as
+    environment:
+      - MONGODB_URI=mongodb://mongo:30001/?replicaSet=my-replica-set
+      - AWS_ACCESS_KEY_ID="test"
+      - AWS_SECRET_ACCESS_KEY="test"
+      - AWS_HOST=http://localstack:4566
+      - SSM_PARAMETER_PREFIX=/local/op_fapi_client_config
+      # - DEBUG=oidc-provider:*
+    ports:
+      - 3000:3000
+    depends_on:
+      localstack:
+        condition: service_healthy
+
+  mtls:
+    build:
+      context: mock_mtls
+    ports:
+      - "443:443"
+    volumes:
+      - ./certs:/app/certs
+    networks:
+      default:
+        aliases:
+          - matls-auth.local
+          - auth.local
+          - api.local
+          - matls-api.local
+          - directory
+
+  mongo1:
+    image: mongo:5.0.29
+    container_name: mongo
+    command: ["--replSet", "my-replica-set", "--bind_ip_all", "--port", "30001"]
+    volumes:
+      - ./data/mongo:/data/db
+    ports:
+      - 30001:30001
+      - 27017:30001
+    healthcheck:
+      test: test $$(echo "rs.initiate({_id:'my-replica-set',members:[{_id:0,host:\"mongo:30001\"}]}).ok || rs.status().ok" | mongosh --port 30001 --quiet) -eq 1
+      interval: 10s
+      start_period: 30s
+  
+  mongo_seed:
+    build: ./mock_as/mongo-seed
+    volumes:
+      - ./certs/:/certs/
+    depends_on:
+      - mongo1
+
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=ssm,s3
+      - AWS_ACCESS_KEY_ID="test"
+      - AWS_SECRET_ACCESS_KEY="test"
+      - DEBUG=1
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - ./setup_ssm.sh:/etc/localstack/init/ready.d/init-aws.sh
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./certs/op.key:/init/certs/client.key
+      - ./certs/op.crt:/init/certs/client.crt
+      - config:/init/config
+    healthcheck:
+      test: ["CMD-SHELL", "if [ -s /init/config/config.txt ]; then exit 0; else exit 1; fi"]
+      interval: 5s
+      retries: 5
+      timeout: 5s
+  
+  certmaker:
+    profiles:
+      - build-only
+    build:
+      context: ./certs
+    volumes:
+      - ./certs:/app/certs
+
+volumes:
+  config:
+    driver: local

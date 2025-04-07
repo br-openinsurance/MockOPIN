@@ -1,0 +1,13 @@
+.idea
+*.jwks
+*.key
+*.crt
+.DS_store
+build
+.gradle
+conformance-suite
+cs_config.json
+*.bkp
+
+data/
+.vscode/

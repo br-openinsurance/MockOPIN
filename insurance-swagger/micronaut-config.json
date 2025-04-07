@@ -1,0 +1,11 @@
+{
+  "modelPackage": "com.raidiam.trustframework.mockinsurance.models.generated",
+  "groupId": "com.raidiam.trustframework",
+  "artifactId": "insurance-models",
+  "java8": true,
+  "dateLibrary": "java8",
+  "hideGenerationTimestamp": true,
+  "useBeanValidation": true,
+  "jakarta": true,
+  "serializableModel": true
+}
