@@ -20,6 +20,11 @@ services:
           - matls-api.local
           - api.local
           - directory
+    environment:
+      - SSA_JWK_URL=http://localstack:4566/keystore/private_jwk.json
+    depends_on:
+      localstack:
+        condition: service_healthy
 
   mockapi:
     profiles:
@@ -92,6 +97,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ../mock-service-os/certs/op.key:/init/certs/client.key
       - ../mock-service-os/certs/op.crt:/init/certs/client.crt
+      - ../mock-service-os/ssa/jwks.json:/init/ssa/jwks.json
+      - ../mock-service-os/ssa/private_jwk.json:/init/ssa/private_jwk.json
       - config:/init/config
     healthcheck:
       test: [ "CMD-SHELL", "if [ -s /init/config/config.txt ]; then exit 0; else exit 1; fi" ]

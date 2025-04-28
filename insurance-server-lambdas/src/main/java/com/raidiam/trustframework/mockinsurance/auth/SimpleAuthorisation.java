@@ -41,6 +41,8 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
     private final Map<String, String> scopesToRoles = Map.ofEntries(
             entry("openid", "OPENID"),
             entry("consents", "CONSENTS_MANAGE"),
+            entry("endorsement", "ENDORSEMENT_REQUEST_MANAGE"),
+            entry("claim-notification", "CLAIM_NOTIFICATION_REQUEST_MANAGE"),
             entry("quote-patrimonial-lead", "QUOTE_PATRIMONIAL_LEAD_MANAGE"),
             entry("quote-patrimonial-business", "QUOTE_PATRIMONIAL_BUSINESS_MANAGE"),
             entry("quote-patrimonial-home", "QUOTE_PATRIMONIAL_HOME_MANAGE"),
@@ -54,8 +56,14 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
             entry("quote-rural-lead", "QUOTE_RURAL_LEAD_MANAGE"),
             entry("quote-auto-lead", "QUOTE_AUTO_LEAD_MANAGE"),
             entry("quote-auto", "QUOTE_AUTO_MANAGE"),
+            entry("quote-person-lead", "QUOTE_PERSON_LEAD_MANAGE"),
+            entry("quote-person-life", "QUOTE_PERSON_LIFE_MANAGE"),
+            entry("quote-person-travel", "QUOTE_PERSON_TRAVEL_MANAGE"),
             entry("contract-life-pension-lead", "QUOTE_LIFE_PENSION_LEAD_MANAGE"),
             entry("contract-life-pension", "QUOTE_LIFE_PENSION_MANAGE"),
+            entry("quote-capitalization-title-lead", "QUOTE_CAPITALIZATION_TITLE_LEAD_MANAGE"),
+            entry("quote-capitalization-title", "QUOTE_CAPITALIZATION_TITLE_MANAGE"),
+            entry("capitalization-title-raffle", "QUOTE_CAPITALIZATION_TITLE_RAFFLE_MANAGE"),
 
             // op-related scopes, are these real? They govern the PUT endpoints needed for administration.
             entry("op:consent", "CONSENTS_FULL_MANAGE"),

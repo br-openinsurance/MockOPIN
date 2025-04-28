@@ -17,6 +17,15 @@ class CleanupSpecification extends Specification {
     ConsentRepository consentRepository
 
     @Inject
+    EndorsementRepository endorsementRepository
+
+    @Inject
+    ClaimNotificationDamageRepository claimNotificationDamageRepository
+
+    @Inject
+    ClaimNotificationPersonRepository claimNotificationPersonRepository
+
+    @Inject
     QuotePatrimonialLeadRepository quotePatrimonialLeadRepository
 
     @Inject
@@ -56,6 +65,24 @@ class CleanupSpecification extends Specification {
     QuoteLifePensionLeadRepository quoteLifePensionLeadRepository
 
     @Inject
+    QuotePersonLifeRepository quotePersonLifeRepository
+
+    @Inject
+    QuotePersonLifeRepository quotePersonTravelRepository
+
+    @Inject
+    QuotePersonLeadRepository quotePersonLeadRepository
+
+    @Inject
+    QuoteCapitalizationTitleRepository quoteCapitalizationTitleRepository
+
+    @Inject
+    QuoteCapitalizationTitleLeadRepository quoteCapitalizationTitleLeadRepository
+
+    @Inject
+    CapitalizationTitleRaffleRepository capitalizationTitleRaffleRepository
+
+    @Inject
     WebhookRepository webhookRepository
 
     @Shared
@@ -69,6 +96,8 @@ class CleanupSpecification extends Specification {
             LOG.info("Running Cleanup")
             accountHolderRepository.deleteAll()
             consentRepository.deleteAll()
+            endorsementRepository.deleteAll()
+            claimNotificationDamageRepository.deleteAll()
             quotePatrimonialLeadRepository.deleteAll()
             quotePatrimonialBusinessRepository.deleteAll()
             quotePatrimonialHomeRepository.deleteAll()
@@ -80,6 +109,13 @@ class CleanupSpecification extends Specification {
             quoteRuralLeadRepository.deleteAll()
             quoteAutoRepository.deleteAll()
             quoteAutoLeadRepository.deleteAll()
+            quoteLifePensionRepository.deleteAll()
+            quoteLifePensionLeadRepository.deleteAll()
+            quotePersonLifeRepository.deleteAll()
+            quotePersonTravelRepository.deleteAll()
+            quoteCapitalizationTitleRepository.deleteAll()
+            quoteCapitalizationTitleLeadRepository.deleteAll()
+            capitalizationTitleRaffleRepository.deleteAll()
             webhookRepository.deleteAll()
             runCleanup = false
             runSetup = true

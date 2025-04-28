@@ -37,6 +37,7 @@ export default function (mtlsIssuer, ssaJwks) {
       'address',
       'phone',
       'consents',
+      'claim-notification',
       'resources',
       'customers',
       'insurance-acceptance-and-branches-abroad',
@@ -64,6 +65,12 @@ export default function (mtlsIssuer, ssaJwks) {
       'quote-rural-lead',
       'quote-auto-lead',
       'quote-auto',
+      'quote-person-lead',
+      'quote-person-life',
+      'quote-person-travel',
+      'quote-capitalization-title-lead',
+      'quote-capitalization-title',
+      'capitalization-title-raffle',
       'op:admin',
     ],
     interactions: {
@@ -384,6 +391,7 @@ export default function (mtlsIssuer, ssaJwks) {
             scopes.push(
               'consents',
               'resources',
+              'claim-notification',
               'customers',
               'insurance-acceptance-and-branches-abroad',
               'insurance-auto',
@@ -410,6 +418,12 @@ export default function (mtlsIssuer, ssaJwks) {
               'quote-rural-lead',
               'quote-auto-lead',
               'quote-auto',
+              'quote-person-lead',
+              'quote-person-life',
+              'quote-person-travel',
+              'quote-capitalization-title-lead',
+              'quote-capitalization-title',
+              'capitalization-title-raffle',
             );
 
             let requestedArray;
@@ -476,25 +490,25 @@ export default function (mtlsIssuer, ssaJwks) {
           }
         }
       },
-      extraTokenClaims: async (ctx, token) => {
-        let claims = {
-          org_id: token.client.org_id,
-          org_name: token.client.org_name,
-          org_number: token.client.org_number,
-          software_id: token.client.software_id,
-        };
+    },
+    extraTokenClaims: async (ctx, token) => {
+      let claims = {
+        org_id: token.client.org_id,
+        org_name: token.client.org_name,
+        org_number: token.client.org_number,
+        software_id: token.client.software_id,
+      };
 
-        let oidcProvider = ctx?.oidc?.provider;
-        if (!oidcProvider) {
-          // When the bank adapter creates a token, this function is called with
-          // ctx as undefined.
-          return;
-        }
+      let oidcProvider = ctx?.oidc?.provider;
+      if (!oidcProvider) {
+        // When the bank adapter creates a token, this function is called with
+        // ctx as undefined.
+        return;
+      }
 
-        await validateConsent(token);
+      await validateConsent(token);
 
-        return claims;
-      },
+      return claims;
     },
     discovery: {
       mtls_endpoint_aliases: {

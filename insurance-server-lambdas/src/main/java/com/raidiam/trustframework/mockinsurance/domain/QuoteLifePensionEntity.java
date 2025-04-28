@@ -53,6 +53,15 @@ public class QuoteLifePensionEntity extends QuoteEntity {
             
             var generalPlan = new GeneralPlanDataQuoteInfoLifePension();
             generalPlan.setEapcName("Previdência ABCD S.A.");
+            generalPlan.setProductName("product");
+            generalPlan.setPlanType(GeneralPlanDataQuoteInfoLifePension.PlanTypeEnum.PGBL);
+            generalPlan.setSusepProcessNumber("12345");
+            generalPlan.setBiometricTable(GeneralPlanDataQuoteInfoLifePension.BiometricTableEnum.AT_2000_FEMALE_SUAVIZADA_15);
+            generalPlan.setRentsInterestRate("10.00");
+            generalPlan.setMonetaryUpdateIndex(GeneralPlanDataQuoteInfoLifePension.MonetaryUpdateIndexEnum.IPC_FGV);
+            generalPlan.setFinancialResultReversalPercentage("2.00");
+            generalPlan.setIsIntendedQualifiedProponents(true);
+            generalPlan.setPrioritizationOrder("1");
             
             var quote = new QuoteInfoLifePensionQuotes();
             quote.setInsurerQuoteId(this.getQuoteId().toString());

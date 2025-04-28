@@ -37,16 +37,6 @@ const ssmClient = new SSMClient({
 });
 
 const brandConfig = {
-  [BRAND_NAME.OPF]: {
-    brand: 'opf',
-    clientId: 'QZY-zq89jUAnkOgBhRp19',
-    dynamicScopesSupported: ['consent:', 'recurring-consent:', 'enrollment:'],
-  },
-  [BRAND_NAME.OPF_LOCAL]: {
-    brand: 'opf',
-    clientId: 'client',
-    dynamicScopesSupported: ['consent:', 'recurring-consent:', 'enrollment:'],
-  },
   [BRAND_NAME.OPIN]: {
     brand: 'opin',
     clientId: 'QZY-zq89jUAnkOgBhRp19',
@@ -58,9 +48,9 @@ const brandConfig = {
     dynamicScopesSupported: ['consent:'],
   },
   default: {
-    brand: 'opf',
+    brand: 'opin',
     clientId: 'client',
-    dynamicScopesSupported: ['consent:', 'recurring-consent:', 'enrollment:'],
+    dynamicScopesSupported: ['consent:'],
   },
 };
 

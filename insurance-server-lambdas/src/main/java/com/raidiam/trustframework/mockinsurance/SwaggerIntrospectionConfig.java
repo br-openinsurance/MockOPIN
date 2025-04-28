@@ -20,11 +20,14 @@ import io.micronaut.core.annotation.Introspected;
         PatchQuotePayload.class,
         ResponseQuotePatch.class,
         QuoteRequestAutoLead.class,
-        ResponseQuoteAutoLead.class,
         QuoteRequestAuto.class,
         ResponseQuoteAuto.class,
         RevokeQuotePatchPayload.class,
-        ResponseRevokeQuotePatch.class
+        ResponseRevokeQuotePatch.class,
+        QuoteRequestCapitalizationTitleLead.class,
+        QuoteRequestCapitalizationTitle.class,
+        RequestCapitalizationTitleRaffle.class,
+        ResponseCapitalizationTitleRaffle.class
 })
 public class SwaggerIntrospectionConfig {
 }

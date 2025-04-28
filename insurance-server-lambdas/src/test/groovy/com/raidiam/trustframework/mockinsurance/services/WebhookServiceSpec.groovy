@@ -29,25 +29,24 @@ class WebhookServiceSpec extends CleanupSpecification {
     def "We can create and update a webhook record"() {
         given:
         def req = new UpdateWebhook()
-                .clientId("random_client_id")
                 .webhookUri("https://example.com")
         def req2 = new UpdateWebhook()
-                .clientId("random_client_id")
+        def clientId = "random_client_id"
 
         when:
-        def resp = webhookService.setWebhookUri(req)
+        def resp = webhookService.updateWebhook(req, clientId)
 
         then:
         noExceptionThrown()
-        resp.clientId == req.clientId
+        resp.clientId == clientId
         resp.webhookUri == req.webhookUri
 
         when:
-        resp = webhookService.setWebhookUri(req2)
+        resp = webhookService.updateWebhook(req2, clientId)
 
         then:
         noExceptionThrown()
-        resp.clientId == req2.clientId
+        resp.clientId == clientId
         resp.webhookUri == null
     }
 

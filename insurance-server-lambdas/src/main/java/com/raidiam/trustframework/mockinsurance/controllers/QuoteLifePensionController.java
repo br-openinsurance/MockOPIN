@@ -67,6 +67,7 @@ public class QuoteLifePensionController extends BaseInsuranceController {
     @Post("/v1/request")
     @Status(HttpStatus.CREATED)
     @Secured({"QUOTE_LIFE_PENSION_MANAGE"})
+    @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     @Idempotent
     public QuoteStatusLifePension createBusinessQuoteV1(@Body RequestContractLifePension body, HttpRequest<?> request) {
@@ -80,6 +81,7 @@ public class QuoteLifePensionController extends BaseInsuranceController {
 
     @Get("/v1/request/{consentId}/quote-status")
     @Secured({"QUOTE_LIFE_PENSION_MANAGE"})
+    @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     public QuoteStatusLifePension getBusinessQuoteV1(@PathVariable("consentId") String consentId, HttpRequest<?> request) {
         LOG.info("Fetching quote life pension for consent id {}", consentId);
@@ -92,6 +94,7 @@ public class QuoteLifePensionController extends BaseInsuranceController {
 
     @Patch("/v1/request/{consentId}")
     @Secured({"QUOTE_LIFE_PENSION_MANAGE"})
+    @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     public ResponsePatchLifePension patchBusinessQuoteV1(@PathVariable("consentId") String consentId, @Body PatchQuotePayload body, HttpRequest<?> request) {
         LOG.info("Patching quote life pension for consent id {}", consentId);
