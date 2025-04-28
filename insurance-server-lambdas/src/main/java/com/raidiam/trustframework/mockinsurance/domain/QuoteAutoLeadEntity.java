@@ -4,7 +4,7 @@ import org.hibernate.envers.Audited;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.QuoteRequestAutoLead;
 import com.raidiam.trustframework.mockinsurance.models.generated.QuoteStatus;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuoteAutoLead;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuoteLead;
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokeQuotePatch;
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokeQuotePatchData;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
@@ -38,8 +38,8 @@ public class QuoteAutoLeadEntity extends QuoteEntity {
         return entity;
     }
 
-    public ResponseQuoteAutoLead toResponse() {
-        return new ResponseQuoteAutoLead()
+    public ResponseQuoteLead toResponse() {
+        return new ResponseQuoteLead()
                 .data(new QuoteStatus()
                         .status(QuoteStatus.StatusEnum.fromValue(this.getStatus()))
                         .statusUpdateDateTime(InsuranceLambdaUtils.dateToOffsetDate(this.getUpdatedAt()))

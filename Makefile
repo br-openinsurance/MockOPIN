@@ -15,3 +15,8 @@ cs-config:
 
 run-with-cs:
 	@$(MAKE) -C ./insurance-server-lambdas run-with-cs
+
+rebuild:
+	@$(MAKE) -C ./insurance-server-lambdas swagger
+	@$(MAKE) -C ./insurance-server-lambdas build-auth-mtls
+	@$(MAKE) -C ./mock-service-os certmaker

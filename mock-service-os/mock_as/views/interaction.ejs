@@ -1,12 +1,17 @@
+<% let isConsent = !!(details.consent.consentId || details.consent.recurringConsentId); %>
+<% let isEnrollment = !!(details.consent.enrollmentId); %>
+
 <h1 class="text-[24px] font-semibold text-gray-800 mb-4 text-left">
-  Consent to Data Sharing
+  Authorize the information below
 </h1>
 
 <p class="text-gray-600 text-sm mb-4">
-  Before sharing your data, we need to confirm some information:
+  Before proceeding, we need to confirm some information:
 </p>
 
-<h2 class="font-semibold text-gray-800 mb-2">Data that will be shared</h2>
+<% if (isConsent) { %>
+  <h2 class="font-semibold text-gray-800 mb-2">Data that will be consented</h2>
+<% } %>
 
 <form id="consentForm" method="POST" action="/interaction/<%= uid %>/confirm">
   <% missingOIDCScope = new Set(details.scopes); %>
@@ -208,21 +213,23 @@
     </ul>
   <% } %>
 
-  <% if (details.consent) { %>
+  <% if (isConsent) { %>
     <div class="bg-gray-100 p-4 rounded-lg shadow-md mt-4">
       <h3 class="font-semibold text-gray-800">Consent Status:</h3>
       <p class="text-gray-600 text-sm"><strong>Status:</strong> <%= details.consent.status %></p>
       <p class="text-gray-600 text-sm"><strong>Expiration Date:</strong> <%= details.consent.expirationDateTime %></p>
     </div>
   <% } %>
-
-  <div class="bg-blue-100 p-3 text-gray-600 text-sm rounded mt-4">
-    If during the sharing period new credit operations are contracted in the selected modalities,
-    the data from these new operations will be shared.
-  </div>
+  <% if (isEnrollment) { %>
+    <div class="bg-gray-100 p-4 rounded-lg shadow-md mt-4">
+      <h3 class="font-semibold text-gray-800">Enrollment Status:</h3>
+      <p class="text-gray-600 text-sm"><strong>Status:</strong> <%= details.consent.status %></p>
+      <p class="text-gray-600 text-sm"><strong>Expiration Date:</strong> <%= details.consent.expirationDateTime %></p>
+    </div>
+  <% } %>
 
   <div class="flex justify-between items-center mt-6">
-    <span class="text-gray-700 text-sm">I consent to sharing the above data.</span>
+    <span class="text-gray-700 text-sm">I consent to the above data.</span>
     <label class="relative inline-flex items-center cursor-pointer">
       <input type="checkbox" id="consent-toggle" class="sr-only peer" />
       <div

@@ -73,6 +73,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
     @Post("/v1/business/request")
     @Status(HttpStatus.CREATED)
     @Secured({"QUOTE_PATRIMONIAL_BUSINESS_MANAGE"})
+    @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     @Idempotent
     public ResponseQuotePatrimonialBusiness createBusinessQuoteV1(@Body QuoteRequestPatrimonialBusiness body, HttpRequest<?> request) {
@@ -86,6 +87,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
 
     @Get("/v1/business/request/{consentId}/quote-status")
     @Secured({"QUOTE_PATRIMONIAL_BUSINESS_MANAGE"})
+    @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     public ResponseQuotePatrimonialBusiness getBusinessQuoteV1(@PathVariable("consentId") String consentId, HttpRequest<?> request) {
         LOG.info("Fetching quote patrimonial business for consent id {}", consentId);
@@ -98,6 +100,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
 
     @Patch("/v1/business/request/{consentId}")
     @Secured({"QUOTE_PATRIMONIAL_BUSINESS_MANAGE"})
+    @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     public ResponseQuotePatch patchBusinessQuoteV1(@PathVariable("consentId") String consentId, @Body PatchQuotePayload body, HttpRequest<?> request) {
         LOG.info("Patching quote patrimonial business for consent id {}", consentId);
@@ -108,6 +111,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
     @Post("/v1/home/request")
     @Status(HttpStatus.CREATED)
     @Secured({"QUOTE_PATRIMONIAL_HOME_MANAGE"})
+    @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     @Idempotent
     public ResponseQuotePatrimonialHome createHomeQuoteV1(@Body QuoteRequestPatrimonialHome body, HttpRequest<?> request) {
@@ -121,6 +125,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
 
     @Get("/v1/home/request/{consentId}/quote-status")
     @Secured({"QUOTE_PATRIMONIAL_HOME_MANAGE"})
+    @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     public ResponseQuotePatrimonialHome getHomeQuoteV1(@PathVariable("consentId") String consentId, HttpRequest<?> request) {
         LOG.info("Fetching quote patrimonial home for consent id {}", consentId);
@@ -133,6 +138,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
 
     @Patch("/v1/home/request/{consentId}")
     @Secured({"QUOTE_PATRIMONIAL_HOME_MANAGE"})
+    @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     public ResponseQuotePatch patchHomeQuoteV1(@PathVariable("consentId") String consentId, @Body PatchQuotePayload body, HttpRequest<?> request) {
         LOG.info("Patching quote patrimonial home for consent id {}", consentId);
@@ -143,6 +149,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
     @Post("/v1/condominium/request")
     @Status(HttpStatus.CREATED)
     @Secured({"QUOTE_PATRIMONIAL_CONDOMINIUM_MANAGE"})
+    @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     @Idempotent
     public ResponseQuotePatrimonialCondominium createCondominiumQuoteV1(@Body QuoteRequestPatrimonialCondominium body, HttpRequest<?> request) {
@@ -156,6 +163,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
 
     @Get("/v1/condominium/request/{consentId}/quote-status")
     @Secured({"QUOTE_PATRIMONIAL_CONDOMINIUM_MANAGE"})
+    @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     public ResponseQuotePatrimonialCondominium getCondominiumQuoteV1(@PathVariable("consentId") String consentId, HttpRequest<?> request) {
         LOG.info("Fetching quote patrimonial condominium for consent id {}", consentId);
@@ -168,6 +176,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
 
     @Patch("/v1/condominium/request/{consentId}")
     @Secured({"QUOTE_PATRIMONIAL_CONDOMINIUM_MANAGE"})
+    @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     public ResponseQuotePatch patchCondominiumQuoteV1(@PathVariable("consentId") String consentId, @Body PatchQuotePayload body, HttpRequest<?> request) {
         LOG.info("Patching quote patrimonial condominium for consent id {}", consentId);
@@ -178,6 +187,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
     @Post("/v1/diverse-risks/request")
     @Status(HttpStatus.CREATED)
     @Secured({"QUOTE_PATRIMONIAL_DIVERSE_RISKS_MANAGE"})
+    @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     @Idempotent
     public ResponseQuotePatrimonialDiverseRisks createDiverseRisksQuoteV1(@Body QuoteRequestPatrimonialDiverseRisks body, HttpRequest<?> request) {
@@ -191,6 +201,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
 
     @Get("/v1/diverse-risks/request/{consentId}/quote-status")
     @Secured({"QUOTE_PATRIMONIAL_DIVERSE_RISKS_MANAGE"})
+    @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     public ResponseQuotePatrimonialDiverseRisks getDiverseRisksQuoteV1(@PathVariable("consentId") String consentId, HttpRequest<?> request) {
         LOG.info("Fetching quote patrimonial diverse risks for consent id {}", consentId);
@@ -203,6 +214,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
 
     @Patch("/v1/diverse-risks/request/{consentId}")
     @Secured({"QUOTE_PATRIMONIAL_DIVERSE_RISKS_MANAGE"})
+    @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     public ResponseQuotePatch patchDiverseRisksQuoteV1(@PathVariable("consentId") String consentId, @Body PatchQuotePayload body, HttpRequest<?> request) {
         LOG.info("Patching quote patrimonial diverse risks for consent id {}", consentId);

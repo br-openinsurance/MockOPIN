@@ -36,19 +36,21 @@ const (
 
 var (
 	apiURI    = os.Getenv("API_GATEWAY_URI")
-	ssaJWK, _ = jwk.ParseKey([]byte(`{
-		"kty": "RSA",
-		"alg": "PS256",
-		"use": "sig",
-		"n": "r37dAsoj8UaIJ9kjjRdiKjXe0jCNQbsQddd7OI0wGDq7RGhuFvCaK0U3bOxm6vSbWzba7xmMJzpYy758j0UgsdLD1S18S6cGOWHF1DqNTofHS1aZrz8M7yPA2DVCznmlYa_q0b4w2azhXx72i_9-XhMx__8bkqtgCi1RUfJcbgMK6gByJCpzNuDS7r8CLOLWdcD6Mh48Uag9ll-oKoVTRQ8I41swkCAt-IqU28C0paMjy1skZQgzmAxtoZgEURn_0IQR2ip1ZSfAuHncXvlYkUvKeZKGqcUpE4tFe_QtsWOInt0Ffh_0mtizrghqaAtqtYy9hCEAN_rJ3dyI6LaAXw",
-		"e": "AQAB",
-		"d": "kQLqCqkPJAoc7Zhd6PLeeXSEBvh5cEvrYQRJ3EPF7u9w2CjWdvwe2AxcrRN2Q0UVrjxYkeNxTOTIhKqE8Dm1t1op2Ve5ciW0XevtdN1g7_f_9L-9Q_J8dIn9imoQJt6bimm7Rc67PNK-c0P5g1r9hyyjTx30IbCcLiyeGnGCcJ-Qky1u9RvapH_CDBXFxyPhltuyxOaiX4bU70UZeScUuPiTw6TzgkCWvdyP-t_20cdKRwmT5CytGBaFekeLTNi-vij7hJCuSeHKq5IiOda5xRmhVqIlJYeoTn2mXPrtySp59F9RNB6oVxVIOsT5fYtekmPhD-DtuaiYK6ZrWFVW-Q"
-	}`))
+	ssaJwkURL = os.Getenv("SSA_JWK_URL")
+	ssaJWK    jwk.Key
 )
 
 func main() {
 	l := logger()
 	slog.SetDefault(l)
+
+	key, err := loadSsaKey()
+	if err != nil {
+		slog.Error("Could not fetch ssa_jwk from S3", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+	ssaJWK = key
+	slog.Info("Successfully fetched ssa_jwk from S3")
 
 	mux := http.NewServeMux()
 
@@ -79,6 +81,34 @@ func main() {
 	}
 	slog.Info("Listening on port 443")
 	slog.Error("server error", slog.String("err", server.Serve(tls.NewListener(ln, tlsConfig)).Error()))
+}
+
+func loadSsaKey() (jwk.Key, error) {
+	if ssaJwkURL == "" {
+		return nil, fmt.Errorf("SSA_JWK_URL environment variable not set")
+	}
+
+	resp, err := http.Get(ssaJwkURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch ssa_jwk: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("ssa_jwk fetch returned status: %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read ssa_jwk response body: %w", err)
+	}
+
+	key, err := jwk.ParseKey(body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse ssa_jwk: %w", err)
+	}
+
+	return key, nil
 }
 
 func authHandler() http.Handler {
@@ -416,6 +446,8 @@ func introspectAndAddHeaders(req *http.Request, token string) bool {
 		slog.Error("Failed to unmarshal introspection response", slog.String("error", err.Error()))
 		return false
 	}
+
+	slog.Info("Introspection response", slog.Any("response", introspectionResponse))
 
 	if active, ok := introspectionResponse["active"].(bool); !ok || !active {
 		slog.Error("Token is not active")

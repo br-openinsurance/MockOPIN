@@ -28,9 +28,9 @@ public class WebhookEntity extends BaseEntity {
                 .webhookUri(this.webhookUri);
     }
 
-    public static WebhookEntity fromRequest(UpdateWebhook webhook) {
+    public static WebhookEntity fromRequest(UpdateWebhook webhook, String clientId) {
         var webhookEntity =  new WebhookEntity();
-        webhookEntity.setClientId(webhook.getClientId());
+        webhookEntity.setClientId(clientId);
         webhookEntity.setWebhookUri(webhook.getWebhookUri());
 
         return webhookEntity;

@@ -30,6 +30,11 @@ services:
           - api.local
           - matls-api.local
           - directory
+    environment:
+      - SSA_JWK_URL=http://localstack:4566/keystore/private_jwk.json
+    depends_on:
+      localstack:
+        condition: service_healthy
 
   mongo1:
     image: mongo:5.0.29
@@ -67,6 +72,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./certs/op.key:/init/certs/client.key
       - ./certs/op.crt:/init/certs/client.crt
+      - ./ssa/jwks.json:/init/ssa/jwks.json
+      - ./ssa/private_jwk.json:/init/ssa/private_jwk.json
       - config:/init/config
     healthcheck:
       test: ["CMD-SHELL", "if [ -s /init/config/config.txt ]; then exit 0; else exit 1; fi"]

@@ -23,10 +23,18 @@ endif
 setup:
 	@$(MAKE) swagger
 	@$(MAKE) mock-service-os
+	@$(MAKE) build-auth-mtls
 
 setup-cs:
 	@$(MAKE) cs
 	@$(MAKE) cs-config
+
+build-auth-mtls:
+	@docker-compose build auth
+	@docker-compose build mtls
+
+hosts:
+	@sudo -- sh -c -e "echo '\n127.0.0.1 api.local\n127.0.0.1 matls-api.local\n127.0.0.1 auth.local\n127.0.0.1 matls-auth.local\n127.0.0.1 directory' >> /etc/hosts";
 
 run:
 	@$(SHELL) -c '$(MAKE_IMAGE_OPTIONAL)'

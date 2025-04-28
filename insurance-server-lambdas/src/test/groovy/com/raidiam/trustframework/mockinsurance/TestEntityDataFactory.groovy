@@ -53,6 +53,73 @@ class TestEntityDataFactory extends CleanupSpecification {
         consent
     }
 
+    static anEndorsement(String consentId){
+        def endorsement = new EndorsementEntity()
+        endorsement.setEndorsementId()
+        endorsement.setConsentId(consentId)
+        endorsement.setClientId("random_client_id")
+        endorsement.setData(new CreateEndorsementData()
+            .policyId("random_policy_id")
+            .insuredObjectId(new ArrayList<String>(List.of("123456")))
+            .proposalId("random_proposal_id")
+            .endorsementType(CreateEndorsementData.EndorsementTypeEnum.ALTERACAO)
+            .requestDescription("description")
+            .requestDate(LocalDate.now().minusMonths(1))
+            .customData(new CreateEndorsementDataCustomData())
+        )
+        endorsement
+    }
+  
+    static ClaimNotificationDamageEntity aClaimNotificationDamage(String consentId) {
+        aClaimNotificationDamage(null, null, consentId)
+    }
+
+    static ClaimNotificationDamageEntity aClaimNotificationDamage(String claimId, String consentId) {
+        aClaimNotificationDamage(null, claimId, consentId)
+    }
+
+    static ClaimNotificationDamageEntity aClaimNotificationDamage(UUID claimId, String clientId, String consentId) {
+        ClaimNotificationDamageEntity claim = new ClaimNotificationDamageEntity()
+        ClaimNotificationDamageData data = new ClaimNotificationDamageData()
+        data.setDocumentType(ClaimNotificationData.DocumentTypeEnum.CERTIFICADO)
+        data.setPolicyId("111111")
+        data.setGroupCertificateId("string")
+        data.setInsuredObjectId(List.of("216731531723"))
+        data.setOccurrenceDate(LocalDate.of(2022, 1, 1))
+        data.setOccurrenceTime("22:18:54")
+        data.setOccurrenceDescription("string")
+        claim.setData(data)
+        claim.setConsentId(consentId)
+        claim.setClaimId(claimId)
+        claim.setClientId(clientId)
+        claim
+    }
+
+    static ClaimNotificationPersonEntity aClaimNotificationPerson(String consentId) {
+        aClaimNotificationPerson(null, null, consentId)
+    }
+
+    static ClaimNotificationPersonEntity aClaimNotificationPerson(String claimId, String consentId) {
+        aClaimNotificationPerson(null, claimId, consentId)
+    }
+
+    static ClaimNotificationPersonEntity aClaimNotificationPerson(UUID claimId, String clientId, String consentId) {
+        ClaimNotificationPersonEntity claim = new ClaimNotificationPersonEntity()
+        ClaimNotificationPersonData data = new ClaimNotificationPersonData()
+        data.setDocumentType(ClaimNotificationData.DocumentTypeEnum.CERTIFICADO)
+        data.setPolicyId("111111")
+        data.setGroupCertificateId("string")
+        data.setInsuredObjectId(List.of("216731531723"))
+        data.setOccurrenceDate(LocalDate.of(2022, 1, 1))
+        data.setOccurrenceTime("22:18:54")
+        data.setOccurrenceDescription("string")
+        claim.setData(data)
+        claim.setConsentId(consentId)
+        claim.setClaimId(claimId)
+        claim.setClientId(clientId)
+        claim
+    }
+
     static QuotePatrimonialLeadEntity aQuotePatrimonialLead(String consentId) {
         aQuotePatrimonialLead(null, consentId)
     }
@@ -288,6 +355,66 @@ class TestEntityDataFactory extends CleanupSpecification {
         return quote
     }
 
+
+    static QuotePersonLeadEntity aQuotePersonLead(String consentId) {
+        aQuotePersonLead(null, consentId)
+    }
+
+    static QuotePersonLeadEntity aQuotePersonLead(UUID quoteId, String consentId) {
+        QuotePersonLeadEntity quote = new QuotePersonLeadEntity()
+        quote.quoteId = quoteId
+        quote.consentId = consentId
+        quote.status = QuoteStatusEnum.RCVD.toString()
+        quote.personCpf = "123456789"
+        quote.clientId = "random_client_id"
+        quote.expirationDateTime = new Date()
+        quote
+    }
+
+    static QuotePersonLifeEntity aQuotePersonLife(String consentId) {
+        aQuotePersonLife(null, consentId)
+    }
+
+    static QuotePersonLifeEntity aQuotePersonLife(UUID quoteId, String consentId) {
+
+        QuotePersonLifeEntity quote = new QuotePersonLifeEntity()
+        quote.quoteId = quoteId
+        quote.consentId = consentId
+        quote.status = QuoteStatusEnum.RCVD.toString()
+        quote.personCpf = "random_cpf"
+        quote.clientId = "random_client_id"
+        quote.expirationDateTime = new Date()
+
+        QuoteDataPersonLife quoteDataPersonLife = new QuoteDataPersonLife()
+
+        quote.data = new QuoteRequestPersonLifeData()
+        quote.data.setQuoteData(quoteDataPersonLife)
+
+        return quote
+    }
+
+    static QuotePersonTravelEntity aQuotePersonTravel(String consentId) {
+        aQuotePersonTravel(null, consentId)
+    }
+
+    static QuotePersonTravelEntity aQuotePersonTravel(UUID quoteId, String consentId) {
+
+        QuotePersonTravelEntity quote = new QuotePersonTravelEntity()
+        quote.quoteId = quoteId
+        quote.consentId = consentId
+        quote.status = QuoteStatusEnum.RCVD.toString()
+        quote.personCpf = "random_cpf"
+        quote.clientId = "random_client_id"
+        quote.expirationDateTime = new Date()
+
+        QuoteDataPersonTravel quoteDataPersonTravel = new QuoteDataPersonTravel()
+
+        quote.data = new QuoteRequestPersonTravelData()
+        quote.data.setQuoteData(quoteDataPersonTravel)
+
+        return quote
+    }
+
     static QuoteResponsibilityLeadEntity aQuoteResponsibilityLead(String consentId) {
         aQuoteResponsibilityLead(null, consentId)
     }
@@ -367,5 +494,58 @@ class TestEntityDataFactory extends CleanupSpecification {
                         .termEndDate(LocalDate.now().plusYears(1))
                 )
         quote
+    }
+
+    static QuoteCapitalizationTitleLeadEntity aQuoteCapitalizationTitleLead(String consentId) {
+        aQuoteCapitalizationTitleLead(null, consentId)
+    }
+
+    static QuoteCapitalizationTitleLeadEntity aQuoteCapitalizationTitleLead(UUID quoteId, String consentId) {
+        QuoteCapitalizationTitleLeadEntity quote = new QuoteCapitalizationTitleLeadEntity()
+        quote.quoteId = quoteId
+        quote.consentId = consentId
+        quote.status = QuoteStatusEnum.RCVD.toString()
+        quote.personCpf = "123456789"
+        quote.clientId = "random_client_id"
+        quote.expirationDateTime = new Date()
+        quote
+    }
+
+    static QuoteCapitalizationTitleEntity aQuoteCapitalizationTitle(String consentId) {
+        aQuoteCapitalizationTitle(null, consentId)
+    }
+
+    static QuoteCapitalizationTitleEntity aQuoteCapitalizationTitle(UUID quoteId, String consentId) {
+        QuoteCapitalizationTitleEntity quote = new QuoteCapitalizationTitleEntity()
+        quote.quoteId = quoteId
+        quote.consentId = consentId
+        quote.status = QuoteStatusEnum.RCVD.toString()
+        quote.personCpf = "123456789"
+        quote.clientId = "random_client_id"
+        quote.expirationDateTime = new Date()
+        quote.data = new QuoteCapitalizationTitleData()
+                .quoteData(new QuoteDataCapitalizationTitle()
+                        .paymentType(QuoteDataCapitalizationTitle.PaymentTypeEnum.MENSAL)
+                        .monthlyPayment(new AmountDetails()
+                            .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
+                            .amount("100")
+                        )
+                )
+        quote
+    }
+
+    static CapitalizationTitleRaffleEntity aCapitalizationTitleRaffle() {
+        aCapitalizationTitleRaffle(null)
+    }
+
+    static CapitalizationTitleRaffleEntity aCapitalizationTitleRaffle(UUID raffleId) {
+        CapitalizationTitleRaffleEntity raffle = new CapitalizationTitleRaffleEntity()
+        raffle.raffleId = raffleId
+        raffle.clientId = "random_client_id"
+        raffle.data = new RequestCapitalizationTitleRaffleData()
+            .modality(RequestCapitalizationTitleRaffleData.ModalityEnum.TRADICIONAL)
+            .susepProcessNumber("random_process_number")
+            .raffleCustomData(new RaffleCustomData())
+        raffle
     }
 }

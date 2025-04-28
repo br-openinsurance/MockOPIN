@@ -3,7 +3,9 @@ package com.raidiam.trustframework.mockinsurance
 import com.raidiam.trustframework.mockinsurance.models.generated.*
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils
 
+import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.LocalDate;
 
 class TestRequestDataFactory {
 
@@ -39,6 +41,42 @@ class TestRequestDataFactory {
                 .expirationDateTime(expirationDateTime)
 
         return new CreateConsent().data(consentRequestData)
+    }
+
+    static createEndorsementRequest(){
+        CreateEndorsementData endorsementData = new CreateEndorsementData()
+            .policyId("random_policy_id")
+            .insuredObjectId(new ArrayList<String>(List.of("123456")))
+            .proposalId("random_proposal_id")
+            .endorsementType(CreateEndorsementData.EndorsementTypeEnum.ALTERACAO)
+            .requestDescription("description")
+            .requestDate(LocalDate.now().minusMonths(1))
+            .customData(new CreateEndorsementDataCustomData())
+        return new CreateEndorsement().data(endorsementData)
+    }
+      
+    static CreateClaimNotificationDamage createClaimNotificationDamageRequest() {
+        return new CreateClaimNotificationDamage()
+                .data(new ClaimNotificationDamageData()
+                        .documentType(ClaimNotificationDamageData.DocumentTypeEnum.CERTIFICADO)
+                        .policyId("111111")
+                        .groupCertificateId("string")
+                        .insuredObjectId(List.of("216731531723"))
+                        .occurrenceTime("2022-01-01")
+                        .occurrenceDescription("string")
+                )
+    }
+
+    static CreateClaimNotificationPerson createClaimNotificationPersonRequest() {
+        return new CreateClaimNotificationPerson()
+                .data(new ClaimNotificationPersonData()
+                        .documentType(ClaimNotificationPersonData.DocumentTypeEnum.CERTIFICADO)
+                        .policyId("111111")
+                        .groupCertificateId("string")
+                        .insuredObjectId(List.of("216731531723"))
+                        .occurrenceTime("2022-01-01")
+                        .occurrenceDescription("string")
+                )
     }
 
     static QuoteRequestPatrimonialLead createQuotePatrimonialLeadRequest() {
@@ -149,6 +187,42 @@ class TestRequestDataFactory {
         req
     }
 
+    static QuoteRequestPersonLead createQuotePersonLeadRequest() {
+        return new QuoteRequestPersonLead()
+                .data(new QuoteRequestPersonLeadData()
+                        .consentId(UUID.randomUUID().toString())
+                        .expirationDateTime(InsuranceLambdaUtils.getOffsetDateTimeUTC())
+                        .quoteCustomer(new QuoteCustomerData()
+                                .identificationData((QuoteCustomerIdentificationData) new QuoteCustomerIdentificationData()
+                                        .cpfNumber("123456789")))
+                        .quoteData(new QuoteDataPersonLead())
+                )
+    }
+
+    static QuoteRequestPersonLife createQuotePersonLifeRequest() {
+        QuoteRequestPersonLife req = new QuoteRequestPersonLife()
+                .data(new QuoteRequestPersonLifeData()
+                        .consentId(UUID.randomUUID().toString())
+                        .expirationDateTime(InsuranceLambdaUtils.getOffsetDateTimeUTC())
+                        .quoteCustomer(new QuoteCustomerData()
+                                .identificationData((QuoteCustomerIdentificationData) new QuoteCustomerIdentificationData()
+                                        .cpfNumber("123456789")))
+                        .quoteData(new QuoteDataPersonLife()))
+        req
+    }
+
+    static QuoteRequestPersonTravel createQuotePersonTravelRequest() {
+        QuoteRequestPersonTravel req = new QuoteRequestPersonTravel()
+                .data(new QuoteRequestPersonTravelData()
+                        .consentId(UUID.randomUUID().toString())
+                        .expirationDateTime(InsuranceLambdaUtils.getOffsetDateTimeUTC())
+                        .quoteCustomer(new QuoteCustomerData()
+                                .identificationData((QuoteCustomerIdentificationData) new QuoteCustomerIdentificationData()
+                                        .cpfNumber("123456789")))
+                        .quoteData(new QuoteDataPersonTravel()))
+        req
+    }
+
     static QuoteRequestResponsibilityLead createQuoteResponsibilityLeadRequest() {
         return new QuoteRequestResponsibilityLead()
                 .data(new QuoteRequestResponsibilityLeadData()
@@ -240,4 +314,38 @@ class TestRequestDataFactory {
         req
     }
 
+    static QuoteRequestCapitalizationTitleLead createQuoteCapitalizationTitleLeadRequest() {
+        return new QuoteRequestCapitalizationTitleLead()
+                .data(new QuoteRequestCapitalizationTitleLeadData()
+                        .consentId(UUID.randomUUID().toString())
+                        .expirationDateTime(InsuranceLambdaUtils.getOffsetDateTimeUTC())
+                        .quoteCustomer(new QuoteCustomerData()
+                                .identificationData((QuoteCustomerIdentificationData) new QuoteCustomerIdentificationData()
+                                        .cpfNumber("123456789")
+                                )
+                        )
+                )
+    }
+
+    static QuoteRequestCapitalizationTitle createQuoteCapitalizationTitleRequest() {
+        QuoteRequestCapitalizationTitle req = new QuoteRequestCapitalizationTitle()
+                .data(new QuoteCapitalizationTitleData()
+                        .consentId(UUID.randomUUID().toString())
+                        .expirationDateTime(InsuranceLambdaUtils.getOffsetDateTimeUTC())
+                        .quoteCustomer(new QuoteCustomerData()
+                                .identificationData((QuoteCustomerIdentificationData) new QuoteCustomerIdentificationData()
+                                        .cpfNumber("123456789")))
+                        .quoteData(new QuoteDataCapitalizationTitle()))
+        req
+    }
+
+    static RequestCapitalizationTitleRaffle createCapitalizationTitleRaffleRequest() {
+        RequestCapitalizationTitleRaffle req = new RequestCapitalizationTitleRaffle()
+                .data(new RequestCapitalizationTitleRaffleData()
+                        .modality(RequestCapitalizationTitleRaffleData.ModalityEnum.TRADICIONAL)
+                        .susepProcessNumber("random_process_number")
+                        .raffleCustomData(new RaffleCustomData())
+                )
+        req
+    }
 }

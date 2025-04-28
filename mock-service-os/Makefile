@@ -18,3 +18,6 @@ run:
 certs:
 	@echo "Making new certs"
 	@$(SHELL) -c '$(MAKE_CERTS)'
+
+certmaker:
+	@docker-compose build certmaker

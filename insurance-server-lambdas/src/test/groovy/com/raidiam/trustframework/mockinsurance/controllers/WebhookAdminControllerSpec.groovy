@@ -45,11 +45,12 @@ class WebhookAdminControllerSpec extends Specification {
     def "We can create a webhook" () {
         given:
         def entity = TestEntityDataFactory.aWebhook()
-        webhookService.setWebhookUri(_ as UpdateWebhook) >> new ResponseWebhook().clientId(entity.getClientId()).webhookUri(entity.getWebhookUri())
-        def req = new UpdateWebhook().clientId(entity.getClientId()).webhookUri(entity.getWebhookUri())
+        webhookService.updateWebhook(_ as UpdateWebhook, _ as String) >> new ResponseWebhook().clientId(entity.getClientId()).webhookUri(entity.getWebhookUri())
+        def req = new UpdateWebhook().webhookUri(entity.getWebhookUri())
 
         String json = mapper.writeValueAsString(req)
-        def event = AwsProxyHelper.buildBasicEvent('/admin/webhook', HttpMethod.PUT)
+        String path = String.format('/admin/webhook/%s', entity.getClientId())
+        def event = AwsProxyHelper.buildBasicEvent(path, HttpMethod.PUT)
                 .withBody(json)
                 .withHeaders(Map.of("x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorize(scopes: "op:admin", event)

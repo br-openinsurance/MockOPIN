@@ -2,10 +2,13 @@ package com.raidiam.trustframework.mockinsurance.domain;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.*;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
+
+import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.hibernate.type.SqlTypes;
 
@@ -78,9 +81,17 @@ public class ConsentEntity extends BaseEntity {
     @Column(name = "business_document_rel")
     private String businessDocumentRel;
 
+    @Column(name = "endorsement_information")
+    @Type(JsonType.class)
+    private CreateConsentDataEndorsementInformation endorsementInformation;
+
     @JdbcTypeCode(SqlTypes.ARRAY)
     @Column(name = "permissions", columnDefinition = "TEXT[]")
     private List<String> permissions;
+
+    @Column(name = "claim_notification_information")
+    @Type(JsonType.class)
+    private ClaimNotificationInformation claimNotificationInformation;
 
     public static ConsentEntity fromRequest(CreateConsent req, UUID accountHolderId, String clientId) {
         ConsentEntity entity = new ConsentEntity();
@@ -106,6 +117,9 @@ public class ConsentEntity extends BaseEntity {
                 .stream()
                 .map(permission -> Optional.ofNullable(permission).map(EnumConsentPermission::toString).orElse(null))
                 .toList());
+        entity.setEndorsementInformation(req.getData().getEndorsementInformation());
+
+        entity.setClaimNotificationInformation(req.getData().getClaimNotificationInformation());
 
         return entity;
     }

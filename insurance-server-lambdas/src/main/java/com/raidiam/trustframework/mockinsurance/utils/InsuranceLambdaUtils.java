@@ -4,11 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.nimbusds.jose.util.Pair;
+import com.raidiam.trustframework.mockinsurance.domain.ConsentEntity;
 import com.raidiam.trustframework.mockinsurance.exceptions.TrustframeworkException;
 import com.raidiam.trustframework.mockinsurance.fapi.ResponseErrorWithRequestDateTime;
 import com.raidiam.trustframework.mockinsurance.models.generated.Links;
 import com.raidiam.trustframework.mockinsurance.models.generated.Meta;
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseError;
+import com.raidiam.trustframework.mockinsurance.repository.ConsentRepository;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.data.model.Page;
@@ -464,5 +466,10 @@ public class InsuranceLambdaUtils {
     public void throwWithoutRollback(Runnable action, HttpStatusException exception) throws HttpStatusException {
         action.run();
         throw exception;
+    }
+
+    public static ConsentEntity getConsent(String consentId, ConsentRepository consentRepository) {
+        return consentRepository.findByConsentId(consentId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Consent Id " + consentId + " not found"));
     }
 }

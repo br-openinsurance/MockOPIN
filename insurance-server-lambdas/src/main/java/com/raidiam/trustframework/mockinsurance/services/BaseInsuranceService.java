@@ -12,6 +12,15 @@ abstract class BaseInsuranceService {
     ConsentRepository consentRepository;
 
     @Inject
+    EndorsementRepository endorsementRepository;
+
+    @Inject
+    ClaimNotificationDamageRepository claimNotificationDamageRepository;
+
+    @Inject
+    ClaimNotificationPersonRepository claimNotificationPersonRepository;
+
+    @Inject
     QuotePatrimonialBusinessRepository quotePatrimonialBusinessRepository;
 
     @Inject
@@ -55,6 +64,24 @@ abstract class BaseInsuranceService {
 
     @Inject
     QuoteAutoRepository quoteAutoRepository;
+
+    @Inject
+    QuoteCapitalizationTitleLeadRepository quoteCapitalizationTitleLeadRepository;
+
+    @Inject
+    QuoteCapitalizationTitleRepository quoteCapitalizationTitleRepository;
+
+    @Inject
+    CapitalizationTitleRaffleRepository capitalizationTitleRaffleRepository;
+
+    @Inject
+    QuotePersonLifeRepository quotePersonLifeRepository;
+
+    @Inject
+    QuotePersonLeadRepository quotePersonLeadRepository;
+
+    @Inject
+    QuotePersonTravelRepository quotePersonTravelRepository;
 
     @Inject
     WebhookRepository webhookRepository;

@@ -7,6 +7,7 @@ import com.raidiam.trustframework.mockinsurance.services.WebhookService;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.Put;
 import io.micronaut.security.annotation.Secured;
 import jakarta.inject.Inject;
@@ -21,10 +22,10 @@ public class WebhookAdminController extends BaseInsuranceController {
     @Inject
     private WebhookService webhookService;
 
-    @Put
-    public ResponseWebhook updateWebhookUri(@Body UpdateWebhook webhook) {
-        LOG.info("Registering new webhook URI for client {}", webhook.getClientId());
-        var response = webhookService.setWebhookUri(webhook);
+    @Put("/{clientId}")
+    public ResponseWebhook updateWebhookUri(@PathVariable("clientId") String clientId, @Body UpdateWebhook webhook) {
+        LOG.info("Registering new webhook URI for client {}", clientId);
+        var response = webhookService.updateWebhook(webhook, clientId);
         LOG.info("Returning webhook response");
         InsuranceLambdaUtils.logObject(mapper, response);
         return response;

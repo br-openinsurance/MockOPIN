@@ -56,7 +56,7 @@ export class InsurerAdapter {
     const config = await this.getRequestConfig('op:admin');
     let response;
     try {
-      response = await this.httpClient.put(`/admin/webhook`, { clientId, webhookUri }, config);
+      response = await this.httpClient.put(`/admin/webhook/${clientId}`, { webhookUri }, config);
     } catch (error) {
       log(`Error updating the client ${clientId} webhook - ${error}`);
       return;

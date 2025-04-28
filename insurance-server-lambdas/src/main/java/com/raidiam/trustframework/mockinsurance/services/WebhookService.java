@@ -35,21 +35,21 @@ public class WebhookService extends BaseInsuranceService {
 
     private static final String SWAGGER_VERSION = "1.0.0";
 
-    public ResponseWebhook setWebhookUri(UpdateWebhook req) {
-        LOG.info("Saving req URI for client {}", req.getClientId());
-        webhookRepository.findByClientId(req.getClientId()).ifPresentOrElse(
+    public ResponseWebhook updateWebhook(UpdateWebhook req, String clientId) {
+        LOG.info("Saving req URI for client {}", clientId);
+        webhookRepository.findByClientId(clientId).ifPresentOrElse(
                 e -> {
-                    LOG.info("Client {} webhook uri already exists, updating it", req.getClientId());
+                    LOG.info("Client {} webhook uri already exists, updating it", clientId);
                     e.setWebhookUri(req.getWebhookUri());
                     webhookRepository.update(e);
                 },
                 () -> {
-                    LOG.info("Client {} webhook uri does not exist, creating it", req.getClientId());
-                    webhookRepository.save(WebhookEntity.fromRequest(req));
+                    LOG.info("Client {} webhook uri does not exist, creating it", clientId);
+                    webhookRepository.save(WebhookEntity.fromRequest(req, clientId));
                 }
         );
 
-        return webhookRepository.findByClientId(req.getClientId())
+        return webhookRepository.findByClientId(clientId)
                 .orElseThrow(() -> new TrustframeworkException("Could not find recently saved WebhookEntity"))
                 .toResponse();
     }

@@ -42,7 +42,7 @@ public class ErrorResponseHandler implements ErrorResponseProcessor<Object> {
             @NonNull MutableHttpResponse<?> baseResponse
     ) {
         LOG.info("Processing error response");
-        errorContext.getErrors().forEach(e -> LOG.info("error: {}", e.getMessage()));
+        errorContext.getErrors().forEach(e -> LOG.error("error: {}", e.getMessage()));
         return buildJsonError(errorContext, baseResponse);
     }
 
