@@ -93,7 +93,7 @@ public class QuoteCapitalizationTitleControllerSpec extends Specification {
         then:
         response.statusCode == HttpStatus.CREATED.code
         response.body != null
-        ResponseQuoteLead resp = mapper.readValue(response.body, ResponseQuoteLead)
+        ResponseQuote resp = mapper.readValue(response.body, ResponseQuote)
         resp.getData().getStatus() == QuoteStatus.StatusEnum.RCVD
 
         and:
@@ -104,7 +104,7 @@ public class QuoteCapitalizationTitleControllerSpec extends Specification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuoteCapitalizationTitleLead(consentId)
-        quoteCapitalizationTitleLeadService.patchQuote(_ as RevokeQuotePatchPayload, _ as String, _ as String) >> quote
+        quoteCapitalizationTitleLeadService.patchQuote(_ as RevokePatchPayload, _ as String, _ as String) >> quote
 
         def req = TestRequestDataFactory.revokeQuotePatchRequest(quote.getQuoteId())
         String json = mapper.writeValueAsString(req)
@@ -120,8 +120,8 @@ public class QuoteCapitalizationTitleControllerSpec extends Specification {
         then:
         response.statusCode == HttpStatus.OK.code
         response.body != null
-        ResponseRevokeQuotePatch resp = mapper.readValue(response.body, ResponseRevokeQuotePatch)
-        resp.getData().getStatus() == ResponseRevokeQuotePatchData.StatusEnum.CANC
+        ResponseRevokePatch resp = mapper.readValue(response.body, ResponseRevokePatch)
+        resp.getData().getStatus() == ResponseRevokePatchData.StatusEnum.CANC
 
         and:
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
@@ -230,7 +230,7 @@ public class QuoteCapitalizationTitleControllerSpec extends Specification {
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuoteCapitalizationTitle(UUID.randomUUID(), consentId)
         quote.status = QuoteStatusEnum.ACKN.toString()
-        quoteCapitalizationTitleService.patchQuote(_ as PatchQuotePayload, _ as String, _ as String) >> quote
+        quoteCapitalizationTitleService.patchQuote(_ as PatchPayload, _ as String, _ as String) >> quote
 
         def req = TestRequestDataFactory.patchQuoteRequest(quote.getQuoteId())
 
@@ -246,8 +246,8 @@ public class QuoteCapitalizationTitleControllerSpec extends Specification {
         then:
         response.statusCode == HttpStatus.OK.code
         response.body != null
-        ResponseQuotePatch resp = mapper.readValue(response.body, ResponseQuotePatch)
-        resp.getData().getStatus() == ResponseQuotePatchData.StatusEnum.ACKN
+        ResponsePatch resp = mapper.readValue(response.body, ResponsePatch)
+        resp.getData().getStatus() == ResponsePatchData.StatusEnum.ACKN
 
         and:
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')

@@ -55,7 +55,7 @@ public class ConsentController extends BaseInsuranceController {
     public ResponseConsent putConsentV2(@PathVariable("consentId") String consentId, @Body UpdateConsent request) {
         LOG.info("Updating consent {} v2", consentId);
         InsuranceLambdaUtils.logObject(mapper, request);
-        var resp = service.updateConsent(consentId, request).toFullResponse();
+        var resp = service.updateConsent(consentId, request);
         InsuranceLambdaUtils.logObject(mapper, resp);
         return resp;
     }
@@ -69,13 +69,13 @@ public class ConsentController extends BaseInsuranceController {
         List<String> roles = callerInfo.getRoles();
         if (roles.contains("CONSENTS_FULL_MANAGE")) {
             LOG.info("OP making call - return full response");
-            var response = service.getFullConsent(consentId).toFullResponse();
+            var response = service.getFullConsent(consentId);
             InsuranceLambdaUtils.decorateResponse(response::setLinks, appBaseUrl + request.getPath());
             InsuranceLambdaUtils.logObject(mapper, response);
             return response;
         }
 
-        var response = service.getConsent(consentId, callerInfo.getClientId()).toResponse();
+        var response = service.getConsent(consentId, callerInfo.getClientId());
         InsuranceLambdaUtils.decorateResponse(response::setLinks, appBaseUrl + request.getPath());
         LOG.info("External client making call - return partial response");
         InsuranceLambdaUtils.logObject(mapper, response);

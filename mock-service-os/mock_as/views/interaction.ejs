@@ -135,14 +135,17 @@
             <% } %>
 
             <!-- LOANS, FINANCINGS, ETC. -->
-            <% if (['loans', 'financings', 'invoice-financings', 'unarranged-accounts-overdraft'].includes(scope.scope)) { %>
+            <% if (['loans', 'financings', 'invoice-financings', 'unarranged-accounts-overdraft',
+              'capitalization-title', 'life-pension', 'pension-plan', 'insurance-acceptance-and-branches-abroad', 'financial-risk', 'housing', 'responsibility', 'person',
+              'financial-assistance', 'auto', 'patrimonial', 'rural', 'transport'].includes(scope.scope)) { %>
               <ul class="mt-2 space-y-2">
                 <% accounts = new Set(scope.accounts); %>
                 <% accounts.forEach((account) => { %>
+                  <% resourceId = account.accountId || account.resourceId; %>
                   <li class="flex justify-between items-center py-2 border-b border-gray-200">
                     <div>
-                      <p class="text-gray-700 font-medium pl-[44px]">Selectable Account:</p>
-                      <p class="text-gray-600 text-sm pl-[44px]"><%= account.accountId %></p>
+                      <p class="text-gray-700 font-medium pl-[44px]">Selectable Resource:</p>
+                      <p class="text-gray-600 text-sm pl-[44px]"><%= resourceId %></p>
                     </div>
                     <!-- Toggle for account -->
                     <label class="relative inline-flex items-center cursor-pointer">
@@ -151,7 +154,7 @@
                         class="sr-only peer"
                         checked
                         data-scope="<%= scope.scope %>"
-                        data-scope-accountid="<%= account.accountId %>"
+                        data-scope-accountid="<%= resourceId %>"
                       />
                       <div
                         class="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-[#147d9666]
@@ -164,7 +167,7 @@
                     <input
                       type="hidden"
                       name="<%= scope.scope %>-accounts"
-                      value="<%= account.accountId %>"
+                      value="<%= resourceId %>"
                     />
                   </li>
                 <% }) %>
@@ -207,6 +210,7 @@
                 <% }) %>
               </ul>
             <% } %>
+
           </div>
         </li>
       <% }) %>

@@ -1,6 +1,8 @@
 const BRAND_NAME = {
-  OPIN: 'OPIN',
-  OPIN_LOCAL: 'OPIN_LOCAL',
-};
+    OPF: "OPF",
+    OPF_LOCAL: "OPF_LOCAL",
+    OPIN: "OPIN",
+    OPIN_LOCAL: "OPIN_LOCAL"
+  };
 
-export default BRAND_NAME;
+  export default BRAND_NAME;

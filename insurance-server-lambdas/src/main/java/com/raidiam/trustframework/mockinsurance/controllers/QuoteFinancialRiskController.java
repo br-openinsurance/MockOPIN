@@ -6,9 +6,9 @@ import com.raidiam.trustframework.mockinsurance.domain.QuoteFinancialRiskLeadEnt
 import com.raidiam.trustframework.mockinsurance.fapi.Idempotent;
 import com.raidiam.trustframework.mockinsurance.fapi.XFapiInteractionIdRequired;
 import com.raidiam.trustframework.mockinsurance.models.generated.QuoteRequestFinancialRiskLead;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuoteLead;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokeQuotePatch;
-import com.raidiam.trustframework.mockinsurance.models.generated.RevokeQuotePatchPayload;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuote;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokePatch;
+import com.raidiam.trustframework.mockinsurance.models.generated.RevokePatchPayload;
 import com.raidiam.trustframework.mockinsurance.services.QuoteFinancialRiskLeadService;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 import io.micronaut.http.HttpRequest;
@@ -37,7 +37,7 @@ public class QuoteFinancialRiskController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseQuoteLead createLeadQuoteV1(
+    public ResponseQuote createLeadQuoteV1(
             @Body QuoteRequestFinancialRiskLead body,
             @NotNull HttpRequest<?> request) {
         String clientId = (String) request.getAttribute("clientId").orElse("");
@@ -54,7 +54,7 @@ public class QuoteFinancialRiskController extends BaseInsuranceController {
     @Secured({"QUOTE_FINANCIAL_RISK_LEAD_MANAGE"})
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseRevokeQuotePatch patchLeadQuoteV1(@PathVariable("consentId") String consentId, @Body RevokeQuotePatchPayload body, HttpRequest<?> request) {
+    public ResponseRevokePatch patchLeadQuoteV1(@PathVariable("consentId") String consentId, @Body RevokePatchPayload body, HttpRequest<?> request) {
         String clientId = (String) request.getAttribute("clientId").orElse("");
         LOG.info("Patching quote financial risk for consent id");
         return quoteFinancialRiskLeadService.patchQuote(body, consentId, clientId).toRevokePatchResponse();

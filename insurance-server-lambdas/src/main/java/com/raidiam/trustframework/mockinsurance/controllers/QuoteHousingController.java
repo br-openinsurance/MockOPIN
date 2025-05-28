@@ -6,9 +6,9 @@ import com.raidiam.trustframework.mockinsurance.domain.QuoteHousingLeadEntity;
 import com.raidiam.trustframework.mockinsurance.fapi.Idempotent;
 import com.raidiam.trustframework.mockinsurance.fapi.XFapiInteractionIdRequired;
 import com.raidiam.trustframework.mockinsurance.models.generated.QuoteRequestHousingLead;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuoteLead;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokeQuotePatch;
-import com.raidiam.trustframework.mockinsurance.models.generated.RevokeQuotePatchPayload;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuote;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokePatch;
+import com.raidiam.trustframework.mockinsurance.models.generated.RevokePatchPayload;
 import com.raidiam.trustframework.mockinsurance.services.QuoteHousingLeadService;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 import io.micronaut.http.HttpRequest;
@@ -37,24 +37,24 @@ public class QuoteHousingController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseQuoteLead createLeadQuoteV1(
+    public ResponseQuote createLeadQuoteV1(
             @Body QuoteRequestHousingLead body,
             @NotNull HttpRequest<?> request) {
         String clientId = (String) request.getAttribute("clientId").orElse("");
         LOG.info("Creating new quote financial risk for client {}", clientId);
-        var responseQuoteLead = quoteHousingLeadService.createQuote(QuoteHousingLeadEntity.fromRequest(body, clientId)).toResponse();
+        var ResponseQuote = quoteHousingLeadService.createQuote(QuoteHousingLeadEntity.fromRequest(body, clientId)).toResponse();
 
-        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(responseQuoteLead::setLinks, responseQuoteLead::setMeta, appBaseUrl + request.getPath());
-        InsuranceLambdaUtils.logObject(mapper, responseQuoteLead);
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(ResponseQuote::setLinks, ResponseQuote::setMeta, appBaseUrl + request.getPath());
+        InsuranceLambdaUtils.logObject(mapper, ResponseQuote);
 
-        return responseQuoteLead;
+        return ResponseQuote;
     }
 
     @Patch("/v1/lead/request/{consentId}")
     @Secured({"QUOTE_HOUSING_LEAD_MANAGE"})
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseRevokeQuotePatch patchLeadQuoteV1(@PathVariable("consentId") String consentId, @Body RevokeQuotePatchPayload body, HttpRequest<?> request) {
+    public ResponseRevokePatch patchLeadQuoteV1(@PathVariable("consentId") String consentId, @Body RevokePatchPayload body, HttpRequest<?> request) {
         LOG.info("Patching quote financial risk for consent id");
         String clientId = (String) request.getAttribute("clientId").orElse("");
         return quoteHousingLeadService.patchQuote(body, consentId, clientId).toRevokePatchResponse();

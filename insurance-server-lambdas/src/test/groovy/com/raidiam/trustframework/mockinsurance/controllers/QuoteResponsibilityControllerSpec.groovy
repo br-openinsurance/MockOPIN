@@ -73,7 +73,7 @@ class QuoteResponsibilityControllerSpec extends Specification {
         then:
         response.statusCode == HttpStatus.CREATED.code
         response.body != null
-        ResponseQuoteLead resp = mapper.readValue(response.body, ResponseQuoteLead)
+        ResponseQuote resp = mapper.readValue(response.body, ResponseQuote)
         resp.getData().getStatus() == QuoteStatus.StatusEnum.RCVD
 
         and:
@@ -84,7 +84,7 @@ class QuoteResponsibilityControllerSpec extends Specification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuoteResponsibilityLead(consentId)
-        quoteResponsibilityLeadService.patchQuote(_ as RevokeQuotePatchPayload, _ as String, _ as String) >> quote
+        quoteResponsibilityLeadService.patchQuote(_ as RevokePatchPayload, _ as String, _ as String) >> quote
 
         def req = TestRequestDataFactory.revokeQuotePatchRequest(quote.getQuoteId())
         String json = mapper.writeValueAsString(req)
@@ -100,8 +100,8 @@ class QuoteResponsibilityControllerSpec extends Specification {
         then:
         response.statusCode == HttpStatus.OK.code
         response.body != null
-        ResponseRevokeQuotePatch resp = mapper.readValue(response.body, ResponseRevokeQuotePatch)
-        resp.getData().getStatus() == ResponseRevokeQuotePatchData.StatusEnum.CANC
+        ResponseRevokePatch resp = mapper.readValue(response.body, ResponseRevokePatch)
+        resp.getData().getStatus() == ResponseRevokePatchData.StatusEnum.CANC
 
         and:
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')

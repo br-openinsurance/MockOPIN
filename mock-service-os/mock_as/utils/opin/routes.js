@@ -1,10 +1,9 @@
-/* eslint-disable no-console, camelcase, no-unused-vars */
 import { strict as assert } from 'node:assert';
 import * as querystring from 'node:querystring';
 import { inspect } from 'node:util';
 
 import isEmpty from 'lodash/isEmpty.js';
-import { urlencoded } from 'express'; // eslint-disable-line import/no-unresolved
+import { urlencoded } from 'express';
 
 import Account from '../account.js';
 import { errors } from 'oidc-provider';
@@ -12,8 +11,10 @@ import { getConsentId } from './helpers.js';
 import { insurerAdapter } from './adapter.js';
 import layout from './layout.js';
 import { addWebhookMiddleware } from '../oidc.js';
+import Debug from 'debug';
 
 const body = urlencoded({ extended: false });
+const log = Debug('raidiam:server:info');
 
 const keys = new Set();
 const debug = (obj) =>
@@ -91,8 +92,8 @@ export default (app, provider) => {
           }
 
           let consent = await insurerAdapter.getConsent(consentId);
-          console.log(consent);
           const scopesInformations = await insurerAdapter.getUserInformation(session.accountId, consent.data);
+          log(`scopesInformations: ${JSON.stringify(scopesInformations)}`);
           return res.render('interaction', {
             client,
             uid,
@@ -288,101 +289,125 @@ export default (app, provider) => {
 };
 
 function getAuthorizedConsentData(req, accountId) {
-  // Accounts could be an array (if there is more than one)
-  let acceptedAccounts = req.body['accounts-accounts']
-    ? Array.isArray(req.body['accounts-accounts'])
-      ? req.body['accounts-accounts']
-      : req.body['accounts-accounts'].split(' ')
+  let acceptedCapitalizationTitlePlans = req.body['capitalization-title-accounts']
+    ? Array.isArray(req.body['capitalization-title-accounts'])
+      ? req.body['capitalization-title-accounts']
+      : req.body['capitalization-title-accounts'].split(' ')
     : [];
 
-  let acceptedCreditCardsAccounts = req.body['credit-cards-accounts']
-    ? Array.isArray(req.body['credit-cards-accounts'])
-      ? req.body['credit-cards-accounts']
-      : req.body['credit-cards-accounts'].split(' ')
+  let acceptedFinancialRiskPolicies = req.body['financial-risk-accounts']
+    ? Array.isArray(req.body['financial-risk-accounts'])
+      ? req.body['financial-risk-accounts']
+      : req.body['financial-risk-accounts'].split(' ')
     : [];
 
-  if (!acceptedAccounts.length) {
-    acceptedAccounts = req.body['customers-accounts']
-      ? Array.isArray(req.body['customers-accounts'])
-        ? req.body['customers-accounts']
-        : req.body['customers-accounts'].split(' ')
-      : [];
-  }
-
-  const acceptedFinancingsAccounts = req.body['financings-accounts']
-    ? Array.isArray(req.body['financings-accounts'])
-      ? req.body['financings-accounts']
-      : req.body['financings-accounts'].split(' ')
+  let acceptedHousingPolicies = req.body['housing-accounts']
+    ? Array.isArray(req.body['housing-accounts'])
+      ? req.body['housing-accounts']
+      : req.body['housing-accounts'].split(' ')
     : [];
 
-  const acceptedInvoiceFinancingsAccounts = req.body['invoice-financings-accounts']
-    ? Array.isArray(req.body['invoice-financings-accounts'])
-      ? req.body['invoice-financings-accounts']
-      : req.body['invoice-financings-accounts'].split(' ')
+  let acceptedResponsibilityPolicies = req.body['responsibility-accounts']
+    ? Array.isArray(req.body['responsibility-accounts'])
+      ? req.body['responsibility-accounts']
+      : req.body['responsibility-accounts'].split(' ')
     : [];
 
-  const acceptedLoansAccounts = req.body['loans-accounts']
-    ? Array.isArray(req.body['loans-accounts'])
-      ? req.body['loans-accounts']
-      : req.body['loans-accounts'].split(' ')
+  let acceptedPersonPolicies = req.body['person-accounts']
+    ? Array.isArray(req.body['person-accounts'])
+      ? req.body['person-accounts']
+      : req.body['person-accounts'].split(' ')
     : [];
 
-  const acceptedOverdraftAccounts = req.body['unarranged-accounts-overdraft-accounts']
-    ? Array.isArray(req.body['unarranged-accounts-overdraft-accounts'])
-      ? req.body['unarranged-accounts-overdraft-accounts']
-      : req.body['unarranged-accounts-overdraft-accounts'].split(' ')
+  let acceptedLifePensionContracts = req.body['life-pension-accounts']
+    ? Array.isArray(req.body['life-pension-accounts'])
+      ? req.body['life-pension-accounts']
+      : req.body['life-pension-accounts'].split(' ')
     : [];
 
-  const acceptedExchangesOperationsAccounts = req.body['exchanges-accounts']
-    ? Array.isArray(req.body['exchanges-accounts'])
-      ? req.body['exchanges-accounts']
-      : req.body['exchanges-accounts'].split(' ')
+  let acceptedPensionPlanContracts = req.body['pension-plan-accounts']
+    ? Array.isArray(req.body['pension-plan-accounts'])
+      ? req.body['pension-plan-accounts']
+      : req.body['pension-plan-accounts'].split(' ')
     : [];
 
-  const acceptedPaymentsAccounts = req.body['payments-accounts']
-    ? Array.isArray(req.body['payments-accounts'])
-      ? req.body['payments-accounts']
-      : req.body['payments-accounts'].split(' ')
+  let acceptedFinancialAssistanceContracts = req.body['financial-assistance-accounts']
+    ? Array.isArray(req.body['financial-assistance-accounts'])
+      ? req.body['financial-assistance-accounts']
+      : req.body['financial-assistance-accounts'].split(' ')
     : [];
 
-  const acceptedPaymentsAccountsBranch = req.body['payments-accounts-branch']
-    ? Array.isArray(req.body['payments-accounts-branch'])
-      ? req.body['payments-accounts-branch']
-      : req.body['payments-accounts-branch'].split(' ')
+  let acceptedAcceptanceAndBranchesAbroadPolicies = req.body['insurance-acceptance-and-branches-abroad-accounts']
+    ? Array.isArray(req.body['insurance-acceptance-and-branches-abroad-accounts'])
+      ? req.body['insurance-acceptance-and-branches-abroad-accounts']
+      : req.body['insurance-acceptance-and-branches-abroad-accounts'].split(' ')
     : [];
 
-  //The update will conditionally add the debtor account based on what was selected
+  let patrimonialPolicies = req.body['patrimonial-accounts']
+    ? Array.isArray(req.body['patrimonial-accounts'])
+      ? req.body['patrimonial-accounts']
+      : req.body['patrimonial-accounts'].split(' ')
+    : [];
+
+  let ruralPolicies = req.body['rural-accounts']
+    ? Array.isArray(req.body['rural-accounts'])
+      ? req.body['rural-accounts']
+      : req.body['rural-accounts'].split(' ')
+    : [];
+
+  let autoPolicies = req.body['auto-accounts']
+    ? Array.isArray(req.body['auto-accounts'])
+      ? req.body['auto-accounts']
+      : req.body['auto-accounts'].split(' ')
+    : [];
+
+  let transportPolicies = req.body['transport-accounts']
+    ? Array.isArray(req.body['transport-accounts'])
+      ? req.body['transport-accounts']
+      : req.body['transport-accounts'].split(' ')
+    : [];
+
   return {
     status: 'AUTHORISED',
-    ...(acceptedFinancingsAccounts && {
-      linkedFinancingAccountIds: acceptedFinancingsAccounts,
-    }),
-    ...(acceptedLoansAccounts && {
-      linkedLoanAccountIds: acceptedLoansAccounts,
-    }),
-    ...(acceptedInvoiceFinancingsAccounts && {
-      linkedInvoiceFinancingAccountIds: acceptedInvoiceFinancingsAccounts,
-    }),
-    ...(acceptedOverdraftAccounts && {
-      linkedUnarrangedOverdraftAccountIds: acceptedOverdraftAccounts,
-    }),
     sub: accountId,
-    ...(acceptedAccounts && {
-      linkedAccountIds: acceptedAccounts,
+    ...(acceptedCapitalizationTitlePlans && {
+      linkedCapitalizationTilePlanIds: acceptedCapitalizationTitlePlans,
     }),
-    ...(acceptedCreditCardsAccounts && {
-      linkedCreditCardAccountIds: acceptedCreditCardsAccounts,
+    ...(acceptedFinancialRiskPolicies && {
+      linkedFinancialRiskPolicyIds: acceptedFinancialRiskPolicies,
     }),
-    ...(acceptedExchangesOperationsAccounts && {
-      linkedExchangeOperationIds: acceptedExchangesOperationsAccounts,
+    ...(acceptedHousingPolicies && {
+      linkedHousingPolicyIds: acceptedHousingPolicies,
     }),
-    ...(acceptedPaymentsAccounts && {
-      debtorAccount: {
-        number: acceptedPaymentsAccounts[0],
-        issuer: acceptedPaymentsAccountsBranch[0],
-        ispb: '12345678',
-        accountType: 'CACC',
-      },
+    ...(acceptedResponsibilityPolicies && {
+      linkedResponsibilityPolicyIds: acceptedResponsibilityPolicies,
+    }),
+    ...(acceptedPersonPolicies && {
+      linkedPersonPolicyIds: acceptedPersonPolicies,
+    }),
+    ...(acceptedLifePensionContracts && {
+      linkedLifePensionContractIds: acceptedLifePensionContracts,
+    }),
+    ...(acceptedPensionPlanContracts && {
+      linkedPensionPlanContractIds: acceptedPensionPlanContracts,
+    }),
+    ...(acceptedAcceptanceAndBranchesAbroadPolicies && {
+      linkedAcceptanceAndBranchesAbroadPolicyIds: acceptedAcceptanceAndBranchesAbroadPolicies,
+    }),
+    ...(acceptedFinancialAssistanceContracts && {
+      linkedFinancialAssistanceContractIds: acceptedFinancialAssistanceContracts,
+    }),
+    ...(patrimonialPolicies && {
+      linkedPatrimonialPolicyIds: patrimonialPolicies,
+    }),
+    ...(ruralPolicies && {
+      linkedRuralPolicyIds: ruralPolicies,
+    }),
+    ...(autoPolicies && {
+      linkedAutoPolicyIds: autoPolicies,
+    }),
+    ...(transportPolicies && {
+      linkedTransportPolicyIds: transportPolicies,
     }),
   };
 }

@@ -44,6 +44,7 @@ export default function (mtlsIssuer, ssaJwks) {
       'insurance-auto',
       'insurance-financial-risk',
       'insurance-housing',
+      'insurance-person',
       'insurance-patrimonial',
       'insurance-rural',
       'insurance-responsibility',
@@ -71,6 +72,10 @@ export default function (mtlsIssuer, ssaJwks) {
       'quote-capitalization-title-lead',
       'quote-capitalization-title',
       'capitalization-title-raffle',
+      'capitalization-title',
+      'insurance-life-pension',
+      'insurance-pension-plan',
+      'insurance-financial-assistance',
       'op:admin',
     ],
     interactions: {
@@ -397,6 +402,7 @@ export default function (mtlsIssuer, ssaJwks) {
               'insurance-auto',
               'insurance-financial-risk',
               'insurance-housing',
+              'insurance-person',
               'insurance-patrimonial',
               'insurance-rural',
               'insurance-responsibility',
@@ -424,6 +430,10 @@ export default function (mtlsIssuer, ssaJwks) {
               'quote-capitalization-title-lead',
               'quote-capitalization-title',
               'capitalization-title-raffle',
+              'capitalization-title',
+              'insurance-life-pension',
+              'insurance-pension-plan',
+              'insurance-financial-assistance',
             );
 
             let requestedArray;

@@ -41,6 +41,7 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
     private final Map<String, String> scopesToRoles = Map.ofEntries(
             entry("openid", "OPENID"),
             entry("consents", "CONSENTS_MANAGE"),
+            entry("resources", "RESOURCES_READ"),
             entry("endorsement", "ENDORSEMENT_REQUEST_MANAGE"),
             entry("claim-notification", "CLAIM_NOTIFICATION_REQUEST_MANAGE"),
             entry("quote-patrimonial-lead", "QUOTE_PATRIMONIAL_LEAD_MANAGE"),
@@ -48,12 +49,15 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
             entry("quote-patrimonial-home", "QUOTE_PATRIMONIAL_HOME_MANAGE"),
             entry("quote-patrimonial-condominium", "QUOTE_PATRIMONIAL_CONDOMINIUM_MANAGE"),
             entry("quote-patrimonial-diverse-risks", "QUOTE_PATRIMONIAL_DIVERSE_RISKS_MANAGE"),
+            entry("insurance-patrimonial", "PATRIMONIAL_MANAGE"),
             entry("quote-financial-risk-lead", "QUOTE_FINANCIAL_RISK_LEAD_MANAGE"),
             entry("quote-acceptance-and-branches-abroad-lead", "QUOTE_ACCEPTANCE_AND_BRANCHES_ABROAD_LEAD_MANAGE"),
+            entry("insurance-acceptance-and-branches-abroad", "ACCEPTANCE_AND_BRANCHES_ABROAD_MANAGE"),
             entry("quote-housing-lead", "QUOTE_HOUSING_LEAD_MANAGE"),
             entry("quote-responsibility-lead", "QUOTE_RESPONSIBILITY_LEAD_MANAGE"),
             entry("quote-transport-lead", "QUOTE_TRANSPORT_LEAD_MANAGE"),
             entry("quote-rural-lead", "QUOTE_RURAL_LEAD_MANAGE"),
+            entry("insurance-rural", "RURAL_MANAGE"),
             entry("quote-auto-lead", "QUOTE_AUTO_LEAD_MANAGE"),
             entry("quote-auto", "QUOTE_AUTO_MANAGE"),
             entry("quote-person-lead", "QUOTE_PERSON_LEAD_MANAGE"),
@@ -64,7 +68,17 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
             entry("quote-capitalization-title-lead", "QUOTE_CAPITALIZATION_TITLE_LEAD_MANAGE"),
             entry("quote-capitalization-title", "QUOTE_CAPITALIZATION_TITLE_MANAGE"),
             entry("capitalization-title-raffle", "QUOTE_CAPITALIZATION_TITLE_RAFFLE_MANAGE"),
-
+            entry("customers", "CUSTOMERS_MANAGE"),
+            entry("capitalization-title", "CAPITALIZATION_TITLE_MANAGE"),
+            entry("insurance-financial-risk", "FINANCIAL_RISK_MANAGE"),
+            entry("insurance-housing", "HOUSING_MANAGE"),
+            entry("insurance-responsibility", "RESPONSIBILITY_MANAGE"),
+            entry("insurance-person", "PERSON_MANAGE"),
+            entry("insurance-life-pension", "LIFE_PENSION_MANAGE"),
+            entry("insurance-financial-assistance", "FINANCIAL_ASSISTANCE_MANAGE"),
+            entry("insurance-auto", "AUTO_MANAGE"),
+            entry("insurance-pension-plan", "PENSION_PLAN_MANAGE"),
+            entry("insurance-transport", "TRANSPORT_MANAGE"),
             // op-related scopes, are these real? They govern the PUT endpoints needed for administration.
             entry("op:consent", "CONSENTS_FULL_MANAGE"),
             entry("op:admin", "ADMIN_FULL_MANAGE")
@@ -113,10 +127,6 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
 
     private Authentication handleLambdaRequest(ApiGatewayProxyServletRequest<?> request) {
         LOG.info("We're a lambda");
-        if (request.getPath().startsWith("/user")) {
-            LOG.info("Request for user endpoint - allowing OP_QUERY_ROLE");
-            return makeClientAuthenticationWithRoles(List.of("OP_QUERY_ROLE"));
-        }
         Map<String, Object> authorizer = null;
         try {
             authorizer = getAuthContext(request);
@@ -134,10 +144,6 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
     }
 
     private Authentication handleHttpRequest(HttpRequest<?> request) {
-        if (request.getPath().startsWith("/user")) {
-            LOG.info("Request for user endpoint - allowing OP_QUERY_ROLE");
-            return makeClientAuthenticationWithRoles(List.of("OP_QUERY_ROLE"));
-        }
         String token = request.getHeaders().get("access_token");
         if (token == null || token.isEmpty()) {
             token = request.getHeaders().get("Authorization");
@@ -227,7 +233,7 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
         String consentId = Arrays.stream(scopes)
                 .filter(Objects::nonNull)
                 .filter(a -> !a.isEmpty())
-                .filter(a -> a.startsWith(dynamicScopePrefix + "urn:raidiambank:"))
+                .filter(a -> a.startsWith(dynamicScopePrefix + "urn:raidiaminsurance:"))
                 .findFirst().orElse(null);
         LOG.info("Consent Id inferred: {}", consentId);
         if(consentId != null) {
@@ -239,7 +245,7 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
         String enrollmentId = Arrays.stream(scopes)
                 .filter(Objects::nonNull)
                 .filter(a -> !a.isEmpty())
-                .filter(a -> a.startsWith(enrollmentScopePrefix + "urn:raidiambank:"))
+                .filter(a -> a.startsWith(enrollmentScopePrefix + "urn:raidiaminsurance:"))
                 .findFirst().orElse(null);
         LOG.info("Enrollment Id inferred: {}", enrollmentId);
         if(enrollmentId != null) {

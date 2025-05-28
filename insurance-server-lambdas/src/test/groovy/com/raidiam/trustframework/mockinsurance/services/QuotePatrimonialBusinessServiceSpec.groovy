@@ -126,12 +126,12 @@ class QuotePatrimonialBusinessServiceSpec extends CleanupSpecification {
         quote.setStatus(QuoteStatusEnum.ACPT.toString())
         quote = quotePatrimonialBusinessRepository.save(quote)
 
-        def req = new PatchQuotePayload()
-                .data(new PatchQuotePayloadData()
-                        .status(PatchQuotePayloadData.StatusEnum.ACKN)
+        def req = new PatchPayload()
+                .data(new PatchPayloadData()
+                        .status(PatchPayloadData.StatusEnum.ACKN)
                         .insurerQuoteId(quote.getQuoteId().toString())
-                        .author(new RevokeQuotePatchPayloadDataAuthor()
-                                .identificationType(RevokeQuotePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
+                        .author(new RevokePatchPayloadDataAuthor()
+                                .identificationType(RevokePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
                                 .identificationNumber(quote.getPersonCpf())))
 
         when:
@@ -151,12 +151,12 @@ class QuotePatrimonialBusinessServiceSpec extends CleanupSpecification {
         quote.setStatus(QuoteStatusEnum.EVAL.toString())
         quote = quotePatrimonialBusinessService.createQuote(quote)
 
-        def req = new PatchQuotePayload()
-                .data(new PatchQuotePayloadData()
-                        .status(PatchQuotePayloadData.StatusEnum.ACKN)
+        def req = new PatchPayload()
+                .data(new PatchPayloadData()
+                        .status(PatchPayloadData.StatusEnum.ACKN)
                         .insurerQuoteId(quote.getQuoteId().toString())
-                        .author(new RevokeQuotePatchPayloadDataAuthor()
-                                .identificationType(RevokeQuotePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
+                        .author(new RevokePatchPayloadDataAuthor()
+                                .identificationType(RevokePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
                                 .identificationNumber(quote.getPersonCpf())))
 
         when:
@@ -175,11 +175,11 @@ class QuotePatrimonialBusinessServiceSpec extends CleanupSpecification {
         quote.setStatus(QuoteStatusEnum.EVAL.toString())
         quote = quotePatrimonialBusinessService.createQuote(quote)
 
-        def req = new PatchQuotePayload()
-                .data(new PatchQuotePayloadData()
-                        .status(PatchQuotePayloadData.StatusEnum.CANC)
-                        .author(new RevokeQuotePatchPayloadDataAuthor()
-                                .identificationType(RevokeQuotePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
+        def req = new PatchPayload()
+                .data(new PatchPayloadData()
+                        .status(PatchPayloadData.StatusEnum.CANC)
+                        .author(new RevokePatchPayloadDataAuthor()
+                                .identificationType(RevokePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
                                 .identificationNumber(quote.getPersonCpf())))
 
         when:

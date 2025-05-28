@@ -6,9 +6,9 @@ import com.raidiam.trustframework.mockinsurance.domain.QuoteAcceptanceAndBranche
 import com.raidiam.trustframework.mockinsurance.fapi.Idempotent;
 import com.raidiam.trustframework.mockinsurance.fapi.XFapiInteractionIdRequired;
 import com.raidiam.trustframework.mockinsurance.models.generated.QuoteRequestAcceptanceAndBranchesAbroadLead;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuoteLead;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokeQuotePatch;
-import com.raidiam.trustframework.mockinsurance.models.generated.RevokeQuotePatchPayload;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuote;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokePatch;
+import com.raidiam.trustframework.mockinsurance.models.generated.RevokePatchPayload;
 import com.raidiam.trustframework.mockinsurance.services.QuoteAcceptanceAndBranchesAbroadLeadService;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 import io.micronaut.http.HttpRequest;
@@ -37,7 +37,7 @@ public class QuoteAcceptanceAndBranchesAbroadController extends BaseInsuranceCon
     @XFapiInteractionIdRequired
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseQuoteLead createLeadQuoteV1(
+    public ResponseQuote createLeadQuoteV1(
             @Body QuoteRequestAcceptanceAndBranchesAbroadLead body,
             @NotNull HttpRequest<?> request) {
         String clientId = (String) request.getAttribute("clientId").orElse("");
@@ -51,7 +51,7 @@ public class QuoteAcceptanceAndBranchesAbroadController extends BaseInsuranceCon
     @Patch("/v1/lead/request/{consentId}")
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseRevokeQuotePatch patchLeadQuoteV1(@PathVariable("consentId") String consentId, @Body RevokeQuotePatchPayload body, HttpRequest<?> request) {
+    public ResponseRevokePatch patchLeadQuoteV1(@PathVariable("consentId") String consentId, @Body RevokePatchPayload body, HttpRequest<?> request) {
         LOG.info("Patching quote acceptance and branches abroad lead for consent id");
         String clientId = (String) request.getAttribute("clientId").orElse("");
         return quoteAcceptanceAndBranchesAbroadLeadService.patchQuote(body, consentId, clientId).toRevokePatchResponse();

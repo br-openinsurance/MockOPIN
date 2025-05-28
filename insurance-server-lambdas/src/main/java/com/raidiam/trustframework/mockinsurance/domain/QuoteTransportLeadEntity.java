@@ -27,17 +27,17 @@ public class QuoteTransportLeadEntity extends QuoteEntity {
         return entity;
     }
 
-    public ResponseQuoteLead toResponse() {
-        return new ResponseQuoteLead()
+    public ResponseQuote toResponse() {
+        return new ResponseQuote()
                 .data(new QuoteStatus()
                         .status(QuoteStatus.StatusEnum.fromValue(this.getStatus()))
                         .statusUpdateDateTime(InsuranceLambdaUtils.dateToOffsetDate(this.getUpdatedAt()))
                 );
     }
 
-    public ResponseRevokeQuotePatch toRevokePatchResponse() {
-        return new ResponseRevokeQuotePatch().data(new ResponseRevokeQuotePatchData()
-                        .status(ResponseRevokeQuotePatchData.StatusEnum.CANC)
+    public ResponseRevokePatch toRevokePatchResponse() {
+        return new ResponseRevokePatch().data(new ResponseRevokePatchData()
+                        .status(ResponseRevokePatchData.StatusEnum.CANC)
         );
     }
 

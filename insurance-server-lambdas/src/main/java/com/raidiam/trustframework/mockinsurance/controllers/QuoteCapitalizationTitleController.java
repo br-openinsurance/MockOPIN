@@ -10,16 +10,16 @@ import com.raidiam.trustframework.mockinsurance.domain.QuoteCapitalizationTitleE
 import com.raidiam.trustframework.mockinsurance.domain.QuoteCapitalizationTitleLeadEntity;
 import com.raidiam.trustframework.mockinsurance.fapi.Idempotent;
 import com.raidiam.trustframework.mockinsurance.fapi.XFapiInteractionIdRequired;
-import com.raidiam.trustframework.mockinsurance.models.generated.PatchQuotePayload;
+import com.raidiam.trustframework.mockinsurance.models.generated.PatchPayload;
 import com.raidiam.trustframework.mockinsurance.models.generated.QuoteRequestCapitalizationTitle;
 import com.raidiam.trustframework.mockinsurance.models.generated.QuoteRequestCapitalizationTitleLead;
 import com.raidiam.trustframework.mockinsurance.models.generated.RequestCapitalizationTitleRaffle;
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseCapitalizationTitleRaffle;
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuoteCapitalizationTitle;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuoteLead;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuotePatch;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokeQuotePatch;
-import com.raidiam.trustframework.mockinsurance.models.generated.RevokeQuotePatchPayload;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuote;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponsePatch;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokePatch;
+import com.raidiam.trustframework.mockinsurance.models.generated.RevokePatchPayload;
 import com.raidiam.trustframework.mockinsurance.services.CapitalizationTitleRaffleService;
 import com.raidiam.trustframework.mockinsurance.services.QuoteCapitalizationTitleLeadService;
 import com.raidiam.trustframework.mockinsurance.services.QuoteCapitalizationTitleService;
@@ -62,7 +62,7 @@ public class QuoteCapitalizationTitleController extends BaseInsuranceController 
     @XFapiInteractionIdRequired
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseQuoteLead createLeadQuoteV1(@Body QuoteRequestCapitalizationTitleLead body, @NotNull HttpRequest<?> request) {
+    public ResponseQuote createLeadQuoteV1(@Body QuoteRequestCapitalizationTitleLead body, @NotNull HttpRequest<?> request) {
         
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         LOG.info("Creating new quote capitalization title lead for client {}", callerInfo.getClientId());
@@ -79,7 +79,7 @@ public class QuoteCapitalizationTitleController extends BaseInsuranceController 
     @Secured({"QUOTE_CAPITALIZATION_TITLE_LEAD_MANAGE"})
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseRevokeQuotePatch patchLeadQuoteV1(@PathVariable("consentId") String consentId, @Body RevokeQuotePatchPayload body, HttpRequest<?> request) {
+    public ResponseRevokePatch patchLeadQuoteV1(@PathVariable("consentId") String consentId, @Body RevokePatchPayload body, HttpRequest<?> request) {
         
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         LOG.info("Patching quote capitalization title lead for consent id {}", consentId);
@@ -127,7 +127,7 @@ public class QuoteCapitalizationTitleController extends BaseInsuranceController 
     @Secured({"QUOTE_CAPITALIZATION_TITLE_MANAGE"})
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseQuotePatch patchQuoteV1(@PathVariable("consentId") String consentId, @Body PatchQuotePayload body, HttpRequest<?> request) {
+    public ResponsePatch patchQuoteV1(@PathVariable("consentId") String consentId, @Body PatchPayload body, HttpRequest<?> request) {
         
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         LOG.info("Patching quote capitalization title for consent id {}", consentId);

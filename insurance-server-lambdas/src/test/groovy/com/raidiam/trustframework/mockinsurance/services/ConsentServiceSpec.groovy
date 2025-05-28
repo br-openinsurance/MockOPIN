@@ -4,12 +4,20 @@ import com.raidiam.trustframework.mockinsurance.CleanupSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
 import com.raidiam.trustframework.mockinsurance.TestRequestDataFactory
 import com.raidiam.trustframework.mockinsurance.domain.AccountHolderEntity
-import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentPermission
-import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentStatus
-import com.raidiam.trustframework.mockinsurance.models.generated.EnumReasonCode
-import com.raidiam.trustframework.mockinsurance.models.generated.EnumRejectedBy
-import com.raidiam.trustframework.mockinsurance.models.generated.UpdateConsent
-import com.raidiam.trustframework.mockinsurance.models.generated.UpdateConsentData
+import com.raidiam.trustframework.mockinsurance.domain.AutoPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.CapitalizationTitlePlanEntity
+import com.raidiam.trustframework.mockinsurance.domain.FinancialAssistanceContractEntity
+import com.raidiam.trustframework.mockinsurance.domain.FinancialRiskPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.HousingPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.LifePensionContractEntity
+import com.raidiam.trustframework.mockinsurance.domain.AcceptanceAndBranchesAbroadPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.PatrimonialPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.PensionPlanContractEntity
+import com.raidiam.trustframework.mockinsurance.domain.RuralPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.PersonPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.ResponsibilityPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.TransportPolicyEntity
+import com.raidiam.trustframework.mockinsurance.models.generated.*
 import com.raidiam.trustframework.mockinsurance.utils.PermissionGroup
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.exceptions.HttpStatusException
@@ -31,9 +39,61 @@ class ConsentServiceSpec extends CleanupSpecification {
     @Shared
     AccountHolderEntity testAccountHolder
 
+    @Shared
+    CapitalizationTitlePlanEntity testCapitalizationTitlePlan
+
+    @Shared
+    FinancialRiskPolicyEntity testFinancialRiskPolicy
+
+    @Shared
+    HousingPolicyEntity testHousingPolicy
+
+    @Shared
+    ResponsibilityPolicyEntity testResponsibilityPolicy
+
+    @Shared
+    PersonPolicyEntity testPersonPolicy
+
+    @Shared
+    LifePensionContractEntity testLifePensionContract
+
+    @Shared
+    PensionPlanContractEntity testPensionPlanContract
+
+    @Shared
+    FinancialAssistanceContractEntity testFinancialAssistanceContract
+
+    @Shared
+    AcceptanceAndBranchesAbroadPolicyEntity testAcceptanceAndBranchesAbroadPolicy
+
+    @Shared
+    PatrimonialPolicyEntity testPatrimonialPolicy
+
+    @Shared
+    RuralPolicyEntity testRuralPolicy
+
+    @Shared
+    AutoPolicyEntity testAutoPolicy
+
+    @Shared
+    TransportPolicyEntity testTransportPolicy
+
     def setup() {
         if (runSetup) {
             testAccountHolder = accountHolderRepository.save(TestEntityDataFactory.anAccountHolder())
+            testCapitalizationTitlePlan = capitalizationTitlePlanRepository.save(TestEntityDataFactory.aCapitalizationTitlePlan(testAccountHolder.getAccountHolderId()))
+            testFinancialRiskPolicy = financialRiskPolicyRepository.save(TestEntityDataFactory.aFinancialRiskPolicy(testAccountHolder.getAccountHolderId()))
+            testHousingPolicy = housingPolicyRepository.save(TestEntityDataFactory.aHousingPolicy(testAccountHolder.getAccountHolderId()))
+            testResponsibilityPolicy = responsibilityPolicyRepository.save(TestEntityDataFactory.aResponsibilityPolicy(testAccountHolder.getAccountHolderId()))
+            testPersonPolicy = personPolicyRepository.save(TestEntityDataFactory.aPersonPolicy(testAccountHolder.getAccountHolderId()))
+            testLifePensionContract = lifePensionContractRepository.save(TestEntityDataFactory.aLifePensionContract(testAccountHolder.getAccountHolderId()))
+            testPensionPlanContract = pensionPlanContractRepository.save(TestEntityDataFactory.aPensionPlanContract("pension-plan-1", testAccountHolder.getAccountHolderId()))
+            testFinancialAssistanceContract = financialAssistanceContractRepository.save(TestEntityDataFactory.aFinancialAssistanceContract(testAccountHolder.getAccountHolderId()))
+            testAcceptanceAndBranchesAbroadPolicy = acceptanceAndBranchesAbroadPolicyRepository.save(TestEntityDataFactory.anAcceptanceAndBranchesAbroadPolicy(testAccountHolder.getAccountHolderId()))
+            testPatrimonialPolicy = patrimonialPolicyRepository.save(TestEntityDataFactory.aPatrimonialPolicy(testAccountHolder.getAccountHolderId(), "0111"))
+            testRuralPolicy = ruralPolicyRepository.save(TestEntityDataFactory.aRuralPolicy(testAccountHolder.getAccountHolderId()))
+            testAutoPolicy = autoPolicyRepository.save(TestEntityDataFactory.anAutoPolicy(testAccountHolder.getAccountHolderId()))
+            testTransportPolicy = transportPolicyRepository.save(TestEntityDataFactory.aTransportPolicy(testAccountHolder.getAccountHolderId()))
             runSetup = false
         }
     }
@@ -257,15 +317,44 @@ class ConsentServiceSpec extends CleanupSpecification {
         given:
         def entity = TestEntityDataFactory.aConsent(testAccountHolder.getAccountHolderId())
         entity = consentRepository.save(entity)
-        def req = new UpdateConsent().data(new UpdateConsentData().status(EnumConsentStatus.AUTHORISED))
+        def req = new UpdateConsent()
+                .data(new UpdateConsentData()
+                        .status(EnumConsentStatus.AUTHORISED)
+                        .linkedCapitalizationTilePlanIds(List.of(testCapitalizationTitlePlan.getCapitalizationTitlePlanId().toString()))
+                        .linkedFinancialRiskPolicyIds(List.of(testFinancialRiskPolicy.getFinancialRiskPolicyId().toString()))
+                        .linkedHousingPolicyIds(List.of(testHousingPolicy.getHousingPolicyId().toString()))
+                        .linkedLifePensionContractIds(List.of(testLifePensionContract.getLifePensionContractId().toString()))
+                        .linkedPensionPlanContractIds(List.of(testPensionPlanContract.getPensionPlanContractId()))
+                        .linkedFinancialAssistanceContractIds(List.of(testFinancialAssistanceContract.getFinancialAssistanceContractId()))
+                        .linkedAcceptanceAndBranchesAbroadPolicyIds(List.of(testAcceptanceAndBranchesAbroadPolicy.getPolicyId().toString()))
+                        .linkedPatrimonialPolicyIds(List.of(testPatrimonialPolicy.getPolicyId().toString()))
+                        .linkedRuralPolicyIds(List.of(testRuralPolicy.getPolicyId().toString()))
+                        .linkedAutoPolicyIds(List.of(testAutoPolicy.getAutoPolicyId()))
+                        .linkedTransportPolicyIds(List.of(testTransportPolicy.getTransportPolicyId()))
+                )
 
         when:
         entity = consentService.updateConsent(entity.getConsentId(), req)
 
         then:
         noExceptionThrown()
-        entity.consentId != null
-        entity.status == EnumConsentStatus.AUTHORISED.name()
+        entity.getData().getConsentId() != null
+        entity.getData().getStatus() == EnumConsentStatus.AUTHORISED
+    }
+
+    def "We can update a consent with a rejected status"() {
+        given:
+        def entity = TestEntityDataFactory.aConsent(testAccountHolder.getAccountHolderId())
+        entity = consentRepository.save(entity)
+        def req = new UpdateConsent().data(new UpdateConsentData().status(EnumConsentStatus.REJECTED))
+
+        when:
+        entity = consentService.updateConsent(entity.getConsentId(), req)
+
+        then:
+        noExceptionThrown()
+        entity.getData().getConsentId() != null
+        entity.getData().getStatus() == EnumConsentStatus.REJECTED
     }
 
     def "We can fetch a consent"() {
@@ -279,14 +368,14 @@ class ConsentServiceSpec extends CleanupSpecification {
 
         then:
         noExceptionThrown()
-        entity.consentId != null
+        entity.getData().getConsentId() != null
     }
 
     def "A consent awaiting authorization for more than one hour moves to REJECTED"() {
         given:
         def clientId = "random_client_id"
         def entity = TestEntityDataFactory.aConsent(testAccountHolder.getAccountHolderId(), clientId)
-        entity.status = EnumConsentStatus.AWAITING_AUTHORISATION.name()
+        entity.status = EnumConsentStatus.AWAITING_AUTHORISATION
         entity.creationDateTime = Date.from(Instant.now() - Duration.ofDays(1))
         entity = consentRepository.save(entity)
 
@@ -295,15 +384,15 @@ class ConsentServiceSpec extends CleanupSpecification {
 
         then:
         noExceptionThrown()
-        entity.consentId != null
-        entity.status == EnumConsentStatus.REJECTED.name()
+        entity.getData().getConsentId() != null
+        entity.getData().getStatus() == EnumConsentStatus.REJECTED
     }
 
     def "An authorized consent moves to REJECTED if it's expired"() {
         given:
         def clientId = "random_client_id"
         def entity = TestEntityDataFactory.aConsent(testAccountHolder.getAccountHolderId(), clientId)
-        entity.status = EnumConsentStatus.AUTHORISED.name()
+        entity.status = EnumConsentStatus.AUTHORISED
         entity.expirationDateTime = Date.from(Instant.now() - Duration.ofDays(1))
         entity = consentRepository.save(entity)
 
@@ -312,8 +401,8 @@ class ConsentServiceSpec extends CleanupSpecification {
 
         then:
         noExceptionThrown()
-        entity.consentId != null
-        entity.status == EnumConsentStatus.REJECTED.name()
+        entity.getData().getConsentId() != null
+        entity.getData().getStatus() == EnumConsentStatus.REJECTED
     }
 
     def "We can't fetch a consent with an invalid client"() {

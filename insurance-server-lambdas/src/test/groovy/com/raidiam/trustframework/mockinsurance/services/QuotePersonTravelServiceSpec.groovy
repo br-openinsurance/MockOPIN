@@ -2,10 +2,10 @@ package com.raidiam.trustframework.mockinsurance.services
 
 import com.raidiam.trustframework.mockinsurance.CleanupSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
-import com.raidiam.trustframework.mockinsurance.models.generated.PatchQuotePayload
-import com.raidiam.trustframework.mockinsurance.models.generated.PatchQuotePayloadData
+import com.raidiam.trustframework.mockinsurance.models.generated.PatchPayload
+import com.raidiam.trustframework.mockinsurance.models.generated.PatchPayloadData
 import com.raidiam.trustframework.mockinsurance.models.generated.QuoteStatusEnum
-import com.raidiam.trustframework.mockinsurance.models.generated.RevokeQuotePatchPayloadDataAuthor
+import com.raidiam.trustframework.mockinsurance.models.generated.RevokePatchPayloadDataAuthor
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.exceptions.HttpStatusException
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
@@ -76,12 +76,12 @@ class QuotePersonTravelServiceSpec extends CleanupSpecification {
         quote.setStatus(QuoteStatusEnum.ACPT.toString())
         quote = quotePersonTravelRepository.save(quote)
 
-        def req = new PatchQuotePayload()
-                .data(new PatchQuotePayloadData()
-                        .status(PatchQuotePayloadData.StatusEnum.ACKN)
+        def req = new PatchPayload()
+                .data(new PatchPayloadData()
+                        .status(PatchPayloadData.StatusEnum.ACKN)
                         .insurerQuoteId(quote.getQuoteId().toString())
-                        .author(new RevokeQuotePatchPayloadDataAuthor()
-                                .identificationType(RevokeQuotePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
+                        .author(new RevokePatchPayloadDataAuthor()
+                                .identificationType(RevokePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
                                 .identificationNumber(quote.getPersonCpf())))
 
         when:
@@ -101,12 +101,12 @@ class QuotePersonTravelServiceSpec extends CleanupSpecification {
         quote.setStatus(QuoteStatusEnum.EVAL.toString())
         quote = quotePersonTravelService.createQuote(quote)
 
-        def req = new PatchQuotePayload()
-                .data(new PatchQuotePayloadData()
-                        .status(PatchQuotePayloadData.StatusEnum.ACKN)
+        def req = new PatchPayload()
+                .data(new PatchPayloadData()
+                        .status(PatchPayloadData.StatusEnum.ACKN)
                         .insurerQuoteId(quote.getQuoteId().toString())
-                        .author(new RevokeQuotePatchPayloadDataAuthor()
-                                .identificationType(RevokeQuotePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
+                        .author(new RevokePatchPayloadDataAuthor()
+                                .identificationType(RevokePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
                                 .identificationNumber(quote.getPersonCpf())))
 
         when:
@@ -125,11 +125,11 @@ class QuotePersonTravelServiceSpec extends CleanupSpecification {
         quote.setStatus(QuoteStatusEnum.EVAL.toString())
         quote = quotePersonTravelService.createQuote(quote)
 
-        def req = new PatchQuotePayload()
-                .data(new PatchQuotePayloadData()
-                        .status(PatchQuotePayloadData.StatusEnum.CANC)
-                        .author(new RevokeQuotePatchPayloadDataAuthor()
-                                .identificationType(RevokeQuotePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
+        def req = new PatchPayload()
+                .data(new PatchPayloadData()
+                        .status(PatchPayloadData.StatusEnum.CANC)
+                        .author(new RevokePatchPayloadDataAuthor()
+                                .identificationType(RevokePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
                                 .identificationNumber(quote.getPersonCpf())))
 
         when:

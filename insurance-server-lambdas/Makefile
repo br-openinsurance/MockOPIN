@@ -116,7 +116,7 @@ cs-config:
 	      }, \
 		  "resource": { \
 	        "brazilOrganizationId": $$orgId, \
-	        "consentUrl": "https://matls-api.local/open-insurance/consents/v2/consents", \
+	        "consentUrl": "https://api.local/open-insurance/consents/v2/consents", \
             "brazilCpf": "76109277673" \
 	      }, \
 		  "directory": { \

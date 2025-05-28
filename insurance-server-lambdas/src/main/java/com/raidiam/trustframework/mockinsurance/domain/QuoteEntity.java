@@ -52,18 +52,18 @@ public abstract class QuoteEntity extends BaseEntity {
         }
     }
 
-    public ResponseQuotePatch toPatchResponse(String redirectLink) {
-        var patchData = new ResponseQuotePatchData();
-        patchData.setStatus(ResponseQuotePatchData.StatusEnum.fromValue(this.getStatus()));
+    public ResponsePatch toPatchResponse(String redirectLink) {
+        var patchData = new ResponsePatchData();
+        patchData.setStatus(ResponsePatchData.StatusEnum.fromValue(this.getStatus()));
 
         if (QuoteStatusEnum.ACKN.toString().equals(this.getStatus())) {
             patchData.setInsurerQuoteId(this.getQuoteId().toString());
             patchData.setProtocolNumber("12345678");
             patchData.setProtocolDateTime(InsuranceLambdaUtils.dateToOffsetDate(this.getUpdatedAt()));
-            patchData.setLinks(new ResponseQuotePatchDataLinks().redirect(redirectLink));
+            patchData.setLinks(new ResponsePatchDataLinks().redirect(redirectLink));
         }
 
-        var resp = new ResponseQuotePatch();
+        var resp = new ResponsePatch();
         resp.setData(patchData);
         return resp;
     }

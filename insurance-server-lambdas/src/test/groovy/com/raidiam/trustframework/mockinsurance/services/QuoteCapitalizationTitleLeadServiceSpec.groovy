@@ -5,9 +5,9 @@ import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
 import com.raidiam.trustframework.mockinsurance.domain.QuoteCapitalizationTitleLeadEntity
 import com.raidiam.trustframework.mockinsurance.models.generated.QuoteStatus
 import com.raidiam.trustframework.mockinsurance.models.generated.QuoteStatusEnum
-import com.raidiam.trustframework.mockinsurance.models.generated.RevokeQuotePatchPayload
-import com.raidiam.trustframework.mockinsurance.models.generated.RevokeQuotePatchPayloadData
-import com.raidiam.trustframework.mockinsurance.models.generated.RevokeQuotePatchPayloadDataAuthor
+import com.raidiam.trustframework.mockinsurance.models.generated.RevokePatchPayload
+import com.raidiam.trustframework.mockinsurance.models.generated.RevokePatchPayloadData
+import com.raidiam.trustframework.mockinsurance.models.generated.RevokePatchPayloadDataAuthor
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
 import spock.lang.Stepwise
@@ -40,11 +40,11 @@ public class QuoteCapitalizationTitleLeadServiceSpec extends CleanupSpecificatio
         def createdCapitalizationTitleLead = TestEntityDataFactory.aQuoteCapitalizationTitleLead(consentId)
         createdCapitalizationTitleLead = quoteCapitalizationTitleLeadService.createQuote(createdCapitalizationTitleLead)
 
-        def req = new RevokeQuotePatchPayload()
-                .data(new RevokeQuotePatchPayloadData()
-                        .author(new RevokeQuotePatchPayloadDataAuthor()
+        def req = new RevokePatchPayload()
+                .data(new RevokePatchPayloadData()
+                        .author(new RevokePatchPayloadDataAuthor()
                                 .identificationNumber("123456789")
-                                .identificationType(RevokeQuotePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
+                                .identificationType(RevokePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
                 ))
 
         when:
