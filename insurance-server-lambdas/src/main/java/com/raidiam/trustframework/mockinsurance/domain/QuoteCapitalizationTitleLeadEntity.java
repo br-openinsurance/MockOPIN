@@ -4,9 +4,9 @@ import org.hibernate.envers.Audited;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.QuoteRequestCapitalizationTitleLead;
 import com.raidiam.trustframework.mockinsurance.models.generated.QuoteStatus;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuoteLead;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokeQuotePatch;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokeQuotePatchData;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuote;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokePatch;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokePatchData;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 
 import jakarta.persistence.Entity;
@@ -37,17 +37,17 @@ public class QuoteCapitalizationTitleLeadEntity extends QuoteEntity {
         return entity;
     }
 
-    public ResponseQuoteLead toResponse() {
-        return new ResponseQuoteLead()
+    public ResponseQuote toResponse() {
+        return new ResponseQuote()
                 .data(new QuoteStatus()
                         .status(QuoteStatus.StatusEnum.fromValue(this.getStatus()))
                         .statusUpdateDateTime(InsuranceLambdaUtils.dateToOffsetDate(this.getUpdatedAt()))
                 );
     }
 
-    public ResponseRevokeQuotePatch toRevokePatchResponse() {
-        return new ResponseRevokeQuotePatch().data(new ResponseRevokeQuotePatchData()
-                        .status(ResponseRevokeQuotePatchData.StatusEnum.CANC)
+    public ResponseRevokePatch toRevokePatchResponse() {
+        return new ResponseRevokePatch().data(new ResponseRevokePatchData()
+                        .status(ResponseRevokePatchData.StatusEnum.CANC)
         );
     }
 }

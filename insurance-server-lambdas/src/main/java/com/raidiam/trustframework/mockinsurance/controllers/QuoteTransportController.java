@@ -34,7 +34,7 @@ public class QuoteTransportController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseQuoteLead createLeadQuoteV1(
+    public ResponseQuote createLeadQuoteV1(
             @Body QuoteRequestTransportLead body,
             @NotNull HttpRequest<?> request) {
         String clientId = (String) request.getAttribute("clientId").orElse("");
@@ -51,7 +51,7 @@ public class QuoteTransportController extends BaseInsuranceController {
     @Secured({"QUOTE_TRANSPORT_LEAD_MANAGE"})
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseRevokeQuotePatch patchLeadQuoteV1(@PathVariable("consentId") String consentId, @Body RevokeQuotePatchPayload body, HttpRequest<?> request) {
+    public ResponseRevokePatch patchLeadQuoteV1(@PathVariable("consentId") String consentId, @Body RevokePatchPayload body, HttpRequest<?> request) {
         String clientId = (String) request.getAttribute("clientId").orElse("");
         LOG.info("Patching quote transport for consent id");
         return quoteTransportLeadService.patchQuote(body, consentId, clientId).toRevokePatchResponse();

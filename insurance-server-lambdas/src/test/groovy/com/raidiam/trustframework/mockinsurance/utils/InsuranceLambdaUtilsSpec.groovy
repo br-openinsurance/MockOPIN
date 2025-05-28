@@ -400,7 +400,7 @@ class InsuranceLambdaUtilsSpec extends CleanupSpecification {
 
     def "We can decorate responses correctly"() {
         given:
-        ResponseQuoteLead quote = TestEntityDataFactory.aQuotePatrimonialLead("dshsdfhsdfh").toResponse()
+        ResponseQuote quote = TestEntityDataFactory.aQuotePatrimonialLead("dshsdfhsdfh").toResponse()
         String self = "https://www.example.com/examplepage"
 
         when:

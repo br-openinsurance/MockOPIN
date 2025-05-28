@@ -36,11 +36,11 @@ class QuoteTransportLeadServiceSpec extends CleanupSpecification {
         def quoteTransportLead = TestEntityDataFactory.aQuoteTransportLead(consentId)
         def createdQuoteTransportLead = quoteTransportLeadService.createQuote(quoteTransportLead)
 
-        def req = new RevokeQuotePatchPayload()
-                .data(new RevokeQuotePatchPayloadData()
-                        .author(new RevokeQuotePatchPayloadDataAuthor()
+        def req = new RevokePatchPayload()
+                .data(new RevokePatchPayloadData()
+                        .author(new RevokePatchPayloadDataAuthor()
                                 .identificationNumber("123456789")
-                                .identificationType(RevokeQuotePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
+                                .identificationType(RevokePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
                 ))
 
         when:

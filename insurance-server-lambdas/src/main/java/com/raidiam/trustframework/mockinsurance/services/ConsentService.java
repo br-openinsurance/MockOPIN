@@ -1,7 +1,7 @@
 package com.raidiam.trustframework.mockinsurance.services;
 
-import com.raidiam.trustframework.mockinsurance.domain.AccountHolderEntity;
-import com.raidiam.trustframework.mockinsurance.domain.ConsentEntity;
+
+import com.raidiam.trustframework.mockinsurance.domain.*;
 import com.raidiam.trustframework.mockinsurance.models.generated.*;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 import com.raidiam.trustframework.mockinsurance.utils.PermissionGroup;
@@ -13,8 +13,12 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Singleton
 @Transactional
@@ -35,16 +39,208 @@ public class ConsentService extends BaseInsuranceService {
         return this.consentRepository.save(entity);
     }
 
-    public ConsentEntity updateConsent(String consentId, UpdateConsent req) {
-        var entity = this.getFullConsent(consentId);
-        return this.consentRepository.update(entity.updateFromRequest(req));
+    public ResponseConsent updateConsent(String consentId, UpdateConsent req) {
+        var consent = this.getConsentEntity(consentId);
+        if (req.getData().getStatus() != null) {
+            consent.setStatus(req.getData().getStatus().toString());
+            if (EnumConsentStatus.REJECTED.equals(req.getData().getStatus())) {
+                consent.setRejectionCode(EnumReasonCode.CUSTOMER_MANUALLY_REJECTED.name());
+                consent.setRejectedBy(EnumRejectedBy.USER.name());
+            }
+        }
+
+        // add resources to consent here as they are implemented
+        if (req.getData().getLinkedCapitalizationTilePlanIds() != null) {
+            addCapitalizationTitlePlansToConsent(consent, req.getData().getLinkedCapitalizationTilePlanIds());
+        }
+
+        if (req.getData().getLinkedFinancialRiskPolicyIds() != null) {
+            addFinancialRiskPoliciesToConsent(consent, req.getData().getLinkedFinancialRiskPolicyIds());
+        }
+
+        if (req.getData().getLinkedHousingPolicyIds() != null) {
+            addHousingPoliciesToConsent(consent, req.getData().getLinkedHousingPolicyIds());
+        }
+
+        if (req.getData().getLinkedResponsibilityPolicyIds() != null) {
+            addResponsibilityPoliciesToConsent(consent, req.getData().getLinkedResponsibilityPolicyIds());
+        }
+
+        if (req.getData().getLinkedPersonPolicyIds() != null) {
+            addPersonPoliciesToConsent(consent, req.getData().getLinkedPersonPolicyIds());
+        }
+
+        if (req.getData().getLinkedLifePensionContractIds() != null) {
+            addLifePensionContractsToConsent(consent, req.getData().getLinkedLifePensionContractIds());
+        }
+
+        if (req.getData().getLinkedPensionPlanContractIds() != null) {
+            addPensionPlanContractsToConsent(consent, req.getData().getLinkedPensionPlanContractIds());
+        }
+
+        if (req.getData().getLinkedAcceptanceAndBranchesAbroadPolicyIds() != null) {
+            addAcceptanceAndBranchesAbroadPoliciesToConsent(consent, req.getData().getLinkedAcceptanceAndBranchesAbroadPolicyIds());
+        }
+        
+        if (req.getData().getLinkedPatrimonialPolicyIds() != null) {
+            addPatrimonialPoliciesToConsent(consent, req.getData().getLinkedPatrimonialPolicyIds());
+        }
+        
+        if (req.getData().getLinkedRuralPolicyIds() != null) {
+            addRuralPoliciesToConsent(consent, req.getData().getLinkedRuralPolicyIds());
+        }
+
+        if (req.getData().getLinkedFinancialAssistanceContractIds() != null) {
+            addFinancialAssistanceContractsToConsent(consent, req.getData().getLinkedFinancialAssistanceContractIds());
+        }
+
+        if (req.getData().getLinkedAutoPolicyIds() != null) {
+            addAutoPoliciesToConsent(consent, req.getData().getLinkedAutoPolicyIds());
+        }
+
+        if (req.getData().getLinkedTransportPolicyIds() != null) {
+            addTransportPoliciesToConsent(consent, req.getData().getLinkedTransportPolicyIds());
+        }
+
+        consent.setStatusUpdateDateTime(new Date());
+        consentRepository.update(consent);
+
+        return consentRepository.findById(consent.getReferenceId())
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not look up consent that has just been updated")).toFullResponse();
     }
 
-    public ConsentEntity getFullConsent(String consentId) {
-        return getConsent(consentId, OP_CLIENT_ID);
+    private void addCapitalizationTitlePlansToConsent(ConsentEntity consent, List<String> requestedPlans) {
+        addObjectToConsent(consent, requestedPlans, "Capitalization Title Plan",
+                capitalizationTitleRepository::findByCapitalizationTitlePlanId,
+                CapitalizationTitlePlanEntity::getAccountHolder,
+                c -> consentCapitalizationTitlePlanRepository.save(new ConsentCapitalizationTitlePlanEntity(consent, c)));
     }
 
-    public ConsentEntity getConsent(String consentId, String clientId) {
+    private void addFinancialRiskPoliciesToConsent(ConsentEntity consent, List<String> requestedPolicies) {
+        addObjectToConsent(consent, requestedPolicies, "Financial Risk Policy",
+                financialRiskPolicyRepository::findByFinancialRiskPolicyId,
+                FinancialRiskPolicyEntity::getAccountHolder,
+                c -> consentFinancialRiskPolicyRepository.save(new ConsentFinancialRiskPolicyEntity(consent, c)));
+    }
+
+    private void addHousingPoliciesToConsent(ConsentEntity consent, List<String> requestedPolicies) {
+        addObjectToConsent(consent, requestedPolicies, "Housing Policy",
+                housingPolicyRepository::findByHousingPolicyId,
+                HousingPolicyEntity::getAccountHolder,
+                c -> consentHousingPolicyRepository.save(new ConsentHousingPolicyEntity(consent, c)));
+    }
+
+    private void addResponsibilityPoliciesToConsent(ConsentEntity consent, List<String> requestedPolicies) {
+        addObjectToConsent(consent, requestedPolicies, "Responsibility Policy",
+                responsibilityPolicyRepository::findByResponsibilityPolicyId,
+                ResponsibilityPolicyEntity::getAccountHolder,
+                c -> consentResponsibilityPolicyRepository.save(new ConsentResponsibilityPolicyEntity(consent, c)));
+    }
+
+    private void addPersonPoliciesToConsent(ConsentEntity consent, List<String> requestedPolicies) {
+        addObjectToConsent(consent, requestedPolicies, "Person Policy",
+                personPolicyRepository::findByPersonPolicyId,
+                PersonPolicyEntity::getAccountHolder,
+                c -> consentPersonPolicyRepository.save(new ConsentPersonPolicyEntity(consent, c)));
+    }
+
+    private void addLifePensionContractsToConsent(ConsentEntity consent, List<String> requestedPlans) {
+        addObjectToConsent(consent, requestedPlans, "Life Pension Contract",
+                lifePensionContractRepository::findByLifePensionContractId,
+                LifePensionContractEntity::getAccountHolder,
+                c -> consentLifePensionContractRepository.save(new ConsentLifePensionContractEntity(consent, c)));
+    }
+
+    private void addPensionPlanContractsToConsent(ConsentEntity consent, List<String> requestedPlans) {
+        addObjectToConsentIdAsString(consent, requestedPlans, "Pension Pension Contract",
+                pensionPlanContractRepository::findByPensionPlanContractId,
+                PensionPlanContractEntity::getAccountHolder,
+                c -> consentPensionPlanContractRepository.save(new ConsentPensionPlanContractEntity(consent, c)));
+    }
+  
+    private void addAcceptanceAndBranchesAbroadPoliciesToConsent(ConsentEntity consent, List<String> requestedPolicies) {
+        addObjectToConsent(consent, requestedPolicies, "Acceptance And Branches Abroad Policy",
+                acceptanceAndBranchesAbroadPolicyRepository::findByPolicyId,
+                AcceptanceAndBranchesAbroadPolicyEntity::getAccountHolder,
+                c -> consentAcceptanceAndBranchesAbroadPolicyRepository.save(new ConsentAcceptanceAndBranchesAbroadPolicyEntity(consent, c)));
+    }
+  
+    private void addPatrimonialPoliciesToConsent(ConsentEntity consent, List<String> requestedPolicies) {
+        addObjectToConsent(consent, requestedPolicies, "Patrimonial Policy",
+                patrimonialPolicyRepository::findByPolicyId,
+                PatrimonialPolicyEntity::getAccountHolder,
+                c -> consentPatrimonialPolicyRepository.save(new ConsentPatrimonialPolicyEntity(consent, c)));
+    }
+  
+    private void addRuralPoliciesToConsent(ConsentEntity consent, List<String> requestedPolicies) {
+        addObjectToConsent(consent, requestedPolicies, "Rural Policy",
+                ruralPolicyRepository::findByPolicyId,
+                RuralPolicyEntity::getAccountHolder,
+                c -> consentRuralPolicyRepository.save(new ConsentRuralPolicyEntity(consent, c)));
+    }
+
+    private void addFinancialAssistanceContractsToConsent(ConsentEntity consent, List<String> requestedContracts) {
+        addObjectToConsentIdAsString(consent, requestedContracts, "Financial Assistance Contract",
+                financialAssistanceContractRepository::findByFinancialAssistanceContractId,
+                FinancialAssistanceContractEntity::getAccountHolder,
+                c -> consentFinancialAssistanceContractRepository.save(new ConsentFinancialAssistanceContractEntity(consent, c)));
+    }
+
+    private void addAutoPoliciesToConsent(ConsentEntity consent, List<String> requestedContracts) {
+        addObjectToConsentIdAsString(consent, requestedContracts, "Auto Policy",
+                autoPolicyRepository::findByAutoPolicyId,
+                AutoPolicyEntity::getAccountHolder,
+                c -> consentAutoPolicyRepository.save(new ConsentAutoPolicyEntity(consent, c)));
+    }
+
+    private void addTransportPoliciesToConsent(ConsentEntity consent, List<String> requestedContracts) {
+        addObjectToConsentIdAsString(consent, requestedContracts, "Transport Policy",
+                transportPolicyRepository::findByTransportPolicyId,
+                TransportPolicyEntity::getAccountHolder,
+                c -> consentTransportPolicyRepository.save(new ConsentTransportPolicyEntity(consent, c)));
+    }
+
+    private <T> void addObjectToConsent(ConsentEntity consent, List<String> requestAccounts, String logType,
+                                        Function<UUID, Optional<T>> entityFinder,
+                                        Function<T, AccountHolderEntity> getAccountHolder,
+                                        Consumer<T> consentBinder) {
+        for (var accountId : requestAccounts) {
+            var entity = entityFinder.apply(UUID.fromString(accountId))
+                    .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, String.format("%s could not be found, cannot update consent", logType)));
+            if (!getAccountHolder.apply(entity).equals(consent.getAccountHolder())) {
+                throw new HttpStatusException(HttpStatus.FORBIDDEN, String.format("%s does not belong to this accountHolder", logType));
+            }
+            consentBinder.accept(entity);
+        }
+    }
+
+    private <T> void addObjectToConsentIdAsString(ConsentEntity consent, List<String> requestAccounts, String logType,
+                                        Function<String, Optional<T>> entityFinder,
+                                        Function<T, AccountHolderEntity> getAccountHolder,
+                                        Consumer<T> consentBinder) {
+        for (var accountId : requestAccounts) {
+            var entity = entityFinder.apply(accountId)
+                    .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, String.format("%s could not be found, cannot update consent", logType)));
+            if (!getAccountHolder.apply(entity).equals(consent.getAccountHolder())) {
+                throw new HttpStatusException(HttpStatus.FORBIDDEN, String.format("%s does not belong to this accountHolder", logType));
+            }
+            consentBinder.accept(entity);
+        }
+    }
+
+    public ResponseConsent getFullConsent(String consentId) {
+        return getConsentEntity(consentId, OP_CLIENT_ID).toFullResponse();
+    }
+
+    public ResponseConsent getConsent(String consentId, String clientId) {
+        return getConsentEntity(consentId, clientId).toResponse();
+    }
+
+    private ConsentEntity getConsentEntity(String consentId) {
+        return getConsentEntity(consentId, OP_CLIENT_ID);
+    }
+
+    public ConsentEntity getConsentEntity(String consentId, String clientId) {
         ConsentEntity entity = this.consentRepository.findByConsentId(consentId)
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Consent Id " + consentId + " not found"));
 
@@ -75,7 +271,7 @@ public class ConsentService extends BaseInsuranceService {
     }
 
     public void deleteConsent(String consentId, String clientId) {
-        ConsentEntity entity = this.getConsent(consentId, clientId);
+        ConsentEntity entity = this.getConsentEntity(consentId, clientId);
         if (EnumConsentStatus.REJECTED.name().equals(entity.getStatus())) {
             return;
         }

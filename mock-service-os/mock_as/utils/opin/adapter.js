@@ -49,7 +49,297 @@ export class InsurerAdapter {
 
   async getUserInformation(userId, consentRecord) {
     var result = [];
+
+    var capitalizationTilePermissions = [
+      'CAPITALIZATION_TITLE_READ',
+      'CAPITALIZATION_TITLE_PLANINFO_READ',
+      'CAPITALIZATION_TITLE_EVENTS_READ',
+      'CAPITALIZATION_TITLE_SETTLEMENTS_READ',
+    ];
+    var hasPermission = consentRecord.permissions.some((i) => capitalizationTilePermissions.includes(i));
+    if (hasPermission) {
+      const userAccounts = await this.getUserCapitalizationTitlePlansInformation(userId);
+      result.push({ scope: 'capitalization-title', accounts: userAccounts.data.data });
+    }
+
+    var financialRiskPermissions = [
+      'DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_READ',
+      'DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_POLICYINFO_READ',
+      'DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_CLAIM_READ',
+      'DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_PREMIUM_READ',
+    ];
+    hasPermission = consentRecord.permissions.some((i) => financialRiskPermissions.includes(i));
+    if (hasPermission) {
+      const userAccounts = await this.getUserFinancialRiskPoliciesInformation(userId);
+      result.push({ scope: 'financial-risk', accounts: userAccounts.data.data });
+    }
+
+    var housingPermissions = [
+      'DAMAGES_AND_PEOPLE_HOUSING_READ',
+      'DAMAGES_AND_PEOPLE_HOUSING_POLICYINFO_READ',
+      'DAMAGES_AND_PEOPLE_HOUSING_CLAIM_READ',
+      'DAMAGES_AND_PEOPLE_HOUSING_PREMIUM_READ',
+    ];
+    hasPermission = consentRecord.permissions.some((i) => housingPermissions.includes(i));
+    if (hasPermission) {
+      const userAccounts = await this.getUserHousingPoliciesInformation(userId);
+      result.push({ scope: 'housing', accounts: userAccounts.data.data });
+    }
+
+    var responsibilityPermissions = [
+      'DAMAGES_AND_PEOPLE_RESPONSIBILITY_READ',
+      'DAMAGES_AND_PEOPLE_RESPONSIBILITY_POLICYINFO_READ',
+      'DAMAGES_AND_PEOPLE_RESPONSIBILITY_CLAIM_READ',
+      'DAMAGES_AND_PEOPLE_RESPONSIBILITY_PREMIUM_READ',
+    ];
+    hasPermission = consentRecord.permissions.some((i) => responsibilityPermissions.includes(i));
+    if (hasPermission) {
+      const userAccounts = await this.getUserResponsibilityPoliciesInformation(userId);
+      result.push({ scope: 'responsibility', accounts: userAccounts.data.data });
+    }
+
+    var personPermissions = [
+      'DAMAGES_AND_PEOPLE_PERSON_READ',
+      'DAMAGES_AND_PEOPLE_PERSON_POLICYINFO_READ',
+      'DAMAGES_AND_PEOPLE_PERSON_CLAIM_READ',
+      'DAMAGES_AND_PEOPLE_PERSON_PREMIUM_READ',
+    ];
+    hasPermission = consentRecord.permissions.some((i) => personPermissions.includes(i));
+    if (hasPermission) {
+      const userAccounts = await this.getUserPersonPoliciesInformation(userId);
+      result.push({ scope: 'person', accounts: userAccounts.data.data });
+    }
+
+    var lifePensionPermissions = [
+      'LIFE_PENSION_READ',
+      'LIFE_PENSION_CONTRACTINFO_READ',
+      'LIFE_PENSION_MOVEMENTS_READ',
+      'LIFE_PENSION_PORTABILITIES_READ',
+      'LIFE_PENSION_WITHDRAWALS_READ',
+      'LIFE_PENSION_CLAIM',
+    ];
+    hasPermission = consentRecord.permissions.some((i) => lifePensionPermissions.includes(i));
+    if (hasPermission) {
+      const userAccounts = await this.getUserLifePensionContractsInformation(userId);
+      result.push({ scope: 'life-pension', accounts: userAccounts.data.data });
+    }
+
+    var pensionPlanPermissions = [
+      'PENSION_PLAN_READ',
+      'PENSION_PLAN_CONTRACTINFO_READ',
+      'PENSION_PLAN_MOVEMENTS_READ',
+      'PENSION_PLAN_PORTABILITIES_READ',
+      'PENSION_PLAN_WITHDRAWALS_READ',
+      'PENSION_PLAN_CLAIM',
+    ];
+    hasPermission = consentRecord.permissions.some((i) => pensionPlanPermissions.includes(i));
+    if (hasPermission) {
+      const userAccounts = await this.getUserPensionPlanContractsInformation(userId);
+      result.push({ scope: 'pension-plan', accounts: userAccounts.data.data });
+    }
+
+    var acceptanceAndBranchesAbroadPermissions = [
+      'DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_READ',
+      'DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_POLICYINFO_READ',
+      'DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_PREMIUM_READ',
+      'DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_CLAIM_READ',
+    ];
+    hasPermission = consentRecord.permissions.some((i) => acceptanceAndBranchesAbroadPermissions.includes(i));
+    if (hasPermission) {
+      const userAccounts = await this.getUserAcceptanceAndBranchesAbroadPoliciesInformation(userId);
+      result.push({ scope: 'insurance-acceptance-and-branches-abroad', accounts: userAccounts.data.data });
+    }
+
+    var financialAssistancePermissions = [
+      'FINANCIAL_ASSISTANCE_READ',
+      'FINANCIAL_ASSISTANCE_CONTRACTINFO_READ',
+      'FINANCIAL_ASSISTANCE_MOVEMENTS_READ',
+    ];
+    hasPermission = consentRecord.permissions.some((i) => financialAssistancePermissions.includes(i));
+    if (hasPermission) {
+      const userAccounts = await this.getUserFinancialAssistanceContractsInformation(userId);
+      result.push({ scope: 'financial-assistance', accounts: userAccounts.data.data });
+    }
+
+    var patrimonialPermissions = [
+      'DAMAGES_AND_PEOPLE_PATRIMONIAL_READ',
+      'DAMAGES_AND_PEOPLE_PATRIMONIAL_POLICYINFO_READ',
+      'DAMAGES_AND_PEOPLE_PATRIMONIAL_PREMIUM_READ',
+      'DAMAGES_AND_PEOPLE_PATRIMONIAL_CLAIM_READ',
+    ];
+    hasPermission = consentRecord.permissions.some((i) => patrimonialPermissions.includes(i));
+    if (hasPermission) {
+      const userAccounts = await this.getUserPatrimonialPoliciesInformation(userId);
+      result.push({ scope: 'patrimonial', accounts: userAccounts.data.data });
+    }
+
+    var ruralPermissions = [
+      'DAMAGES_AND_PEOPLE_RURAL_READ',
+      'DAMAGES_AND_PEOPLE_RURAL_POLICYINFO_READ',
+      'DAMAGES_AND_PEOPLE_RURAL_PREMIUM_READ',
+      'DAMAGES_AND_PEOPLE_RURAL_CLAIM_READ',
+    ];
+    hasPermission = consentRecord.permissions.some((i) => ruralPermissions.includes(i));
+    if (hasPermission) {
+      const userAccounts = await this.getUserRuralPoliciesInformation(userId);
+      result.push({ scope: 'rural', accounts: userAccounts.data.data });
+    }
+
+    var autoPermissions = [
+      'DAMAGES_AND_PEOPLE_AUTO_READ',
+      'DAMAGES_AND_PEOPLE_AUTO_POLICYINFO_READ',
+      'DAMAGES_AND_PEOPLE_AUTO_PREMIUM_READ',
+      'DAMAGES_AND_PEOPLE_AUTO_CLAIM_READ',
+    ];
+    hasPermission = consentRecord.permissions.some((i) => autoPermissions.includes(i));
+    if (hasPermission) {
+      const userAccounts = await this.getUserAutoPoliciesInformation(userId);
+      result.push({ scope: 'auto', accounts: userAccounts.data.data });
+    }
+
+    var transportPermissions = [
+      'DAMAGES_AND_PEOPLE_TRANSPORT_READ',
+      'DAMAGES_AND_PEOPLE_TRANSPORT_POLICYINFO_READ',
+      'DAMAGES_AND_PEOPLE_TRANSPORT_PREMIUM_READ',
+      'DAMAGES_AND_PEOPLE_TRANSPORT_CLAIM_READ',
+    ];
+    hasPermission = consentRecord.permissions.some((i) => transportPermissions.includes(i));
+    if (hasPermission) {
+      const userAccounts = await this.getUserTransportPoliciesInformation(userId);
+      result.push({ scope: 'transport', accounts: userAccounts.data.data });
+    }
+
     return result;
+  }
+
+  async getUserCapitalizationTitlePlansInformation(userId) {
+    const config = await this.getRequestConfig('op:admin');
+    try {
+      return await this.httpClient.get(`/user/${userId}/capitalization-title-plans`, config);
+    } catch (error) {
+      log(`error getting the user capitalization title plans ${userId} - ${error}`);
+      throw new errors.InvalidGrant(`user capitalization title plans ${userId} not found`);
+    }
+  }
+
+  async getUserFinancialRiskPoliciesInformation(userId) {
+    const config = await this.getRequestConfig('op:admin');
+    try {
+      return await this.httpClient.get(`/user/${userId}/financial-risk-policies`, config);
+    } catch (error) {
+      log(`error getting the user financial risk policies ${userId} - ${error}`);
+      throw new errors.InvalidGrant(`user financial risk policies ${userId} not found`);
+    }
+  }
+
+  async getUserHousingPoliciesInformation(userId) {
+    const config = await this.getRequestConfig('op:admin');
+    try {
+      return await this.httpClient.get(`/user/${userId}/housing-policies`, config);
+    } catch (error) {
+      log(`error getting the user housing policies ${userId} - ${error}`);
+      throw new errors.InvalidGrant(`user housing policies ${userId} not found`);
+    }
+  }
+
+  async getUserResponsibilityPoliciesInformation(userId) {
+    const config = await this.getRequestConfig('op:admin');
+    try {
+      return await this.httpClient.get(`/user/${userId}/responsibility-policies`, config);
+    } catch (error) {
+      log(`error getting the user responsibility policies ${userId} - ${error}`);
+      throw new errors.InvalidGrant(`user responsibility policies ${userId} not found`);
+    }
+  }
+
+  async getUserPersonPoliciesInformation(userId) {
+    const config = await this.getRequestConfig('op:admin');
+    try {
+      return await this.httpClient.get(`/user/${userId}/person-policies`, config);
+    } catch (error) {
+      log(`error getting the user person policies ${userId} - ${error}`);
+      throw new errors.InvalidGrant(`user person policies ${userId} not found`);
+    }
+  }
+
+  async getUserLifePensionContractsInformation(userId) {
+    const config = await this.getRequestConfig('op:admin');
+    try {
+      return await this.httpClient.get(`/user/${userId}/life-pension-contracts`, config);
+    } catch (error) {
+      log(`error getting the user life-pension-contracts ${userId} - ${error}`);
+      throw new errors.InvalidGrant(`user life-pension-contracts ${userId} not found`);
+    }
+  }
+
+  async getUserPensionPlanContractsInformation(userId) {
+    const config = await this.getRequestConfig('op:admin');
+    try {
+      return await this.httpClient.get(`/user/${userId}/pension-plan-contracts`, config);
+    } catch (error) {
+      log(`error getting the user pension-plan-contracts ${userId} - ${error}`);
+      throw new errors.InvalidGrant(`user pension-plan-contracts ${userId} not found`);
+    }
+  }
+
+  async getUserAcceptanceAndBranchesAbroadPoliciesInformation(userId) {
+    const config = await this.getRequestConfig('op:admin');
+    try {
+      return await this.httpClient.get(`/user/${userId}/acceptance-and-branches-abroad-policies`, config);
+    } catch (error) {
+      log(`error getting the user acceptance-and-branches-abroad-policies ${userId} - ${error}`);
+      throw new errors.InvalidGrant(`user acceptance-and-branches-abroad-policies ${userId} not found`);
+    }
+  }
+
+  async getUserFinancialAssistanceContractsInformation(userId) {
+    const config = await this.getRequestConfig('op:admin');
+    try {
+      return await this.httpClient.get(`/user/${userId}/financial-assistance-contracts`, config);
+    } catch (error) {
+      log(`error getting the user financial-assistance-contracts ${userId} - ${error}`);
+      throw new errors.InvalidGrant(`user financial-assistance-contracts ${userId} not found`);
+    }
+  }
+
+  async getUserPatrimonialPoliciesInformation(userId) {
+    const config = await this.getRequestConfig('op:admin');
+    try {
+      return await this.httpClient.get(`/user/${userId}/patrimonial-policies`, config);
+    } catch (error) {
+      log(`error getting the user patrimonial policies ${userId} - ${error}`);
+      throw new errors.InvalidGrant(`user patrimonial policies ${userId} not found`);
+    }
+  }
+
+  async getUserRuralPoliciesInformation(userId) {
+    const config = await this.getRequestConfig('op:admin');
+    try {
+      return await this.httpClient.get(`/user/${userId}/rural-policies`, config);
+    } catch (error) {
+      log(`error getting the user rural policies ${userId} - ${error}`);
+      throw new errors.InvalidGrant(`user rural policies ${userId} not found`);
+    }
+  }
+
+  async getUserAutoPoliciesInformation(userId) {
+    const config = await this.getRequestConfig('op:admin');
+    try {
+      return await this.httpClient.get(`/user/${userId}/auto-policies`, config);
+    } catch (error) {
+      log(`error getting the user auto policies ${userId} - ${error}`);
+      throw new errors.InvalidGrant(`user auto policies ${userId} not found`);
+    }
+  }
+
+  async getUserTransportPoliciesInformation(userId) {
+    const config = await this.getRequestConfig('op:admin');
+    try {
+      return await this.httpClient.get(`/user/${userId}/transport-policies`, config);
+    } catch (error) {
+      log(`error getting the user transport policies ${userId} - ${error}`);
+      throw new errors.InvalidGrant(`user auto policies ${userId} not found`);
+    }
   }
 
   async updateWebhook(clientId, webhookUri) {

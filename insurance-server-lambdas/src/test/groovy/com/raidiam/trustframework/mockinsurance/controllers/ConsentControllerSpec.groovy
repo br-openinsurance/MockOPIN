@@ -182,7 +182,7 @@ class ConsentControllerSpec extends Specification {
         def accountHolderEntity = TestEntityDataFactory.anAccountHolder("random_cpf", "CPF")
         def entity = TestEntityDataFactory.aConsent(accountHolderEntity.accountHolderId, "random_client_id")
         entity.accountHolder = accountHolderEntity
-        consentService.updateConsent(_ as String, _ as UpdateConsent) >> entity
+        consentService.updateConsent(_ as String, _ as UpdateConsent) >> entity.toResponse()
         def req = new UpdateConsent()
 
         String json = mapper.writeValueAsString(req)
@@ -205,10 +205,31 @@ class ConsentControllerSpec extends Specification {
     def "We can fetch a consent" () {
         given:
         def entity = TestEntityDataFactory.aConsent(UUID.randomUUID(), "random_client_id")
-        consentService.getConsent(_ as String, _ as String) >> entity
+        consentService.getConsent(_ as String, _ as String) >> entity.toResponse()
 
         def event = AwsProxyHelper.buildBasicEvent('/open-insurance/consents/v2/consents/' + entity.getConsentId(), HttpMethod.GET)
         AuthHelper.authorize(scopes: "consents", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+        ResponseConsent resp = mapper.readValue(response.body, ResponseConsent)
+        resp.getData().getStatus() == EnumConsentStatus.AWAITING_AUTHORISATION
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "We can fetch a full consent" () {
+        given:
+        def entity = TestEntityDataFactory.aConsent(UUID.randomUUID(), "random_client_id")
+        consentService.getFullConsent(_ as String) >> entity.toResponse()
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/consents/v2/consents/' + entity.getConsentId(), HttpMethod.GET)
+        AuthHelper.authorize(scopes: "consents op:consent", event)
 
         when:
         def response = handler.handleRequest(event, lambdaContext)

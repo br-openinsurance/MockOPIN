@@ -1,5 +1,6 @@
 package com.raidiam.trustframework.mockinsurance
 
+
 import com.raidiam.trustframework.mockinsurance.repository.*
 import jakarta.inject.Inject
 import org.slf4j.Logger
@@ -83,6 +84,180 @@ class CleanupSpecification extends Specification {
     CapitalizationTitleRaffleRepository capitalizationTitleRaffleRepository
 
     @Inject
+    PersonalIdentificationRepository personalIdentificationRepository;
+
+    @Inject
+    PersonalQualificationRepository personalQualificationRepository;
+
+    @Inject
+    PersonalComplimentaryInformationRepository personalComplimentaryInformationRepository;
+
+    @Inject
+    BusinessIdentificationRepository businessIdentificationRepository;
+
+    @Inject
+    BusinessQualificationRepository businessQualificationRepository;
+
+    @Inject
+    BusinessComplimentaryInformationRepository businessComplimentaryInformationRepository;
+
+    @Inject
+    CapitalizationTitlePlanRepository capitalizationTitlePlanRepository;
+
+    @Inject
+    ConsentCapitalizationTitlePlanRepository consentCapitalizationTitlePlanRepository;
+
+    @Inject
+    CapitalizationTitlePlanEventRepository capitalizationTitlePlanEventRepository;
+
+    @Inject
+    CapitalizationTitlePlanSettlementRepository capitalizationTitlePlanSettlementRepository;
+
+    @Inject
+    FinancialRiskPolicyRepository financialRiskPolicyRepository;
+
+    @Inject
+    ConsentFinancialRiskPolicyRepository consentFinancialRiskPolicyRepository;
+
+    @Inject
+    FinancialRiskPolicyClaimRepository financialRiskPolicyClaimRepository;
+
+    @Inject
+    FinancialRiskPolicyPremiumRepository financialRiskPolicyPremiumRepository;
+
+    @Inject
+    HousingPolicyRepository housingPolicyRepository;
+
+    @Inject
+    ConsentHousingPolicyRepository consentHousingPolicyRepository;
+
+    @Inject
+    HousingPolicyClaimRepository housingPolicyClaimRepository;
+
+    @Inject
+    HousingPolicyPremiumRepository housingPolicyPremiumRepository;
+
+    @Inject
+    ResponsibilityPolicyRepository responsibilityPolicyRepository;
+
+    @Inject
+    ConsentResponsibilityPolicyRepository consentResponsibilityPolicyRepository;
+
+    @Inject
+    ResponsibilityPolicyClaimRepository responsibilityPolicyClaimRepository;
+
+    @Inject
+    ResponsibilityPolicyPremiumRepository responsibilityPolicyPremiumRepository;
+
+    @Inject
+    PersonPolicyRepository personPolicyRepository;
+
+    @Inject
+    ConsentPersonPolicyRepository consentPersonPolicyRepository;
+
+    @Inject
+    PersonPolicyClaimRepository personPolicyClaimRepository;
+
+    @Inject
+    PersonPolicyPremiumRepository personPolicyPremiumRepository;
+
+    @Inject
+    LifePensionContractRepository lifePensionContractRepository;
+
+    @Inject
+    ConsentLifePensionContractRepository consentLifePensionContractRepository;
+
+    @Inject
+    LifePensionContractClaimRepository lifePensionContractClaimRepository;
+
+    @Inject
+    LifePensionContractPortabilityRepository lifePensionContractPortabilityRepository;
+
+    @Inject
+    LifePensionContractWithdrawalRepository lifePensionContractWithdrawalRepository;
+
+    @Inject
+    LifePensionContractMovementBenefitRepository lifePensionContractMovementBenefitRepository;
+
+    @Inject
+    LifePensionContractMovementContributionRepository lifePensionContractMovementContributionRepository;
+
+    @Inject
+    PensionPlanContractRepository pensionPlanContractRepository;
+
+    @Inject
+    ConsentPensionPlanContractRepository consentPensionPlanContractRepository;
+
+    @Inject
+    PensionPlanContractClaimRepository pensionPlanContractClaimRepository;
+
+    @Inject
+    PensionPlanContractPortabilityRepository pensionPlanContractPortabilityRepository;
+
+    @Inject
+    PensionPlanContractWithdrawalRepository pensionPlanContractWithdrawalRepository;
+
+    @Inject
+    PensionPlanContractMovementBenefitRepository pensionPlanContractMovementBenefitRepository;
+
+    @Inject
+    PensionPlanContractMovementContributionRepository pensionPlanContractMovementContributionRepository;
+
+    @Inject
+    FinancialAssistanceContractRepository financialAssistanceContractRepository;
+
+    @Inject
+    FinancialAssistanceContractMovementRepository financialAssistanceContractMovementRepository;
+
+    @Inject
+    ConsentFinancialAssistanceContractRepository consentFinancialAssistanceContractRepository;
+
+    @Inject
+    AcceptanceAndBranchesAbroadPolicyRepository acceptanceAndBranchesAbroadPolicyRepository;
+
+    @Inject
+    AcceptanceAndBranchesAbroadClaimRepository acceptanceAndBranchesAbroadClaimRepository;
+
+    @Inject
+    ConsentAcceptanceAndBranchesAbroadPolicyRepository consentAcceptanceAndBranchesAbroadPolicyRepository;
+
+    @Inject
+    PatrimonialPolicyRepository patrimonialPolicyRepository;
+
+    @Inject
+    PatrimonialClaimRepository patrimonialClaimRepository;
+
+    @Inject
+    ConsentPatrimonialPolicyRepository consentPatrimonialPolicyRepository;
+
+    @Inject
+    RuralPolicyRepository ruralPolicyRepository;
+
+    @Inject
+    RuralClaimRepository ruralClaimRepository;
+
+    @Inject
+    ConsentRuralPolicyRepository consentRuralPolicyRepository;
+
+    @Inject
+    AutoPolicyRepository autoPolicyRepository;
+
+    @Inject
+    AutoPolicyClaimRepository autoPolicyClaimRepository;
+
+    @Inject
+    ConsentAutoPolicyRepository consentAutoPolicyRepository
+
+    @Inject
+    TransportPolicyRepository transportPolicyRepository
+
+    @Inject
+    TransportPolicyClaimRepository transportPolicyClaimRepository
+
+    @Inject
+    ConsentTransportPolicyRepository consentTransportPolicyRepository
+
+    @Inject
     WebhookRepository webhookRepository
 
     @Shared
@@ -116,7 +291,61 @@ class CleanupSpecification extends Specification {
             quoteCapitalizationTitleRepository.deleteAll()
             quoteCapitalizationTitleLeadRepository.deleteAll()
             capitalizationTitleRaffleRepository.deleteAll()
+            personalIdentificationRepository.deleteAll();
+            personalQualificationRepository.deleteAll();
+            personalComplimentaryInformationRepository.deleteAll();
+            businessIdentificationRepository.deleteAll();
+            businessQualificationRepository.deleteAll();
+            businessComplimentaryInformationRepository.deleteAll();
             webhookRepository.deleteAll()
+            capitalizationTitlePlanRepository.deleteAll()
+            consentCapitalizationTitlePlanRepository.deleteAll()
+            capitalizationTitlePlanEventRepository.deleteAll()
+            capitalizationTitlePlanSettlementRepository.deleteAll()
+            financialRiskPolicyRepository.deleteAll()
+            consentFinancialRiskPolicyRepository.deleteAll()
+            financialRiskPolicyClaimRepository.deleteAll()
+            financialRiskPolicyPremiumRepository.deleteAll()
+            housingPolicyRepository.deleteAll()
+            consentHousingPolicyRepository.deleteAll()
+            housingPolicyClaimRepository.deleteAll()
+            housingPolicyPremiumRepository.deleteAll()
+            responsibilityPolicyRepository.deleteAll()
+            consentResponsibilityPolicyRepository.deleteAll()
+            responsibilityPolicyClaimRepository.deleteAll()
+            responsibilityPolicyPremiumRepository.deleteAll()
+            personPolicyRepository.deleteAll()
+            consentPersonPolicyRepository.deleteAll()
+            personPolicyClaimRepository.deleteAll()
+            personPolicyPremiumRepository.deleteAll()
+            lifePensionContractPortabilityRepository.deleteAll()
+            lifePensionContractMovementBenefitRepository.deleteAll()
+            lifePensionContractClaimRepository.deleteAll()
+            lifePensionContractMovementContributionRepository.deleteAll()
+            financialAssistanceContractRepository.deleteAll()
+            financialAssistanceContractMovementRepository.deleteAll()
+            consentFinancialAssistanceContractRepository.deleteAll()
+            acceptanceAndBranchesAbroadPolicyRepository.deleteAll()
+            acceptanceAndBranchesAbroadClaimRepository.deleteAll()
+            consentAcceptanceAndBranchesAbroadPolicyRepository.deleteAll()
+            patrimonialPolicyRepository.deleteAll()
+            patrimonialClaimRepository.deleteAll()
+            consentPatrimonialPolicyRepository.deleteAll()
+            ruralPolicyRepository.deleteAll()
+            ruralClaimRepository.deleteAll()
+            consentRuralPolicyRepository.deleteAll()
+            autoPolicyRepository.deleteAll()
+            autoPolicyClaimRepository.deleteAll()
+            consentAutoPolicyRepository.deleteAll()
+            pensionPlanContractPortabilityRepository.deleteAll()
+            pensionPlanContractMovementBenefitRepository.deleteAll()
+            pensionPlanContractClaimRepository.deleteAll()
+            pensionPlanContractMovementContributionRepository.deleteAll()
+            pensionPlanContractWithdrawalRepository.deleteAll()
+            consentPensionPlanContractRepository.deleteAll()
+            transportPolicyRepository.deleteAll()
+            transportPolicyClaimRepository.deleteAll()
+            consentTransportPolicyRepository.deleteAll()
             runCleanup = false
             runSetup = true
         }

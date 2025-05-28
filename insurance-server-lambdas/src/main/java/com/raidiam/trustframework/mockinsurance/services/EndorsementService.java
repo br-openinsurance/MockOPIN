@@ -1,25 +1,21 @@
 package com.raidiam.trustframework.mockinsurance.services;
 
-import java.time.LocalDate;
-import java.util.Collections;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.raidiam.trustframework.mockinsurance.domain.ConsentEntity;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.raidiam.trustframework.mockinsurance.domain.EndorsementEntity;
 import com.raidiam.trustframework.mockinsurance.models.generated.CreateConsentDataEndorsementInformation;
 import com.raidiam.trustframework.mockinsurance.models.generated.CreateEndorsementData;
 import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentStatus;
-
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.exceptions.HttpStatusException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
+import java.util.Collections;
 
 @Singleton
 @Transactional
@@ -46,7 +42,7 @@ public class EndorsementService extends BaseInsuranceService {
             throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: consent id was not informed");
         }
 
-        ConsentEntity consent = consentService.getConsent(endorsement.getConsentId(), endorsement.getClientId());
+        ConsentEntity consent = consentService.getConsentEntity(endorsement.getConsentId(), endorsement.getClientId());
 
         // Client ID
         if (!endorsement.getClientId().equals(consent.getClientId())) {

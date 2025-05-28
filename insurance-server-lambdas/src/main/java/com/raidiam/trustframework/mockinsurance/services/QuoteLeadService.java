@@ -31,10 +31,10 @@ public abstract class QuoteLeadService<T extends QuoteEntity> extends BaseInsura
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Quote lead for consent id " + consentId + " not found"));
     }
 
-    public T patchQuote(RevokeQuotePatchPayload req, String consentId, String clientId) {
+    public T patchQuote(RevokePatchPayload req, String consentId, String clientId) {
         T quote = this.getQuote(consentId, clientId);
 
-        String entityId = RevokeQuotePatchPayloadDataAuthor.IdentificationTypeEnum.CNPJ.equals(req.getData().getAuthor().getIdentificationType()) ?
+        String entityId = RevokePatchPayloadDataAuthor.IdentificationTypeEnum.CNPJ.equals(req.getData().getAuthor().getIdentificationType()) ?
                 quote.getBusinessCnpj() : quote.getPersonCpf();
         this.getLogger().info("Patching quote lead for {}", entityId);
         if (entityId == null || !entityId.equals(req.getData().getAuthor().getIdentificationNumber())) {

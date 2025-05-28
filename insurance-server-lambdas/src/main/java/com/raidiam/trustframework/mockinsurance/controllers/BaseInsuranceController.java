@@ -20,6 +20,9 @@ public class BaseInsuranceController {
     @Value("${mockinsurance.mockinsuranceUrl}")
     protected String appBaseUrl;
 
+    @Value("${mockinsurance.max-page-size}")
+    int maxPageSize;
+
     @Inject
     protected ObjectMapper mapper;
 

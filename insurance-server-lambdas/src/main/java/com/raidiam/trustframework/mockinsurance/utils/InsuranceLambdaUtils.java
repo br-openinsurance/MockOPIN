@@ -7,9 +7,7 @@ import com.nimbusds.jose.util.Pair;
 import com.raidiam.trustframework.mockinsurance.domain.ConsentEntity;
 import com.raidiam.trustframework.mockinsurance.exceptions.TrustframeworkException;
 import com.raidiam.trustframework.mockinsurance.fapi.ResponseErrorWithRequestDateTime;
-import com.raidiam.trustframework.mockinsurance.models.generated.Links;
-import com.raidiam.trustframework.mockinsurance.models.generated.Meta;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseError;
+import com.raidiam.trustframework.mockinsurance.models.generated.*;
 import com.raidiam.trustframework.mockinsurance.repository.ConsentRepository;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.annotation.Property;
@@ -22,6 +20,9 @@ import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.exceptions.HttpStatusException;
 import io.micronaut.security.authentication.Authentication;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.asn1.x500.RDN;
@@ -30,10 +31,6 @@ import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.security.cert.CertificateException;
@@ -45,6 +42,7 @@ import java.time.*;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Singleton
 public class InsuranceLambdaUtils {
@@ -395,8 +393,11 @@ public class InsuranceLambdaUtils {
         setLinks.accept(links);
     }
 
-
     public static Meta getMeta(Page<?> page) {
+        return getMeta(page, true);
+    }
+
+    public static Meta getMeta(Page<?> page, boolean setRequestDateTime) {
         var meta = new Meta();
         if (page != null) {
             meta.setTotalRecords((int) page.getTotalSize());
@@ -405,7 +406,9 @@ public class InsuranceLambdaUtils {
             meta.setTotalRecords(0);
             meta.setTotalPages(0);
         }
-        meta.setRequestDateTime(OffsetDateTime.now());
+        if (setRequestDateTime) {
+            meta.setRequestDateTime(OffsetDateTime.now());
+        }
         return meta;
     }
 
@@ -471,5 +474,30 @@ public class InsuranceLambdaUtils {
     public static ConsentEntity getConsent(String consentId, ConsentRepository consentRepository) {
         return consentRepository.findByConsentId(consentId)
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Consent Id " + consentId + " not found"));
+    }
+
+    public static void checkAuthorisationStatus(ConsentEntity consentEntity) {
+        var status = EnumConsentStatus.fromValue(consentEntity.getStatus());
+        if (!EnumConsentStatus.AUTHORISED.equals(status)) {
+            throw new HttpStatusException(HttpStatus.UNAUTHORIZED, "Bad request, consent not Authorised!");
+        }
+    }
+
+    public static void checkConsentPermissions(ConsentEntity consent, EnumConsentPermission permissionsEnum) {
+        if (!consent.getPermissions().contains(permissionsEnum.name())) {
+            throw new HttpStatusException(HttpStatus.FORBIDDEN, "You do not have the correct permission");
+        }
+    }
+
+    public static String getConsentIdFromRequest(HttpRequest<?> request) {
+        return Optional.of(InsuranceLambdaUtils.getRequestMeta(request)).map(InsuranceLambdaUtils.RequestMeta::getConsentId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.FORBIDDEN, "Request has no associated consent Id"));
+    }
+
+    public static Set<EnumConsentPermission> getConsentPermissions(ConsentEntity consent) {
+        return consent.getPermissions().stream()
+                .map(EnumConsentPermission::fromValue)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 }
