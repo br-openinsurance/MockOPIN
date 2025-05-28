@@ -68,11 +68,11 @@ public abstract class QuoteService<T extends QuoteEntity> extends BaseInsuranceS
         return quote;
     }
 
-    public T patchQuote(PatchQuotePayload req, String consentId, String clientId) {
+    public T patchQuote(PatchPayload req, String consentId, String clientId) {
         T quote = this.getQuote(consentId, clientId);
 
         String entityId;
-        if (RevokeQuotePatchPayloadDataAuthor.IdentificationTypeEnum.CNPJ.equals(req.getData().getAuthor().getIdentificationType())) {
+        if (RevokePatchPayloadDataAuthor.IdentificationTypeEnum.CNPJ.equals(req.getData().getAuthor().getIdentificationType())) {
             this.getLogger().info("Patching quote for business");
             entityId = quote.getBusinessCnpj();
         } else {
@@ -84,7 +84,7 @@ public abstract class QuoteService<T extends QuoteEntity> extends BaseInsuranceS
             throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: invalid identificationNumber");
         }
 
-        if (PatchQuotePayloadData.StatusEnum.CANC.equals(req.getData().getStatus())) {
+        if (PatchPayloadData.StatusEnum.CANC.equals(req.getData().getStatus())) {
             quote.setStatus(QuoteStatusEnum.CANC.toString());
             this.getLogger().info("the quote was cancelled");
             return this.saveQuote(quote);

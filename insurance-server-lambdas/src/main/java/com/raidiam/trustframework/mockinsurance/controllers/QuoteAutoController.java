@@ -9,14 +9,14 @@ import com.raidiam.trustframework.mockinsurance.domain.QuoteAutoEntity;
 import com.raidiam.trustframework.mockinsurance.domain.QuoteAutoLeadEntity;
 import com.raidiam.trustframework.mockinsurance.fapi.Idempotent;
 import com.raidiam.trustframework.mockinsurance.fapi.XFapiInteractionIdRequired;
-import com.raidiam.trustframework.mockinsurance.models.generated.PatchQuotePayload;
+import com.raidiam.trustframework.mockinsurance.models.generated.PatchPayload;
 import com.raidiam.trustframework.mockinsurance.models.generated.QuoteRequestAuto;
 import com.raidiam.trustframework.mockinsurance.models.generated.QuoteRequestAutoLead;
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuoteAuto;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuoteLead;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuotePatch;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokeQuotePatch;
-import com.raidiam.trustframework.mockinsurance.models.generated.RevokeQuotePatchPayload;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuote;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponsePatch;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokePatch;
+import com.raidiam.trustframework.mockinsurance.models.generated.RevokePatchPayload;
 import com.raidiam.trustframework.mockinsurance.services.QuoteAutoLeadService;
 import com.raidiam.trustframework.mockinsurance.services.QuoteAutoService;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
@@ -56,7 +56,7 @@ public class QuoteAutoController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseQuoteLead createLeadQuoteV1(@Body QuoteRequestAutoLead body, @NotNull HttpRequest<?> request) {
+    public ResponseQuote createLeadQuoteV1(@Body QuoteRequestAutoLead body, @NotNull HttpRequest<?> request) {
         
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         LOG.info("Creating new quote auto lead for client {}", callerInfo.getClientId());
@@ -73,7 +73,7 @@ public class QuoteAutoController extends BaseInsuranceController {
     @Secured({"QUOTE_AUTO_LEAD_MANAGE"})
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseRevokeQuotePatch patchLeadQuoteV1(@PathVariable("consentId") String consentId, @Body RevokeQuotePatchPayload body, HttpRequest<?> request) {
+    public ResponseRevokePatch patchLeadQuoteV1(@PathVariable("consentId") String consentId, @Body RevokePatchPayload body, HttpRequest<?> request) {
         
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         LOG.info("Patching quote auto lead for consent id {}", consentId);
@@ -121,7 +121,7 @@ public class QuoteAutoController extends BaseInsuranceController {
     @Secured({"QUOTE_AUTO_MANAGE"})
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseQuotePatch patchQuoteV1(@PathVariable("consentId") String consentId, @Body PatchQuotePayload body, HttpRequest<?> request) {
+    public ResponsePatch patchQuoteV1(@PathVariable("consentId") String consentId, @Body PatchPayload body, HttpRequest<?> request) {
         
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         LOG.info("Patching quote auto for consent id {}", consentId);

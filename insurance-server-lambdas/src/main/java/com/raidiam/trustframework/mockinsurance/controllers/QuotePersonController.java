@@ -46,23 +46,23 @@ public class QuotePersonController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseQuoteLead createLeadQuoteV1(
+    public ResponseQuote createLeadQuoteV1(
             @Body QuoteRequestPersonLead body,
             @NotNull HttpRequest<?> request) {
         var clientId = InsuranceLambdaUtils.getRequestMeta(request).getClientId();
         LOG.info("Creating new quote person lead for client {}", clientId);
-        var responseQuoteLead = quotePersonLeadService.createQuote(QuotePersonLeadEntity.fromRequest(body, clientId)).toResponse();
-        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(responseQuoteLead::setLinks, responseQuoteLead::setMeta, appBaseUrl + request.getPath());
-        InsuranceLambdaUtils.logObject(mapper, responseQuoteLead);
+        var ResponseQuote = quotePersonLeadService.createQuote(QuotePersonLeadEntity.fromRequest(body, clientId)).toResponse();
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(ResponseQuote::setLinks, ResponseQuote::setMeta, appBaseUrl + request.getPath());
+        InsuranceLambdaUtils.logObject(mapper, ResponseQuote);
 
-        return responseQuoteLead;
+        return ResponseQuote;
     }
 
     @Patch("/v1/lead/request/{consentId}")
     @Secured({"QUOTE_PERSON_LEAD_MANAGE"})
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseRevokeQuotePatch patchLeadQuoteV1(@PathVariable("consentId") String consentId, @Body RevokeQuotePatchPayload body, HttpRequest<?> request) {
+    public ResponseRevokePatch patchLeadQuoteV1(@PathVariable("consentId") String consentId, @Body RevokePatchPayload body, HttpRequest<?> request) {
         LOG.info("Patching quote person lead for consent id");
         var clientId = InsuranceLambdaUtils.getRequestMeta(request).getClientId();
         return quotePersonLeadService.patchQuote(body, consentId, clientId).toRevokePatchResponse();
@@ -100,7 +100,7 @@ public class QuotePersonController extends BaseInsuranceController {
     @Secured({"QUOTE_PERSON_LIFE_MANAGE"})
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseQuotePatch patchQuoteV1(@PathVariable("consentId") String consentId, @Body PatchQuotePayload body, HttpRequest<?> request) {
+    public ResponsePatch patchQuoteV1(@PathVariable("consentId") String consentId, @Body PatchPayload body, HttpRequest<?> request) {
         LOG.info("Patching quote person life for consent id {}", consentId);
         var clientId = InsuranceLambdaUtils.getRequestMeta(request).getClientId();
         return quotePersonLifeService.patchQuote(body, consentId, clientId).toPatchResponse(REDIRECT_LINK);
@@ -138,7 +138,7 @@ public class QuotePersonController extends BaseInsuranceController {
     @Secured({"QUOTE_PERSON_TRAVEL_MANAGE"})
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseQuotePatch patchTravelQuoteV1(@PathVariable("consentId") String consentId, @Body PatchQuotePayload body, HttpRequest<?> request) {
+    public ResponsePatch patchTravelQuoteV1(@PathVariable("consentId") String consentId, @Body PatchPayload body, HttpRequest<?> request) {
         LOG.info("Patching quote person travel for consent id {}", consentId);
         var clientId = InsuranceLambdaUtils.getRequestMeta(request).getClientId();
         return quotePersonTravelService.patchQuote(body, consentId, clientId).toPatchResponse(REDIRECT_LINK);

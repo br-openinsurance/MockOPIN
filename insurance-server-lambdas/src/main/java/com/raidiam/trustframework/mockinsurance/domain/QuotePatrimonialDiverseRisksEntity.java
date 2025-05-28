@@ -72,7 +72,7 @@ public class QuotePatrimonialDiverseRisksEntity extends QuoteEntity {
                             .unit(new AmountDetailsUnit().code("R$").description(AmountDetailsUnit.DescriptionEnum.BRL)))
                     .paymentType(QuoteResultPayment.PaymentTypeEnum.PIX)));
 
-            var quote = new QuotePatrimonialDiverseRisksQuotes();
+            var quote = new QuotePatrimonialItem();
             quote.setInsurerQuoteId(this.getQuoteId().toString());
             quote.setQuoteDateTime(InsuranceLambdaUtils.dateToOffsetDate(this.getUpdatedAt()));
             quote.setCoverages(List.of());

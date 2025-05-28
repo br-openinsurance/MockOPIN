@@ -235,22 +235,22 @@ class TestRequestDataFactory {
                 )
     }
 
-    static PatchQuotePayload patchQuoteRequest(UUID quoteId) {
-        PatchQuotePayload req = new PatchQuotePayload()
-                .data(new PatchQuotePayloadData()
-                        .status(PatchQuotePayloadData.StatusEnum.ACKN)
+    static PatchPayload patchQuoteRequest(UUID quoteId) {
+        PatchPayload req = new PatchPayload()
+                .data(new PatchPayloadData()
+                        .status(PatchPayloadData.StatusEnum.ACKN)
                         .insurerQuoteId(quoteId.toString())
-                        .author(new RevokeQuotePatchPayloadDataAuthor()
-                                .identificationType(RevokeQuotePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
+                        .author(new RevokePatchPayloadDataAuthor()
+                                .identificationType(RevokePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
                                 .identificationNumber("123456789")))
         req
     }
 
-    static RevokeQuotePatchPayload revokeQuotePatchRequest(UUID quoteId) {
-        RevokeQuotePatchPayload req = new RevokeQuotePatchPayload()
-                .data(new RevokeQuotePatchPayloadData()
-                        .author(new RevokeQuotePatchPayloadDataAuthor()
-                                .identificationType(RevokeQuotePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
+    static RevokePatchPayload revokeQuotePatchRequest(UUID quoteId) {
+        RevokePatchPayload req = new RevokePatchPayload()
+                .data(new RevokePatchPayloadData()
+                        .author(new RevokePatchPayloadDataAuthor()
+                                .identificationType(RevokePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
                                 .identificationNumber("123456789"))
                 )
         req

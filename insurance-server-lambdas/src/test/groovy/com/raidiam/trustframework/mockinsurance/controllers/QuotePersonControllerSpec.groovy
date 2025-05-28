@@ -95,7 +95,7 @@ class QuotePersonControllerSpec extends Specification {
         then:
         response.statusCode == HttpStatus.CREATED.code
         response.body != null
-        ResponseQuoteLead resp = mapper.readValue(response.body, ResponseQuoteLead)
+        ResponseQuote resp = mapper.readValue(response.body, ResponseQuote)
         resp.getData().getStatus() == QuoteStatus.StatusEnum.RCVD
 
         and:
@@ -107,7 +107,7 @@ class QuotePersonControllerSpec extends Specification {
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuotePersonLead(consentId)
 
-        quotePersonLeadService.patchQuote(_ as RevokeQuotePatchPayload, _ as String, _ as String) >> quote
+        quotePersonLeadService.patchQuote(_ as RevokePatchPayload, _ as String, _ as String) >> quote
 
         def req = TestRequestDataFactory.revokeQuotePatchRequest(quote.getQuoteId())
         String json = mapper.writeValueAsString(req)
@@ -122,7 +122,7 @@ class QuotePersonControllerSpec extends Specification {
         then:
         response.statusCode == HttpStatus.OK.code
         response.body != null
-        ResponseRevokeQuotePatch resp = mapper.readValue(response.body, ResponseRevokeQuotePatch)
+        ResponseRevokePatch resp = mapper.readValue(response.body, ResponseRevokePatch)
         resp.getData().getStatus() == resp.getData().getStatus().CANC
 
         and:
@@ -205,7 +205,7 @@ class QuotePersonControllerSpec extends Specification {
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuotePersonLife(UUID.randomUUID(), consentId)
         quote.status = QuoteStatusEnum.ACKN.toString()
-        quotePersonLifeService.patchQuote(_ as PatchQuotePayload, _ as String, _ as String) >> quote
+        quotePersonLifeService.patchQuote(_ as PatchPayload, _ as String, _ as String) >> quote
 
         def req = TestRequestDataFactory.patchQuoteRequest(quote.getQuoteId())
 
@@ -221,8 +221,8 @@ class QuotePersonControllerSpec extends Specification {
         then:
         response.statusCode == HttpStatus.OK.code
         response.body != null
-        ResponseQuotePatch resp = mapper.readValue(response.body, ResponseQuotePatch)
-        resp.getData().getStatus() == ResponseQuotePatchData.StatusEnum.ACKN
+        ResponsePatch resp = mapper.readValue(response.body, ResponsePatch)
+        resp.getData().getStatus() == ResponsePatchData.StatusEnum.ACKN
 
         and:
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
@@ -304,7 +304,7 @@ class QuotePersonControllerSpec extends Specification {
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuotePersonTravel(UUID.randomUUID(), consentId)
         quote.status = QuoteStatusEnum.ACKN.toString()
-        quotePersonTravelService.patchQuote(_ as PatchQuotePayload, _ as String, _ as String) >> quote
+        quotePersonTravelService.patchQuote(_ as PatchPayload, _ as String, _ as String) >> quote
 
         def req = TestRequestDataFactory.patchQuoteRequest(quote.getQuoteId())
 
@@ -320,8 +320,8 @@ class QuotePersonControllerSpec extends Specification {
         then:
         response.statusCode == HttpStatus.OK.code
         response.body != null
-        ResponseQuotePatch resp = mapper.readValue(response.body, ResponseQuotePatch)
-        resp.getData().getStatus() == ResponseQuotePatchData.StatusEnum.ACKN
+        ResponsePatch resp = mapper.readValue(response.body, ResponsePatch)
+        resp.getData().getStatus() == ResponsePatchData.StatusEnum.ACKN
 
         and:
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')

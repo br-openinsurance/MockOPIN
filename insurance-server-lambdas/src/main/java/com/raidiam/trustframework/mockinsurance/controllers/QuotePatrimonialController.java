@@ -48,7 +48,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseQuoteLead createLeadQuoteV1(
+    public ResponseQuote createLeadQuoteV1(
             @Body QuoteRequestPatrimonialLead body,
             @NotNull HttpRequest<?> request) {
         String clientId = (String) request.getAttribute("clientId").orElse("");
@@ -64,7 +64,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
     @Secured({"QUOTE_PATRIMONIAL_LEAD_MANAGE"})
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseRevokeQuotePatch patchLeadQuoteV1(@PathVariable("consentId") String consentId, @Body RevokeQuotePatchPayload body, HttpRequest<?> request) {
+    public ResponseRevokePatch patchLeadQuoteV1(@PathVariable("consentId") String consentId, @Body RevokePatchPayload body, HttpRequest<?> request) {
         LOG.info("Patching quote patrimonial lead for consent id");
         String clientId = (String) request.getAttribute("clientId").orElse("");
         return quotePatrimonialLeadService.patchQuote(body, consentId, clientId).toRevokePatchResponse();
@@ -102,7 +102,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
     @Secured({"QUOTE_PATRIMONIAL_BUSINESS_MANAGE"})
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseQuotePatch patchBusinessQuoteV1(@PathVariable("consentId") String consentId, @Body PatchQuotePayload body, HttpRequest<?> request) {
+    public ResponsePatch patchBusinessQuoteV1(@PathVariable("consentId") String consentId, @Body PatchPayload body, HttpRequest<?> request) {
         LOG.info("Patching quote patrimonial business for consent id {}", consentId);
         String clientId = (String) request.getAttribute("clientId").orElse("");
         return quotePatrimonialBusinessService.patchQuote(body, consentId, clientId).toPatchResponse(REDIRECT_LINK);
@@ -140,7 +140,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
     @Secured({"QUOTE_PATRIMONIAL_HOME_MANAGE"})
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseQuotePatch patchHomeQuoteV1(@PathVariable("consentId") String consentId, @Body PatchQuotePayload body, HttpRequest<?> request) {
+    public ResponsePatch patchHomeQuoteV1(@PathVariable("consentId") String consentId, @Body PatchPayload body, HttpRequest<?> request) {
         LOG.info("Patching quote patrimonial home for consent id {}", consentId);
         String clientId = (String) request.getAttribute("clientId").orElse("");
         return quotePatrimonialHomeService.patchQuote(body, consentId, clientId).toPatchResponse(REDIRECT_LINK);
@@ -178,7 +178,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
     @Secured({"QUOTE_PATRIMONIAL_CONDOMINIUM_MANAGE"})
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseQuotePatch patchCondominiumQuoteV1(@PathVariable("consentId") String consentId, @Body PatchQuotePayload body, HttpRequest<?> request) {
+    public ResponsePatch patchCondominiumQuoteV1(@PathVariable("consentId") String consentId, @Body PatchPayload body, HttpRequest<?> request) {
         LOG.info("Patching quote patrimonial condominium for consent id {}", consentId);
         String clientId = (String) request.getAttribute("clientId").orElse("");
         return quotePatrimonialCondominiumService.patchQuote(body, consentId, clientId).toPatchResponse(REDIRECT_LINK);
@@ -216,7 +216,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
     @Secured({"QUOTE_PATRIMONIAL_DIVERSE_RISKS_MANAGE"})
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
-    public ResponseQuotePatch patchDiverseRisksQuoteV1(@PathVariable("consentId") String consentId, @Body PatchQuotePayload body, HttpRequest<?> request) {
+    public ResponsePatch patchDiverseRisksQuoteV1(@PathVariable("consentId") String consentId, @Body PatchPayload body, HttpRequest<?> request) {
         LOG.info("Patching quote patrimonial diverse risks for consent id {}", consentId);
         String clientId = (String) request.getAttribute("clientId").orElse("");
         return quotePatrimonialDiverseRisksService.patchQuote(body, consentId, clientId).toPatchResponse(REDIRECT_LINK);

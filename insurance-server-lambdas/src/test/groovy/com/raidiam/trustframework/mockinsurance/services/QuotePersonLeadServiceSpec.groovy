@@ -36,11 +36,11 @@ class QuotePersonLeadServiceSpec extends CleanupSpecification {
         def createdPersonLead = TestEntityDataFactory.aQuotePersonLead(consentId)
         createdPersonLead = quotePersonLeadService.createQuote(createdPersonLead)
 
-        def req = new RevokeQuotePatchPayload()
-                .data(new RevokeQuotePatchPayloadData()
-                        .author(new RevokeQuotePatchPayloadDataAuthor()
+        def req = new RevokePatchPayload()
+                .data(new RevokePatchPayloadData()
+                        .author(new RevokePatchPayloadDataAuthor()
                                 .identificationNumber("123456789")
-                                .identificationType(RevokeQuotePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
+                                .identificationType(RevokePatchPayloadDataAuthor.IdentificationTypeEnum.CPF)
                 ))
 
         when:
