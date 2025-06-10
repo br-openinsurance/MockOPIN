@@ -1,56 +1,73 @@
 # Mock Insurance Open Source
 
-This solution provides a complete local instance of Mock Insurance, including all components needed to adhere to OPIN standards and API specification implementations.
+This repository provides a fully local instance of **Mock Insurance**, including all components required to comply with [Open Insurance (OPIN)] standards and API specifications.
+
+Certificates for the Certificate Authority and mTLS clients are located in [`mock-service-os/certs`](./mock-service-os/certs).
+
+---
 
 ## Prerequisites
 
-To run Mock Insurance OS, ensure you have the following tools installed:
+To run Mock Insurance OS, ensure the following tools are installed:
 
 - **Java 17**
 - **Gradle**
 - **Docker**
 
-### 1. Set Up
-Run the command below to generate a Certificate Authority along with the necessary server certificates for the MTLS agent. This will also publish a local dependency containing the API models used by Mock Insurance.
+---
 
-This step is required only once.
+Below are the steps to run and interact with Mock OPIN on your local machine.
+If you're using Windows, make sure to run these commands in a Linux-compatible terminal (e.g., WSL or Git Bash).
+
+### 1. Setup
+
+Publish the local dependency that contains the API models used by Mock Insurance.
+
+> This step is required only once.
 
 ```bash
 make setup
 ```
 
-### 2. Create local host entries
-You need to add `api.local` and `auth.local` as aliases for localhost in the hosts file.
+### 2. Configure Local Hosts
+
+Add the following entries to your hosts file to create aliases for localhost:
 
 ```bash
 127.0.0.1 auth.local
 127.0.0.1 api.local
+127.0.0.1 directory
 ```
 
-### 3. Start eveything up
+### 3. Run the Environment
+
 To run a fully local instance, you can start all the components using Docker with the following command:
+
 ```bash
 make run
 ```
 
-### 4. Start eveything up with the Conformance Suite
+### 4. Run with Conformance Suite
+
 To run a fully local instance with the conformance suite, you need to start all components, along with the conformance suite itself.
 
 Run the command below to set up the conformance suite:
+
 ```bash
 make setup-cs
 ```
 
-A configuration file for the conformance suite will be generated at `insurance-server-lambdas/cs_config.json`.
-
 Then, you can start the environment with:
 
-Note: This requires a powerful machine to run properly.
 ```bash
 make run-with-cs
 ```
 
-# Get a token using the certificates
+Configuration for the tests is available in the `cs_config.json` file.
+
+## Obtaining a Token Using Certificates
+
+You can request a token using the client certificate:
 
 ```bash
 curl -v \
@@ -62,23 +79,18 @@ curl -v \
   -d "grant_type=client_credentials&scope=openid" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   https://auth.local/token -k
+```
 
+To introspect the token:
+
+```bash
 curl -v \
   --cert ./mock-service-os/certs/client_one.crt \
   --key ./mock-service-os/certs/client_one.key \
   --cert-type PEM \
   --key-type PEM \
   -u client:1234 \
-  -d "token=UXc7zN2knByBYD2conPeRgysCRlfL-FbsKmyUoJylnU" \
+  -d "token=your_access_token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   https://auth.local/token/introspection -k
-
-
-curl -v \
-  --cert ./mock-service-os/certs/client_one.crt \
-  --key ./mock-service-os/certs/client_one.key \
-  --cert-type PEM \
-  --key-type PEM \
-  -H "Authorization: Bearer UXc7zN2knByBYD2conPeRgysCRlfL-FbsKmyUoJylnU" \
-  https://api.local/ -k
-  ```
+```
