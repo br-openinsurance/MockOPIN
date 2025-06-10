@@ -1,22 +1,24 @@
-.PHONY: setup setup-cs run run-with-cs cs-config
+.PHONY: setup setup-cs run run-with-cs rebuild
 
 setup:
-	@$(MAKE) -C ./insurance-server-lambdas swagger
-	@$(MAKE) -C ./insurance-server-lambdas certs
+	cd insurance-swagger; BUILD_NUMBER=2 ./gradlew publishToMavenLocal
 
 run:
-	@$(MAKE) -C ./insurance-server-lambdas run
+	cd insurance-server-lambdas; ./gradlew optimizedDockerBuild -x test
+	cd insurance-server-lambdas; docker-compose --profile main up
 
 setup-cs:
-	@$(MAKE) -C ./insurance-server-lambdas setup-cs
-
-cs-config:
-	@$(MAKE) -C ./insurance-server-lambdas cs-config
+	git clone --branch main --single-branch --depth=1 https://gitlab.com/raidiam-conformance/open-insurance/open-insurance-brasil.git insurance-server-lambdas/conformance-suite
+	mkdir -p insurance-server-lambdas/conformance-suite/server-dev
+	echo 'FROM openjdk:17-jdk-slim\n\nRUN apt-get update && apt-get install redir' > insurance-server-lambdas/conformance-suite/server-dev/Dockerfile
+	
+	cd insurance-server-lambdas; docker-compose run cs-builder
 
 run-with-cs:
-	@$(MAKE) -C ./insurance-server-lambdas run-with-cs
+	cd insurance-server-lambdas; ./gradlew optimizedDockerBuild -x test
+	cd insurance-server-lambdas; docker-compose --profile main --profile cs up
 
 rebuild:
-	@$(MAKE) -C ./insurance-server-lambdas swagger
-	@$(MAKE) -C ./insurance-server-lambdas build-auth-mtls
-	@$(MAKE) -C ./mock-service-os certmaker
+	cd insurance-swagger; BUILD_NUMBER=2 ./gradlew publishToMavenLocal
+	cd insurance-server-lambdas; docker-compose build auth
+	cd insurance-server-lambdas; docker-compose build mtls

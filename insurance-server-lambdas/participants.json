@@ -230,6 +230,50 @@
                                 "ApiEndpoint": "https://api.local/open-insurance/contract-life-pension/v1/lead/request/{consentId}"
                             }
                         ]
+                    },
+                    {
+                        "ApiFamilyType": "insurance-capitalization-title",
+                        "ApiVersion": "1.5.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-capitalization-title/v1/insurance-capitalization-title/plans"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-capitalization-title/v1/insurance-capitalization-title/{planId}/plan-info"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-capitalization-title/v1/insurance-capitalization-title/{planId}/events"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-capitalization-title/v1/insurance-capitalization-title/{planId}/settlements"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "quote-capitalization-title",
+                        "ApiVersion": "1.10.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/request/{consentId}/quote-status"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/request/{consentId}"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/lead/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/lead/request/{consentId}"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/raffle/request"
+                            }
+                        ]
                     }
                 ]
             }

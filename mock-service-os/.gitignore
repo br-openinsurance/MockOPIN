@@ -1,6 +1,2 @@
 /mongo/
 /data/
-/certs/*.crt
-/certs/*.key
-/certs/*.jwks
-/certs/*.json
