@@ -27,7 +27,23 @@ import io.micronaut.core.annotation.Introspected;
         QuoteRequestCapitalizationTitleLead.class,
         QuoteRequestCapitalizationTitle.class,
         RequestCapitalizationTitleRaffle.class,
-        ResponseCapitalizationTitleRaffle.class
+        ResponseCapitalizationTitleRaffle.class,
+        InsuranceCapitalizationTitleBroker.class,
+        AmountDetails.class,
+        AmountDetailsUnit.class,
+        InsuranceCapitalizationTitleHolder.class,
+        CapitalizationTitleQuotas.class,
+        InsuranceCapitalizationTitleSeries.class,
+        ResponseInsuranceCapitalizationTitleSettlementData.class,
+        InsuranceCapitalizationTitleSubscriber.class,
+        InsuranceCapitalizationTitleTechnicalProvisions.class,
+        InsuranceCapitalizationTitleTitle.class,
+        OverridePayload.class,
+        OverrideData.class,
+        OverrideDataResponse.class,
+        ResponseInsuranceFinancialAssistanceBrandContracts.class,
+        ResponseInsuranceFinancialAssistanceContractInfo.class,
+        InsuranceFinancialAssistanceMovements.class,
 })
 public class SwaggerIntrospectionConfig {
 }

@@ -7,7 +7,7 @@ import jakarta.inject.Singleton
 
 import java.time.Duration
 import java.time.Instant
-import java.time.LocalDate;
+import java.time.LocalDate
 
 @Singleton
 class TestEntityDataFactory extends CleanupSpecification {
@@ -26,7 +26,7 @@ class TestEntityDataFactory extends CleanupSpecification {
     }
 
     static String aConsentId() {
-        return "urn:mockin:" + UUID.randomUUID().toString();
+        return "urn:mockin:" + UUID.randomUUID().toString()
     }
 
     static aConsent(UUID accountHolderId, EnumConsentPermission... permissions) {
@@ -581,6 +581,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         def plan = new CapitalizationTitlePlanEntity()
         plan.setAccountHolderId(accountHolderId)
         plan.setCapitalizationTitleId("random_capitalization_title")
+        plan.setProductName("Test Capitalization Title Plan")
         plan
     }
 
@@ -588,32 +589,431 @@ class TestEntityDataFactory extends CleanupSpecification {
         def event = new CapitalizationTitlePlanEventEntity()
         event.setCapitalizationTitlePlanId(planId)
         event.setEventType(eventType)
+        event.setRaffleDate(LocalDate.of(2023, 01, 30))
+        event.setRaffleSettlementDate(LocalDate.of(2023, 01, 30))
+        event.setRaffleAmount("8")
+        event.setRaffleUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        event.setRaffleUnitTypeOthers("Horas")
+        event.setRaffleUnitCode("R\$")
+        event.setRaffleUnitDescription("BRL")
+        event.setRaffleCurrency("BRL")
         event
     }
 
     static aCapitalizationTitlePlanSettlement(UUID planId) {
         def settlement = new CapitalizationTitlePlanSettlementEntity()
         settlement.setCapitalizationTitlePlanId(planId)
+        settlement.setSettlementDueDate(LocalDate.of(2023, 01, 30))
+        settlement.setSettlementPaymentDate(LocalDate.of(2023, 01, 30))
+        settlement.setSettlementFinancialAmount("370")
+        settlement.setSettlementFinancialUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        settlement.setSettlementFinancialUnitTypeOthers("Horas")
+        settlement.setSettlementFinancialUnitCode("R\$")
+        settlement.setSettlementFinancialUnitDescription("BRL")
+        settlement.setSettlementFinancialCurrency("BRL")
         settlement
     }
 
-    static aFinancialRiskPolicy(UUID accountHolderId) {
+    static aCapitalizationPlanSeries(UUID planId) {
+        def series = new CapitalizationTitlePlanSeriesEntity()
+        series.setCapitalizationTitlePlanId(planId)
+        series.setModality("TRADICIONAL")
+        series.setSusepProcessNumber("15414622222222222")
+        series.setCommercialDenomination("Denominação comercial do produto")
+        series.setSerieSize(5000000)
+        series.setGracePeriodRedemption(48)
+        series.setGracePeriodForFullRedemption(48)
+        series.setUpdateIndex("IPCA")
+        series.setUpdateIndexOthers("Índice de atualização Outros")
+        series.setReadjustmentIndex("IPCA")
+        series.setReadjustmentIndexOthers("Índice de atualização Outros")
+        series.setBonusClause(false)
+        series.setFrequency("PAGAMENTO_MENSAL")
+        series.setFrequencyDescription("string")
+        series.setInterestRate("10.00")
+        series
+    }
+
+    static aCapitalizationPlanBroker(UUID seriesId) {
+        def broker = new CapitalizationTitlePlanBrokerEntity()
+        broker.setCapitalizationTitlePlanSeriesId(seriesId)
+        broker.setBrokerDescription("string")
+        broker.setSusepBrokerCode("123123123")
+        broker
+    }
+
+    static aCapitalizationTitlePlanQuota(UUID seriesId) {
+        def quota = new CapitalizationTitlePlanQuotaEntity()
+        quota.setCapitalizationTitlePlanSeriesId(seriesId)
+        quota.setQuota(10)
+        quota.setCapitalizationQuota("0.000002")
+        quota.setRaffleQuota("0.000002")
+        quota.setChargingQuota("0.000002")
+        quota
+    }
+
+    static aCapitalizationTitlePlanTitle(UUID seriesId) {
+        def title = new CapitalizationTitlePlanTitleEntity()
+        title.setCapitalizationTitlePlanSeriesId(seriesId)
+        title.setRegistrationForm("string")
+        title.setIssueTitleDate(LocalDate.of(2023, 01, 30))
+        title.setTermStartDate(LocalDate.of(2023, 01, 30))
+        title.setTermEndDate(LocalDate.of(2023, 01, 30))
+        title.setRafflePremiumAmount("8")
+        title.setRafflePremiumUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        title.setRafflePremiumUnitTypeOthers("Horas")
+        title.setRafflePremiumUnitCode("R\$")
+        title.setRafflePremiumUnitDescription("BRL")
+        title.setRafflePremiumCurrency("BRL")
+        title.setContributionAmount("370")
+        title.setContributionUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        title.setContributionUnitTypeOthers("Horas")
+        title.setContributionUnitCode("R\$")
+        title.setContributionUnitDescription("BRL")
+        title.setContributionCurrency("BRL")
+        title
+    }
+
+    static aCapitalizationTitlePlanSubscriber(UUID titleId) {
+        def subscriber = new CapitalizationTitlePlanSubscriberEntity()
+        subscriber.setCapitalizationTitlePlanTitleId(titleId)
+        subscriber.setSubscriberName("Nome do Subscritor")
+        subscriber.setSubscriberDocumentType("OUTROS")
+        subscriber.setSubscriberDocumentTypeOthers("string")
+        subscriber.setSubscriberDocumentNumber("string")
+        subscriber.setSubscriberAddress("Av Naburo Ykesaki, 1270")
+        subscriber.setSubscriberAddressAdditionalInfo("Fundos")
+        subscriber.setSubscriberTownName("Rio de Janeiro")
+        subscriber.setSubscriberCountrySubDivision("RJ")
+        subscriber.setSubscriberCountryCode("BRA")
+        subscriber.setSubscriberPostcode("17500001")
+        subscriber.setSubscriberCountryCallingCode("55")
+        subscriber.setSubscriberAreaCode("11")
+        subscriber.setSubscriberNumber("29875132")
+        subscriber
+    }
+
+    static aCapitalizationTitlePlanHolder(UUID subscriberId) {
+        def holder = new CapitalizationTitlePlanHolderEntity()
+        holder.setCapitalizationTitleSubscriberId(subscriberId)
+        holder.setHolderName("Nome do Titular")
+        holder.setHolderDocumentType("OUTROS")
+        holder.setHolderDocumentTypeOthers("string")
+        holder.setHolderDocumentNumber("string")
+        holder.setHolderAddress("Av Naburo Ykesaki, 1270")
+        holder.setHolderAddressAdditionalInfo("Fundos")
+        holder.setHolderTownName("Rio de Janeiro")
+        holder.setHolderCountrySubdivision("RJ")
+        holder.setHolderCountryCode("BRA")
+        holder.setHolderPostcode("17500001")
+        holder.setHolderRedemption(false)
+        holder.setHolderRaffle(false)
+        holder.setHolderCountryCallingCode("55")
+        holder.setHolderAreaCode("11")
+        holder.setHolderNumber("29875132")
+        holder
+    }
+
+    static aCapitalizationTitlePlanTechnicalProvisions(UUID titleId) {
+        def technicalProvisions = new CapitalizationTitlePlanTechnicalProvisionsEntity()
+        technicalProvisions.setCapitalizationTitlePlanTitleId(titleId)
+        technicalProvisions.setPmcAmount("100.00")
+        technicalProvisions.setPmcUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        technicalProvisions.setPmcUnitTypeOthers("Horas")
+        technicalProvisions.setPmcUnitCode("R\$")
+        technicalProvisions.setPmcUnitDescription("BRL")
+        technicalProvisions.setPmcCurrency("BRL")
+        technicalProvisions.setPdbAmount("100.00")
+        technicalProvisions.setPdbUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        technicalProvisions.setPdbUnitTypeOthers("Horas")
+        technicalProvisions.setPdbUnitCode("R\$")
+        technicalProvisions.setPdbUnitDescription("BRL")
+        technicalProvisions.setPdbCurrency("BRL")
+        technicalProvisions.setPrAmount("100.00")
+        technicalProvisions.setPrUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        technicalProvisions.setPrUnitTypeOthers("Horas")
+        technicalProvisions.setPrUnitCode("R\$")
+        technicalProvisions.setPrUnitDescription("BRL")
+        technicalProvisions.setPrCurrency("BRL")
+        technicalProvisions.setPspAmount("100.00")
+        technicalProvisions.setPspUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        technicalProvisions.setPspUnitTypeOthers("Horas")
+        technicalProvisions.setPspUnitCode("R\$")
+        technicalProvisions.setPspUnitDescription("BRL")
+        technicalProvisions.setPspCurrency("BRL")
+        technicalProvisions
+    }
+
+    static aFinancialRiskPolicy(UUID accountHolderId, List<UUID> insuredIds, List<UUID> beneficiaryIds,
+                                List<UUID> principalIds, List<UUID> intermediaryIds, List<UUID> coinsurerIds) {
         def contract = new FinancialRiskPolicyEntity()
         contract.setAccountHolderId(accountHolderId)
         contract.setFinancialRiskId("random_financial_risk")
+        contract.setProductName("Produto Exemplo")
+        contract.setDocumentType(InsuranceFinancialRiskPolicyInfoData.DocumentTypeEnum.APOLICE_INDIVIDUAL.toString())
+        contract.setSusepProcessNumber("string")
+        contract.setGroupCertificateId("string")
+        contract.setIssuanceType(InsuranceFinancialRiskPolicyInfoData.IssuanceTypeEnum.EMISSAO_PROPRIA.toString())
+        contract.setIssuanceDate(LocalDate.of(2023, 01, 30))
+        contract.setTermStartDate(LocalDate.of(2023, 01, 30))
+        contract.setTermEndDate(LocalDate.of(2023, 01, 30))
+        contract.setLeadInsurerCode("string")
+        contract.setLeadInsurerPolicyId("string")
+        contract.setMaxLMGAmount("27.90")
+        contract.setMaxLMGUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        contract.setMaxLMGUnitTypeOthers("Horas")
+        contract.setMaxLMGUnitCode("R\$")
+        contract.setMaxLMGUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        contract.setProposalId("string")
+        contract.setBranchInfoIdentification("string")
+        contract.setBranchInfoUserGroup("string")
+        contract.setBranchInfoTechnicalSurplus("10.00")
+        contract.setInsuredIds(insuredIds)
+        contract.setBeneficiaryIds(beneficiaryIds)
+        contract.setPrincipalIds(principalIds)
+        contract.setIntermediaryIds(intermediaryIds)
+        contract.setCoinsurerIds(coinsurerIds)
         contract
+    }
+
+    static aFinancialRiskPolicyInsured() {
+        def insured = new PersonalInfoEntity()
+        insured.setIdentification("12345678900")
+        insured.setIdentificationType("CPF")
+        insured.setIdentificationTypeOthers("RNE")
+        insured.setName("Nome Sobrenome")
+        insured.setBirthDate(LocalDate.of(1999, 06, 12))
+        insured.setPostCode("10000000")
+        insured.setEmail("string")
+        insured.setCity("string")
+        insured.setState("AC")
+        insured.setCountry("BRA")
+        insured.setAddress("string")
+        insured
+    }
+
+    static aFinancialRiskPolicyBeneficiary() {
+        def beneficiary = new BeneficiaryInfoEntity()
+        beneficiary.setIdentification("12345678900")
+        beneficiary.setIdentificationType("CPF")
+        beneficiary.setIdentificationTypeOthers("RNE")
+        beneficiary.setName("Nome Sobrenome")
+        beneficiary
+    }
+
+    static aFinancialRiskPolicyPrincipal() {
+        def principal = new PrincipalInfoEntity()
+        principal.setIdentification("12345678900")
+        principal.setIdentificationType("CPF")
+        principal.setIdentificationTypeOthers("RNE")
+        principal.setName("Nome Sobrenome")
+        principal.setPostCode("10000000")
+        principal.setEmail("string")
+        principal.setCity("string")
+        principal.setState("AC")
+        principal.setCountry("BRA")
+        principal.setAddress("string")
+        principal
+    }
+
+    static aFinancialRiskPolicyIntermediary() {
+        def intermediary = new IntermediaryEntity()
+        intermediary.setIdentification("12345678900")
+        intermediary.setIdentificationType("CPF")
+        intermediary.setIdentificationTypeOthers("RNE")
+        intermediary.setName("Nome Sobrenome")
+        intermediary.setPostCode("10000000")
+        intermediary.setCity("string")
+        intermediary.setState("AC")
+        intermediary.setCountry("BRA")
+        intermediary.setAddress("string")
+        intermediary
+    }
+
+    static aFinancialRiskPolicyInsuredObject(UUID planId) {
+        def insuredObject = new FinancialRiskPolicyInsuredObjectEntity()
+        insuredObject.setFinancialRiskPolicyId(planId)
+        insuredObject.setIdentification("string")
+        insuredObject.setType("CONTRATO")
+        insuredObject.setTypeAdditionalInfo("string")
+        insuredObject.setDescription("string")
+        insuredObject.setAmount("751")
+        insuredObject.setUnitType("PORCENTAGEM")
+        insuredObject.setUnitTypeOthers("Horas")
+        insuredObject.setUnitCode("R\$")
+        insuredObject.setUnitDescription("BRL")
+        insuredObject
+    }
+
+    static aFinancialRiskPolicyInsuredObjectCoverage(UUID insuredObjectId) {
+        def coverage = new FinancialRiskPolicyInsuredObjectCoverageEntity()
+        coverage.setFinancialRiskInsuredObjectId(insuredObjectId)
+        coverage.setBranch("0111")
+        coverage.setCode("PROTECAO_DE_BENS")
+        coverage.setDescription("string")
+        coverage.setInternalCode("string")
+        coverage.setSusepProcessNumber("string")
+        coverage.setLmiAmount("947556")
+        coverage.setLmiUnitType("PORCENTAGEM")
+        coverage.setLmiUnitTypeOthers("Horas")
+        coverage.setLmiUnitCode("R\$")
+        coverage.setLmiUnitDescription("BRL")
+        coverage.setIsLMISublimit(true)
+        coverage.setTermStartDate(LocalDate.of(2023, 01, 30))
+        coverage.setTermEndDate(LocalDate.of(2023, 01, 30))
+        coverage.setIsMainCoverage(true)
+        coverage.setFeature("MASSIFICADOS")
+        coverage.setType("PARAMETRICO")
+        coverage.setGracePeriod(0)
+        coverage.setGracePeriodicity("DIA")
+        coverage.setGracePeriodCountingMethod("DIAS_UTEIS")
+        coverage.setGracePeriodStartDate(LocalDate.of(2023, 01, 30))
+        coverage.setGracePeriodEndDate(LocalDate.of(2023, 01, 30))
+        coverage.setPremiumPeriodicity("MENSAL")
+        coverage.setPremiumPeriodicityOthers("string")
+        coverage
+    }
+
+    static aFinancialRiskPolicyCoverage(UUID planId, UUID deductibleId, UUID posId) {
+        def coverage = new FinancialRiskPolicyCoverageEntity()
+        coverage.setFinancialRiskPolicyId(planId)
+        coverage.setDeductibleId(deductibleId)
+        coverage.setPOSId(posId)
+        coverage.setBranch("0111")
+        coverage.setCode("PROTECAO_DE_BENS")
+        coverage.setDescription("string")
+        coverage
+    }
+
+    static aFinancialRiskPolicyCoverageDeductible() {
+        def deductible = new DeductibleEntity()
+        deductible.setType("DEDUTIVEL")
+        deductible.setTypeAdditionalInfo("string")
+        deductible.setAmount("692372.38")
+        deductible.setUnitType("PORCENTAGEM")
+        deductible.setUnitTypeOthers("Horas")
+        deductible.setUnitCode("R\$")
+        deductible.setUnitDescription("BRL")
+        deductible.setPeriod(10)
+        deductible.setPeriodicity("DIA")
+        deductible.setPeriodCountingMethod("DIAS_UTEIS")
+        deductible.setPeriodStartDate(LocalDate.of(2023, 01, 30))
+        deductible.setPeriodEndDate(LocalDate.of(2023, 01, 31))
+        deductible.setDescription("string")
+        deductible
+    }
+
+    static aFinancialRiskPolicyCoveragePos() {
+        def pos = new POSEntity()
+        pos.setApplicationType("VALOR")
+        pos.setDescription("string")
+        pos.setMinValueAmount("01")
+        pos.setMinValueUnitType("PORCENTAGEM")
+        pos.setMinValueUnitTypeOthers("Horas")
+        pos.setMinValueUnitCode("R\$")
+        pos.setMinValueUnitDescription("BRL")
+        pos.setMaxValueAmount("06.26")
+        pos.setMaxValueUnitType("PORCENTAGEM")
+        pos.setMaxValueUnitTypeOthers("Horas")
+        pos.setMaxValueUnitCode("R\$")
+        pos.setMaxValueUnitDescription("BRL")
+        pos.setPercentageAmount("5.12")
+        pos.setPercentageUnitType("PORCENTAGEM")
+        pos.setPercentageUnitTypeOthers("Horas")
+        pos.setPercentageUnitCode("R\$")
+        pos.setPercentageUnitDescription("BRL")
+        pos.setValueOthersAmount("616157")
+        pos.setValueOthersUnitType("PORCENTAGEM")
+        pos.setValueOthersUnitTypeOthers("Horas")
+        pos.setValueOthersUnitCode("R\$")
+        pos.setValueOthersUnitDescription("BRL")
+        pos
+    }
+
+    static aFinancialRiskPolicyCoinsurer() {
+        def coinsurer = new CoinsurerEntity()
+        coinsurer.setIdentification("string")
+        coinsurer.setCededPercentage("10.00")
+        coinsurer
     }
 
     static aFinancialRiskPolicyClaim(UUID planId) {
         def claim = new FinancialRiskPolicyClaimEntity()
         claim.setFinancialRiskPolicyId(planId)
+        claim.setIdentification("string")
+        claim.setDocumentationDeliveryDate(LocalDate.of(2023, 01, 30))
+        claim.setStatus("ABERTO")
+        claim.setStatusAlterationDate(LocalDate.of(2023, 01, 30))
+        claim.setOccurrenceDate(LocalDate.of(2023, 01, 30))
+        claim.setWarningDate(LocalDate.of(2023, 01, 30))
+        claim.setThirdPartyClaimDate(LocalDate.of(2023, 01, 30))
+        claim.setAmount("28494")
+        claim.setUnitType("PORCENTAGEM")
+        claim.setUnitTypeOthers("Horas")
+        claim.setUnitCode("R\$")
+        claim.setUnitDescription("BRL")
+        claim.setDenialJustification("RISCO_EXCLUIDO")
+        claim.setDenialJustificationDescription("string")
         claim
     }
 
-    static aFinancialRiskPolicyPremium(UUID planId) {
+    static aFinancialRiskPolicyClaimCoverage(UUID claimId) {
+        def coverage = new FinancialRiskPolicyClaimCoverageEntity()
+        coverage.setFinancialRiskPolicyClaimId(claimId)
+        coverage.setInsuredObjectId("string")
+        coverage.setBranch("0111")
+        coverage.setCode("PROTECAO_DE_BENS")
+        coverage.setDescription("string")
+        coverage.setWarningDate(LocalDate.of(2023, 01, 30))
+        coverage.setThirdPartyClaimDate(LocalDate.of(2023, 01, 30))
+        coverage
+    }
+
+    static aFinancialRiskPolicyPremium(UUID planId, List<UUID> paymentIds) {
         def premium = new FinancialRiskPolicyPremiumEntity()
         premium.setFinancialRiskPolicyId(planId)
+        premium.setAmount("46")
+        premium.setUnitType("PORCENTAGEM")
+        premium.setUnitTypeOthers("Horas")
+        premium.setUnitCode("R\$")
+        premium.setUnitDescription("BRL")
+        premium.setPaymentIds(paymentIds)
         premium
+    }
+
+    static aFinancialRiskPolicyPremiumCoverage(UUID premiumId) {
+        def coverage = new FinancialRiskPolicyPremiumCoverageEntity()
+        coverage.setFinancialRiskPolicyPremiumId(premiumId)
+        coverage.setBranch("0111")
+        coverage.setCode("PROTECAO_DE_BENS")
+        coverage.setDescription("string")
+        coverage.setPremiumAmount("100.00")
+        coverage.setPremiumUnitType("PORCENTAGEM")
+        coverage.setPremiumUnitTypeOthers("Horas")
+        coverage.setPremiumUnitCode("R\$")
+        coverage.setPremiumUnitDescription("BRL")
+        coverage
+    }
+
+    static aFinancialRiskPolicyPremiumPayment() {
+        def payment = new PaymentEntity()
+        payment.setMovementDate(LocalDate.of(2023, 01, 30))
+        payment.setMovementType("LIQUIDACAO_DE_PREMIO")
+        payment.setMovementOrigin("EMISSAO_DIRETA")
+        payment.setMovementPaymentsNumber("str")
+        payment.setAmount("55595")
+        payment.setUnitType("PORCENTAGEM")
+        payment.setUnitTypeOthers("Horas")
+        payment.setUnitCode("R\$")
+        payment.setUnitDescription("BRL")
+        payment.setMaturityDate(LocalDate.of(2023, 01, 30))
+        payment.setTellerId("string")
+        payment.setTellerIdType("CPF")
+        payment.setTellerIdTypeOthers("RNE")
+        payment.setTellerName("string")
+        payment.setFinancialInstitutionCode("string")
+        payment.setPaymentType("BOLETO")
+        payment
     }
 
     static aHousingPolicy(UUID accountHolderId) {
@@ -751,13 +1151,124 @@ class TestEntityDataFactory extends CleanupSpecification {
         def contract = new FinancialAssistanceContractEntity()
         contract.setAccountHolderId(accountHolderId)
         contract.setFinancialAssistanceContractId("random_life_pension")
+        contract.setCertificateId("42")
+        contract.setGroupContractId("42")
+        contract.setSusepProcessNumber("12345")
+        contract.setConceivedCreditValueAmount("100.00")
+        contract.setConceivedCreditValueUnitType("PORCENTAGEM")
+        contract.setConceivedCreditValueUnitTypeOthers("Horas")
+        contract.setConceivedCreditValueUnitCode("R\$")
+        contract.setConceivedCreditValueUnitDescription("BRL")
+        contract.setConceivedCreditValueCurrency("BRL")
+        contract.setCreditedLiquidValueAmount("100.00")
+        contract.setCreditedLiquidValueUnitType("PORCENTAGEM")
+        contract.setCreditedLiquidValueUnitTypeOthers("Horas")
+        contract.setCreditedLiquidValueUnitCode("R\$")
+        contract.setCreditedLiquidValueUnitDescription("BRL")
+        contract.setCreditedLiquidValueCurrency("BRL")
+        contract.setCounterInstallmentAmount("0.84")
+        contract.setCounterInstallmentUnitType("PORCENTAGEM")
+        contract.setCounterInstallmentUnitTypeOthers("Horas")
+        contract.setCounterInstallmentUnitCode("R\$")
+        contract.setCounterInstallmentUnitDescription("BRL")
+        contract.setCounterInstallmentCurrency("BRL")
+        contract.setCounterInstallmentPeriodicity("MENSAL")
+        contract.setCounterInstallmentQuantity(4)
+        contract.setCounterInstallmentFirstDate(LocalDate.of(2021, 05, 21))
+        contract.setCounterInstallmentLastDate(LocalDate.of(2021, 05, 21))
+        contract.setInterestRateAmount("88.70")
+        contract.setInterestRateUnitType("PORCENTAGEM")
+        contract.setInterestRateUnitTypeOthers("Horas")
+        contract.setInterestRateUnitCode("R\$")
+        contract.setInterestRateUnitDescription("BRL")
+        contract.setInterestRateCurrency("BRL")
+        contract.setEffectiveCostRateAmount("255579661.04")
+        contract.setEffectiveCostRateUnitType("PORCENTAGEM")
+        contract.setEffectiveCostRateUnitTypeOthers("Horas")
+        contract.setEffectiveCostRateUnitCode("R\$")
+        contract.setEffectiveCostRateUnitDescription("BRL")
+        contract.setEffectiveCostRateCurrency("BRL")
+        contract.setAmortizationPeriod(4)
+        contract.setAcquittanceValueAmount("736280.46")
+        contract.setAcquittanceValueUnitType("PORCENTAGEM")
+        contract.setAcquittanceValueUnitTypeOthers("Horas")
+        contract.setAcquittanceValueUnitCode("R\$")
+        contract.setAcquittanceValueUnitDescription("BRL")
+        contract.setAcquittanceValueCurrency("BRL")
+        contract.setAcquittanceDate(LocalDate.of(2021, 05, 21))
+        contract.setTaxesValueAmount("1856029.36")
+        contract.setTaxesValueUnitType("PORCENTAGEM")
+        contract.setTaxesValueUnitTypeOthers("Horas")
+        contract.setTaxesValueUnitCode("R\$")
+        contract.setTaxesValueUnitDescription("BRL")
+        contract.setTaxesValueCurrency("BRL")
+        contract.setExpensesValueAmount("016")
+        contract.setExpensesValueUnitType("PORCENTAGEM")
+        contract.setExpensesValueUnitTypeOthers("Horas")
+        contract.setExpensesValueUnitCode("R\$")
+        contract.setExpensesValueUnitDescription("BRL")
+        contract.setExpensesValueCurrency("BRL")
+        contract.setFinesValueAmount("123604.13")
+        contract.setFinesValueUnitType("PORCENTAGEM")
+        contract.setFinesValueUnitTypeOthers("Horas")
+        contract.setFinesValueUnitCode("R\$")
+        contract.setFinesValueUnitDescription("BRL")
+        contract.setFinesValueCurrency("BRL")
+        contract.setMonetaryUpdatesValueAmount("65.90")
+        contract.setMonetaryUpdatesValueUnitType("PORCENTAGEM")
+        contract.setMonetaryUpdatesValueUnitTypeOthers("Horas")
+        contract.setMonetaryUpdatesValueUnitCode("R\$")
+        contract.setMonetaryUpdatesValueUnitDescription("BRL")
+        contract.setMonetaryUpdatesValueCurrency("BRL")
+        contract.setAdministrativeFeesValueAmount("90.02")
+        contract.setAdministrativeFeesValueUnitType("PORCENTAGEM")
+        contract.setAdministrativeFeesValueUnitTypeOthers("Horas")
+        contract.setAdministrativeFeesValueUnitCode("R\$")
+        contract.setAdministrativeFeesValueUnitDescription("BRL")
+        contract.setAdministrativeFeesValueCurrency("BRL")
+        contract.setInterestValueAmount("100.00")
+        contract.setInterestValueUnitType("PORCENTAGEM")
+        contract.setInterestValueUnitTypeOthers("Horas")
+        contract.setInterestValueUnitCode("R\$")
+        contract.setInterestValueUnitDescription("BRL")
+        contract.setInterestValueCurrency("BRL")
         contract
     }
 
     static aFinancialAssistanceContractMovement(String contractId) {
         def movement = new FinancialAssistanceContractMovementEntity()
         movement.setFinancialAssistanceContractId(contractId)
+        movement.setUpdatedDebitAmount("291218.42")
+        movement.setUpdatedDebitUnitType("PORCENTAGEM")
+        movement.setUpdatedDebitUnitTypeOthers("Horas")
+        movement.setUpdatedDebitUnitCode("R\$")
+        movement.setUpdatedDebitUnitDescription("BRL")
+        movement.setUpdatedDebitCurrency("BRL")
+        movement.setRemainingCounterInstallmentsQuantity(4)
+        movement.setRemainingUnpaidCounterInstallmentsQuantity(4)
+        movement.setLifePensionPmBacAmount("910677.19")
+        movement.setLifePensionPmBacUnitType("PORCENTAGEM")
+        movement.setLifePensionPmBacUnitTypeOthers("Horas")
+        movement.setLifePensionPmBacUnitCode("R\$")
+        movement.setLifePensionPmBacUnitDescription("BRL")
+        movement.setLifePensionPmBacCurrency("BRL")
+        movement.setPensionPlanPmBacAmount("0546074035413.87")
+        movement.setPensionPlanPmBacUnitType("PORCENTAGEM")
+        movement.setPensionPlanPmBacUnitTypeOthers("Horas")
+        movement.setPensionPlanPmBacUnitCode("R\$")
+        movement.setPensionPlanPmBacUnitDescription("BRL")
+        movement.setPensionPlanPmBacCurrency("BRL")
         movement
+    }
+
+    static aFinancialAssistanceContractInsured(String contractId) {
+        def insured = new FinancialAssistanceContractInsuredEntity()
+        insured.setFinancialAssistanceContractId(contractId)
+        insured.setDocumentNumber("12345678910")
+        insured.setDocumentType("CPF")
+        insured.setDocumentTypeOthers("string")
+        insured.setName("Juan Kaique Cláudio Fernandes")
+        insured
     }
 
     static anAcceptanceAndBranchesAbroadPolicy(UUID accountHolderId) {

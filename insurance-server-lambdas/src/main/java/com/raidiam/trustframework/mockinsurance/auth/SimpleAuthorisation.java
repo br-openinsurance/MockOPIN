@@ -81,7 +81,8 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
             entry("insurance-transport", "TRANSPORT_MANAGE"),
             // op-related scopes, are these real? They govern the PUT endpoints needed for administration.
             entry("op:consent", "CONSENTS_FULL_MANAGE"),
-            entry("op:admin", "ADMIN_FULL_MANAGE")
+            entry("op:admin", "ADMIN_FULL_MANAGE"),
+            entry("override", "OVERRIDE_MANAGE")
     );
 
     private final ApplicationContext applicationContext;

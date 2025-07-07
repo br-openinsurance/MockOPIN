@@ -13,6 +13,7 @@ import com.raidiam.trustframework.mockinsurance.domain.QuotePatrimonialHomeEntit
 import com.raidiam.trustframework.mockinsurance.domain.QuotePatrimonialLeadEntity
 import com.raidiam.trustframework.mockinsurance.models.generated.*
 import com.raidiam.trustframework.mockinsurance.repository.IdempotencyRepository
+import com.raidiam.trustframework.mockinsurance.services.OverrideService
 import com.raidiam.trustframework.mockinsurance.services.QuotePatrimonialBusinessService
 import com.raidiam.trustframework.mockinsurance.services.QuotePatrimonialCondominiumService
 import com.raidiam.trustframework.mockinsurance.services.QuotePatrimonialDiverseRisksService
@@ -28,7 +29,7 @@ import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
 import spock.lang.Specification
 
-@MicronautTest
+@MicronautTest(environments = "test")
 class QuotePatrimonialControllerSpec extends Specification {
 
     private static Context lambdaContext = new MockLambdaContext()
@@ -40,6 +41,13 @@ class QuotePatrimonialControllerSpec extends Specification {
     @MockBean(QuotePatrimonialLeadService)
     QuotePatrimonialLeadService quotePatrimonialLeadService() {
         Spy(QuotePatrimonialLeadService)
+    }
+
+    @MockBean(OverrideService)
+    OverrideService overrideService() {
+        def mock = Mock(OverrideService)
+        mock.getOverride(_ as String, _ as String, _ as String) >> Optional.empty()
+        return mock
     }
 
     @Inject

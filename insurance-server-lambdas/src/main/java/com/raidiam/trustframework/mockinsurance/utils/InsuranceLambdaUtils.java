@@ -494,6 +494,11 @@ public class InsuranceLambdaUtils {
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.FORBIDDEN, "Request has no associated consent Id"));
     }
 
+    public static String getClientIdFromRequest(HttpRequest<?> request) {
+        return Optional.of(InsuranceLambdaUtils.getRequestMeta(request)).map(InsuranceLambdaUtils.RequestMeta::getClientId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.FORBIDDEN, "Request has no associated client Id"));
+    }
+
     public static Set<EnumConsentPermission> getConsentPermissions(ConsentEntity consent) {
         return consent.getPermissions().stream()
                 .map(EnumConsentPermission::fromValue)

@@ -11,6 +11,7 @@ import com.raidiam.trustframework.mockinsurance.models.generated.ResponsePersona
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponsePersonalCustomersIdentification
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponsePersonalCustomersQualification
 import com.raidiam.trustframework.mockinsurance.services.CustomerService
+import com.raidiam.trustframework.mockinsurance.services.OverrideService
 import io.micronaut.context.ApplicationContext
 import io.micronaut.function.aws.proxy.MockLambdaContext
 import io.micronaut.function.aws.proxy.payload1.ApiGatewayProxyRequestEventFunction
@@ -29,6 +30,13 @@ class CustomerControllerSpec extends Specification {
     @MockBean(CustomerService)
     CustomerService customerService() {
         Spy(CustomerService)
+    }
+
+    @MockBean(OverrideService)
+    OverrideService overrideService() {
+        def mock = Mock(OverrideService)
+        mock.getOverride(_ as String, _ as String, _ as String) >> Optional.empty()
+        return mock
     }
 
     private static Context lambdaContext = new MockLambdaContext()

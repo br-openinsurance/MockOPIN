@@ -11,6 +11,7 @@ import com.raidiam.trustframework.mockinsurance.domain.ClaimNotificationPersonEn
 import com.raidiam.trustframework.mockinsurance.repository.IdempotencyRepository
 import com.raidiam.trustframework.mockinsurance.services.ClaimNotificationDamageService
 import com.raidiam.trustframework.mockinsurance.services.ClaimNotificationPersonService
+import com.raidiam.trustframework.mockinsurance.services.OverrideService
 import io.micronaut.context.ApplicationContext
 import io.micronaut.function.aws.proxy.MockLambdaContext
 import io.micronaut.function.aws.proxy.payload1.ApiGatewayProxyRequestEventFunction
@@ -33,6 +34,13 @@ class ClaimNotificationControllerSpec extends Specification {
     @MockBean(ClaimNotificationDamageService)
     ClaimNotificationDamageService claimNotificationDamageService() {
         Mock(ClaimNotificationDamageService)
+    }
+
+    @MockBean(OverrideService)
+    OverrideService overrideService() {
+        def mock = Mock(OverrideService)
+        mock.getOverride(_ as String, _ as String, _ as String) >> Optional.empty()
+        return mock
     }
 
     @Inject

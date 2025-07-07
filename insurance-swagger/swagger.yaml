@@ -41,6 +41,34 @@ tags:
   - name: InsurancePensionPlan
   - name: Admin
 paths:
+  '/override':
+    put:
+      summary: Create or update a route override
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OverridePayload'
+      responses:
+        '200':
+          description: Override created or updated
+          headers:
+            x-fapi-interaction-id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OverridePayload'
+      security:
+        - authorizer: []
+      x-amazon-apigateway-integration:
+        uri: "${lambda_write_arn}"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        timeoutInMillis: 29000
+        type: "aws_proxy"
   '/admin/webhook/{clientId}':
     put:
       operationId: putWebhook
@@ -6736,6 +6764,36 @@ paths:
         type: "aws_proxy"
 components:
   schemas:
+    OverridePayload:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/OverrideData'
+    OverrideData:
+      required: [method, path, response]
+      properties:
+        method:
+          type: string
+          enum: [GET, POST, PUT, DELETE, PATCH]
+        path:
+          type: string
+        timeout:
+          type: integer
+          description: Time to live in seconds (optional)
+        response:
+          type: object
+          required: [status, body]
+          properties:
+            status:
+              type: integer
+              example: 200
+            headers:
+              type: object
+              additionalProperties:
+                type: string
+            body:
+              type: object
     Introspection:
       type: object
       properties:
@@ -7933,8 +7991,7 @@ components:
         maxValue:
           $ref: '#/components/schemas/AmountDetails'
         percentage:
-          type: string
-          pattern: '^(^(100\.\00|\d{1,2}\.\d{2})$|^(\d{1,6})$|^(\d{1,15}\.\d{2})$)$'
+          $ref: '#/components/schemas/AmountDetails'
         valueOthers:
           $ref: '#/components/schemas/AmountDetails'
     Coinsurer:
@@ -17501,8 +17558,7 @@ components:
         maxValue:
           $ref: '#/components/schemas/AmountDetails'
         percentage:
-          type: string
-          pattern: ^100\.0{1,9}$|^\d{1,2}\.\d{1,9}$
+          $ref: '#/components/schemas/AmountDetails'
         fullIndemnityDeductible:
           $ref: '#/components/schemas/AmountDetails'
     EnumCodeCoverage:

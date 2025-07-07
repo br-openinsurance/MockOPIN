@@ -9,6 +9,7 @@ import com.raidiam.trustframework.mockinsurance.TestRequestDataFactory
 import com.raidiam.trustframework.mockinsurance.domain.QuoteAcceptanceAndBranchesAbroadLeadEntity
 import com.raidiam.trustframework.mockinsurance.models.generated.*
 import com.raidiam.trustframework.mockinsurance.repository.IdempotencyRepository
+import com.raidiam.trustframework.mockinsurance.services.OverrideService
 import com.raidiam.trustframework.mockinsurance.services.QuoteAcceptanceAndBranchesAbroadLeadService
 import io.micronaut.context.ApplicationContext
 import io.micronaut.function.aws.proxy.MockLambdaContext
@@ -32,6 +33,13 @@ class QuoteAcceptanceAndBranchesAbroadControllerSpec extends Specification {
     @MockBean(QuoteAcceptanceAndBranchesAbroadLeadService)
     QuoteAcceptanceAndBranchesAbroadLeadService quoteAcceptanceAndBranchesAbroadLeadService() {
         Spy(QuoteAcceptanceAndBranchesAbroadLeadService)
+    }
+
+    @MockBean(OverrideService)
+    OverrideService overrideService() {
+        def mock = Mock(OverrideService)
+        mock.getOverride(_ as String, _ as String, _ as String) >> Optional.empty()
+        return mock
     }
 
     @Inject

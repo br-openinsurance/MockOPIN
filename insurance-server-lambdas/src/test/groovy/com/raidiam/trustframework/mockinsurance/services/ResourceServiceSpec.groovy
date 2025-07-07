@@ -119,7 +119,7 @@ class ResourceServiceSpec extends CleanupSpecification {
             testCapitalizationTitlePlan = capitalizationTitlePlanRepository.save(TestEntityDataFactory.aCapitalizationTitlePlan(testAccountHolder.getAccountHolderId()))
             consentCapitalizationTitlePlanRepository.save(new ConsentCapitalizationTitlePlanEntity(testConsent, testCapitalizationTitlePlan))
 
-            testFinancialRiskPolicy = financialRiskPolicyRepository.save(TestEntityDataFactory.aFinancialRiskPolicy(testAccountHolder.getAccountHolderId()))
+            testFinancialRiskPolicy = financialRiskPolicyRepository.save(TestEntityDataFactory.aFinancialRiskPolicy(testAccountHolder.getAccountHolderId(), null, null, null, null, null))
             consentFinancialRiskPolicyRepository.save(new ConsentFinancialRiskPolicyEntity(testConsent, testFinancialRiskPolicy))
 
             testHousingPolicy = housingPolicyRepository.save(TestEntityDataFactory.aHousingPolicy(testAccountHolder.getAccountHolderId()))

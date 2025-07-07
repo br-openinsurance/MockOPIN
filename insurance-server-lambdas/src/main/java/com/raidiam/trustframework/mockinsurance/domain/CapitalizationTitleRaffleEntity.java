@@ -71,7 +71,7 @@ public class CapitalizationTitleRaffleEntity extends BaseEntity {
         );
 
         var raffleData = new ResponseCapitalizationTitleRaffleData();
-        raffleData.setModality(ModalityEnum.valueOf(this.getData().getModality().toString()));
+        raffleData.setModality(ModalityEnum.fromValue(this.getData().getModality().toString()));
         raffleData.setProtocolDateTime(InsuranceLambdaUtils.getOffsetDateTimeInBrasil());
         raffleData.setProtocolNumber("string");
         raffleData.setRaffleCustomData(this.getData().getRaffleCustomData());

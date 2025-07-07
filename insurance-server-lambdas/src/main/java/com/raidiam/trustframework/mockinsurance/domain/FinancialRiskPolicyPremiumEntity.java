@@ -5,12 +5,10 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.hibernate.annotations.Generated;
-import org.hibernate.annotations.GenerationTime;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,9 +21,39 @@ public class FinancialRiskPolicyPremiumEntity extends BaseEntity {
 
     @Id
     @GeneratedValue
-    @Generated(GenerationTime.INSERT)
     @Column(name = "financial_risk_policy_premium_id", unique = true, nullable = false, updatable = false, insertable = false, columnDefinition = "uuid NOT NULL DEFAULT uuid_generate_v4()")
     private UUID premiumId;
+
+    @Column(name = "payments_quantity")
+    private Integer paymentsQuantity;
+
+    @Column(name = "amount")
+    private String amount;
+
+    @Column(name = "unit_type")
+    private String unitType;
+
+    @Column(name = "unit_type_others")
+    private String unitTypeOthers;
+
+    @Column(name = "unit_code")
+    private String unitCode;
+
+    @Column(name = "unit_description")
+    private String unitDescription;
+
+    @Column(name = "currency")
+    private String currency;
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "financialRiskPolicyPremium")
+    private List<FinancialRiskPolicyPremiumCoverageEntity> coverages = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "payment_ids", joinColumns = @JoinColumn(name = "reference_id"))
+    @Column(name = "payment_id")
+    private List<UUID> paymentIds;
 
     @Column(name = "financial_risk_policy_id")
     private UUID financialRiskPolicyId;
@@ -39,39 +67,15 @@ public class FinancialRiskPolicyPremiumEntity extends BaseEntity {
 
     public InsuranceFinancialRiskPremium mapDTO() {
         return new InsuranceFinancialRiskPremium()
-                .paymentsQuantity(4)
+                .paymentsQuantity(this.getPaymentsQuantity())
                 .amount(new AmountDetails()
-                        .amount("16")
-                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
-                )
-                .coverages(List.of(new InsuranceFinancialRiskPremiumCoverage()
-                        .branch("0111")
-                        .code(InsuranceFinancialRiskPremiumCoverage.CodeEnum.GAP_SALDO_DEVEDOR)
-                        .premiumAmount(new AmountDetails()
-                                .amount("1680.71")
-                                .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
-                        )
-                ))
-                .payments(List.of(new Payment()
-                        .movementDate(LocalDate.of(2023, 10, 1))
-                        .movementType(Payment.MovementTypeEnum.COMPENSACAO_FINANCEIRA)
-                        .movementOrigin(Payment.MovementOriginEnum.DIRETA)
-                        .movementPaymentsNumber("str")
-                        .amount(new AmountDetails()
-                                .amount("680.71")
-                                .unitType(AmountDetails.UnitTypeEnum.MONETARIO)
-                                .unit(new AmountDetailsUnit()
-                                        .code("Br")
-                                        .description(AmountDetailsUnit.DescriptionEnum.BRL)
-                                )
-                        )
-                        .maturityDate(LocalDate.of(2023, 10, 1))
-                        .tellerId("string")
-                        .tellerIdType(Payment.TellerIdTypeEnum.CPF)
-                        .tellerIdTypeOthers("RNE")
-                        .tellerName("string")
-                        .financialInstitutionCode("string")
-                        .paymentType(Payment.PaymentTypeEnum.BOLETO)
-                ));
+                        .amount(this.getAmount())
+                        .unit(new AmountDetailsUnit()
+                                .code(this.getUnitCode())
+                                .description(AmountDetailsUnit.DescriptionEnum.fromValue(this.getUnitDescription())))
+                        .currency(AmountDetails.CurrencyEnum.fromValue(this.getCurrency()))
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getUnitType()))
+                        .unitTypeOthers(this.getUnitTypeOthers()))
+                .coverages(this.getCoverages().stream().map(FinancialRiskPolicyPremiumCoverageEntity::mapDTO).toList());
     }
 }

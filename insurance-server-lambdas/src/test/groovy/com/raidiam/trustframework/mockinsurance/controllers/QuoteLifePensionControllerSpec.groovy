@@ -6,18 +6,11 @@ import com.raidiam.trustframework.mockinsurance.AuthHelper
 import com.raidiam.trustframework.mockinsurance.AwsProxyHelper
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
 import com.raidiam.trustframework.mockinsurance.TestRequestDataFactory
-import com.raidiam.trustframework.mockinsurance.domain.QuoteLifePensionLeadEntity
 import com.raidiam.trustframework.mockinsurance.domain.QuoteLifePensionEntity
-import com.raidiam.trustframework.mockinsurance.models.generated.PatchPayload
-import com.raidiam.trustframework.mockinsurance.models.generated.QuoteStatus
-import com.raidiam.trustframework.mockinsurance.models.generated.QuoteStatusEnum
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuote
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponsePatch
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponsePatchData
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuote
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokePatch
-import com.raidiam.trustframework.mockinsurance.models.generated.RevokePatchPayload
+import com.raidiam.trustframework.mockinsurance.domain.QuoteLifePensionLeadEntity
+import com.raidiam.trustframework.mockinsurance.models.generated.*
 import com.raidiam.trustframework.mockinsurance.repository.IdempotencyRepository
+import com.raidiam.trustframework.mockinsurance.services.OverrideService
 import com.raidiam.trustframework.mockinsurance.services.QuoteLifePensionLeadService
 import com.raidiam.trustframework.mockinsurance.services.QuoteLifePensionService
 import io.micronaut.context.ApplicationContext
@@ -30,7 +23,7 @@ import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
 import spock.lang.Specification
 
-@MicronautTest
+@MicronautTest(environments = "test")
 class QuoteLifePensionControllerSpec extends Specification {
 
     private static Context lambdaContext = new MockLambdaContext()
@@ -42,6 +35,13 @@ class QuoteLifePensionControllerSpec extends Specification {
     @MockBean(QuoteLifePensionLeadService)
     QuoteLifePensionLeadService quoteLifePensionLeadService() {
         Spy(QuoteLifePensionLeadService)
+    }
+
+    @MockBean(OverrideService)
+    OverrideService overrideService() {
+        def mock = Mock(OverrideService)
+        mock.getOverride(_ as String, _ as String, _ as String) >> Optional.empty()
+        return mock
     }
 
     @Inject

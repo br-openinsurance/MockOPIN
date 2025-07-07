@@ -9,6 +9,7 @@ import com.raidiam.trustframework.mockinsurance.models.generated.ResponseInsuran
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseInsuranceFinancialAssistanceContractInfo
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseInsuranceFinancialAssistanceMovements
 import com.raidiam.trustframework.mockinsurance.services.FinancialAssistanceService
+import com.raidiam.trustframework.mockinsurance.services.OverrideService
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils
 import io.micronaut.context.ApplicationContext
 import io.micronaut.data.model.Pageable
@@ -29,6 +30,13 @@ class FinancialAssistanceControllerSpec extends Specification {
     @MockBean(FinancialAssistanceService)
     FinancialAssistanceService financialAssistanceService() {
         Mock(FinancialAssistanceService)
+    }
+
+    @MockBean(OverrideService)
+    OverrideService overrideService() {
+        def mock = Mock(OverrideService)
+        mock.getOverride(_ as String, _ as String, _ as String) >> Optional.empty()
+        return mock
     }
 
     private static Context lambdaContext = new MockLambdaContext()

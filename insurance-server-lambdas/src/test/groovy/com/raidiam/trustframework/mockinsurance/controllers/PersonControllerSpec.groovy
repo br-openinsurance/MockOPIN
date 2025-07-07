@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.raidiam.trustframework.mockinsurance.AuthHelper
 import com.raidiam.trustframework.mockinsurance.AwsProxyHelper
 import com.raidiam.trustframework.mockinsurance.models.generated.*
+import com.raidiam.trustframework.mockinsurance.services.OverrideService
 import com.raidiam.trustframework.mockinsurance.services.PersonService
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils
 import io.micronaut.context.ApplicationContext
@@ -26,6 +27,13 @@ class PersonControllerSpec extends Specification {
     @MockBean(PersonService)
     PersonService personService() {
         Mock(PersonService)
+    }
+
+    @MockBean(OverrideService)
+    OverrideService overrideService() {
+        def mock = Mock(OverrideService)
+        mock.getOverride(_ as String, _ as String, _ as String) >> Optional.empty()
+        return mock
     }
 
     private static Context lambdaContext = new MockLambdaContext()

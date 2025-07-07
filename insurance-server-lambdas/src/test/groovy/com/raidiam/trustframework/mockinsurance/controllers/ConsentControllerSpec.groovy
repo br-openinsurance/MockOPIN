@@ -13,6 +13,7 @@ import com.raidiam.trustframework.mockinsurance.models.generated.ResponseConsent
 import com.raidiam.trustframework.mockinsurance.models.generated.UpdateConsent
 import com.raidiam.trustframework.mockinsurance.repository.IdempotencyRepository
 import com.raidiam.trustframework.mockinsurance.services.ConsentService
+import com.raidiam.trustframework.mockinsurance.services.OverrideService
 import com.raidiam.trustframework.mockinsurance.utils.PermissionGroup
 import io.micronaut.context.ApplicationContext
 import io.micronaut.function.aws.proxy.MockLambdaContext
@@ -35,6 +36,16 @@ class ConsentControllerSpec extends Specification {
     @MockBean(ConsentService)
     ConsentService consentService() {
         Spy(ConsentService)
+    }
+
+    @Inject
+    OverrideService overrideService
+
+    @MockBean(OverrideService)
+    OverrideService overrideService() {
+        def mock = Mock(OverrideService)
+        mock.getOverride(_ as String, _ as String, _ as String) >> Optional.empty()
+        return mock
     }
 
     @Inject

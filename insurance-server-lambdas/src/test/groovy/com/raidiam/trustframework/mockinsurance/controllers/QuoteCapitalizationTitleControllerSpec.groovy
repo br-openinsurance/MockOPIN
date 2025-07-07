@@ -11,6 +11,7 @@ import com.raidiam.trustframework.mockinsurance.domain.QuoteCapitalizationTitleL
 import com.raidiam.trustframework.mockinsurance.domain.CapitalizationTitleRaffleEntity
 import com.raidiam.trustframework.mockinsurance.models.generated.*
 import com.raidiam.trustframework.mockinsurance.repository.IdempotencyRepository
+import com.raidiam.trustframework.mockinsurance.services.OverrideService
 import com.raidiam.trustframework.mockinsurance.services.QuoteCapitalizationTitleService
 import com.raidiam.trustframework.mockinsurance.services.QuoteCapitalizationTitleLeadService
 import com.raidiam.trustframework.mockinsurance.services.CapitalizationTitleRaffleService
@@ -36,6 +37,13 @@ public class QuoteCapitalizationTitleControllerSpec extends Specification {
     @MockBean(QuoteCapitalizationTitleLeadService)
     QuoteCapitalizationTitleLeadService quoteCapitalizationTitleLeadService() {
         Spy(QuoteCapitalizationTitleLeadService)
+    }
+
+    @MockBean(OverrideService)
+    OverrideService overrideService() {
+        def mock = Mock(OverrideService)
+        mock.getOverride(_ as String, _ as String, _ as String) >> Optional.empty()
+        return mock
     }
 
     @Inject
