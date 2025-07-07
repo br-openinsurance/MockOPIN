@@ -24,6 +24,9 @@ class FinancialAssistanceServiceSpec extends CleanupSpecification {
     FinancialAssistanceContractMovementEntity testFinancialAssistanceContractMovement
 
     @Shared
+    FinancialAssistanceContractInsuredEntity testFinancialAssistanceContractInsured
+
+    @Shared
     AccountHolderEntity testAccountHolder
 
     @Shared
@@ -44,6 +47,7 @@ class FinancialAssistanceServiceSpec extends CleanupSpecification {
             testConsent = consentRepository.save(testConsent)
             testFinancialAssistanceContract = financialAssistanceContractRepository.save(TestEntityDataFactory.aFinancialAssistanceContract(testAccountHolder.getAccountHolderId()))
             testFinancialAssistanceContractMovement = financialAssistanceContractMovementRepository.save(TestEntityDataFactory.aFinancialAssistanceContractMovement(testFinancialAssistanceContract.getFinancialAssistanceContractId()))
+            testFinancialAssistanceContractInsured = financialAssistanceContractInsuredRepository.save(TestEntityDataFactory.aFinancialAssistanceContractInsured(testFinancialAssistanceContract.getFinancialAssistanceContractId()))
             consentFinancialAssistanceContractRepository.save(new ConsentFinancialAssistanceContractEntity(testConsent, testFinancialAssistanceContract))
             runSetup = false
         }
@@ -57,6 +61,9 @@ class FinancialAssistanceServiceSpec extends CleanupSpecification {
         response.getData()
         response.getData().size() == 1
         response.getData().first()
+        response.getData().first().getBrand().getName() == "Mock"
+        response.getData().first().getBrand().getCompanies().first().getCnpjNumber() == "12345678901234"
+        response.getData().first().getBrand().getCompanies().first().getContracts().first().getContractId() == testFinancialAssistanceContract.getFinancialAssistanceContractId()
     }
 
     def "we can get a contract info" () {
@@ -65,6 +72,11 @@ class FinancialAssistanceServiceSpec extends CleanupSpecification {
 
         then:
         response.getData() != null
+        response.getData().getContractId() == testFinancialAssistanceContract.getFinancialAssistanceContractId()
+        response.getData().getCertificateId() == testFinancialAssistanceContract.getCertificateId()
+        response.getData().getInterestRate().getAmount() == testFinancialAssistanceContract.getInterestRateAmount()
+        response.getData().getCounterInstallments().getPeriodicity().toString() == testFinancialAssistanceContract.getCounterInstallmentPeriodicity()
+        response.getData().getInsureds().first().getName() == testFinancialAssistanceContractInsured.getName()
     }
 
     def "we can get a contract's claims" () {
@@ -73,6 +85,8 @@ class FinancialAssistanceServiceSpec extends CleanupSpecification {
 
         then:
         response.getData() != null
+        response.getData().first().getRemainingCounterInstallmentsQuantity() == testFinancialAssistanceContractMovement.getRemainingCounterInstallmentsQuantity()
+        response.getData().first().getLifePensionPmBacAmount().getAmount() == testFinancialAssistanceContractMovement.getLifePensionPmBacAmount()
     }
 
     def "enable cleanup"() {

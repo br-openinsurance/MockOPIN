@@ -10,6 +10,7 @@ import com.raidiam.trustframework.mockinsurance.domain.QuoteAutoEntity
 import com.raidiam.trustframework.mockinsurance.domain.QuoteAutoLeadEntity
 import com.raidiam.trustframework.mockinsurance.models.generated.*
 import com.raidiam.trustframework.mockinsurance.repository.IdempotencyRepository
+import com.raidiam.trustframework.mockinsurance.services.OverrideService
 import com.raidiam.trustframework.mockinsurance.services.QuoteAutoService
 import com.raidiam.trustframework.mockinsurance.services.QuoteAutoLeadService
 import io.micronaut.context.ApplicationContext
@@ -34,6 +35,13 @@ public class QuoteAutoControllerSpec extends Specification {
     @MockBean(QuoteAutoLeadService)
     QuoteAutoLeadService quoteAutoLeadService() {
         Spy(QuoteAutoLeadService)
+    }
+
+    @MockBean(OverrideService)
+    OverrideService overrideService() {
+        def mock = Mock(OverrideService)
+        mock.getOverride(_ as String, _ as String, _ as String) >> Optional.empty()
+        return mock
     }
 
     @Inject

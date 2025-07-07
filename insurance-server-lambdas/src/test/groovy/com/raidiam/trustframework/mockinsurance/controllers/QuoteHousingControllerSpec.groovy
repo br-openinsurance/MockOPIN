@@ -34,6 +34,13 @@ class QuoteHousingControllerSpec extends Specification {
         Spy(QuoteHousingLeadService)
     }
 
+    @MockBean(OverrideService)
+    OverrideService overrideService() {
+        def mock = Mock(OverrideService)
+        mock.getOverride(_ as String, _ as String, _ as String) >> Optional.empty()
+        return mock
+    }
+
     @Inject
     IdempotencyRepository idempotencyRepository
 

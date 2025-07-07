@@ -9,6 +9,7 @@ import com.raidiam.trustframework.mockinsurance.TestRequestDataFactory
 import com.raidiam.trustframework.mockinsurance.domain.QuoteTransportLeadEntity
 import com.raidiam.trustframework.mockinsurance.models.generated.*
 import com.raidiam.trustframework.mockinsurance.repository.IdempotencyRepository
+import com.raidiam.trustframework.mockinsurance.services.OverrideService
 import com.raidiam.trustframework.mockinsurance.services.QuoteTransportLeadService
 import io.micronaut.context.ApplicationContext
 import io.micronaut.function.aws.proxy.MockLambdaContext
@@ -20,7 +21,7 @@ import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
 import spock.lang.Specification
 
-@MicronautTest
+@MicronautTest(environments = "test")
 class QuoteTransportControllerSpec extends Specification {
 
     private static Context lambdaContext = new MockLambdaContext()
@@ -32,6 +33,13 @@ class QuoteTransportControllerSpec extends Specification {
     @MockBean(QuoteTransportLeadService)
     QuoteTransportLeadService quoteTransportLeadService() {
         Spy(QuoteTransportLeadService)
+    }
+
+    @MockBean(OverrideService)
+    OverrideService overrideService() {
+        def mock = Mock(OverrideService)
+        mock.getOverride(_ as String, _ as String, _ as String) >> Optional.empty()
+        return mock
     }
 
     @Inject

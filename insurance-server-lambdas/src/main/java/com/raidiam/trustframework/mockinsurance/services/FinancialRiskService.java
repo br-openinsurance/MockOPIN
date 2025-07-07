@@ -55,7 +55,30 @@ public class FinancialRiskService extends BaseInsuranceService {
 
     public ResponseInsuranceFinancialRiskPolicyInfo getPolicyInfo(UUID policyId, String consentId) {
         LOG.info("Getting financial risk policy info response for consent id {}", consentId);
-        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_POLICYINFO_READ).mapPolicyInfoDTO();
+        var policy = getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_POLICYINFO_READ);
+        var response = policy.mapPolicyInfoDTO();
+
+        policy.getBeneficiaryIds().forEach(beneficiaryId -> response.getData().addBeneficiariesItem(beneficiaryInfoRepository.findById(beneficiaryId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Beneficiary not found for UUID %s", beneficiaryId)))
+                .mapDTO()));
+
+        policy.getInsuredIds().forEach(insuredIds -> response.getData().addInsuredsItem(personalInfoRepository.findById(insuredIds)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Personal info not found for UUID %s", insuredIds)))
+                .mapDTO()));
+
+        policy.getIntermediaryIds().forEach(intermediaryId -> response.getData().addIntermediariesItem(intermediaryRepository.findById(intermediaryId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Intermediary not found for UUID %s", intermediaryId)))
+                .mapDTO()));
+
+        policy.getPrincipalIds().forEach(principalId -> response.getData().addPrincipalsItem(principalInfoRepository.findById(principalId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Principal not found for UUID %s", principalId)))
+                .mapDTO()));
+
+        policy.getCoinsurerIds().forEach(coinsurerId -> response.getData().addCoinsurersItem(coinsurerRepository.findById(coinsurerId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Coinsurer not found for UUID %s", coinsurerId)))
+                .mapDTO()));
+
+        return response;
     }
 
     public ResponseInsuranceFinancialRiskClaims getPolicyClaims(UUID policyId, String consentId, Pageable pageable) {
@@ -75,7 +98,13 @@ public class FinancialRiskService extends BaseInsuranceService {
 
         var premium = financialRiskPolicyPremiumRepository.findByFinancialRiskPolicyId(policyId)
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Policy id " + policyId + " not found"));
-        return new ResponseInsuranceFinancialRiskPremium().data(premium.mapDTO());
+
+        var response = new ResponseInsuranceFinancialRiskPremium().data(premium.mapDTO());
+
+        premium.getPaymentIds().forEach(paymentId -> response.getData().addPaymentsItem(paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Payment not found for UUID %s", paymentId)))
+                .mapDTO()));
+        return response;
     }
 
     public void checkConsentCoversPolicy(ConsentEntity consentEntity, FinancialRiskPolicyEntity policy) {

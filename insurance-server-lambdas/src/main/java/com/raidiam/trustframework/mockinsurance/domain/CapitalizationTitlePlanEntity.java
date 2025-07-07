@@ -27,11 +27,17 @@ public class CapitalizationTitlePlanEntity extends BaseEntity implements HasStat
     @Column(name = "capitalization_title_id")
     private String capitalizationTitleId;
 
+    @Column(name = "type")
+    private String type;
+
     @Column(name = "status")
     private String status;
 
     @Column(name = "account_holder_id")
     private UUID accountHolderId;
+
+    @Column(name = "product_name")
+    private String productName;
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
@@ -60,7 +66,7 @@ public class CapitalizationTitlePlanEntity extends BaseEntity implements HasStat
     public ResponseInsuranceCapitalizationTitleBrandProducts mapProductDto() {
         return new ResponseInsuranceCapitalizationTitleBrandProducts()
                 .planId(this.getCapitalizationTitlePlanId().toString())
-                .productName("Mock Insurer Capitalization Title Plan");
+                .productName(this.getProductName());
     }
 
     public ResponseResourceListData mapResourceDto() {

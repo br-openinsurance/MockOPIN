@@ -8,8 +8,9 @@ import lombok.ToString;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -20,10 +21,70 @@ public class CapitalizationTitlePlanSeriesEntity extends BaseEntity {
     @Id
     @GeneratedValue
     @Column(name = "capitalization_title_plan_series_id", unique = true, nullable = false, updatable = false, columnDefinition = "uuid DEFAULT uuid_generate_v4()")
-    private String capitalizationTitlePlanSeriesId;
+    private UUID seriesId;
 
     @Column(name = "susep_process_number")
     private String susepProcessNumber;
+
+    @Column(name = "modality")
+    private String modality;
+
+    @Column(name = "commercial_denomination")
+    private String commercialDenomination;
+
+    @Column(name = "serie_size")
+    private Integer serieSize;
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @NotAudited
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "capitalizationTitlePlanSeries")
+    private List<CapitalizationTitlePlanQuotaEntity> quotas = new ArrayList<>();
+
+    @Column(name = "grace_period_redemption")
+    private Integer gracePeriodRedemption;
+
+    @Column(name = "grace_period_for_full_redemption")
+    private Integer gracePeriodForFullRedemption;
+
+    @Column(name = "update_index")
+    private String updateIndex;
+
+    @Column(name = "update_index_others")
+    private String updateIndexOthers;
+
+    @Column(name = "readjustment_index")
+    private String readjustmentIndex;
+
+    @Column(name = "readjustment_index_others")
+    private String readjustmentIndexOthers;
+
+    @Column(name = "bonus_clause")
+    private Boolean bonusClause;
+
+    @Column(name = "frequency")
+    private String frequency;
+
+    @Column(name = "frequency_description")
+    private String frequencyDescription;
+
+    @Column(name = "interest_rate")
+    private String interestRate;
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @NotAudited
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "capitalizationTitlePlanSeries")
+    private List<CapitalizationTitlePlanBrokerEntity> brokers = new ArrayList<>();
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @NotAudited
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "capitalizationTitlePlanSeries")
+    private List<CapitalizationTitlePlanTitleEntity> titles = new ArrayList<>();
+
+    @Column(name = "capitalization_title_plan_id")
+    private UUID capitalizationTitlePlanId;
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
@@ -33,49 +94,25 @@ public class CapitalizationTitlePlanSeriesEntity extends BaseEntity {
     private CapitalizationTitlePlanEntity capitalizationTitlePlan;
 
     public InsuranceCapitalizationTitleSeries toResponse() {
-        var accountHolder = this.getCapitalizationTitlePlan().getAccountHolder();
         return new InsuranceCapitalizationTitleSeries()
                 .planId(this.getCapitalizationTitlePlan().getCapitalizationTitlePlanId().toString())
-                .seriesId(this.getCapitalizationTitlePlanSeriesId())
-                .modality(InsuranceCapitalizationTitleSeries.ModalityEnum.TRADICIONAL)
+                .seriesId(String.valueOf(this.getSeriesId()))
+                .modality(InsuranceCapitalizationTitleSeries.ModalityEnum.fromValue(this.getModality()))
                 .susepProcessNumber(this.getSusepProcessNumber())
-                .serieSize(1)
-                .quotas(List.of(new CapitalizationTitleQuotas()
-                        .quota(1)
-                        .capitalizationQuota("0.000002")
-                        .raffleQuota("0.000002")
-                        .chargingQuota("0.000002")))
-                .gracePeriodForFullRedemption(48)
-                .updateIndex(InsuranceCapitalizationTitleSeries.UpdateIndexEnum.IGPM)
-                .readjustmentIndex(InsuranceCapitalizationTitleSeries.ReadjustmentIndexEnum.IGPM)
-                .bonusClause(false)
-                .frequency(InsuranceCapitalizationTitleSeries.FrequencyEnum.MENSAL)
-                .interestRate("10.00")
-                .titles(List.of(new InsuranceCapitalizationTitleTitle()
-                        .titleId(this.getCapitalizationTitlePlan().getCapitalizationTitleId())
-                        .registrationForm("00000")
-                        .issueTitleDate(LocalDate.now())
-                        .termStartDate(LocalDate.now().minusDays(1))
-                        .termEndDate(LocalDate.now().plusDays(1))
-                        .rafflePremiumAmount(new AmountDetails()
-                                .amount("62500.67")
-                                .unitType(AmountDetails.UnitTypeEnum.MONETARIO))
-                        .contributionAmount(new AmountDetails()
-                                .amount("62500.67")
-                                .unitType(AmountDetails.UnitTypeEnum.MONETARIO))
-                        .subscriber(List.of(new InsuranceCapitalizationTitleSubscriber()
-                                .subscriberName(accountHolder.getAccountHolderName())
-                                .subscriberDocumentType(InsuranceCapitalizationTitleSubscriber.SubscriberDocumentTypeEnum.CPF)
-                                .subscriberDocumentNumber(accountHolder.getDocumentIdentification())
-                                .subscriberAddress("Av Naburo Ykesaki, 1270")
-                                .subscriberTownName("Rio de Janeiro")
-                                .subscriberCountrySubDivision(EnumCountrySubDivision.RJ)
-                                .subscriberCountryCode("BRA")
-                                .subscriberPostCode("17500001")))
-                        .technicalProvisions(List.of(new InsuranceCapitalizationTitleTechnicalProvisions()
-                                .pdbAmount(new AmountDetails().amount("100.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
-                                .prAmount(new AmountDetails().amount("100.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
-                                .pspAmount(new AmountDetails().amount("100.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
-                                .pmcAmount(new AmountDetails().amount("100.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))))));
+                .serieSize(this.getSerieSize())
+                .quotas(this.getQuotas().stream().map(CapitalizationTitlePlanQuotaEntity::getDTO).toList())
+                .gracePeriodForFullRedemption(this.getGracePeriodForFullRedemption())
+                .gracePeriodRedemption(this.getGracePeriodRedemption())
+                .updateIndex(InsuranceCapitalizationTitleSeries.UpdateIndexEnum.fromValue(this.getUpdateIndex()))
+                .updateIndexOthers(this.getUpdateIndexOthers())
+                .readjustmentIndex(InsuranceCapitalizationTitleSeries.ReadjustmentIndexEnum.fromValue(this.getReadjustmentIndex()))
+                .readjustmentIndexOthers(this.getReadjustmentIndexOthers())
+                .bonusClause(this.getBonusClause())
+                .frequency(InsuranceCapitalizationTitleSeries.FrequencyEnum.fromValue(this.getFrequency()))
+                .frequencyDescription(this.getFrequencyDescription())
+                .interestRate(this.getInterestRate())
+                .commercialDenomination(this.getCommercialDenomination())
+                .titles(this.getTitles().stream().map(CapitalizationTitlePlanTitleEntity::getDTO).toList())
+                .broker(this.getBrokers().stream().map(CapitalizationTitlePlanBrokerEntity::getDTO).toList());
     }
 }

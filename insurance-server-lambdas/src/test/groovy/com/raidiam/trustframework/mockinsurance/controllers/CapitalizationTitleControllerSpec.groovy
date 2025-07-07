@@ -10,6 +10,7 @@ import com.raidiam.trustframework.mockinsurance.models.generated.ResponseInsuran
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseInsuranceCapitalizationTitlePlanInfo
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseInsuranceCapitalizationTitleSettlement
 import com.raidiam.trustframework.mockinsurance.services.CapitalizationTitleService
+import com.raidiam.trustframework.mockinsurance.services.OverrideService
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils
 import io.micronaut.context.ApplicationContext
 import io.micronaut.data.model.Pageable
@@ -30,6 +31,13 @@ class CapitalizationTitleControllerSpec extends Specification {
     @MockBean(CapitalizationTitleService)
     CapitalizationTitleService capitalizationTitleService() {
         Mock(CapitalizationTitleService)
+    }
+
+    @MockBean(OverrideService)
+    OverrideService overrideService() {
+        def mock = Mock(OverrideService)
+        mock.getOverride(_ as String, _ as String, _ as String) >> Optional.empty()
+        return mock
     }
 
     private static Context lambdaContext = new MockLambdaContext()

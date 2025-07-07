@@ -59,47 +59,382 @@ CREATE OR REPLACE FUNCTION addBusinessComplimentaryInfo(docId varchar) RETURNS u
     RETURNING business_complimentary_information_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addCapitalizationTitlePlan(docId varchar, titleId varchar, s varchar) RETURNS uuid AS $$
-    INSERT INTO capitalization_title_plans (account_holder_id, capitalization_title_id, status, created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), titleId, s, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+CREATE OR REPLACE FUNCTION addCapitalizationTitlePlan(docId varchar, titleId varchar, status varchar,
+productName varchar) RETURNS uuid AS $$
+    INSERT INTO capitalization_title_plans (account_holder_id, capitalization_title_id, status, product_name,
+    created_at, created_by, updated_at, updated_by)
+    VALUES (getAccountHolderId(docId), titleId, status, productName, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING capitalization_title_plan_id
 $$ LANGUAGE SQL;
 
 
-CREATE OR REPLACE FUNCTION addCapitalizationTitlePlanSeries(planId uuid, susepProcessNumber varchar) RETURNS uuid AS $$
-    INSERT INTO capitalization_title_plan_series(capitalization_title_plan_id, susep_process_number, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, susepProcessNumber, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+CREATE OR REPLACE FUNCTION addCapitalizationTitlePlanSeries(planId uuid, susepProcessNumber varchar, modality varchar,
+commercialDenomination varchar, serieSize int, gracePeriodRedemption int, gracePeriodForFullRedemption int,
+updateIndex varchar, updateIndexOthers varchar, readjustmentIndex varchar, readjustmentIndexOthers varchar,
+bonusClause boolean, frequency varchar, frequencyDescription varchar, interestRate varchar) RETURNS uuid AS $$
+    INSERT INTO capitalization_title_plan_series(capitalization_title_plan_id, susep_process_number, modality,
+    commercial_denomination, serie_size, grace_period_redemption, grace_period_for_full_redemption, update_index,
+    update_index_others, readjustment_index, readjustment_index_others, bonus_clause, frequency, frequency_description,
+    interest_rate, created_at, created_by, updated_at, updated_by)
+    VALUES (planId, susepProcessNumber, modality, commercialDenomination, serieSize, gracePeriodRedemption,
+    gracePeriodForFullRedemption, updateIndex, updateIndexOthers, readjustmentIndex, readjustmentIndexOthers,
+    bonusClause, frequency, frequencyDescription, interestRate, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING capitalization_title_plan_series_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addCapitalizationTitlePlanEvent(planId uuid, eventType varchar) RETURNS uuid AS $$
-    INSERT INTO capitalization_title_plan_events(capitalization_title_plan_id, event_type, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, eventType, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+CREATE OR REPLACE FUNCTION addCapitalizationTitlePlanEventRaffle(planId uuid, eventType varchar, raffleDate date,
+raffleSettlementDate date, raffleAmount varchar, raffleUnitType varchar, raffleUnitTypeOthers varchar, raffleUnitCode varchar,
+raffleUnitDescription varchar, raffleCurrency varchar) RETURNS uuid AS $$
+    INSERT INTO capitalization_title_plan_events(capitalization_title_plan_id, event_type, raffle_date,
+    raffle_settlement_date, raffle_amount, raffle_unit_type, raffle_unit_type_others, raffle_unit_code,
+    raffle_unit_description, raffle_currency, created_at, created_by, updated_at, updated_by)
+    VALUES (planId, eventType, raffleDate, raffleSettlementDate, raffleAmount, raffleUnitType, raffleUnitTypeOthers, raffleUnitCode, raffleUnitDescription,
+    raffleCurrency, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING capitalization_title_plan_event_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addCapitalizationTitlePlanSettlement(planId uuid) RETURNS uuid AS $$
-    INSERT INTO capitalization_title_plan_settlements(capitalization_title_plan_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+CREATE OR REPLACE FUNCTION addCapitalizationTitlePlanSettlement(planId uuid, settlementPaymentDate date,
+settlementDueDate date, settlementAmount varchar, settlementUnitType varchar, settlementUnitTypeOthers varchar,
+settlementUnitCode varchar, settlementUnitDescription varchar, settlementCurrency varchar) RETURNS uuid AS $$
+    INSERT INTO capitalization_title_plan_settlements(capitalization_title_plan_id, settlement_payment_date,
+    settlement_due_date, settlement_financial_amount, settlement_financial_unit_type, settlement_financial_unit_type_others,
+    settlement_financial_unit_code, settlement_financial_unit_description, settlement_financial_currency,
+    created_at, created_by, updated_at, updated_by)
+    VALUES (planId, settlementPaymentDate, settlementDueDate, settlementAmount, settlementUnitType,
+    settlementUnitTypeOthers, settlementUnitCode, settlementUnitDescription, settlementCurrency,
+    NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING capitalization_title_plan_settlement_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addFinancialRiskPolicy(docId varchar, titleId varchar, s varchar) RETURNS uuid AS $$
-    INSERT INTO financial_risk_policies (account_holder_id, financial_risk_id, status, created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), titleId, s, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+CREATE OR REPLACE FUNCTION addCapitalizationTitlePlanBroker(seriesId uuid, susepBrokerCode varchar,
+brokerDescription varchar) RETURNS uuid AS $$
+    INSERT INTO capitalization_title_plan_brokers(capitalization_title_plan_series_id, susep_broker_code,
+    broker_description, created_at, created_by, updated_at, updated_by)
+    VALUES (seriesId, susepBrokerCode, brokerDescription, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING capitalization_title_plan_broker_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addCapitalizationTitlePlanQuota(seriesId uuid, quota int,
+capitalizationQuota varchar, raffleQuota varchar, chargingQuota varchar)  RETURNS uuid AS $$
+    INSERT INTO capitalization_title_plan_quotas(capitalization_title_plan_series_id, quota, capitalization_quota,
+    raffle_quota, charging_quota, created_at, created_by, updated_at, updated_by)
+    VALUES (seriesId, quota, capitalizationQuota, raffleQuota, chargingQuota, NOW(), 'PREPOPULATE', NOW(),
+    'PREPOPULATE')
+    RETURNING capitalization_title_plan_quota_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addCapitalizationTitlePlanTitle(seriesId uuid, registrationForm varchar, issueTitleDate date,
+termStartDate date, termEndDate date, rafflePremiumAmount varchar, rafflePremiumUnitType varchar,
+rafflePremiumUnitTypeOthers varchar, rafflePremiumUnitCode varchar, rafflePremiumUnitDescription varchar,
+rafflePremiumCurrency varchar, contributionAmount varchar, contributionUnitType varchar,
+contributionUnitTypeOthers varchar, contributionUnitCode varchar, contributionUnitDescription varchar,
+contributionCurrency varchar)  RETURNS uuid AS $$
+    INSERT INTO capitalization_title_plan_titles(capitalization_title_plan_series_id, registration_form,
+    issue_title_date, term_start_date, term_end_date, raffle_premium_amount, raffle_premium_unit_type,
+    raffle_premium_unit_type_others, raffle_premium_unit_code, raffle_premium_unit_description, raffle_premium_currency,
+    contribution_amount, contribution_unit_type, contribution_unit_type_others, contribution_unit_code,
+    contribution_unit_description, contribution_currency, created_at, created_by, updated_at, updated_by)
+    VALUES (seriesId, registrationForm, issueTitleDate, termStartDate, termEndDate, rafflePremiumAmount, 
+    rafflePremiumUnitType, rafflePremiumUnitTypeOthers, rafflePremiumUnitCode, rafflePremiumUnitDescription,
+    rafflePremiumCurrency, contributionAmount, contributionUnitType, contributionUnitTypeOthers, contributionUnitCode,
+    contributionUnitDescription, contributionCurrency, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING capitalization_title_plan_title_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addCapitalizationTitlePlanSubscriber(titleId uuid, subscriberName varchar,
+subscriberDocumentType varchar, subscriberDocumentTypeOthers varchar, subscriberDocumentNumber varchar,
+subscriberAddress varchar, subscriberAddressAdditionalInfo varchar, subscriberTownName varchar,
+subscriberCountrySubDivision varchar, subscriberCountryCode varchar, subscriberPostcode varchar,
+subscriberCountryCallingCode varchar, subscriberAreaCode varchar, subscriberNumber varchar)  RETURNS uuid AS $$
+    INSERT INTO capitalization_title_plan_subscribers(capitalization_title_plan_title_id, subscriber_name, subscriber_document_type,
+    subscriber_document_type_others, subscriber_document_number, subscriber_address, subscriber_address_additional_info,
+    subscriber_town_name, subscriber_country_sub_division, subscriber_country_code, subscriber_postcode,
+    subscriber_country_calling_code, subscriber_area_code, subscriber_number, created_at, created_by,
+    updated_at, updated_by)
+    VALUES (titleId, subscriberName, subscriberDocumentType, subscriberDocumentTypeOthers, subscriberDocumentNumber,
+    subscriberAddress, subscriberAddressAdditionalInfo, subscriberTownName, subscriberCountrySubDivision,
+    subscriberCountryCode, subscriberPostcode, subscriberCountryCallingCode, subscriberAreaCode, subscriberNumber,
+    NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING capitalization_title_plan_subscriber_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addCapitalizationTitlePlanHolder(subscriberId uuid, holderName varchar,
+holderDocumentType varchar, holderDocumentTypeOthers varchar, holderDocumentNumber varchar,
+holderAddress varchar, holderAddressAdditionalInfo varchar, holderTownName varchar,
+holderCountrySubdivision varchar, holderCountryCode varchar, holderPostcode varchar, holderRedemption boolean,
+holderRaffle boolean, holderCountryCallingCode varchar, holderAreaCode varchar,
+holderNumber varchar)  RETURNS uuid AS $$
+    INSERT INTO capitalization_title_plan_holders(capitalization_title_plan_subscriber_id, holder_name, holder_document_type,
+    holder_document_type_others, holder_document_number, holder_address, holder_address_additional_info,
+    holder_town_name, holder_country_subdivision, holder_country_code, holder_postcode, holder_redemption, holder_raffle,
+    holder_country_calling_code, holder_area_code, holder_number, created_at, created_by,
+    updated_at, updated_by)
+    VALUES (subscriberId, holderName, holderDocumentType, holderDocumentTypeOthers, holderDocumentNumber,
+    holderAddress, holderAddressAdditionalInfo, holderTownName, holderCountrySubDivision,
+    holderCountryCode, holderPostcode, holderRedemption, holderRaffle, holderCountryCallingCode,
+    holderAreaCode, holderNumber, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING capitalization_title_plan_holder_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addCapitalizationTitlePlanTechnicalProvisions(titleId uuid, pmcAmount varchar,
+pmcUnitType varchar, pmcUnitTypeOthers varchar, pmcUnitCode varchar, pmcUnitDescription varchar, pmcCurrency varchar,
+pdbAmount varchar, pdbUnitType varchar, pdbUnitTypeOthers varchar, pdbUnitCode varchar, pdbUnitDescription varchar,
+pdbCurrency varchar, prAmount varchar, prUnitType varchar, prUnitTypeOthers varchar, prUnitCode varchar,
+prUnitDescription varchar, prCurrency varchar, pspAmount varchar, pspUnitType varchar, pspUnitTypeOthers varchar,
+pspUnitCode varchar, pspUnitDescription varchar, pspCurrency varchar)  RETURNS uuid AS $$
+    INSERT INTO capitalization_title_plan_technical_provisions(capitalization_title_plan_title_id, pmc_amount, pmc_unit_type, pmc_unit_type_others, pmc_unit_code,
+    pmc_unit_description, pmc_currency, pdb_amount, pdb_unit_type, pdb_unit_type_others, pdb_unit_code,
+    pdb_unit_description, pdb_currency, pr_amount, pr_unit_type, pr_unit_type_others, pr_unit_code, pr_unit_description,
+    pr_currency, psp_amount, psp_unit_type, psp_unit_type_others, psp_unit_code, psp_unit_description, psp_currency,
+    created_at, created_by, updated_at, updated_by)
+    VALUES (titleId, pmcAmount, pmcUnitType, pmcUnitTypeOthers, pmcUnitCode, pmcUnitDescription, pmcCurrency,
+                     pdbAmount, pdbUnitType, pdbUnitTypeOthers, pdbUnitCode, pdbUnitDescription,
+                     pdbCurrency, prAmount, prUnitType, prUnitTypeOthers, prUnitCode,
+                     prUnitDescription, prCurrency, pspAmount, pspUnitType, pspUnitTypeOthers,
+                     pspUnitCode, pspUnitDescription, pspCurrency, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING capitalization_title_plan_technical_provision_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addFinancialRiskPolicy(docId varchar, titleId varchar, status varchar, productName varchar,
+documentType varchar, susepProcessNumber varchar, groupCertificateId varchar, issuanceType varchar, issuanceDate date,
+termStartDate date, termEndDate date, leadInsurerCode varchar, leadInsurerPolicyId varchar, maxLMGAmount varchar,
+maxLMGUnitType varchar, maxLMGUnitTypeOthers varchar, maxLMGUnitCode varchar, maxLMGUnitDescription varchar,
+proposalId varchar, coinsuranceRetainedPercentage varchar, branchInfoIdentification varchar,
+branchInfoUserGroup varchar, branchInfoTechnicalSurplus varchar) RETURNS uuid AS $$
+    INSERT INTO financial_risk_policies (account_holder_id, financial_risk_id, status, product_name, document_type,
+    susep_process_number, group_certificate_id, issuance_type, issuance_date, term_start_date, term_end_date,
+    lead_insurer_code, lead_insurer_policy_id, max_lmg_amount, max_lmg_unit_type, max_lmg_unit_type_others, max_lmg_unit_code,
+    max_lmg_unit_description, proposal_id, coinsurance_retained_percentage, identification,
+    user_group, technical_surplus, created_at, created_by, updated_at, updated_by)
+    VALUES (getAccountHolderId(docId), titleId, status, productName, documentType, susepProcessNumber, groupCertificateId,
+    issuanceType, issuanceDate, termStartDate, termEndDate, leadInsurerCode, leadInsurerPolicyId, maxLMGAmount,
+    maxLMGUnitType, maxLMGUnitTypeOthers, maxLMGUnitCode, maxLMGUnitDescription, proposalId,
+    coinsuranceRetainedPercentage, branchInfoIdentification, branchInfoUserGroup, branchInfoTechnicalSurplus,
+    NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING financial_risk_policy_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addFinancialRiskPolicyClaim(planId uuid) RETURNS uuid AS $$
-    INSERT INTO financial_risk_policy_claims(financial_risk_policy_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+CREATE OR REPLACE FUNCTION addPersonalInfo(identification varchar,
+identificationType varchar, identificationTypeOthers varchar, name varchar, birthDate date, postCode varchar,
+email varchar, city varchar, state varchar, country varchar, address varchar) RETURNS uuid AS $$
+    INSERT INTO personal_info(identification, identification_type, identification_type_others,
+    name, birth_date, post_code, email, city, state, country, address, created_at, created_by, updated_at, updated_by)
+    VALUES(identification, identificationType, identificationTypeOthers, name, birthDate, postCode,
+    email, city, state, country, address, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING reference_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addPersonalInfoIds(reference_id UUID, ids UUID[])
+RETURNS void AS $$
+BEGIN
+  INSERT INTO personal_info_ids(reference_id, personal_id)
+  SELECT reference_id, unnest(ids);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION addBeneficiaryInfo(identification varchar,
+identificationType varchar, identificationTypeOthers varchar, name varchar) RETURNS uuid AS $$
+    INSERT INTO beneficiary_info(identification, identification_type, identification_type_others,
+    name, created_at, created_by, updated_at, updated_by)
+    VALUES(identification, identificationType, identificationTypeOthers, name,
+    NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING reference_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addBeneficiaryInfoIds(reference_id UUID, ids UUID[])
+RETURNS void AS $$
+BEGIN
+  INSERT INTO beneficiary_info_ids(reference_id, beneficiary_id)
+  SELECT reference_id, unnest(ids);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION addPrincipalInfo(identification varchar,
+identificationType varchar, identificationTypeOthers varchar, name varchar, postCode varchar, email varchar, city varchar,
+state varchar, country varchar, address varchar, addressAdditionalInfo varchar) RETURNS uuid AS $$
+    INSERT INTO principal_info(identification, identification_type, identification_type_others,
+    name, post_code, email, city, state, country, address, address_additional_info, created_at, created_by, updated_at,
+    updated_by)
+    VALUES(identification, identificationType, identificationTypeOthers, name, postCode, email, city,
+           state, country, address, addressAdditionalInfo, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING reference_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addPrincipalInfoIds(reference_id UUID, ids UUID[])
+RETURNS void AS $$
+BEGIN
+  INSERT INTO principal_info_ids(reference_id, principal_id)
+  SELECT reference_id, unnest(ids);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION addIntermediaryInfo(identification varchar,
+identificationType varchar, identificationTypeOthers varchar, name varchar, postCode varchar,
+city varchar, state varchar, country varchar, address varchar, type varchar) RETURNS uuid AS $$
+    INSERT INTO intermediaries(identification, identification_type, identification_type_others,
+    name, post_code, city, state, country, address, type, created_at, created_by, updated_at, updated_by)
+    VALUES(identification, identificationType, identificationTypeOthers, name, postCode,
+    city, state, country, address, type, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING reference_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addIntermediaryInfoIds(reference_id UUID, ids UUID[])
+RETURNS void AS $$
+BEGIN
+  INSERT INTO intermediary_info_ids(reference_id, intermediary_id)
+  SELECT reference_id, unnest(ids);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION addFinancialRiskPolicyInsuredObject(financialRiskPolicyId UUID, identification varchar,
+type varchar, typeAdditionalInfo varchar, description varchar, amount varchar, unitType varchar, unitTypeOthers varchar,
+unitCode varchar, unitDescription varchar) RETURNS uuid AS $$
+    INSERT INTO financial_risk_policy_insured_objects(financial_risk_policy_id, identification, type, type_additional_info,
+    description, amount, unit_type, unit_type_others, unit_code, unit_description, created_at, created_by, updated_at, updated_by)
+    VALUES(financialRiskPolicyId, identification, type, typeAdditionalInfo, description, amount, unitType, unitTypeOthers,
+    unitCode, unitDescription, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING financial_risk_policy_insured_object_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addFinancialRiskPolicyInsuredObjectCoverage(financialRiskPolicyInsuredObjectId UUID, branch varchar,
+code varchar, description varchar, internalCode varchar, susepProcessNumber varchar, lmiAmount varchar, lmiUnitType varchar,
+lmiUnitTypeOthers varchar, lmiUnitCode varchar, lmiUnitDescription varchar, isLMISublimit boolean, termStartDate date,
+termEndDate date, isMainCoverage boolean, feature varchar, type varchar, gracePeriod integer, gracePeriodicity varchar,
+gracePeriodCountingMethod varchar, gracePeriodStartDate date, gracePeriodEndDate date, premiumPeriodicity varchar,
+premiumPeriodicityOthers varchar) RETURNS uuid AS $$
+    INSERT INTO financial_risk_policy_insured_object_coverages(financial_risk_policy_insured_object_id, branch, code,
+    description, internal_code, susep_process_number, lmi_amount, lmi_unit_type, lmi_unit_type_others, lmi_unit_code,
+    lmi_unit_description, is_lmi_sublimit, term_start_date, term_end_date, is_main_coverage, feature, type, grace_period,
+    grace_periodicity, grace_period_counting_method, grace_period_start_date, grace_period_end_date, premium_periodicity,
+    premium_periodicity_others, created_at, created_by, updated_at, updated_by)
+    VALUES(financialRiskPolicyInsuredObjectId, branch, code, description, internalCode, susepProcessNumber, lmiAmount,
+    lmiUnitType, lmiUnitTypeOthers, lmiUnitCode, lmiUnitDescription, isLMISublimit, termStartDate, termEndDate,
+    isMainCoverage, feature, type, gracePeriod, gracePeriodicity, gracePeriodCountingMethod, gracePeriodStartDate,
+    gracePeriodEndDate, premiumPeriodicity, premiumPeriodicityOthers, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING financial_risk_policy_insured_object_coverage_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addFinancialRiskPolicyCoverage(financialRiskPolicyId UUID, deductibleId UUID, posId UUID, branch varchar, code varchar,
+description varchar) RETURNS uuid AS $$
+    INSERT INTO financial_risk_policy_coverages(financial_risk_policy_id, deductible_id, pos_id, branch, code, description, created_at,
+    created_by, updated_at, updated_by)
+    VALUES(financialRiskPolicyId, deductibleId, posId, branch, code, description, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING financial_risk_policy_coverage_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addFinancialRiskPolicyCoverageDeductible(type varchar,
+typeAdditionalInfo varchar, amount varchar, unitType varchar, unitTypeOthers varchar, unitCode varchar, unitDescription varchar,
+period integer, periodicity varchar, periodCountingMethod varchar, periodStartDate date, periodEndDate date,
+description varchar) RETURNS uuid AS $$
+    INSERT INTO deductibles(type, type_additional_info, amount, unit_type, unit_type_others,
+    unit_code, unit_description,period, periodicity, period_counting_method, period_start_date, period_end_date, description,
+    created_at, created_by, updated_at, updated_by)
+    VALUES(type, typeAdditionalInfo, amount, unitType, unitTypeOthers, unitCode, unitDescription,
+    period, periodicity, periodCountingMethod, periodStartDate, periodEndDate, description, NOW(), 'PREPOPULATE', NOW(),
+    'PREPOPULATE')
+    RETURNING reference_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addFinancialRiskPolicyCoveragePos(applicationType varchar,
+description varchar, minValueAmount varchar, minValueUnitType varchar, minValueUnitTypeOthers varchar, minValueUnitCode varchar,
+minValueUnitDescription varchar, maxValueAmount varchar, maxValueUnitType varchar, maxValueUnitTypeOthers varchar,
+maxValueUnitCode varchar, maxValueUnitDescription varchar, percentageAmount varchar, percentageUnitType varchar,
+percentageUnitTypeOthers varchar, percentageUnitCode varchar, percentageUnitDescription varchar, valueOthersAmount varchar,
+valueOthersUnitType varchar, valueOthersUnitTypeOthers varchar, valueOthersUnitCode varchar,
+valueOthersUnitDescription varchar) RETURNS uuid AS $$
+    INSERT INTO pos(application_type, description, min_value_amount, min_value_unit_type,
+    min_value_unit_type_others, min_value_unit_code, min_value_unit_description, max_value_amount, max_value_unit_type,
+    max_value_unit_type_others, max_value_unit_code, max_value_unit_description, percentage_amount, percentage_unit_type,
+    percentage_unit_type_others, percentage_unit_code, percentage_unit_description, value_others_amount,
+    value_others_unit_type, value_others_unit_type_others, value_others_unit_code, value_others_unit_description,
+    created_at, created_by, updated_at, updated_by)
+    VALUES(applicationType, description, minValueAmount, minValueUnitType,
+    minValueUnitTypeOthers, minValueUnitCode, minValueUnitDescription, maxValueAmount, maxValueUnitType,
+    maxValueUnitTypeOthers, maxValueUnitCode, maxValueUnitDescription, percentageAmount, percentageUnitType,
+    percentageUnitTypeOthers, percentageUnitCode, percentageUnitDescription, valueOthersAmount, valueOthersUnitType,
+    valueOthersUnitTypeOthers, valueOthersUnitCode, valueOthersUnitDescription, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING pos_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addCoinsurer(identification varchar,
+cededPercentage varchar) RETURNS uuid AS $$
+    INSERT INTO coinsurers(identification, ceded_percentage, created_at, created_by, updated_at,
+    updated_by)
+    VALUES(identification, cededPercentage, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING coinsurer_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addCoinsurerIds(reference_id UUID, ids UUID[])
+RETURNS void AS $$
+BEGIN
+  INSERT INTO coinsurer_ids(reference_id, coinsurer_id)
+  SELECT reference_id, unnest(ids);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION addFinancialRiskPolicyClaim(financialRiskPolicyId UUID, identification varchar,
+documentationDeliveryDate date, status varchar, statusAlterationDate date, occurrenceDate date, warningDate date,
+thirdPartyClaimDate date, amount varchar, unitType varchar, unitTypeOthers varchar, unitCode varchar, unitDescription varchar,
+denialJustification varchar, denialJustificationDescription varchar) RETURNS uuid AS $$
+    INSERT INTO financial_risk_policy_claims(financial_risk_policy_id, identification, documentation_delivery_date, status,
+    status_alteration_date, occurrence_date, warning_date, third_party_claim_date, amount, unit_type, unit_type_others,
+    unit_code, unit_description, denial_justification,denial_justification_description, created_at, created_by, updated_at,
+    updated_by)
+    VALUES (financialRiskPolicyId, identification, documentationDeliveryDate, status, statusAlterationDate, occurrenceDate,
+    warningDate, thirdPartyClaimDate, amount, unitType, unitTypeOthers, unitCode, unitDescription, denialJustification,
+    denialJustificationDescription, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING financial_risk_policy_claim_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addFinancialRiskPolicyPremium(planId uuid) RETURNS uuid AS $$
-    INSERT INTO financial_risk_policy_premiums(financial_risk_policy_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+CREATE OR REPLACE FUNCTION addFinancialRiskPolicyClaimCoverage(financialRiskPolicyClaimId UUID, insuredObjectId varchar,
+branch varchar, code varchar, description varchar, warningDate date, thirdPartyClaimDate date) RETURNS uuid AS $$
+    INSERT INTO financial_risk_policy_claim_coverages(financial_risk_policy_claim_id, insured_object_id, branch, code,
+    description, warning_date, third_party_claim_date, created_at, created_by, updated_at, updated_by)
+    VALUES(financialRiskPolicyClaimId, insuredObjectId, branch, code, description, warningDate, thirdPartyClaimDate,
+    NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING financial_risk_policy_claim_coverage_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addFinancialRiskPolicyPremium(financialRiskPolicyId uuid, paymentsQuantity integer, amount varchar,
+unitType varchar, unitTypeOthers varchar, unitCode varchar, unitDescription varchar) RETURNS uuid AS $$
+    INSERT INTO financial_risk_policy_premiums(financial_risk_policy_id, payments_quantity, amount, unit_type, unit_type_others,
+    unit_code, unit_description, created_at, created_by, updated_at, updated_by)
+    VALUES (financialRiskPolicyId, paymentsQuantity, amount, unitType, unitTypeOthers, unitCode, unitDescription,
+    NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING financial_risk_policy_premium_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addPaymentIds(reference_id UUID, ids UUID[])
+RETURNS void AS $$
+BEGIN
+  INSERT INTO payment_ids(reference_id, payment_id)
+  SELECT reference_id, unnest(ids);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION addFinancialRiskPolicyPremiumCoverage(financialRiskPolicyPremiumId UUID, branch varchar,
+code varchar, description varchar, premiumAmount varchar, premiumUnitType varchar, premiumUnitTypeOthers varchar,
+premiumUnitCode varchar, premiumUnitDescription varchar) RETURNS uuid AS $$
+    INSERT INTO financial_risk_policy_premium_coverages(financial_risk_policy_premium_id, branch, code, description,
+    premium_amount, premium_unit_type, premium_unit_type_others, premium_unit_code, premium_unit_description,
+    created_at, created_by, updated_at, updated_by)
+    VALUES(financialRiskPolicyPremiumId, branch, code, description, premiumAmount, premiumUnitType, premiumUnitTypeOthers,
+    premiumUnitCode, premiumUnitDescription, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING financial_risk_policy_premium_coverage_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addPayment(movementDate date,
+movementType varchar, movementOrigin varchar, movementPaymentsNumber varchar, amount varchar, unitType varchar,
+unitTypeOthers varchar, unitCode varchar, unitDescription varchar, maturityDate date, tellerId varchar, tellerIdType varchar,
+tellerIdOthers varchar, tellerName varchar, financialInstitutionCode varchar, paymentType varchar) RETURNS uuid AS $$
+    INSERT INTO payments(movement_date, movement_type, movement_origin,
+    movement_payments_number, amount, unit_type, unit_type_others, unit_code, unit_description, maturity_date, teller_id,
+    teller_id_type, teller_id_type_others, teller_name, financial_institution_code, payment_type, created_at, created_by,
+    updated_at, updated_by)
+    VALUES(movementDate, movementType, movementOrigin, movementPaymentsNumber, amount,
+    unitType, unitTypeOthers, unitCode, unitDescription, maturityDate, tellerId, tellerIdType, tellerIdOthers, tellerName,
+    financialInstitutionCode, paymentType, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING payment_id
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addHousingPolicy(docId varchar, titleId varchar, s varchar) RETURNS uuid AS $$
@@ -264,16 +599,107 @@ CREATE OR REPLACE FUNCTION addRuralClaim(policyId uuid, identification varchar) 
     RETURNING claim_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addFinancialAssistanceContract(docId varchar, contractId varchar, s varchar) RETURNS varchar AS $$
-    INSERT INTO financial_assistance_contracts (account_holder_id, financial_assistance_contract_id, status, created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), contractId, s, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+CREATE OR REPLACE FUNCTION addFinancialAssistanceContract(docId varchar, contractId varchar, status varchar,
+certificateId varchar, groupContractId varchar, susepProcessNumber varchar, conceivedCreditValueAmount varchar,
+conceivedCreditValueUnitType varchar, conceivedCreditValueUnitTypeOthers varchar, conceivedCreditValueUnitCode varchar,
+conceivedCreditValueUnitDescription varchar, conceivedCreditValueCurrency varchar, creditedLiquidValueAmount varchar,
+creditedLiquidValueUnitType varchar, creditedLiquidValueUnitTypeOthers varchar, creditedLiquidValueUnitCode varchar,
+creditedLiquidValueUnitDescription varchar, creditedLiquidValueCurrency varchar, counterInstallmentAmount varchar,
+counterInstallmentUnitType varchar, counterInstallmentUnitTypeOthers varchar, counterInstallmentUnitCode varchar,
+counterInstallmentUnitDescription varchar, counterInstallmentCurrency varchar, counterInstallmentPeriodicity varchar,
+counterInstallmentQuantity int, counterInstallmentFirst_date date, counterInstallmentLastDate date,
+interestRateAmount varchar, interestRateUnitType varchar, interestRateUnitTypeOthers varchar, interestRateUnitCode varchar,
+interestRateUnitDescription varchar, interestRate_currency varchar, effectiveCostRateAmount varchar,
+effectiveCostRateUnitType varchar, effectiveCostRateUnitTypeOthers varchar, effectiveCostRateUnitCode varchar,
+effectiveCostRateUnitDescription varchar, effectiveCostRateCurrency varchar, amortizationPeriod int,
+acquittanceValueAmount varchar, acquittanceValueUnitType varchar, acquittanceValueUnitTypeOthers varchar,
+acquittanceValueUnitCode varchar, acquittanceValueUnitDescription varchar, acquittanceValueCurrency varchar,
+acquittanceDate date, taxesValueAmount varchar, taxesValueUnitType varchar, taxesValueUnitTypeOthers varchar,
+taxesValueUnitCode varchar, taxesValueUnitDescription varchar, taxesValueCurrency varchar, expensesValueAmount varchar,
+expensesValueUnitType varchar, expensesValueUnitTypeOthers varchar, expensesValueUnitCode varchar,
+expensesValueUnitDescription varchar, expensesValueCurrency varchar, finesValueAmount varchar, finesValueUnitType varchar,
+finesValueUnitTypeOthers varchar, finesValueUnitCode varchar, finesValueUnitDescription varchar, finesValueCurrency varchar,
+monetaryUpdatesValueAmount varchar, monetaryUpdatesValueUnitType varchar, monetaryUpdatesValueUnitTypeOthers varchar,
+monetaryUpdatesValueUnitCode varchar, monetaryUpdatesValueUnitDescription varchar, monetaryUpdatesValueCurrency varchar,
+administrativeFeesValueAmount varchar, administrativeFeesValueUnitType varchar, administrativeFeesValueUnitTypeOthers varchar,
+administrativeFeesValueUnitCode varchar, administrativeFeesValueUnitDescription varchar, administrativeFeesValueCurrency varchar,
+interestValueAmount varchar, interestValueUnitType varchar, interestValueUnitTypeOthers varchar, interestValueUnitCode varchar,
+interestValueUnitDescription varchar, interestValueCurrency varchar) RETURNS varchar AS $$
+    INSERT INTO financial_assistance_contracts (account_holder_id, financial_assistance_contract_id, status, certificate_id,
+    group_contract_id, susep_process_number, conceived_credit_value_amount, conceived_credit_value_unit_type,
+    conceived_credit_value_unit_type_others, conceived_credit_value_unit_code, conceived_credit_value_unit_description,
+    conceived_credit_value_currency, credited_liquid_value_amount, credited_liquid_value_unit_type,
+    credited_liquid_value_unit_type_others, credited_liquid_value_unit_code, credited_liquid_value_unit_description,
+    credited_liquid_value_currency, counter_installment_amount, counter_installment_unit_type,
+    counter_installment_unit_type_others, counter_installment_unit_code, counter_installment_unit_description,
+    counter_installment_currency, counter_installment_periodicity, counter_installment_quantity, counter_installment_first_date,
+    counter_installment_last_date, interest_rate_amount, interest_rate_unit_type, interest_rate_unit_type_others,
+    interest_rate_unit_code, interest_rate_unit_description, interest_rate_currency, effective_cost_rate_amount,
+    effective_cost_rate_unit_type, effective_cost_rate_unit_type_others, effective_cost_rate_unit_code,
+    effective_cost_rate_unit_description, effective_cost_rate_currency, amortization_period, acquittance_value_amount,
+    acquittance_value_unit_type, acquittance_value_unit_type_others, acquittance_value_unit_code,
+    acquittance_value_unit_description, acquittance_value_currency, acquittance_date, taxes_value_amount, taxes_value_unit_type,
+    taxes_value_unit_type_others, taxes_value_unit_code, taxes_value_unit_description, taxes_value_currency,
+    expenses_value_amount, expenses_value_unit_type, expenses_value_unit_type_others, expenses_value_unit_code,
+    expenses_value_unit_description, expenses_value_currency, fines_value_amount, fines_value_unit_type,
+    fines_value_unit_type_others, fines_value_unit_code, fines_value_unit_description, fines_value_currency,
+    monetary_updates_value_amount, monetary_updates_value_unit_type, monetary_updates_value_unit_type_others,
+    monetary_updates_value_unit_code, monetary_updates_value_unit_description, monetary_updates_value_currency,
+    administrative_fees_value_amount, administrative_fees_value_unit_type, administrative_fees_value_unit_type_others,
+    administrative_fees_value_unit_code, administrative_fees_value_unit_description, administrative_fees_value_currency,
+    interest_value_amount, interest_value_unit_type, interest_value_unit_type_others, interest_value_unit_code,
+    interest_value_unit_description, interest_value_currency, created_at, created_by, updated_at, updated_by)
+    VALUES (getAccountHolderId(docId), contractId, status, certificateId, groupContractId, susepProcessNumber,
+    conceivedCreditValueAmount, conceivedCreditValueUnitType, conceivedCreditValueUnitTypeOthers,
+    conceivedCreditValueUnitCode, conceivedCreditValueUnitDescription, conceivedCreditValueCurrency,
+    creditedLiquidValueAmount, creditedLiquidValueUnitType, creditedLiquidValueUnitTypeOthers, creditedLiquidValueUnitCode,
+    creditedLiquidValueUnitDescription, creditedLiquidValueCurrency, counterInstallmentAmount, counterInstallmentUnitType,
+    counterInstallmentUnitTypeOthers, counterInstallmentUnitCode, counterInstallmentUnitDescription, counterInstallmentCurrency,
+    counterInstallmentPeriodicity, counterInstallmentQuantity, counterInstallmentFirst_date, counterInstallmentLastDate,
+    interestRateAmount, interestRateUnitType, interestRateUnitTypeOthers, interestRateUnitCode, interestRateUnitDescription,
+    interestRate_currency, effectiveCostRateAmount, effectiveCostRateUnitType, effectiveCostRateUnitTypeOthers,
+    effectiveCostRateUnitCode, effectiveCostRateUnitDescription, effectiveCostRateCurrency, amortizationPeriod,
+    acquittanceValueAmount, acquittanceValueUnitType, acquittanceValueUnitTypeOthers, acquittanceValueUnitCode,
+    acquittanceValueUnitDescription, acquittanceValueCurrency, acquittanceDate, taxesValueAmount, taxesValueUnitType,
+    taxesValueUnitTypeOthers, taxesValueUnitCode, taxesValueUnitDescription, taxesValueCurrency, expensesValueAmount,
+    expensesValueUnitType, expensesValueUnitTypeOthers, expensesValueUnitCode, expensesValueUnitDescription,
+    expensesValueCurrency, finesValueAmount, finesValueUnitType, finesValueUnitTypeOthers, finesValueUnitCode,
+    finesValueUnitDescription, finesValueCurrency,  monetaryUpdatesValueAmount, monetaryUpdatesValueUnitType,
+    monetaryUpdatesValueUnitTypeOthers,  monetaryUpdatesValueUnitCode, monetaryUpdatesValueUnitDescription,
+    monetaryUpdatesValueCurrency,  administrativeFeesValueAmount, administrativeFeesValueUnitType,
+    administrativeFeesValueUnitTypeOthers,  administrativeFeesValueUnitCode, administrativeFeesValueUnitDescription,
+    administrativeFeesValueCurrency,  interestValueAmount, interestValueUnitType, interestValueUnitTypeOthers,
+    interestValueUnitCode,  interestValueUnitDescription, interestValueCurrency, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING financial_assistance_contract_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addFinancialAssistanceContractMovement(contractId varchar) RETURNS uuid AS $$
-    INSERT INTO financial_assistance_contract_movements(financial_assistance_contract_id, created_at, created_by, updated_at, updated_by)
-    VALUES (contractId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+CREATE OR REPLACE FUNCTION addFinancialAssistanceContractMovement(contractId varchar, updatedDebitAmount varchar,
+updatedDebitUnitType varchar, updatedDebitUnitTypeOthers varchar, updatedDebitUnitCode varchar, updatedDebitUnitDescription varchar,
+updatedDebitCurrency varchar, remainingCounterInstallmentsQuantity integer, remainingUnpaidCounterInstallmentsQuantity integer,
+lifePensionPmBacAmount varchar, lifePensionPmBacUnitType varchar, lifePensionPmBacUnitTypeOthers varchar,
+lifePensionPmBacUnitCode varchar, lifePensionPmBacUnitDescription varchar, lifePensionPmBacCurrency varchar,
+pensionPlanPmBacAmount varchar, pensionPlanPmBacUnitType varchar, pensionPlanPmBacUnitTypeOthers varchar,
+pensionPlanPmBacUnitCode varchar, pensionPlanPmBacUnitDescription varchar, pensionPlanPmBacUnitCurrency varchar) RETURNS uuid AS $$
+    INSERT INTO financial_assistance_contract_movements(financial_assistance_contract_id, updated_debit_amount, updated_debit_unit_type,
+    updated_debit_unit_type_others, updated_debit_unit_code, updated_debit_unit_description, updated_debit_currency,
+    remaining_counter_installments_quantity , remaining_unpaid_counter_installments_quantity , life_pension_pm_bac_amount,
+    life_pension_pm_bac_unit_type, life_pension_pm_bac_unit_type_others, life_pension_pm_bac_unit_code,
+    life_pension_pm_bac_unit_description, life_pension_pm_bac_currency, pension_plan_pm_bac_amount, pension_plan_pm_bac_unit_type,
+    pension_plan_pm_bac_unit_type_others, pension_plan_pm_bac_unit_code, pension_plan_pm_bac_unit_description, pension_plan_pm_bac_currency,
+    created_at, created_by, updated_at, updated_by)
+    VALUES (contractId, updatedDebitAmount, updatedDebitUnitType, updatedDebitUnitTypeOthers, updatedDebitUnitCode, 
+    updatedDebitUnitDescription, updatedDebitCurrency, remainingCounterInstallmentsQuantity, remainingUnpaidCounterInstallmentsQuantity,
+    lifePensionPmBacAmount, lifePensionPmBacUnitType, lifePensionPmBacUnitTypeOthers, lifePensionPmBacUnitCode,
+    lifePensionPmBacUnitDescription, lifePensionPmBacCurrency, pensionPlanPmBacAmount, pensionPlanPmBacUnitType,
+    pensionPlanPmBacUnitTypeOthers, pensionPlanPmBacUnitCode, pensionPlanPmBacUnitDescription, pensionPlanPmBacUnitCurrency,
+    NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING financial_assistance_contract_movement_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addFinancialAssistanceContractInsured(contractId varchar, documentType varchar, documentTypeOthers varchar, documentNumber varchar, name varchar) RETURNS uuid AS $$
+    INSERT INTO financial_assistance_contract_insureds (financial_assistance_contract_id, document_type, document_type_others, document_number, name, created_at, created_by, updated_at, updated_by)
+    VALUES (contractId, documentType, documentTypeOthers, documentNumber, name, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING financial_assistance_contract_insured_id
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addAutoPolicy(docId varchar, policyId varchar, s varchar, docType varchar, proposalId varchar) RETURNS varchar AS $$

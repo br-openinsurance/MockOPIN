@@ -11,6 +11,7 @@ import com.raidiam.trustframework.mockinsurance.domain.QuotePersonTravelEntity
 import com.raidiam.trustframework.mockinsurance.domain.QuotePersonLeadEntity
 import com.raidiam.trustframework.mockinsurance.models.generated.*
 import com.raidiam.trustframework.mockinsurance.repository.IdempotencyRepository
+import com.raidiam.trustframework.mockinsurance.services.OverrideService
 import com.raidiam.trustframework.mockinsurance.services.QuotePersonLeadService
 import com.raidiam.trustframework.mockinsurance.services.QuotePersonLifeService
 import com.raidiam.trustframework.mockinsurance.services.QuotePersonTravelService
@@ -36,6 +37,13 @@ class QuotePersonControllerSpec extends Specification {
     @MockBean(QuotePersonLeadService)
     QuotePersonLeadService quotePersonLeadService() {
         Spy(QuotePersonLeadService)
+    }
+
+    @MockBean(OverrideService)
+    OverrideService overrideService() {
+        def mock = Mock(OverrideService)
+        mock.getOverride(_ as String, _ as String, _ as String) >> Optional.empty()
+        return mock
     }
 
     @Inject

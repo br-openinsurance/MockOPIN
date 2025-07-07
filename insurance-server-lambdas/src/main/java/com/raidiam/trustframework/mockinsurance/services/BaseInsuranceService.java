@@ -257,8 +257,28 @@ abstract class BaseInsuranceService {
     @Inject
     ConsentTransportPolicyRepository consentTransportPolicyRepository;
 
+    @Inject
+    PaymentRepository paymentRepository;
+
+    @Inject
+    BeneficiaryInfoRepository beneficiaryInfoRepository;
+
+    @Inject
+    PersonalInfoRepository personalInfoRepository;
+
+    @Inject
+    IntermediaryRepository intermediaryRepository;
+
+    @Inject
+    PrincipalInfoRepository principalInfoRepository;
+
+    @Inject
+    CoinsurerRepository coinsurerRepository;
 
     @Inject
     WebhookRepository webhookRepository;
+
+    @Inject
+    OverrideResponseRepository overrideResponseRepository;
 
 }

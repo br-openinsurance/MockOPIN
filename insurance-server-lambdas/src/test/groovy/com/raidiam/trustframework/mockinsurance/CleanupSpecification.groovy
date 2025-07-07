@@ -114,7 +114,67 @@ class CleanupSpecification extends Specification {
     CapitalizationTitlePlanSettlementRepository capitalizationTitlePlanSettlementRepository;
 
     @Inject
-    FinancialRiskPolicyRepository financialRiskPolicyRepository;
+    CapitalizationTitlePlanPlanSeriesRepository capitalizationTitlePlanSeriesRepository
+
+    @Inject
+    CapitalizationTitlePlanQuotaRepository capitalizationTitlePlanQuotaRepository
+
+    @Inject
+    CapitalizationTitleBrokerRepository capitalizationTitlePlanBrokerRepository
+
+    @Inject
+    CapitalizationTitlePlanTitleRepository capitalizationTitlePlanTitleRepository
+
+    @Inject
+    CapitalizationTitlePlanSubscriberRepository capitalizationTitlePlanSubscriberRepository
+
+    @Inject
+    CapitalizationTitlePlanTechnicalProvisionsRepository capitalizationTitlePlanTechnicalProvisionsRepository
+
+    @Inject
+    CapitalizationTitleHolderRepository capitalizationTitlePlanHolderRepository;
+
+    @Inject
+    FinancialRiskPolicyRepository financialRiskPolicyRepository
+
+    @Inject
+    BeneficiaryInfoRepository beneficiaryInfoRepository
+
+    @Inject
+    CoinsurerRepository coinsurerRepository
+
+    @Inject
+    FinancialRiskPolicyClaimCoverageRepository financialRiskPolicyClaimCoverageRepository
+
+    @Inject
+    DeductibleRepository deductibleRepository
+
+    @Inject
+    POSRepository posRepository
+
+    @Inject
+    FinancialRiskPolicyCoverageRepository financialRiskPolicyCoverageRepository
+
+    @Inject
+    FinancialRiskPolicyInsuredObjectRepository financialRiskPolicyInsuredObjectRepository
+
+    @Inject
+    FinancialRiskPolicyInsuredObjectCoverageRepository financialRiskPolicyInsuredObjectCoverageRepository
+
+    @Inject
+    FinancialRiskPolicyPremiumCoverageRepository financialRiskPolicyPremiumCoverageRepository
+
+    @Inject
+    IntermediaryRepository intermediaryRepository
+
+    @Inject
+    PaymentRepository paymentRepository
+
+    @Inject
+    PersonalInfoRepository personalInfoRepository
+
+    @Inject
+    PrincipalInfoRepository principalInfoRepository
 
     @Inject
     ConsentFinancialRiskPolicyRepository consentFinancialRiskPolicyRepository;
@@ -210,6 +270,9 @@ class CleanupSpecification extends Specification {
     FinancialAssistanceContractMovementRepository financialAssistanceContractMovementRepository;
 
     @Inject
+    FinancialAssistanceContractInsuredRepository financialAssistanceContractInsuredRepository
+
+    @Inject
     ConsentFinancialAssistanceContractRepository consentFinancialAssistanceContractRepository;
 
     @Inject
@@ -260,6 +323,9 @@ class CleanupSpecification extends Specification {
     @Inject
     WebhookRepository webhookRepository
 
+    @Inject
+    OverrideResponseRepository overrideResponseRepository
+
     @Shared
     boolean runSetup = true
 
@@ -301,8 +367,28 @@ class CleanupSpecification extends Specification {
             capitalizationTitlePlanRepository.deleteAll()
             consentCapitalizationTitlePlanRepository.deleteAll()
             capitalizationTitlePlanEventRepository.deleteAll()
+            capitalizationTitlePlanSeriesRepository.deleteAll()
+            capitalizationTitlePlanQuotaRepository.deleteAll()
+            capitalizationTitlePlanBrokerRepository.deleteAll()
+            capitalizationTitlePlanTitleRepository.deleteAll()
+            capitalizationTitlePlanSubscriberRepository.deleteAll()
+            capitalizationTitlePlanTechnicalProvisionsRepository.deleteAll()
+            capitalizationTitlePlanHolderRepository.deleteAll()
             capitalizationTitlePlanSettlementRepository.deleteAll()
             financialRiskPolicyRepository.deleteAll()
+            beneficiaryInfoRepository.deleteAll()
+            coinsurerRepository.deleteAll()
+            financialRiskPolicyClaimCoverageRepository.deleteAll()
+            posRepository.deleteAll()
+            deductibleRepository.deleteAll()
+            financialRiskPolicyCoverageRepository.deleteAll()
+            financialRiskPolicyInsuredObjectRepository.deleteAll()
+            financialRiskPolicyInsuredObjectCoverageRepository.deleteAll()
+            financialRiskPolicyPremiumCoverageRepository.deleteAll()
+            intermediaryRepository.deleteAll()
+            paymentRepository.deleteAll()
+            personalInfoRepository.deleteAll()
+            principalInfoRepository.deleteAll()
             consentFinancialRiskPolicyRepository.deleteAll()
             financialRiskPolicyClaimRepository.deleteAll()
             financialRiskPolicyPremiumRepository.deleteAll()
@@ -324,6 +410,7 @@ class CleanupSpecification extends Specification {
             lifePensionContractMovementContributionRepository.deleteAll()
             financialAssistanceContractRepository.deleteAll()
             financialAssistanceContractMovementRepository.deleteAll()
+            financialAssistanceContractInsuredRepository.deleteAll()
             consentFinancialAssistanceContractRepository.deleteAll()
             acceptanceAndBranchesAbroadPolicyRepository.deleteAll()
             acceptanceAndBranchesAbroadClaimRepository.deleteAll()
@@ -346,6 +433,7 @@ class CleanupSpecification extends Specification {
             transportPolicyRepository.deleteAll()
             transportPolicyClaimRepository.deleteAll()
             consentTransportPolicyRepository.deleteAll()
+            overrideResponseRepository.deleteAll()
             runCleanup = false
             runSetup = true
         }

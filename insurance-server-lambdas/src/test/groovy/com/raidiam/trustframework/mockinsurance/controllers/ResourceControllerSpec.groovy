@@ -1,12 +1,13 @@
 package com.raidiam.trustframework.mockinsurance.controllers
 
-import com.raidiam.trustframework.mockinsurance.AwsProxyHelper
-import com.raidiam.trustframework.mockinsurance.AuthHelper
 import com.amazonaws.services.lambda.runtime.Context
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.raidiam.trustframework.mockinsurance.AuthHelper
+import com.raidiam.trustframework.mockinsurance.AwsProxyHelper
 import com.raidiam.trustframework.mockinsurance.models.generated.Meta
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseResourceList
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseResourceListData
+import com.raidiam.trustframework.mockinsurance.services.OverrideService
 import com.raidiam.trustframework.mockinsurance.services.ResourcesService
 import io.micronaut.context.ApplicationContext
 import io.micronaut.data.model.Pageable
@@ -20,10 +21,7 @@ import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
 import spock.lang.Specification
 
-import java.time.OffsetDateTime
-
-
-@MicronautTest(transactional = false)
+@MicronautTest(transactional = false, environments = "test")
 class ResourceControllerSpec extends Specification {
 
     private static Context lambdaContext = new MockLambdaContext()
@@ -36,6 +34,13 @@ class ResourceControllerSpec extends Specification {
     @MockBean(ResourcesService)
     ResourcesService resourcesService(){
         Mock(ResourcesService)
+    }
+
+    @MockBean(OverrideService)
+    OverrideService overrideService() {
+        def mock = Mock(OverrideService)
+        mock.getOverride(_ as String, _ as String, _ as String) >> Optional.empty()
+        return mock
     }
 
     ApiGatewayProxyRequestEventFunction handler

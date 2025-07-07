@@ -6,6 +6,7 @@ import com.raidiam.trustframework.mockinsurance.AuthHelper
 import com.raidiam.trustframework.mockinsurance.AwsProxyHelper
 import com.raidiam.trustframework.mockinsurance.models.generated.*
 import com.raidiam.trustframework.mockinsurance.services.AcceptanceAndBranchesAbroadService
+import com.raidiam.trustframework.mockinsurance.services.OverrideService
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils
 import io.micronaut.context.ApplicationContext
 import io.micronaut.data.model.Pageable
@@ -18,7 +19,7 @@ import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
 import spock.lang.Specification
 
-@MicronautTest
+@MicronautTest()
 class AcceptanceAndBranchesAbroadControllerSpec extends Specification {
     @Inject
     AcceptanceAndBranchesAbroadService acceptanceAndBranchesAbroadService
@@ -26,6 +27,13 @@ class AcceptanceAndBranchesAbroadControllerSpec extends Specification {
     @MockBean(AcceptanceAndBranchesAbroadService)
     AcceptanceAndBranchesAbroadService acceptanceAndBranchesAbroadService() {
         Mock(AcceptanceAndBranchesAbroadService)
+    }
+
+    @MockBean(OverrideService)
+    OverrideService overrideService() {
+        def mock = Mock(OverrideService)
+        mock.getOverride(_ as String, _ as String, _ as String) >> Optional.empty()
+        return mock
     }
 
     private static Context lambdaContext = new MockLambdaContext()

@@ -40,7 +40,7 @@ public class EndorsementController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @ResponseErrorWithRequestDateTime
     @Idempotent
-    @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
     public ResponseEndorsement createEndorsement(@Body CreateEndorsement body, @PathVariable("consentId") String consentId, HttpRequest<?> request) {
 
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
