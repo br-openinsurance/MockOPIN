@@ -1,6 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.services
 
-import com.raidiam.trustframework.mockinsurance.CleanupSpecification
+import com.raidiam.trustframework.mockinsurance.cleanups.CleanupCapitalizationTitleSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
 import com.raidiam.trustframework.mockinsurance.domain.*
 import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentPermission
@@ -13,7 +13,7 @@ import spock.lang.Stepwise
 
 @Stepwise
 @MicronautTest(transactional = false, environments = ["db"])
-class CapitalizationTitleServiceSpec extends CleanupSpecification {
+class CapitalizationTitleServiceSpec extends CleanupCapitalizationTitleSpecification {
 
     @Inject
     CapitalizationTitleService capitalizationTitleService

@@ -216,11 +216,11 @@ $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addPersonalInfo(identification varchar,
 identificationType varchar, identificationTypeOthers varchar, name varchar, birthDate date, postCode varchar,
-email varchar, city varchar, state varchar, country varchar, address varchar) RETURNS uuid AS $$
+email varchar, city varchar, state varchar, country varchar, address varchar, addressAdditionalInfo varchar) RETURNS uuid AS $$
     INSERT INTO personal_info(identification, identification_type, identification_type_others,
-    name, birth_date, post_code, email, city, state, country, address, created_at, created_by, updated_at, updated_by)
+    name, birth_date, post_code, email, city, state, country, address, address_additional_info, created_at, created_by, updated_at, updated_by)
     VALUES(identification, identificationType, identificationTypeOthers, name, birthDate, postCode,
-    email, city, state, country, address, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    email, city, state, country, address, addressAdditionalInfo, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING reference_id
 $$ LANGUAGE SQL;
 
@@ -322,7 +322,7 @@ description varchar) RETURNS uuid AS $$
     RETURNING financial_risk_policy_coverage_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addFinancialRiskPolicyCoverageDeductible(type varchar,
+CREATE OR REPLACE FUNCTION addDeductible(type varchar,
 typeAdditionalInfo varchar, amount varchar, unitType varchar, unitTypeOthers varchar, unitCode varchar, unitDescription varchar,
 period integer, periodicity varchar, periodCountingMethod varchar, periodStartDate date, periodEndDate date,
 description varchar) RETURNS uuid AS $$
@@ -335,7 +335,7 @@ description varchar) RETURNS uuid AS $$
     RETURNING reference_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addFinancialRiskPolicyCoveragePos(applicationType varchar,
+CREATE OR REPLACE FUNCTION addPos(applicationType varchar,
 description varchar, minValueAmount varchar, minValueUnitType varchar, minValueUnitTypeOthers varchar, minValueUnitCode varchar,
 minValueUnitDescription varchar, maxValueAmount varchar, maxValueUnitType varchar, maxValueUnitTypeOthers varchar,
 maxValueUnitCode varchar, maxValueUnitDescription varchar, percentageAmount varchar, percentageUnitType varchar,
@@ -437,22 +437,90 @@ tellerIdOthers varchar, tellerName varchar, financialInstitutionCode varchar, pa
     RETURNING payment_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addHousingPolicy(docId varchar, titleId varchar, s varchar) RETURNS uuid AS $$
-    INSERT INTO housing_policies (account_holder_id, housing_id, status, created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), titleId, s, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+CREATE OR REPLACE FUNCTION addHousingPolicy(docId varchar, titleId varchar, s varchar, productName VARCHAR, documentType VARCHAR,
+policyId VARCHAR, susepProcessNumber VARCHAR, groupCertificateId VARCHAR, issuanceType VARCHAR, issuanceDate DATE, termStartDate DATE,
+termEndDate DATE, leadInsurerCode VARCHAR, leadInsurerPolicyId VARCHAR, maxLmgAmount VARCHAR, maxLmgUnitType VARCHAR, maxLmgUnitCode VARCHAR,
+maxLmgUnitDescription VARCHAR, proposalId VARCHAR) RETURNS uuid AS $$
+    INSERT INTO housing_policies (account_holder_id, housing_id, status, product_name, document_type, policy_id, susep_process_number,
+    group_certificate_id, issuance_type, issuance_date, term_start_date, term_end_date, lead_insurer_code, lead_insurer_policy_id,
+    max_lmg_amount, max_lmg_unit_type, max_lmg_unit_code, max_lmg_unit_description, proposal_id,
+    created_at, created_by, updated_at, updated_by)
+    VALUES (getAccountHolderId(docId), titleId, s, productName, documentType, policyId, susepProcessNumber, groupCertificateId, issuanceType,
+    issuanceDate, termStartDate, termEndDate, leadInsurerCode, leadInsurerPolicyId, maxLmgAmount, maxLmgUnitType, maxLmgUnitCode, maxLmgUnitDescription,
+    proposalId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING housing_policy_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addHousingPolicyClaim(planId uuid) RETURNS uuid AS $$
-    INSERT INTO housing_policy_claims(housing_policy_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+CREATE OR REPLACE FUNCTION addHousingPolicyInsuredObject(planId uuid, identification VARCHAR, type VARCHAR, description VARCHAR, amount VARCHAR,
+unitType VARCHAR, unitCode VARCHAR, unitDescription VARCHAR) RETURNS uuid AS $$
+    INSERT INTO housing_policy_insured_objects(housing_policy_id, identification, type, description, amount, unit_type, unit_code, unit_description,
+    created_at, created_by, updated_at, updated_by)
+    VALUES (planId, identification, type, description, amount, unitType, unitCode, unitDescription, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING housing_policy_insured_object_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addHousingPolicyInsuredObjectCoverage(insuredObjectId uuid, branch VARCHAR, code VARCHAR, description VARCHAR,
+internalCode VARCHAR, susepProcessNumber VARCHAR, lmiAmount VARCHAR, lmiUnitType VARCHAR, lmiSubLimit BOOLEAN, termStartDate DATE, termEndDate DATE,
+mainCoverage BOOLEAN, feature VARCHAR, type VARCHAR, gracePeriod INTEGER, gracePeriodicity VARCHAR,
+gracePeriodCountingMethod VARCHAR, premiumPeriodicity VARCHAR) RETURNS uuid AS $$
+    INSERT INTO housing_policy_insured_object_coverages(housing_policy_insured_object_id, branch, code, description, internal_code, susep_process_number,
+    lmi_amount, lmi_unit_type, lmi_sub_limit, term_start_date, term_end_date, main_coverage, feature, type, grace_period, grace_periodicity,
+    grace_period_counting_method, premium_periodicity, created_at, created_by, updated_at, updated_by)
+    VALUES (insuredObjectId, branch, code, description, internalCode, susepProcessNumber, lmiAmount, lmiUnitType, lmiSubLimit, termStartDate,
+    termEndDate, mainCoverage, feature, type, gracePeriod, gracePeriodicity, gracePeriodCountingMethod, premiumPeriodicity,
+    NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING housing_policy_insured_object_coverage_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addHousingPolicyBranchInsuredObject(planId uuid, identification VARCHAR, propertyType VARCHAR, postcode VARCHAR,
+interestRate VARCHAR, costRate VARCHAR, updateIndex VARCHAR) RETURNS uuid AS $$
+    INSERT INTO housing_policy_branch_insured_objects(housing_policy_id, identification, property_type, postcode, interest_rate, cost_rate,
+    update_index, created_at, created_by, updated_at, updated_by)
+    VALUES (planId, identification, propertyType, postcode, interestRate, costRate, updateIndex, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING housing_policy_branch_insured_object_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addHousingPolicyBranchInsuredObjectLender(branchInsuredObjectId uuid, companyName VARCHAR, cnpjNumber VARCHAR) RETURNS uuid AS $$
+    INSERT INTO housing_policy_branch_insured_object_lenders(housing_policy_branch_insured_object_id, company_name, cnpj_number, created_at, created_by, updated_at, updated_by)
+    VALUES (branchInsuredObjectId, companyName, cnpjNumber, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING housing_policy_branch_insured_object_lender_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addHousingPolicyBranchInsured(planId uuid, identification VARCHAR, identificationType VARCHAR) RETURNS uuid AS $$
+    INSERT INTO housing_policy_branch_insureds(housing_policy_id, identification, identification_type, created_at, created_by, updated_at, updated_by)
+    VALUES (planId, identification, identificationType, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING housing_policy_branch_insured_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addHousingPolicyClaim(planId uuid, identification VARCHAR, documentationDeliveryDate DATE, status VARCHAR,
+statusAlterationDate DATE, occurrenceDate DATE, warningDate DATE, thirdPartyClaimDate DATE, amount VARCHAR, unitType VARCHAR,
+denialJustification VARCHAR, denialJustificationDescription VARCHAR) RETURNS uuid AS $$
+    INSERT INTO housing_policy_claims(housing_policy_id, identification, documentation_delivery_date, status, status_alteration_date,
+    occurrence_date, warning_date, third_party_claim_date, amount, unit_type, denial_justification, denial_justification_description,
+    created_at, created_by, updated_at, updated_by)
+    VALUES (planId, identification, documentationDeliveryDate, status, statusAlterationDate, occurrenceDate, warningDate, thirdPartyClaimDate,
+    amount, unitType, denialJustification, denialJustificationDescription, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING housing_policy_claim_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addHousingPolicyPremium(planId uuid) RETURNS uuid AS $$
-    INSERT INTO housing_policy_premiums(housing_policy_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+CREATE OR REPLACE FUNCTION addHousingPolicyClaimCoverage(claimId uuid, insuredObjectId VARCHAR, branch VARCHAR, code VARCHAR, description VARCHAR,
+warningDate DATE, thirdPartyClaimDate DATE) RETURNS uuid AS $$
+    INSERT INTO housing_policy_claim_coverages(housing_policy_claim_id, insured_object_id, branch, code, description, warning_date, third_party_claim_date,
+    created_at, created_by, updated_at, updated_by)
+    VALUES (claimId, insuredObjectId, branch, code, description, warningDate, thirdPartyClaimDate, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING housing_policy_claim_coverage_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addHousingPolicyPremium(planId uuid, paymentsQuantity INTEGER, amount VARCHAR, unitType VARCHAR) RETURNS uuid AS $$
+    INSERT INTO housing_policy_premiums(housing_policy_id, payments_quantity, amount, unit_type, created_at, created_by, updated_at, updated_by)
+    VALUES (planId, paymentsQuantity, amount, unitType, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING housing_policy_premium_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addHousingPolicyPremiumCoverage(premiumId uuid, branch VARCHAR, code VARCHAR, amount VARCHAR, unitType VARCHAR) RETURNS uuid AS $$
+    INSERT INTO housing_policy_premium_coverages(housing_policy_premium_id, branch, code, amount, unit_type, created_at, created_by, updated_at, updated_by)
+    VALUES (premiumId, branch, code, amount, unitType, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING housing_policy_premium_coverage_id
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addResponsibilityPolicy(docId varchar, titleId varchar, s varchar) RETURNS uuid AS $$
@@ -587,16 +655,58 @@ CREATE OR REPLACE FUNCTION addPatrimonialClaim(policyId uuid, identification var
     RETURNING claim_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addRuralPolicy(docId varchar, insuranceId varchar, s varchar) RETURNS uuid AS $$
-    INSERT INTO rural_policies (account_holder_id, insurance_id, status, created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), insuranceId, s, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
-    RETURNING policy_id
+CREATE OR REPLACE FUNCTION addRuralPolicy(docId VARCHAR, insuranceId VARCHAR, s VARCHAR, productName VARCHAR, documentType VARCHAR, policyId VARCHAR, susepProcessNumber VARCHAR, groupCertificateId VARCHAR, issuanceType VARCHAR, issuanceDate DATE, termStartDate DATE, termEndDate DATE, leadInsurerCode VARCHAR, leadInsurerPolicyId VARCHAR, maxLmgAmount VARCHAR, maxLmgUnitType VARCHAR, maxLmgUnitTypeOthers VARCHAR, maxLmgUnitCode VARCHAR, maxLmgUnitDescription VARCHAR, proposalId VARCHAR, coinsuranceRetainedPercentage VARCHAR ) RETURNS UUID AS $$
+    INSERT INTO rural_policies (account_holder_id, insurance_id, status, product_name, document_type, policy_id, susep_process_number, group_certificate_id, issuance_type, issuance_date, term_start_date, term_end_date, lead_insurer_code, lead_insurer_policy_id, max_lmg_amount, max_lmg_unit_type, max_lmg_unit_type_others, max_lmg_unit_code, max_lmg_unit_description, proposal_id, coinsurance_retained_percentage, created_at, created_by, updated_at, updated_by)
+    VALUES (getAccountHolderId(docId), insuranceId, s, productName, documentType, policyId, susepProcessNumber, groupCertificateId, issuanceType, issuanceDate, termStartDate, termEndDate, leadInsurerCode, leadInsurerPolicyId, maxLmgAmount, maxLmgUnitType, maxLmgUnitTypeOthers, maxLmgUnitCode, maxLmgUnitDescription, proposalId, coinsuranceRetainedPercentage, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING rural_policy_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addRuralClaim(policyId uuid, identification varchar) RETURNS uuid AS $$
-    INSERT INTO rural_policy_claims(policy_id, identification, created_at, created_by, updated_at, updated_by)
-    VALUES (policyId, identification, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
-    RETURNING claim_id
+CREATE OR REPLACE FUNCTION addRuralPolicyInsuredObject(ruralPolicyId UUID, identification VARCHAR, type VARCHAR, typeAdditionalInfo VARCHAR, description VARCHAR, amount VARCHAR, unitType VARCHAR, unitTypeOthers VARCHAR, unitCode VARCHAR, unitDescription VARCHAR) RETURNS UUID AS $$
+    INSERT INTO rural_policy_insured_objects (rural_policy_id, identification, type, type_additional_info, description, amount, unit_type, unit_type_others, unit_code, unit_description, created_at, created_by, updated_at, updated_by)
+    VALUES (ruralPolicyId, identification, type, typeAdditionalInfo, description, amount, unitType, unitTypeOthers, unitCode, unitDescription, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING rural_policy_insured_object_id
+$$ LANGUAGE SQL;
+   
+CREATE OR REPLACE FUNCTION addRuralPolicyInsuredObjectCoverage(ruralPolicyInsuredObjectId UUID, branch VARCHAR, code VARCHAR, description VARCHAR, internalCode VARCHAR, susepProcessNumber VARCHAR, lmiAmount VARCHAR, lmiUnitType VARCHAR, lmiUnitTypeOthers VARCHAR, lmiUnitCode VARCHAR, lmiUnitDescription VARCHAR, lmiSublimit BOOLEAN, termStartDate DATE, termEndDate DATE, mainCoverage BOOLEAN, feature VARCHAR, type VARCHAR, gracePeriod INTEGER, gracePeriodicity VARCHAR, gracePeriodCountingMethod VARCHAR, gracePeriodStartDate DATE, gracePeriodEndDate DATE, premiumPeriodicity VARCHAR, premiumPeriodicityOthers VARCHAR) RETURNS UUID AS $$
+    INSERT INTO rural_policy_insured_object_coverages (rural_policy_insured_object_id, branch, code, description, internal_code, susep_process_number, lmi_amount, lmi_unit_type, lmi_unit_type_others, lmi_unit_code, lmi_unit_description, lmi_sublimit, term_start_date, term_end_date, main_coverage, feature, type, grace_period, grace_periodicity, grace_period_counting_method, grace_period_start_date, grace_period_end_date, premium_periodicity, premium_periodicity_others, created_at, created_by, updated_at, updated_by)
+    VALUES (ruralPolicyInsuredObjectId, branch, code, description, internalCode, susepProcessNumber, lmiAmount, lmiUnitType, lmiUnitTypeOthers, lmiUnitCode, lmiUnitDescription, lmiSublimit, termStartDate, termEndDate, mainCoverage, feature, type, gracePeriod, gracePeriodicity, gracePeriodCountingMethod, gracePeriodStartDate, gracePeriodEndDate, premiumPeriodicity, premiumPeriodicityOthers, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING rural_policy_insured_object_coverage_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addRuralPolicyCoverage(ruralPolicyId UUID, branch VARCHAR, code VARCHAR, description VARCHAR, deductibleId UUID, posId UUID) RETURNS UUID AS $$
+    INSERT INTO rural_policy_coverages(rural_policy_id, branch, code, description, deductible_id, pos_id, created_at, created_by, updated_at, updated_by)
+    VALUES (ruralPolicyId, branch, code, description, deductibleId, posId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING rural_policy_coverage_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addRuralPolicyBranchInsuredObject(ruralPolicyId UUID, identification VARCHAR, fesrParticipant BOOLEAN, amount VARCHAR, unitType VARCHAR, unitTypeOthers VARCHAR, unitCode VARCHAR, unitDescription VARCHAR, subventionType VARCHAR, safeArea VARCHAR, unitMeasure VARCHAR, unitMeasureOthers VARCHAR, cultureCode VARCHAR, flockCode VARCHAR, flockCodeOthers VARCHAR, forestCode VARCHAR, forestCodeOthers VARCHAR, surveyDate DATE, surveyAddress VARCHAR, surveyCountrySubDivision VARCHAR, surveyPostcode VARCHAR, surveyCountryCode VARCHAR, surveyorIdType VARCHAR, surveyorIdOthers VARCHAR, surveyorId VARCHAR, surveyorName VARCHAR, modelType VARCHAR, modelTypeOthers VARCHAR, assetsCovered BOOLEAN, coveredAnimalDestination VARCHAR, animalType VARCHAR) RETURNS UUID AS $$
+    INSERT INTO rural_policy_branch_insured_objects(rural_policy_id, identification, fesr_participant, amount, unit_type, unit_type_others, unit_code, unit_description, subvention_type, safe_area, unit_measure, unit_measure_others, culture_code, flock_code, flock_code_others, forest_code, forest_code_others, survey_date, survey_address, survey_country_sub_division, survey_postcode, survey_country_code, surveyor_id_type, surveyor_id_others, surveyor_id, surveyor_name, model_type, model_type_others, assets_covered, covered_animal_destination, animal_type, created_at, created_by, updated_at, updated_by)
+    VALUES (ruralPolicyId, identification, fesrParticipant, amount, unitType, unitTypeOthers, unitCode, unitDescription, subventionType, safeArea, unitMeasure, unitMeasureOthers, cultureCode, flockCode, flockCodeOthers, forestCode, forestCodeOthers, surveyDate, surveyAddress, surveyCountrySubDivision, surveyPostcode, surveyCountryCode, surveyorIdType, surveyorIdOthers, surveyorId, surveyorName, modelType, modelTypeOthers, assetsCovered, coveredAnimalDestination, animalType, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING rural_policy_branch_insured_object_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addRuralPolicyClaim(ruralPolicyId UUID, identification VARCHAR, documentationDeliveryDate DATE, status VARCHAR, statusAlterationDate DATE, ocurranceDate DATE, warningDate DATE, thirdPartyDate DATE, amount VARCHAR, unitType VARCHAR, unitTypeOthers VARCHAR, unitCode VARCHAR, unitDescription VARCHAR, denialJustification VARCHAR, denialJustificationDescription VARCHAR, surveyDate DATE, surveyAddress VARCHAR, surveyCountrySubDivision VARCHAR, surveyPostcode VARCHAR, surveyCountryCode VARCHAR) RETURNS UUID AS $$
+    INSERT INTO rural_policy_claims(rural_policy_id, identification, documentation_delivery_date, status, status_alteration_date, ocurrance_date, warning_date, third_party_date, amount, unit_type, unit_type_others, unit_code, unit_description, denial_justification, denial_justification_description, survey_date, survey_address, survey_country_sub_division, survey_postcode, survey_country_code, created_at, created_by, updated_at, updated_by)
+    VALUES (ruralPolicyId, identification, documentationDeliveryDate, status, statusAlterationDate, ocurranceDate, warningDate, thirdPartyDate, amount, unitType, unitTypeOthers, unitCode, unitDescription, denialJustification, denialJustificationDescription, surveyDate, surveyAddress, surveyCountrySubDivision, surveyPostcode, surveyCountryCode, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING rural_policy_claim_id
+$$ LANGUAGE SQL; 
+
+CREATE OR REPLACE FUNCTION addRuralPolicyClaimCoverage(ruralPolicyClaimId UUID, insuredObjectId VARCHAR, branch VARCHAR, code VARCHAR, description VARCHAR, warningDate DATE, thirdPartyClaimDate DATE) RETURNS UUID AS $$
+    INSERT INTO rural_policy_claim_coverages(rural_policy_claim_id, insured_object_id, branch, code, description, warning_date, third_party_claim_date, created_at, created_by, updated_at, updated_by)
+    VALUES (ruralPolicyClaimId, insuredObjectId, branch, code, description, warningDate, thirdPartyClaimDate, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING rural_policy_claim_coverage_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addRuralPolicyPremium(ruralPolicyId UUID, paymentsQuantity INTEGER, amount VARCHAR, unitType VARCHAR, unitTypeOthers VARCHAR, unitCode VARCHAR, unitDescription VARCHAR) RETURNS UUID AS $$
+    INSERT INTO rural_policy_premiums(rural_policy_id, payments_quantity, amount, unit_type, unit_type_others, unit_code, unit_description, created_at, created_by, updated_at, updated_by)
+    VALUES (ruralPolicyId, paymentsQuantity, amount, unitType, unitTypeOthers, unitCode, unitDescription, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING rural_policy_premium_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addRuralPolicyPremiumCoverage(ruralPolicyPremiumId UUID, branch VARCHAR, code VARCHAR, description VARCHAR, amount VARCHAR, unitType VARCHAR,  unitTypeOthers VARCHAR, unitCode VARCHAR, unitDescription VARCHAR) RETURNS UUID AS $$
+    INSERT INTO rural_policy_premium_coverages(rural_policy_premium_id, branch, code, description, amount, unit_type, unit_type_others, unit_code, unit_description, created_at, created_by, updated_at, updated_by)
+    VALUES (ruralPolicyPremiumId, branch, code, description, amount, unitType, unitTypeOthers, unitCode, unitDescription, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING rural_policy_premium_coverage_id
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addFinancialAssistanceContract(docId varchar, contractId varchar, status varchar,

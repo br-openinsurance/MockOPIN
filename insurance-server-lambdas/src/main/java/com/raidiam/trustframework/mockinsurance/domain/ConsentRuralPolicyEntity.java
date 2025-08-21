@@ -23,8 +23,8 @@ public class ConsentRuralPolicyEntity extends BaseEntity {
     @Column(name = "consent_id")
     private String consentId;
 
-    @Column(name = "policy_id")
-    private UUID policyId;
+    @Column(name = "rural_policy_id")
+    private UUID ruralPolicyId;
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
@@ -36,12 +36,12 @@ public class ConsentRuralPolicyEntity extends BaseEntity {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "policy_id", referencedColumnName = "policy_id", insertable = false, nullable = false, updatable = false)
+    @JoinColumn(name = "rural_policy_id", referencedColumnName = "rural_policy_id", insertable = false, nullable = false, updatable = false)
     @NotAudited
-    private RuralPolicyEntity policy;
+    private RuralPolicyEntity ruralPolicy;
 
-    public ConsentRuralPolicyEntity(ConsentEntity consent, RuralPolicyEntity policy) {
+    public ConsentRuralPolicyEntity(ConsentEntity consent, RuralPolicyEntity ruralPolicy) {
         this.consentId = consent.getConsentId();
-        this.policyId = policy.getPolicyId();
+        this.ruralPolicyId = ruralPolicy.getRuralPolicyId();
     }
 }

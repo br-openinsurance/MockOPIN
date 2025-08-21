@@ -1,6 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.services
 
-import com.raidiam.trustframework.mockinsurance.CleanupSpecification
+import com.raidiam.trustframework.mockinsurance.cleanups.CleanupSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
 import com.raidiam.trustframework.mockinsurance.domain.AccountHolderEntity
 import com.raidiam.trustframework.mockinsurance.models.generated.ClaimNotificationData
@@ -95,14 +95,23 @@ class ClaimNotificationDamageServiceSpec extends CleanupSpecification {
                 .occurrenceDate(claim.getData().getOccurrenceDate())
         )
         claim.data.setDocumentType(ClaimNotificationData.DocumentTypeEnum.CERTIFICADO_AUTOMOVEL)
-        consent = consentRepository.save(consent)
+        consentRepository.save(consent)
 
         when:
-        def newClaim = claimNotificationDamageService.createClaimNotification(claim)
+        claimNotificationDamageService.createClaimNotification(claim)
 
         then:
         def e = thrown(HttpStatusException)
         e.status == HttpStatus.UNPROCESSABLE_ENTITY
+
+        when: "The consent should be consumed, even when valid"
+        claim.data.setDocumentType(ClaimNotificationData.DocumentTypeEnum.CERTIFICADO)
+        claimNotificationDamageService.createClaimNotification(claim)
+
+        then:
+        def e2 = thrown(HttpStatusException)
+        e2.status == HttpStatus.FORBIDDEN
+        e2.getMessage() == "NAO_INFORMADO: consent is not authorised"
     }
 
     def "We can't create a claim notification with null policyId if documentType is APOLICE_INDIVIDUAL" () {
@@ -144,14 +153,23 @@ class ClaimNotificationDamageServiceSpec extends CleanupSpecification {
                 .insuredObjectId(claim.getData().getInsuredObjectId())
                 .occurrenceDate(claim.getData().getOccurrenceDate())
         )
-        consent = consentRepository.save(consent)
+        consentRepository.save(consent)
 
         when:
-        def newClaim = claimNotificationDamageService.createClaimNotification(claim)
+        claimNotificationDamageService.createClaimNotification(claim)
 
         then:
         def e = thrown(HttpStatusException)
         e.status == HttpStatus.UNPROCESSABLE_ENTITY
+
+        when: "The consent should be consumed, even when valid"
+        claim.getData().setPolicyId("111111")
+        claimNotificationDamageService.createClaimNotification(claim)
+
+        then:
+        def e2 = thrown(HttpStatusException)
+        e2.status == HttpStatus.FORBIDDEN
+        e2.getMessage() == "NAO_INFORMADO: consent is not authorised"
     }
 
     def "We can't create a claim notification with null groupCertificateId if documentType is CERTIFICADO" () {
@@ -239,14 +257,23 @@ class ClaimNotificationDamageServiceSpec extends CleanupSpecification {
                 .insuredObjectId(claim.getData().getInsuredObjectId())
                 .occurrenceDate(LocalDate.of(2000, 1, 1))
         )
-        consent = consentRepository.save(consent)
+        consentRepository.save(consent)
 
         when:
-        def newClaim = claimNotificationDamageService.createClaimNotification(claim)
+        claimNotificationDamageService.createClaimNotification(claim)
 
         then:
         def e = thrown(HttpStatusException)
         e.status == HttpStatus.UNPROCESSABLE_ENTITY
+
+        when: "The consent should be consumed, even when valid"
+        claim.data.setOccurrenceDate(LocalDate.of(2022, 1, 1))
+        claimNotificationDamageService.createClaimNotification(claim)
+
+        then:
+        def e2 = thrown(HttpStatusException)
+        e2.status == HttpStatus.FORBIDDEN
+        e2.getMessage() == "NAO_INFORMADO: consent is not authorised"
     }
 
     def "We can't create a claim notification without a consentId"() {

@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @Repository
 public interface RuralPolicyRepository extends PageableRepository<RuralPolicyEntity, UUID> {
-    Optional<RuralPolicyEntity> findByPolicyId(UUID policyId);
+    Optional<RuralPolicyEntity> findByRuralPolicyId(UUID policyId);
 
     @Join(value="accountHolder", type = Join.Type.FETCH)
     List<RuralPolicyEntity> findByAccountHolderUserId(@NotNull String userId);

@@ -113,5 +113,6 @@ class FinancialAssistanceControllerSpec extends Specification {
 
         and:
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+        resp.meta.totalRecords == resp.data.size()
     }
 }

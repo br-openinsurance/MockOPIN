@@ -1,6 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.services
 
-import com.raidiam.trustframework.mockinsurance.CleanupSpecification
+import com.raidiam.trustframework.mockinsurance.cleanups.CleanupSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
 import com.raidiam.trustframework.mockinsurance.TestRequestDataFactory
 import com.raidiam.trustframework.mockinsurance.domain.AccountHolderEntity
@@ -82,7 +82,7 @@ class ConsentServiceSpec extends CleanupSpecification {
         if (runSetup) {
             testAccountHolder = accountHolderRepository.save(TestEntityDataFactory.anAccountHolder())
             testCapitalizationTitlePlan = capitalizationTitlePlanRepository.save(TestEntityDataFactory.aCapitalizationTitlePlan(testAccountHolder.getAccountHolderId()))
-            testFinancialRiskPolicy = financialRiskPolicyRepository.save(TestEntityDataFactory.aFinancialRiskPolicy(testAccountHolder.getAccountHolderId(), null, null, null, null, null))
+            testFinancialRiskPolicy = financialRiskPolicyRepository.save(TestEntityDataFactory.aFinancialRiskPolicy(testAccountHolder.getAccountHolderId()))
             testHousingPolicy = housingPolicyRepository.save(TestEntityDataFactory.aHousingPolicy(testAccountHolder.getAccountHolderId()))
             testResponsibilityPolicy = responsibilityPolicyRepository.save(TestEntityDataFactory.aResponsibilityPolicy(testAccountHolder.getAccountHolderId()))
             testPersonPolicy = personPolicyRepository.save(TestEntityDataFactory.aPersonPolicy(testAccountHolder.getAccountHolderId()))
@@ -328,7 +328,7 @@ class ConsentServiceSpec extends CleanupSpecification {
                         .linkedFinancialAssistanceContractIds(List.of(testFinancialAssistanceContract.getFinancialAssistanceContractId()))
                         .linkedAcceptanceAndBranchesAbroadPolicyIds(List.of(testAcceptanceAndBranchesAbroadPolicy.getPolicyId().toString()))
                         .linkedPatrimonialPolicyIds(List.of(testPatrimonialPolicy.getPolicyId().toString()))
-                        .linkedRuralPolicyIds(List.of(testRuralPolicy.getPolicyId().toString()))
+                        .linkedRuralPolicyIds(List.of(testRuralPolicy.getRuralPolicyId().toString()))
                         .linkedAutoPolicyIds(List.of(testAutoPolicy.getAutoPolicyId()))
                         .linkedTransportPolicyIds(List.of(testTransportPolicy.getTransportPolicyId()))
                 )

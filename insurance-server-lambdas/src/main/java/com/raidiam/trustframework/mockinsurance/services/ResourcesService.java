@@ -329,10 +329,10 @@ public class ResourcesService extends BaseInsuranceService {
         for (var policy : policies) {
             var resourceType = TYPE_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_RURAL);
             var data = new ResponseResourceListData();
-            String resourceId = policy.getPolicyId().toString();
+            String resourceId = policy.getRuralPolicyId().toString();
             if (permitted) {
                 var resourceStatus = getStatus(policy, consent);
-                LOG.info("Adding rural policy {}, status {}, resourceId {}, type {}", policy.getPolicyId(), resourceStatus, resourceId, resourceType);
+                LOG.info("Adding rural policy {}, status {}, resourceId {}, type {}", policy.getRuralPolicyId(), resourceStatus, resourceId, resourceType);
                 data.status(resourceStatus).resourceId(resourceId).type(resourceType);
                 responseMap.put(data, resourceId);
             } else {

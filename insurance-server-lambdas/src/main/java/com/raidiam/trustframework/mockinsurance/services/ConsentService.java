@@ -174,7 +174,7 @@ public class ConsentService extends BaseInsuranceService {
   
     private void addRuralPoliciesToConsent(ConsentEntity consent, List<String> requestedPolicies) {
         addObjectToConsent(consent, requestedPolicies, "Rural Policy",
-                ruralPolicyRepository::findByPolicyId,
+                ruralPolicyRepository::findByRuralPolicyId,
                 RuralPolicyEntity::getAccountHolder,
                 c -> consentRuralPolicyRepository.save(new ConsentRuralPolicyEntity(consent, c)));
     }

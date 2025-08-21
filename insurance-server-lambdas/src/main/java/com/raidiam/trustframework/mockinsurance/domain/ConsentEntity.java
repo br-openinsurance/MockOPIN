@@ -177,7 +177,7 @@ public class ConsentEntity extends BaseEntity {
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH, CascadeType.PERSIST})
     @JoinTable(name = "consent_rural_policies",
             joinColumns = @JoinColumn(name = "consent_id", referencedColumnName = "consent_id"),
-            inverseJoinColumns = @JoinColumn(name = "policy_id", referencedColumnName = "policy_id"))
+            inverseJoinColumns = @JoinColumn(name = "rural_policy_id", referencedColumnName = "rural_policy_id"))
     private Set<RuralPolicyEntity> ruralPolicies = new HashSet<>();
 
     @EqualsAndHashCode.Exclude
@@ -300,7 +300,7 @@ public class ConsentEntity extends BaseEntity {
                 .toList());
 
         resp.getData().linkedRuralPolicyIds(ruralPolicies.stream()
-                .map(RuralPolicyEntity::getPolicyId)
+                .map(RuralPolicyEntity::getRuralPolicyId)
                 .map(UUID::toString)
                 .toList());
 

@@ -11,7 +11,8 @@ import io.micronaut.http.exceptions.HttpStatusException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-
+import java.time.Instant;
+import java.util.Date;
 
 public abstract class ClaimNotificationService< E extends ClaimNotificationEntity > extends BaseInsuranceService {
     protected abstract Logger getLogger();
@@ -46,15 +47,18 @@ public abstract class ClaimNotificationService< E extends ClaimNotificationEntit
             throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: consent does not have claim notification information");
         }
 
-        validateClaimData(claim.getClaimData(), claimNotificationInformation);
+        validateClaimData(claim.getClaimData(), claimNotificationInformation, consent);
     }
 
-    public void validateClaimData(ClaimNotificationData claimData, ClaimNotificationInformation info) {
+    public void validateClaimData(ClaimNotificationData claimData, ClaimNotificationInformation info, ConsentEntity consent) {
         // documentType
         if (claimData.getDocumentType() == null) {
             throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: document type was not informed");
         }
         if (!claimData.getDocumentType().toString().equals(info.getDocumentType().toString())) {
+            consent.setStatus(EnumConsentStatus.CONSUMED.toString());
+            consent.setStatusUpdateDateTime(Date.from(Instant.now()));
+            consentRepository.update(consent);
             throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: document type does not match");
         }
 
@@ -64,6 +68,9 @@ public abstract class ClaimNotificationService< E extends ClaimNotificationEntit
                 throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: policy id was not informed");
             }
             if (!claimData.getPolicyId().equals(info.getPolicyId())) {
+                consent.setStatus(EnumConsentStatus.CONSUMED.toString());
+                consent.setStatusUpdateDateTime(Date.from(Instant.now()));
+                consentRepository.update(consent);
                 throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: policy id does not match");
             }
         }
@@ -85,6 +92,9 @@ public abstract class ClaimNotificationService< E extends ClaimNotificationEntit
 
         // occurrenceDate
         if (!claimData.getOccurrenceDate().equals(info.getOccurrenceDate())) {
+            consent.setStatus(EnumConsentStatus.CONSUMED.toString());
+            consent.setStatusUpdateDateTime(Date.from(Instant.now()));
+            consentRepository.update(consent);
             throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: occurrence date does not match");
         }
     }

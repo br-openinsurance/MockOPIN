@@ -166,7 +166,7 @@ public class QuoteCapitalizationTitleControllerSpec extends Specification {
     def "we can create a capitalization title raffle" () {
         given:
         def raffle = TestEntityDataFactory.aCapitalizationTitleRaffle()
-        capitalizationTitleRaffleService.createRaffle(_ as CapitalizationTitleRaffleEntity) >> raffle
+        capitalizationTitleRaffleService.createRaffle(_ as CapitalizationTitleRaffleEntity, _ as String) >> raffle
         idempotencyRepository.findByIdempotencyId( _ as String) >> Optional.empty()
 
         def req = TestRequestDataFactory.createCapitalizationTitleRaffleRequest()
@@ -175,7 +175,7 @@ public class QuoteCapitalizationTitleControllerSpec extends Specification {
         def event = AwsProxyHelper.buildBasicEvent('/open-insurance/quote-capitalization-title/v1/raffle/request', HttpMethod.POST)
                 .withBody(json)
                 .withHeaders(Map.of("x-idempotency-key", UUID.randomUUID().toString(), "x-fapi-interaction-id", UUID.randomUUID().toString()))
-        AuthHelper.authorize(scopes: "capitalization-title-raffle", event)
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "quote-capitalization-title-raffle consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
 
         when:
         def response = handler.handleRequest(event, lambdaContext)

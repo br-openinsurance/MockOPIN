@@ -1,6 +1,7 @@
 package com.raidiam.trustframework.mockinsurance.services;
 
 import com.raidiam.trustframework.mockinsurance.repository.*;
+import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 import jakarta.inject.Inject;
 
 abstract class BaseInsuranceService {
@@ -51,7 +52,28 @@ abstract class BaseInsuranceService {
     RuralPolicyRepository ruralPolicyRepository;
 
     @Inject
-    RuralClaimRepository ruralClaimRepository;
+    RuralPolicyInsuredObjectRepository ruralPolicyInsuredObjectRepository;
+    
+    @Inject
+    RuralPolicyInsuredObjectCoverageRepository ruralPolicyInsuredObjectCoverageRepository;
+    
+    @Inject
+    RuralPolicyCoverageRepository ruralPolicyCoverageRepository;
+
+    @Inject
+    RuralPolicyBranchInsuredObjectRepository ruralPolicyBranchInsuredObjectRepository;
+
+    @Inject
+    RuralPolicyClaimRepository ruralPolicyClaimRepository;
+
+    @Inject
+    RuralPolicyClaimCoverageRepository ruralPolicyClaimCoverageRepository;
+
+    @Inject
+    RuralPolicyPremiumRepository ruralPolicyPremiumRepository;
+
+    @Inject
+    RuralPolicyPremiumCoverageRepository ruralPolicyPremiumCoverageRepository;
 
     @Inject
     QuoteFinancialRiskLeadRepository quoteFinancialRiskLeadRepository;
@@ -159,10 +181,31 @@ abstract class BaseInsuranceService {
     HousingPolicyRepository housingPolicyRepository;
 
     @Inject
+    HousingPolicyInsuredObjectRepository housingPolicyInsuredObjectRepository;
+
+    @Inject
+    HousingPolicyInsuredObjectCoverageRepository housingPolicyInsuredObjectCoverageRepository;
+
+    @Inject
+    HousingPolicyBranchInsuredObjectRepository housingPolicyBranchInsuredObjectRepository;
+
+    @Inject
+    HousingPolicyBranchInsuredObjectLenderRepository housingPolicyBranchInsuredObjectLenderRepository;
+
+    @Inject
+    HousingPolicyBranchInsuredRepository housingPolicyBranchInsuredRepository;
+
+    @Inject
     HousingPolicyClaimRepository housingPolicyClaimRepository;
 
     @Inject
+    HousingPolicyClaimCoverageRepository housingPolicyClaimCoverageRepository;
+
+    @Inject
     HousingPolicyPremiumRepository housingPolicyPremiumRepository;
+
+    @Inject
+    HousingPolicyPremiumCoverageRepository housingPolicyPremiumCoverageRepository;
 
     @Inject
     ConsentHousingPolicyRepository consentHousingPolicyRepository;
@@ -281,4 +324,6 @@ abstract class BaseInsuranceService {
     @Inject
     OverrideResponseRepository overrideResponseRepository;
 
+    @Inject
+    InsuranceLambdaUtils insuranceLambdaUtils;
 }

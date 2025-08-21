@@ -38,7 +38,7 @@ public class ClaimNotificationController extends BaseInsuranceController {
     @Status(HttpStatus.CREATED)
     @Secured({"CLAIM_NOTIFICATION_REQUEST_MANAGE"})
     @XFapiInteractionIdRequired
-    @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
     @Idempotent
     public ResponseClaimNotificationDamage createClaimNotificationRequestDamageV1(
             @PathVariable("consentId") String consentId,
@@ -55,7 +55,7 @@ public class ClaimNotificationController extends BaseInsuranceController {
     @Status(HttpStatus.CREATED)
     @Secured({"CLAIM_NOTIFICATION_REQUEST_MANAGE"})
     @XFapiInteractionIdRequired
-    @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
     @Idempotent
     public ResponseClaimNotificationPerson createClaimNotificationRequestPersonV1(
             @PathVariable("consentId") String consentId,

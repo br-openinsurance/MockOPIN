@@ -1,5 +1,6 @@
 package com.raidiam.trustframework.mockinsurance
 
+import com.raidiam.trustframework.mockinsurance.cleanups.CleanupSpecification
 import com.raidiam.trustframework.mockinsurance.domain.*
 import com.raidiam.trustframework.mockinsurance.models.generated.*
 import com.raidiam.trustframework.mockinsurance.utils.PermissionGroup
@@ -744,6 +745,10 @@ class TestEntityDataFactory extends CleanupSpecification {
         technicalProvisions
     }
 
+    static aFinancialRiskPolicy(UUID accountHolderId) {
+        aFinancialRiskPolicy(accountHolderId, null, null, null, null, null)
+    }
+
     static aFinancialRiskPolicy(UUID accountHolderId, List<UUID> insuredIds, List<UUID> beneficiaryIds,
                                 List<UUID> principalIds, List<UUID> intermediaryIds, List<UUID> coinsurerIds) {
         def contract = new FinancialRiskPolicyEntity()
@@ -776,7 +781,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         contract
     }
 
-    static aFinancialRiskPolicyInsured() {
+    static aPolicyInsured() {
         def insured = new PersonalInfoEntity()
         insured.setIdentification("12345678900")
         insured.setIdentificationType("CPF")
@@ -792,7 +797,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         insured
     }
 
-    static aFinancialRiskPolicyBeneficiary() {
+    static aPolicyBeneficiary() {
         def beneficiary = new BeneficiaryInfoEntity()
         beneficiary.setIdentification("12345678900")
         beneficiary.setIdentificationType("CPF")
@@ -801,7 +806,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         beneficiary
     }
 
-    static aFinancialRiskPolicyPrincipal() {
+    static aPolicyPrincipal() {
         def principal = new PrincipalInfoEntity()
         principal.setIdentification("12345678900")
         principal.setIdentificationType("CPF")
@@ -816,7 +821,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         principal
     }
 
-    static aFinancialRiskPolicyIntermediary() {
+    static aPolicyIntermediary() {
         def intermediary = new IntermediaryEntity()
         intermediary.setIdentification("12345678900")
         intermediary.setIdentificationType("CPF")
@@ -885,7 +890,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         coverage
     }
 
-    static aFinancialRiskPolicyCoverageDeductible() {
+    static aPolicyCoverageDeductible() {
         def deductible = new DeductibleEntity()
         deductible.setType("DEDUTIVEL")
         deductible.setTypeAdditionalInfo("string")
@@ -896,14 +901,14 @@ class TestEntityDataFactory extends CleanupSpecification {
         deductible.setUnitDescription("BRL")
         deductible.setPeriod(10)
         deductible.setPeriodicity("DIA")
-        deductible.setPeriodCountingMethod("DIAS_UTEIS")
+        deductible.setPeriodCountingMethod("UTEIS")
         deductible.setPeriodStartDate(LocalDate.of(2023, 01, 30))
         deductible.setPeriodEndDate(LocalDate.of(2023, 01, 31))
         deductible.setDescription("string")
         deductible
     }
 
-    static aFinancialRiskPolicyCoveragePos() {
+    static aPolicyCoveragePos() {
         def pos = new POSEntity()
         pos.setApplicationType("VALOR")
         pos.setDescription("string")
@@ -930,7 +935,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         pos
     }
 
-    static aFinancialRiskPolicyCoinsurer() {
+    static aPolicyCoinsurer() {
         def coinsurer = new CoinsurerEntity()
         coinsurer.setIdentification("string")
         coinsurer.setCededPercentage("10.00")
@@ -995,7 +1000,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         coverage
     }
 
-    static aFinancialRiskPolicyPremiumPayment() {
+    static aPolicyPremiumPayment() {
         def payment = new PaymentEntity()
         payment.setMovementDate(LocalDate.of(2023, 01, 30))
         payment.setMovementType("LIQUIDACAO_DE_PREMIO")
@@ -1016,23 +1021,148 @@ class TestEntityDataFactory extends CleanupSpecification {
         payment
     }
 
-    static aHousingPolicy(UUID accountHolderId) {
+static aHousingPolicy(UUID accountHolderId) {
+        aHousingPolicy(accountHolderId, null, null, null)
+    }
+
+    static aHousingPolicy(UUID accountHolderId, List<UUID> insuredIds, List<UUID> beneficiaryIds, List<UUID> intermediaryIds) {
         def contract = new HousingPolicyEntity()
         contract.setAccountHolderId(accountHolderId)
-        contract.setHousingId("random_housing")
+        contract.setHousingId("mock_housing_policy")
+        contract.setStatus('AVAILABLE')
+        contract.setProductName('Mock Insurer Housing Policy')
+        contract.setDocumentType('APOLICE_INDIVIDUAL')
+        contract.setPolicyId('1111111')
+        contract.setSusepProcessNumber('string')
+        contract.setGroupCertificateId('string')
+        contract.setIssuanceType('EMISSAO_PROPRIA')
+        contract.setIssuanceDate(LocalDate.of(2022, 12, 31))
+        contract.setTermStartDate(LocalDate.of(2022, 12, 31))
+        contract.setTermEndDate(LocalDate.of(2023, 12, 31))
+        contract.setLeadInsurerCode('string')
+        contract.setLeadInsurerPolicyId('string')
+        contract.setMaxLMGAmount('9871667727569.12')
+        contract.setMaxLMGUnitType('MONETARIO')
+        contract.setMaxLMGUnitCode('Br')
+        contract.setMaxLMGUnitDescription('BRL')
+        contract.setProposalId('string')
+        contract.setInsuredIds(insuredIds)
+        contract.setBeneficiaryIds(beneficiaryIds)
+        contract.setIntermediaryIds(intermediaryIds)
         contract
+    }
+
+    static aHousingPolicyInsuredObject(UUID planId) {
+        def insuredObject = new HousingPolicyInsuredObjectEntity()
+        insuredObject.setHousingPolicyId(planId)
+        insuredObject.setIdentification('string')
+        insuredObject.setType('AUTOMOVEL')
+        insuredObject.setDescription('string')
+        insuredObject.setAmount('9871667727569.12')
+        insuredObject.setUnitType('MONETARIO')
+        insuredObject.setUnitCode('Br')
+        insuredObject.setUnitDescription('BRL')
+        insuredObject
+    }
+
+    static aHousingPolicyInsuredObjectCoverage(UUID insuredObjectId) {
+        def coverage = new HousingPolicyInsuredObjectCoverageEntity()
+        coverage.setHousingPolicyInsuredObjectId(insuredObjectId)
+        coverage.setBranch('0111')
+        coverage.setCode('DANOS_ELETRICOS')
+        coverage.setDescription('string')
+        coverage.setInternalCode('string')
+        coverage.setSusepProcessNumber('string')
+        coverage.setLMIAmount('100')
+        coverage.setLMIUnitType('PORCENTAGEM')
+        coverage.setIsLMISublimit(true)
+        coverage.setTermStartDate(LocalDate.of(2022, 12, 31))
+        coverage.setTermEndDate(LocalDate.of(2023, 12, 31))
+        coverage.setIsMainCoverage(true)
+        coverage.setFeature('MASSIFICADOS')
+        coverage.setType('PARAMETRICO')
+        coverage.setGracePeriod(0)
+        coverage.setGracePeriodicity('DIA')
+        coverage.setGracePeriodCountingMethod('UTEIS')
+        coverage.setPremiumPeriodicity('ANUAL')
+        coverage
+    }
+
+    static aHousingPolicyBranchInsuredObject(UUID planId) {
+        def branchInsuredObject = new HousingPolicyBranchInsuredObjectEntity()
+        branchInsuredObject.setHousingPolicyId(planId)
+        branchInsuredObject.setIdentification('string')
+        branchInsuredObject.setPropertyType('APARTAMENTO')
+        branchInsuredObject.setPostcode('10000000')
+        branchInsuredObject.setInterestRate('10.00')
+        branchInsuredObject.setCostRate('10.00')
+        branchInsuredObject.setUpdateIndex('IGPDI_FGV')
+        branchInsuredObject
+    }
+
+    static aHousingPolicyBranchInsuredObjectLender(UUID branchInsuredObjectId) {
+        def lender = new HousingPolicyBranchInsuredObjectLenderEntity()
+        lender.setHousingPolicyBranchInsuredObjectId(branchInsuredObjectId)
+        lender.setCompanyName('string')
+        lender.setCnpjNumber('12345678901234')
+        lender
+    }
+
+    static aHousingPolicyBranchInsured(UUID planId) {
+        def branchInsured = new HousingPolicyBranchInsuredEntity()
+        branchInsured.setHousingPolicyId(planId)
+        branchInsured.setIdentification('12345678900')
+        branchInsured.setIdentificationType('CPF')
+        branchInsured
     }
 
     static aHousingPolicyClaim(UUID planId) {
         def claim = new HousingPolicyClaimEntity()
         claim.setHousingPolicyId(planId)
+        claim.setIdentification('string')
+        claim.setDocumentationDeliveryDate(LocalDate.of(2023, 10, 1))
+        claim.setStatus('ABERTO')
+        claim.setStatusAlterationDate(LocalDate.of(2023, 10, 1))
+        claim.setOccurrenceDate(LocalDate.of(2023, 10, 1))
+        claim.setWarningDate(LocalDate.of(2023, 10, 1))
+        claim.setThirdPartyClaimDate(LocalDate.of(2022, 10, 1))
+        claim.setAmount('16')
+        claim.setUnitType('PORCENTAGEM')
+        claim.setDenialJustification('PRESCRICAO')
+        claim.setDenialJustificationDescription('string')
         claim
     }
 
-    static aHousingPolicyPremium(UUID planId) {
+    static aHousingPolicyClaimCoverage(UUID claimId) {
+        def claim = new HousingPolicyClaimCoverageEntity()
+        claim.setHousingPolicyClaimId(claimId)
+        claim.setInsuredObjectId('string')
+        claim.setBranch('0111')
+        claim.setCode('DANOS_ELETRICOS')
+        claim.setDescription('string')
+        claim.setWarningDate(LocalDate.of(2023, 10, 1))
+        claim.setThirdPartyClaimDate(LocalDate.of(2023, 10, 1))
+        claim
+    }
+
+    static aHousingPolicyPremium(UUID planId, List<UUID> paymentIds) {
         def premium = new HousingPolicyPremiumEntity()
         premium.setHousingPolicyId(planId)
+        premium.setPaymentsQuantity(4)
+        premium.setAmount('16')
+        premium.setUnitType('PORCENTAGEM')
+        premium.setPaymentIds(paymentIds)
         premium
+    }
+
+    static aHousingPolicyPremiumCoverage(UUID premiumId) {
+        def coverage = new HousingPolicyPremiumCoverageEntity()
+        coverage.setHousingPolicyPremiumId(premiumId)
+        coverage.setBranch('0111')
+        coverage.setCode('DANOS_ELETRICOS')
+        coverage.setAmount('1680.71')
+        coverage.setUnitType('PORCENTAGEM')
+        coverage
     }
 
     static aResponsibilityPolicy(UUID accountHolderId) {
@@ -1301,17 +1431,191 @@ class TestEntityDataFactory extends CleanupSpecification {
     }
 
     static aRuralPolicy(UUID accountHolderId) {
+        aRuralPolicy(accountHolderId, null, null, null, null, null)
+    }
+
+    static aRuralPolicy(UUID accountHolderId, List<UUID> insuredIds, List<UUID> beneficiaryIds, List<UUID> principalIds, List<UUID> intermediaryIds, List<UUID> coinsurerIds) {
         def policy = new RuralPolicyEntity()
         policy.setAccountHolderId(accountHolderId)
         policy.setInsuranceId("random_rural")
+        policy.setProductName("Mock Insurer Rural Policy")
+        policy.setDocumentType(InsuranceRuralPolicyInfo.DocumentTypeEnum.APOLICE_INDIVIDUAL.toString())
+        policy.setPolicyId("111111")
+        policy.setSusepProcessNumber("string")
+        policy.setGroupCertificateId("string")
+        policy.setIssuanceType(InsuranceRuralPolicyInfo.IssuanceTypeEnum.EMISSAO_PROPRIA.toString())
+        policy.setIssuanceDate(LocalDate.of(2022, 12, 31))
+        policy.setTermStartDate(LocalDate.of(2022, 12, 31))
+        policy.setTermEndDate(LocalDate.of(2022, 12, 31))
+        policy.setLeadInsurerCode("string")
+        policy.setLeadInsurerPolicyId("string")
+        policy.setMaxLMGAmount("100.00")
+        policy.setMaxLMGUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        policy.setMaxLMGUnitTypeOthers("Horas")
+        policy.setMaxLMGUnitCode("R\$")
+        policy.setMaxLMGUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        policy.setProposalId("string")
+        policy.setCoinsuranceRetainedPercentage("10.00")
+        policy.setInsuredIds(insuredIds)
+        policy.setBeneficiaryIds(beneficiaryIds)
+        policy.setPrincipalIds(principalIds)
+        policy.setIntermediaryIds(intermediaryIds)
+        policy.setCoinsurerIds(coinsurerIds)
         policy
     }
 
-    static aRuralClaim(UUID policyId, String identification = '123456789') {
-        def claim = new RuralClaimEntity()
-        claim.setPolicyId(policyId)
-        claim.setIdentification(identification)
+    static aRuralPolicyInsuredObject(UUID policyId){
+        def insuredObject = new RuralPolicyInsuredObjectEntity()
+        insuredObject.setRuralPolicyId(policyId)
+        insuredObject.setIdentification("string")
+        insuredObject.setType(InsuranceRuralInsuredObject.TypeEnum.CONTRATO.toString())
+        insuredObject.setTypeAdditionalInfo("string")
+        insuredObject.setDescription("string")
+        insuredObject.setAmount("32657178608719.25")
+        insuredObject.setUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        insuredObject.setUnitTypeOthers("Horas")
+        insuredObject.setUnitCode("R\$")
+        insuredObject.setUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        insuredObject
+    }
+
+    static aRuralPolicyInsuredObjectCoverage(UUID insuredObjectId){
+        def insuredObjectCoverage = new RuralPolicyInsuredObjectCoverageEntity()
+        insuredObjectCoverage.setRuralPolicyInsuredObjectId(insuredObjectId)
+        insuredObjectCoverage.setBranch("0111")
+        insuredObjectCoverage.setCode(InsuranceRuralInsuredObjectCoverage.CodeEnum.GRANIZO.toString())
+        insuredObjectCoverage.setDescription("string")
+        insuredObjectCoverage.setInternalCode("string")
+        insuredObjectCoverage.setSusepProcessNumber("string")
+        insuredObjectCoverage.setLmiAmount("1")
+        insuredObjectCoverage.setLmiUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        insuredObjectCoverage.setLmiUnitTypeOthers("Horas")
+        insuredObjectCoverage.setLmiUnitCode("R\$")
+        insuredObjectCoverage.setLmiUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        insuredObjectCoverage.setIsLMISublimit(true)
+        insuredObjectCoverage.setTermStartDate(LocalDate.of(2022, 12, 31))
+        insuredObjectCoverage.setTermEndDate(LocalDate.of(2022, 12, 31))
+        insuredObjectCoverage.setIsMainCoverage(true)
+        insuredObjectCoverage.setFeature(InsuranceRuralInsuredObjectCoverage.FeatureEnum.MASSIFICADOS.toString())
+        insuredObjectCoverage.setType(InsuranceRuralInsuredObjectCoverage.TypeEnum.PARAMETRICO.toString())
+        insuredObjectCoverage.setGracePeriod(0)
+        insuredObjectCoverage.setGracePeriodicity(InsuranceRuralInsuredObjectCoverage.GracePeriodicityEnum.DIA.toString())
+        insuredObjectCoverage.setGracePeriodCountingMethod("UTEIS")
+        insuredObjectCoverage.setGracePeriodStartDate(LocalDate.of(2022, 12, 31))
+        insuredObjectCoverage.setGracePeriodEndDate(LocalDate.of(2022, 12, 31))
+        insuredObjectCoverage.setPremiumPeriodicity(InsuranceRuralInsuredObjectCoverage.PremiumPeriodicityEnum.MENSAL.toString())
+        insuredObjectCoverage.setPremiumPeriodicityOthers("string")
+        insuredObjectCoverage
+    }
+    static aRuralPolicyCoverage(UUID policyId, UUID deductibleId, UUID posId){
+        def coverage = new RuralPolicyCoverageEntity()
+        coverage.setRuralPolicyId(policyId)
+        coverage.setBranch("0111")
+        coverage.setCode(InsuranceRuralCoverage.CodeEnum.GRANIZO.toString())
+        coverage.setDescription("string")
+        coverage.setDeductibleId(deductibleId)
+        coverage.setPosId(posId)
+        coverage
+    }
+
+    static aRuralPolicyBranchInsuredObject(UUID policyId){
+        def branchInsuredObject = new RuralPolicyBranchInsuredObjectEntity()
+        branchInsuredObject.setRuralPolicyId(policyId)
+        branchInsuredObject.setIdentification("string")
+        branchInsuredObject.setIsFESRParticipant(true)
+        branchInsuredObject.setAmount("3")
+        branchInsuredObject.setUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        branchInsuredObject.setUnitTypeOthers("Horas")
+        branchInsuredObject.setUnitCode("R\$")
+        branchInsuredObject.setUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        branchInsuredObject.setSubventionType(InsuranceRuralSpecificInsuredObject.SubventionTypeEnum.AC.toString())
+        branchInsuredObject.setSafeArea("2000.00")
+        branchInsuredObject.setUnitMeasure(InsuranceRuralSpecificInsuredObject.UnitMeasureEnum.HECTAR.toString())
+        branchInsuredObject.setUnitMeasureOthers("string")
+        branchInsuredObject.setCultureCode("11111111")
+        branchInsuredObject.setFlockCode(InsuranceRuralSpecificInsuredObject.FlockCodeEnum.BOVINOS.toString())
+        branchInsuredObject.setFlockCodeOthers("string")
+        branchInsuredObject.setForestCode(InsuranceRuralSpecificInsuredObject.ForestCodeEnum.PINUS.toString())
+        branchInsuredObject.setForestCodeOthers("string")
+        branchInsuredObject.setSurveyDate(LocalDate.of(2022, 12, 31))
+        branchInsuredObject.setSurveyAddress("string")
+        branchInsuredObject.setSurveyCountrySubDivision(InsuranceRuralSpecificInsuredObject.SurveyCountrySubDivisionEnum.SP.toString())
+        branchInsuredObject.setSurveyPostCode("10000000")
+        branchInsuredObject.setSurveyCountryCode(InsuranceRuralSpecificInsuredObject.SurveyCountryCodeEnum.BRA.toString())
+        branchInsuredObject.setSurveyorIdType(InsuranceRuralSpecificInsuredObject.SurveyorIdTypeEnum.CPF.toString())
+        branchInsuredObject.setSurveyorIdOthers("string")
+        branchInsuredObject.setSurveyorId("40")
+        branchInsuredObject.setSurveyorName("string")
+        branchInsuredObject.setModelType(InsuranceRuralSpecificInsuredObject.ModelTypeEnum.CLIMATICOS.toString())
+        branchInsuredObject.setModelTypeOthers("string")
+        branchInsuredObject.setAreAssetsCovered(true)
+        branchInsuredObject.setCoveredAnimalDestination(InsuranceRuralSpecificInsuredObject.CoveredAnimalDestinationEnum.CONSUMO.toString())
+        branchInsuredObject.setAnimalType(InsuranceRuralSpecificInsuredObject.AnimalTypeEnum.ELITE.toString())
+        branchInsuredObject
+    }
+
+    static aRuralPolicyClaim(UUID policyId) {
+        def claim = new RuralPolicyClaimEntity()
+        claim.setRuralPolicyId(policyId)
+        claim.setIdentification("string")
+        claim.setDocumentationDeliveryDate(LocalDate.of(2022, 12, 31))
+        claim.setStatus(InsuranceRuralClaim.StatusEnum.ABERTO.toString())
+        claim.setStatusAlterationDate(LocalDate.of(2022, 12, 31))
+        claim.setOccurrenceDate(LocalDate.of(2022, 12, 31))
+        claim.setWarningDate(LocalDate.of(2022, 12, 31))
+        claim.setThirdPartyClaimDate(LocalDate.of(2022, 12, 31))
+        claim.setAmount("100.00")
+        claim.setUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        claim.setUnitTypeOthers("Horas")
+        claim.setUnitCode("R\$")
+        claim.setUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        claim.setDenialJustification(InsuranceRuralClaim.DenialJustificationEnum.RISCO_EXCLUIDO.toString())
+        claim.setDenialJustificationDescription("string")
+        claim.setSurveyDate(LocalDate.of(2022, 12, 31))
+        claim.setSurveyAddress("string")
+        claim.setSurveyCountrySubDivision(InsuranceRuralSpecificClaim.SurveyCountrySubDivisionEnum.SP.toString())
+        claim.setSurveyPostCode("10000000")
+        claim.setSurveyCountryCode(InsuranceRuralSpecificClaim.SurveyCountryCodeEnum.BRA.toString())
         claim
+    }
+
+    static aRuralPolicyClaimCoverage(UUID claimId) {
+        def coverage = new RuralPolicyClaimCoverageEntity()
+        coverage.setRuralPolicyClaimId(claimId)
+        coverage.setInsuredObjectId("string")
+        coverage.setBranch("0111")
+        coverage.setCode(InsuranceRuralClaimCoverage.CodeEnum.GRANIZO.toString())
+        coverage.setDescription("string")
+        coverage.setWarningDate(LocalDate.of(2022, 12, 31))
+        coverage.setThirdPartyClaimDate(LocalDate.of(2022, 12, 31))
+        coverage
+    }
+
+    static aRuralPolicyPremium(UUID policyId, List<UUID> paymentIds) {
+        def premium = new RuralPolicyPremiumEntity()
+        premium.setRuralPolicyId(policyId)
+        premium.setPaymentsQuantity(4)
+        premium.setAmount("100.00")
+        premium.setUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        premium.setUnitTypeOthers("Horas")
+        premium.setUnitCode("R\$")
+        premium.setUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        premium.setPaymentIds(paymentIds)
+        premium
+    }
+
+    static aRuralPolicyPremiumCoverage(UUID premiumId) {
+        def coverage = new RuralPolicyPremiumCoverageEntity()
+        coverage.setRuralPolicyPremiumId(premiumId)
+        coverage.setBranch("0111")
+        coverage.setCode(InsuranceRuralPremiumCoverage.CodeEnum.GRANIZO.toString())
+        coverage.setDescription("string")
+        coverage.setAmount("100.00")
+        coverage.setUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        coverage.setUnitTypeOthers("Horas")
+        coverage.setUnitCode("R\$")
+        coverage.setUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        coverage
     }
 
     static anAutoPolicy(UUID accountHolderId, String policyId = "auto-policy-1") {

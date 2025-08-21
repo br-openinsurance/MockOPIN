@@ -82,7 +82,7 @@ class ClaimNotificationControllerSpec extends Specification {
         def event = AwsProxyHelper.buildBasicEvent("/open-insurance/claim-notification/v1/request/damage/${consentId}", HttpMethod.POST)
                 .withBody(json)
                 .withHeaders(Map.of("x-idempotency-key", UUID.randomUUID().toString(), "x-fapi-interaction-id", UUID.randomUUID().toString()))
-        AuthHelper.authorize(scopes: "claim-notification", event)
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "claim-notification", event)
 
         when:
         def response = handler.handleRequest(event, lambdaContext)
@@ -107,7 +107,7 @@ class ClaimNotificationControllerSpec extends Specification {
         def event = AwsProxyHelper.buildBasicEvent("/open-insurance/claim-notification/v1/request/person/${consentId}", HttpMethod.POST)
                 .withBody(json)
                 .withHeaders(Map.of("x-idempotency-key", UUID.randomUUID().toString(), "x-fapi-interaction-id", UUID.randomUUID().toString()))
-        AuthHelper.authorize(scopes: "claim-notification", event)
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "claim-notification", event)
 
         when:
         def response = handler.handleRequest(event, lambdaContext)

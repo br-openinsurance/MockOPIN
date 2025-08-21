@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.raidiam.trustframework.mockinsurance.domain.ConsentEntity;
-import com.raidiam.trustframework.mockinsurance.domain.RuralClaimEntity;
+import com.raidiam.trustframework.mockinsurance.domain.RuralPolicyClaimEntity;
 import com.raidiam.trustframework.mockinsurance.domain.RuralPolicyEntity;
 import com.raidiam.trustframework.mockinsurance.domain.ConsentRuralPolicyEntity;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
@@ -50,7 +50,7 @@ public class RuralService extends BaseInsuranceService {
         LOG.info("Getting rural policy for policy id {} and consent id {}", policyId, consentId);
 
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
-        var policy = ruralPolicyRepository.findByPolicyId(policyId)
+        var policy = ruralPolicyRepository.findByRuralPolicyId(policyId)
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Policy id " + policyId + " not found"));
 
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
@@ -84,7 +84,7 @@ public class RuralService extends BaseInsuranceService {
     public void checkConsentOwnerIsPolicyOwner(Page<ConsentRuralPolicyEntity> consentPolicy, ConsentEntity consentEntity) {
         if(consentPolicy.getContent()
                 .stream()
-                .map(ConsentRuralPolicyEntity::getPolicy)
+                .map(ConsentRuralPolicyEntity::getRuralPolicy)
                 .map(RuralPolicyEntity::getAccountHolderId)
                 .anyMatch(accountHolderId -> !accountHolderId.equals(consentEntity.getAccountHolderId()))) {
             throw new HttpStatusException(HttpStatus.FORBIDDEN, "Forbidden, consent owner does not match policy owner!");
@@ -93,21 +93,53 @@ public class RuralService extends BaseInsuranceService {
     
     public ResponseInsuranceRuralPolicyInfo getPolicyInfo(UUID policyId, String consentId) {
         LOG.info("Getting rural policy info response for consent id {}", consentId);
-        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RURAL_POLICYINFO_READ).mapPolicyInfoDto();
+        var policy = getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RURAL_POLICYINFO_READ);
+        var response = policy.mapPolicyInfoDto();
+
+        policy.getBeneficiaryIds().forEach(beneficiaryId -> response.getData().addBeneficiariesItem(beneficiaryInfoRepository.findById(beneficiaryId)
+            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Beneficiary not found for UUID %s", beneficiaryId)))
+            .mapDTO()));
+        
+        policy.getInsuredIds().forEach(insuredIds -> response.getData().addInsuredsItem(personalInfoRepository.findById(insuredIds)
+            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Personal info not found for UUID %s", insuredIds)))
+            .mapDTO()));
+        
+        policy.getIntermediaryIds().forEach(intermediaryId -> response.getData().addIntermediariesItem(intermediaryRepository.findById(intermediaryId)
+            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Intermediary not found for UUID %s", intermediaryId)))
+            .mapDTO()));
+        
+        policy.getPrincipalIds().forEach(principalId -> response.getData().addPrincipalsItem(principalInfoRepository.findById(principalId)
+            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Principal not found for UUID %s", principalId)))
+            .mapDTO()));
+        
+        policy.getCoinsurerIds().forEach(coinsurerId -> response.getData().addCoinsurersItem(coinsurerRepository.findById(coinsurerId)
+            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Coinsurer not found for UUID %s", coinsurerId)))
+            .mapDTO()));
+         
+        return response;
     }
 
     public ResponseInsuranceRuralPremium getPremium(UUID policyId, String consentId) {
         LOG.info("Getting rural premium response for consent id {}", consentId);
-        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RURAL_PREMIUM_READ).mapPremiumDto();
+        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RURAL_PREMIUM_READ);
+
+        var premium = ruralPolicyPremiumRepository.findByRuralPolicyId(policyId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Policy id " + policyId + " not found"));
+        var response = new ResponseInsuranceRuralPremium().data(premium.mapDto());
+
+        premium.getPaymentIds().forEach(paymentId -> response.getData().addPaymentsItem(paymentRepository.findById(paymentId)
+            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Payment not found for UUID %s", paymentId)))
+            .mapDTO()));
+        return response;
     }
 
     public ResponseInsuranceRuralClaims getClaims(UUID policyId, String consentId, Pageable pageable) {
         LOG.info("Getting rural claims response for consent id {}", consentId);
         getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RURAL_CLAIM_READ);
 
-        var claims = ruralClaimRepository.findByPolicyId(policyId, pageable);
+        var claims = ruralPolicyClaimRepository.findByRuralPolicyId(policyId, pageable);
         var resp = new ResponseInsuranceRuralClaims()
-                .data(claims.getContent().stream().map(RuralClaimEntity::toResponse).toList());
+                .data(claims.getContent().stream().map(RuralPolicyClaimEntity::toResponse).toList());
         resp.setMeta(InsuranceLambdaUtils.getMeta(claims, false));
         return resp;
     }
