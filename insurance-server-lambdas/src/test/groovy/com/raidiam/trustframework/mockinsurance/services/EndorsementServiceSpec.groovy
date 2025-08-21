@@ -1,11 +1,9 @@
 package com.raidiam.trustframework.mockinsurance.services
 
-import com.raidiam.trustframework.mockinsurance.CleanupSpecification
+import com.raidiam.trustframework.mockinsurance.cleanups.CleanupSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
-import com.raidiam.trustframework.mockinsurance.TestRequestDataFactory
 import com.raidiam.trustframework.mockinsurance.domain.AccountHolderEntity
 import com.raidiam.trustframework.mockinsurance.models.generated.*
-import com.raidiam.trustframework.mockinsurance.utils.PermissionGroup
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.exceptions.HttpStatusException
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
@@ -188,12 +186,21 @@ class EndorsementServiceSpec extends CleanupSpecification {
         )
 
         when:
-        def entity = endorsementService.createEndorsement(endorsement)
+        endorsementService.createEndorsement(endorsement)
 
         then:
         def e = thrown(HttpStatusException)
         e.status == HttpStatus.UNPROCESSABLE_ENTITY
         e.getMessage() == "NAO_INFORMADO: request date is invalid"
+
+        when: "The consent should be consumed, even when valid"
+        endorsement.getData().setRequestDate(LocalDate.now().minusMonths(1))
+        endorsementService.createEndorsement(endorsement)
+
+        then:
+        def e2 = thrown(HttpStatusException)
+        e2.status == HttpStatus.FORBIDDEN
+        e2.getMessage() == "NAO_INFORMADO: consent is not authorised"
     }
 
     def "We can't create an endorsement without an endorsement type"() {
@@ -255,12 +262,21 @@ class EndorsementServiceSpec extends CleanupSpecification {
         )
 
         when:
-        def entity = endorsementService.createEndorsement(endorsement)
+        endorsementService.createEndorsement(endorsement)
 
         then:
         def e = thrown(HttpStatusException)
         e.status == HttpStatus.UNPROCESSABLE_ENTITY
         e.getMessage() == "NAO_INFORMADO: endorsement type does not match"
+
+        when: "The consent should be consumed, even when valid"
+        endorsement.getData().setEndorsementType(CreateEndorsementData.EndorsementTypeEnum.ALTERACAO)
+        endorsementService.createEndorsement(endorsement)
+
+        then:
+        def e2 = thrown(HttpStatusException)
+        e2.status == HttpStatus.FORBIDDEN
+        e2.getMessage() == "NAO_INFORMADO: consent is not authorised"
     }
 
     def "We can't create an endorsement without an insured object id"() {
@@ -389,12 +405,21 @@ class EndorsementServiceSpec extends CleanupSpecification {
         )
 
         when:
-        def entity = endorsementService.createEndorsement(endorsement)
+        endorsementService.createEndorsement(endorsement)
 
         then:
         def e = thrown(HttpStatusException)
         e.status == HttpStatus.UNPROCESSABLE_ENTITY
         e.getMessage() == "NAO_INFORMADO: policy id does not match"
+
+        when: "The consent should be consumed, even when valid"
+        endorsement.getData().setPolicyId("random_policy_id")
+        endorsementService.createEndorsement(endorsement)
+
+        then:
+        def e2 = thrown(HttpStatusException)
+        e2.status == HttpStatus.FORBIDDEN
+        e2.getMessage() == "NAO_INFORMADO: consent is not authorised"
     }
 
     def "We can't create an endorsement without a proposal id"() {

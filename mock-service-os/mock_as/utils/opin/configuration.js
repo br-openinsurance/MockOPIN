@@ -71,12 +71,14 @@ export default function (mtlsIssuer, ssaJwks) {
       'quote-person-travel',
       'quote-capitalization-title-lead',
       'quote-capitalization-title',
+      'quote-capitalization-title-raffle',
       'capitalization-title-raffle',
       'capitalization-title',
       'insurance-life-pension',
       'insurance-pension-plan',
       'insurance-financial-assistance',
       'op:admin',
+      'override',
     ],
     interactions: {
       url(ctx, interaction) {
@@ -429,7 +431,7 @@ export default function (mtlsIssuer, ssaJwks) {
               'quote-person-travel',
               'quote-capitalization-title-lead',
               'quote-capitalization-title',
-              'capitalization-title-raffle',
+              'quote-capitalization-title-raffle',
               'capitalization-title',
               'insurance-life-pension',
               'insurance-pension-plan',

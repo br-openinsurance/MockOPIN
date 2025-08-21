@@ -69,7 +69,9 @@ public class FinancialAssistanceController extends BaseInsuranceController {
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
         LOG.info("Getting movements for contract id {} v1", consentId);
         ResponseInsuranceFinancialAssistanceMovements response = service.getContractMovements(contractId, consentId, pageable);
-        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
+        // Uses total movements for pagination
+        // This is acceptable for the current mock setup, but may not reflect real pagination behavior when total movements exceed maxPageSize
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath(), response.getData().size(), maxPageSize);
         LOG.info("Retrieved movements for contract id {}", contractId);
         InsuranceLambdaUtils.logObject(mapper, response);
         return response;

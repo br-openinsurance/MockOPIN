@@ -1,6 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.services
 
-import com.raidiam.trustframework.mockinsurance.CleanupSpecification
+import com.raidiam.trustframework.mockinsurance.cleanups.CleanupSpecification
 import com.raidiam.trustframework.mockinsurance.models.generated.OverrideData
 import com.raidiam.trustframework.mockinsurance.models.generated.OverrideDataResponse
 import com.raidiam.trustframework.mockinsurance.models.generated.OverridePayload

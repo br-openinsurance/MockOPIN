@@ -85,6 +85,8 @@ class EndorsementControllerSpec extends Specification {
         resp.getData().getProtocolNumber() != null
         resp.getData().getProtocolDateTime() != null
         resp.getData().getEndorsementType().toString() == req.getData().getEndorsementType().toString()
+        resp.getLinks() != null
+        resp.getLinks().getRedirect() == "https://www.raidiam.com/"
 
         and:
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')

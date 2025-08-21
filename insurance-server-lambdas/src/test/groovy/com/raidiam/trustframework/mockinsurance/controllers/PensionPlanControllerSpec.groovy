@@ -155,6 +155,7 @@ class PensionPlanControllerSpec extends Specification {
 
         and:
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+        resp.meta.totalRecords == resp.data.movementBenefits.size() + resp.data.movementContributions.size()
     }
 
     def "We can fetch a contract's portabilities" () {

@@ -57,7 +57,22 @@ public class HousingService extends BaseInsuranceService {
 
     public ResponseInsuranceHousingPolicyInfo getPolicyInfo(UUID policyId, String consentId) {
         LOG.info("Getting housing policy info response for consent id {}", consentId);
-        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_HOUSING_POLICYINFO_READ).mapPolicyInfoDTO();
+        var policy =  getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_HOUSING_POLICYINFO_READ);
+        var response = policy.mapPolicyInfoDTO();
+
+        policy.getBeneficiaryIds().forEach(beneficiaryId -> response.getData().addBeneficiariesItem(beneficiaryInfoRepository.findById(beneficiaryId)
+            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Beneficiary not found for UUID %s", beneficiaryId)))
+            .mapDTO()));
+
+        policy.getInsuredIds().forEach(insuredIds -> response.getData().addInsuredsItem(personalInfoRepository.findById(insuredIds)
+            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Personal info not found for UUID %s", insuredIds)))
+            .mapDTO()));
+
+        policy.getIntermediaryIds().forEach(intermediaryId -> response.getData().addIntermediariesItem(intermediaryRepository.findById(intermediaryId)
+            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Intermediary not found for UUID %s", intermediaryId)))
+            .mapDTO()));
+
+        return response;
     }
 
     public ResponseInsuranceHousingClaims getPolicyClaims(UUID policyId, String consentId, Pageable pageable) {
@@ -77,7 +92,12 @@ public class HousingService extends BaseInsuranceService {
 
         var premium = housingPolicyPremiumRepository.findByHousingPolicyId(policyId)
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Policy id " + policyId + " not found"));
-        return new ResponseInsuranceHousingPremium().data(premium.mapDTO());
+        var response = new ResponseInsuranceHousingPremium().data(premium.mapDTO());
+
+        premium.getPaymentIds().forEach(paymentId -> response.getData().addPaymentsItem(paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Payment not found for UUID %s", paymentId)))
+                .mapDTO()));
+        return response;
     }
 
     public void checkConsentCoversPolicy(ConsentEntity consentEntity, HousingPolicyEntity policy) {

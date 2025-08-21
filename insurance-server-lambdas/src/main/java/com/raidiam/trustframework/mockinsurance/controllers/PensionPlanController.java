@@ -67,7 +67,12 @@ public class PensionPlanController extends BaseInsuranceController {
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
         LOG.info("Getting movements for contract id {} v1", consentId);
         ResponseInsurancePensionPlanMovements response = service.getContractMovements(contractId, consentId, pageable);
-        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
+
+        // Calculates total movements by summing benefits and contributions
+        // This is acceptable for the current mock setup, but may not reflect real pagination behavior when total movements exceed maxPageSize
+        int totalMovements = response.getData().getMovementBenefits().size() + response.getData().getMovementContributions().size();
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath(), totalMovements, maxPageSize);
+
         LOG.info("Retrieved movements for contract id {}", contractId);
         InsuranceLambdaUtils.logObject(mapper, response);
         return response;

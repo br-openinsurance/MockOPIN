@@ -44,7 +44,7 @@ public class EndorsementEntity extends BaseEntity {
         return entity;
     }
 
-    public ResponseEndorsement toResponse() {
+    public ResponseEndorsement toResponse(String redirectLink) {
         ResponseEndorsementData data = new ResponseEndorsementData();
         data.setCustomData(this.getData().getCustomData());
         data.setEndorsementType(EndorsementTypeEnum.valueOf(this.getData().getEndorsementType().toString()));
@@ -56,7 +56,9 @@ public class EndorsementEntity extends BaseEntity {
         data.setRequestDate(this.getData().getRequestDate());
         data.setRequestDescription(this.getData().getRequestDescription());
 
+        ResponseEndorsement responseEndorsement = new ResponseEndorsement();
+        responseEndorsement.setLinks(new ResponsePatchDataLinks().redirect(redirectLink));
 
-        return new ResponseEndorsement().data(data);
+        return responseEndorsement.data(data);
     }
 }

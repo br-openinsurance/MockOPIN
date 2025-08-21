@@ -12,7 +12,7 @@ import jakarta.validation.constraints.NotNull;
 @Repository
 public interface ConsentRuralPolicyRepository extends PageableRepository<ConsentRuralPolicyEntity, Integer> {
     
-    @Join(value="policy", type = Join.Type.FETCH)
+    @Join(value="ruralPolicy", type = Join.Type.FETCH)
     @Join(value="consent", type = Join.Type.FETCH)
     Page<ConsentRuralPolicyEntity> findByConsentConsentIdOrderByCreatedAtAsc(@NotNull String consentId, Pageable pageable);
 }
