@@ -67,7 +67,7 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
             entry("contract-life-pension", "QUOTE_LIFE_PENSION_MANAGE"),
             entry("quote-capitalization-title-lead", "QUOTE_CAPITALIZATION_TITLE_LEAD_MANAGE"),
             entry("quote-capitalization-title", "QUOTE_CAPITALIZATION_TITLE_MANAGE"),
-            entry("capitalization-title-raffle", "QUOTE_CAPITALIZATION_TITLE_RAFFLE_MANAGE"),
+            entry("quote-capitalization-title-raffle", "QUOTE_CAPITALIZATION_TITLE_RAFFLE_MANAGE"),
             entry("customers", "CUSTOMERS_MANAGE"),
             entry("capitalization-title", "CAPITALIZATION_TITLE_MANAGE"),
             entry("insurance-financial-risk", "FINANCIAL_RISK_MANAGE"),

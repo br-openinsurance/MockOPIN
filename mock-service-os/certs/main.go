@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"net"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -144,6 +145,16 @@ func generateCert(
 				},
 			},
 		},
+		DNSNames: []string{
+			"auth.local",
+			"matls-auth.local",
+			"api.local",
+			"matls-api.local",
+			"directory",
+			"directory.local",
+			"keystore",
+		},
+		IPAddresses: []net.IP{net.ParseIP("127.0.0.1"), net.ParseIP("::1")},
 		NotBefore:   time.Now(),
 		NotAfter:    time.Now().Add(365 * 24 * time.Hour),
 		KeyUsage:    x509.KeyUsageDigitalSignature,

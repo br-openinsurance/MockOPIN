@@ -1,6 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.services
 
-import com.raidiam.trustframework.mockinsurance.CleanupSpecification
+import com.raidiam.trustframework.mockinsurance.cleanups.CleanupFinancialRiskSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
 import com.raidiam.trustframework.mockinsurance.domain.*
 import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentPermission
@@ -13,7 +13,7 @@ import spock.lang.Stepwise
 
 @Stepwise
 @MicronautTest(transactional = false, environments = ["db"])
-class FinancialRiskServiceSpec extends CleanupSpecification {
+class FinancialRiskServiceSpec extends CleanupFinancialRiskSpecification {
 
     @Inject
     FinancialRiskService financialRiskService
@@ -49,7 +49,7 @@ class FinancialRiskServiceSpec extends CleanupSpecification {
     CoinsurerEntity testFinancialRiskPolicyCoinsurer
 
     @Shared
-    testFinancialRiskPolicyPremiumPayment
+    PaymentEntity testFinancialRiskPolicyPremiumPayment
 
     @Shared
     POSEntity testFinancialCoveragePos
@@ -74,11 +74,11 @@ class FinancialRiskServiceSpec extends CleanupSpecification {
             )
             testConsent.setStatus(EnumConsentStatus.AUTHORISED.toString())
             testConsent = consentRepository.save(testConsent)
-            testFinancialRiskPolicyInsured = personalInfoRepository.save(TestEntityDataFactory.aFinancialRiskPolicyInsured())
-            testFinancialRiskPolicyBeneficiary = beneficiaryInfoRepository.save(TestEntityDataFactory.aFinancialRiskPolicyBeneficiary())
-            testFinancialRiskPolicyPrincipal = principalInfoRepository.save(TestEntityDataFactory.aFinancialRiskPolicyPrincipal())
-            testFinancialRiskPolicyIntermediary = intermediaryRepository.save(TestEntityDataFactory.aFinancialRiskPolicyIntermediary())
-            testFinancialRiskPolicyCoinsurer = coinsurerRepository.save(TestEntityDataFactory.aFinancialRiskPolicyCoinsurer())
+            testFinancialRiskPolicyInsured = personalInfoRepository.save(TestEntityDataFactory.aPolicyInsured())
+            testFinancialRiskPolicyBeneficiary = beneficiaryInfoRepository.save(TestEntityDataFactory.aPolicyBeneficiary())
+            testFinancialRiskPolicyPrincipal = principalInfoRepository.save(TestEntityDataFactory.aPolicyPrincipal())
+            testFinancialRiskPolicyIntermediary = intermediaryRepository.save(TestEntityDataFactory.aPolicyIntermediary())
+            testFinancialRiskPolicyCoinsurer = coinsurerRepository.save(TestEntityDataFactory.aPolicyCoinsurer())
             testFinancialRiskPolicy = financialRiskPolicyRepository.save(TestEntityDataFactory.aFinancialRiskPolicy(
                     testAccountHolder.getAccountHolderId(),
                     List.of(testFinancialRiskPolicyInsured.getReferenceId()),
@@ -88,13 +88,13 @@ class FinancialRiskServiceSpec extends CleanupSpecification {
                     List.of(testFinancialRiskPolicyCoinsurer.getCoinsurerId())))
             testFinancialInsuredObject = financialRiskPolicyInsuredObjectRepository.save(TestEntityDataFactory.aFinancialRiskPolicyInsuredObject(testFinancialRiskPolicy.getFinancialRiskPolicyId()))
             financialRiskPolicyInsuredObjectCoverageRepository.save(TestEntityDataFactory.aFinancialRiskPolicyInsuredObjectCoverage(testFinancialInsuredObject.getInsuredObjectId()))
-            testFinancialCoverageDeductible = deductibleRepository.save(TestEntityDataFactory.aFinancialRiskPolicyCoverageDeductible())
-            testFinancialCoveragePos = posRepository.save(TestEntityDataFactory.aFinancialRiskPolicyCoveragePos())
+            testFinancialCoverageDeductible = deductibleRepository.save(TestEntityDataFactory.aPolicyCoverageDeductible())
+            testFinancialCoveragePos = posRepository.save(TestEntityDataFactory.aPolicyCoveragePos())
             financialRiskPolicyCoverageRepository.save(TestEntityDataFactory.aFinancialRiskPolicyCoverage(testFinancialRiskPolicy.getFinancialRiskPolicyId(), testFinancialCoverageDeductible.getReferenceId(), testFinancialCoveragePos.getPosId()))
             consentFinancialRiskPolicyRepository.save(new ConsentFinancialRiskPolicyEntity(testConsent, testFinancialRiskPolicy))
             testFinancialRiskPolicyClaim = financialRiskPolicyClaimRepository.save(TestEntityDataFactory.aFinancialRiskPolicyClaim(testFinancialRiskPolicy.getFinancialRiskPolicyId()))
             financialRiskPolicyClaimCoverageRepository.save(TestEntityDataFactory.aFinancialRiskPolicyClaimCoverage(testFinancialRiskPolicyClaim.getClaimId()))
-            testFinancialRiskPolicyPremiumPayment = paymentRepository.save(TestEntityDataFactory.aFinancialRiskPolicyPremiumPayment())
+            testFinancialRiskPolicyPremiumPayment = paymentRepository.save(TestEntityDataFactory.aPolicyPremiumPayment())
             testFinancialRiskPolicyPremium = financialRiskPolicyPremiumRepository.save(TestEntityDataFactory.aFinancialRiskPolicyPremium(testFinancialRiskPolicy.getFinancialRiskPolicyId(), List.of(testFinancialRiskPolicyPremiumPayment.getPaymentId())))
             financialRiskPolicyPremiumCoverageRepository.save(TestEntityDataFactory.aFinancialRiskPolicyPremiumCoverage(testFinancialRiskPolicyPremium.getPremiumId()))
             runSetup = false

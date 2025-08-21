@@ -1,6 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.services
 
-import com.raidiam.trustframework.mockinsurance.CleanupSpecification
+import com.raidiam.trustframework.mockinsurance.cleanups.CleanupSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
 import com.raidiam.trustframework.mockinsurance.models.generated.*
 import io.micronaut.http.HttpStatus
@@ -8,7 +8,6 @@ import io.micronaut.http.exceptions.HttpStatusException
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
 import spock.lang.Stepwise
-import java.time.LocalDate;
 
 @Stepwise
 @MicronautTest(transactional = false, environments = ["db"])

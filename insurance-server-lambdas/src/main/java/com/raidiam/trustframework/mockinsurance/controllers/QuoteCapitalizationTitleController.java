@@ -139,13 +139,13 @@ public class QuoteCapitalizationTitleController extends BaseInsuranceController 
     @Status(HttpStatus.CREATED)
     @Secured({"QUOTE_CAPITALIZATION_TITLE_RAFFLE_MANAGE"})
     @XFapiInteractionIdRequired
-    @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
     @Idempotent
     public ResponseCapitalizationTitleRaffle createRaffleV1(@Body RequestCapitalizationTitleRaffle body, @NotNull HttpRequest<?> request){
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         LOG.info("Creating new capitalization title raffle for client {}", callerInfo.getClientId());
 
-        var response = capitalizationTitleRaffleService.createRaffle(CapitalizationTitleRaffleEntity.fromRequest(body, callerInfo.getClientId())).toResponse();
+        var response = capitalizationTitleRaffleService.createRaffle(CapitalizationTitleRaffleEntity.fromRequest(body, callerInfo.getClientId()), callerInfo.getConsentId()).toResponse();
 
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
         InsuranceLambdaUtils.logObject(mapper, response);

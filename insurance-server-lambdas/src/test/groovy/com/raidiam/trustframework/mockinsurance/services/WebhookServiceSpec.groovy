@@ -1,6 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.services
 
-import com.raidiam.trustframework.mockinsurance.CleanupSpecification
+import com.raidiam.trustframework.mockinsurance.cleanups.CleanupSpecification
 import com.raidiam.trustframework.mockinsurance.domain.WebhookEntity
 import com.raidiam.trustframework.mockinsurance.models.generated.UpdateWebhook
 import io.micronaut.http.HttpRequest

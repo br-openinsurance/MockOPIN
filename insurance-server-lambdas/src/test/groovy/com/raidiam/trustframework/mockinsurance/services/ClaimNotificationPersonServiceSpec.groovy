@@ -1,6 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.services
 
-import com.raidiam.trustframework.mockinsurance.CleanupSpecification
+import com.raidiam.trustframework.mockinsurance.cleanups.CleanupSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
 import com.raidiam.trustframework.mockinsurance.domain.AccountHolderEntity
 import com.raidiam.trustframework.mockinsurance.models.generated.ClaimNotificationData
@@ -56,7 +56,7 @@ class ClaimNotificationPersonServiceSpec extends CleanupSpecification {
         newClaim.consentId == consent.getConsentId()
     }
 
-    def "We can't create a claim notification with wrong documentType" () {
+    def "We can't create a claim notification with a mismatched documentType" () {
         given:
         def clientId = "random_client_id"
         def consent = TestEntityDataFactory.aConsent(testAccountHolder.getAccountHolderId(), clientId)
@@ -70,14 +70,93 @@ class ClaimNotificationPersonServiceSpec extends CleanupSpecification {
                 .occurrenceDate(claim.getData().getOccurrenceDate())
         )
         claim.data.setDocumentType(ClaimNotificationData.DocumentTypeEnum.CERTIFICADO_AUTOMOVEL)
-        consent = consentRepository.save(consent)
+        consentRepository.save(consent)
 
         when:
-        def newClaim = claimNotificationPersonService.createClaimNotification(claim)
+        claimNotificationPersonService.createClaimNotification(claim)
 
         then:
         def e = thrown(HttpStatusException)
         e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.message == "NAO_INFORMADO: document type does not match"
+
+        when: "A new claim is created, the consent should not be valid"
+        claim.data.setDocumentType(ClaimNotificationData.DocumentTypeEnum.CERTIFICADO)
+        claimNotificationPersonService.createClaimNotification(claim)
+
+        then:
+        def e2 = thrown(HttpStatusException)
+        e2.status == HttpStatus.FORBIDDEN
+        e2.message == "NAO_INFORMADO: consent is not authorised"
+    }
+
+    def "We can't create a claim notification with a mismatched policyId" () {
+        given:
+        def clientId = "random_client_id"
+        def consent = TestEntityDataFactory.aConsent(testAccountHolder.getAccountHolderId(), clientId)
+        def claim = TestEntityDataFactory.aClaimNotificationPerson(clientId, consent.getConsentId())
+        claim.data.setDocumentType(ClaimNotificationData.DocumentTypeEnum.APOLICE_INDIVIDUAL)
+        consent.setStatus(EnumConsentStatus.AUTHORISED.toString())
+        consent.setClaimNotificationInformation(new ClaimNotificationInformation()
+                .documentType(ClaimNotificationInformation.DocumentTypeEnum.fromValue(claim.getData().getDocumentType().toString()))
+                .policyId(claim.getData().getPolicyId())
+                .groupCertificateId(claim.getData().getGroupCertificateId())
+                .insuredObjectId(claim.getData().getInsuredObjectId())
+                .occurrenceDate(claim.getData().getOccurrenceDate())
+        )
+        claim.data.setPolicyId(UUID.randomUUID().toString())
+        consentRepository.save(consent)
+
+        when:
+        claimNotificationPersonService.createClaimNotification(claim)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.message == "NAO_INFORMADO: policy id does not match"
+
+        when: "A new claim is created, the consent should not be valid"
+        claim.data.setPolicyId(consent.getClaimNotificationInformation().getPolicyId())
+        claimNotificationPersonService.createClaimNotification(claim)
+
+        then:
+        def e2 = thrown(HttpStatusException)
+        e2.status == HttpStatus.FORBIDDEN
+        e2.message == "NAO_INFORMADO: consent is not authorised"
+    }
+
+    def "We can't create a claim notification with a mismatched occurrence date" () {
+        given:
+        def clientId = "random_client_id"
+        def consent = TestEntityDataFactory.aConsent(testAccountHolder.getAccountHolderId(), clientId)
+        def claim = TestEntityDataFactory.aClaimNotificationPerson(clientId, consent.getConsentId())
+        consent.setStatus(EnumConsentStatus.AUTHORISED.toString())
+        consent.setClaimNotificationInformation(new ClaimNotificationInformation()
+                .documentType(ClaimNotificationInformation.DocumentTypeEnum.fromValue(claim.getData().getDocumentType().toString()))
+                .policyId(claim.getData().getPolicyId())
+                .groupCertificateId(claim.getData().getGroupCertificateId())
+                .insuredObjectId(claim.getData().getInsuredObjectId())
+                .occurrenceDate(claim.getData().getOccurrenceDate())
+        )
+        claim.data.setOccurrenceDate(LocalDate.now())
+        consentRepository.save(consent)
+
+        when:
+        claimNotificationPersonService.createClaimNotification(claim)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.message == "NAO_INFORMADO: occurrence date does not match"
+
+        when: "A new claim is created, the consent should not be valid"
+        claim.data.setOccurrenceDate(LocalDate.of(2022, 1, 1))
+        claimNotificationPersonService.createClaimNotification(claim)
+
+        then:
+        def e2 = thrown(HttpStatusException)
+        e2.status == HttpStatus.FORBIDDEN
+        e2.message == "NAO_INFORMADO: consent is not authorised"
     }
 
     def "We can't create a claim notification with null policyId if documentType is APOLICE_INDIVIDUAL" () {

@@ -5,6 +5,7 @@ import com.raidiam.trustframework.mockinsurance.domain.EndorsementEntity;
 import com.raidiam.trustframework.mockinsurance.models.generated.CreateConsentDataEndorsementInformation;
 import com.raidiam.trustframework.mockinsurance.models.generated.CreateEndorsementData;
 import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentStatus;
+import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.exceptions.HttpStatusException;
 import jakarta.inject.Inject;
@@ -14,11 +15,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Date;
 
 @Singleton
-@Transactional
+@Transactional(dontRollbackOn={HttpStatusException.class})
 public class EndorsementService extends BaseInsuranceService {
     
     private static final Logger LOG = LoggerFactory.getLogger(EndorsementService.class);
@@ -42,7 +45,7 @@ public class EndorsementService extends BaseInsuranceService {
             throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: consent id was not informed");
         }
 
-        ConsentEntity consent = consentService.getConsentEntity(endorsement.getConsentId(), endorsement.getClientId());
+        ConsentEntity consent = InsuranceLambdaUtils.getConsent(endorsement.getConsentId(), consentRepository);
 
         // Client ID
         if (!endorsement.getClientId().equals(consent.getClientId())) {
@@ -69,6 +72,9 @@ public class EndorsementService extends BaseInsuranceService {
         }
 
         if (endorsementData.getRequestDate().isAfter(LocalDate.now())){
+            consent.setStatus(EnumConsentStatus.CONSUMED.toString());
+            consent.setStatusUpdateDateTime(Date.from(Instant.now()));
+            consentRepository.update(consent);
             throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: request date is invalid");
         }
 
@@ -78,6 +84,9 @@ public class EndorsementService extends BaseInsuranceService {
         }
         
         if (!endorsementData.getEndorsementType().toString().equals(consentEndorsementInfo.getEndorsementType().toString())){
+            consent.setStatus(EnumConsentStatus.CONSUMED.toString());
+            consent.setStatusUpdateDateTime(Date.from(Instant.now()));
+            consentRepository.update(consent);
             throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: endorsement type does not match");
         }
         
@@ -100,6 +109,9 @@ public class EndorsementService extends BaseInsuranceService {
         }
         
         if (!endorsementData.getPolicyId().equals(consentEndorsementInfo.getPolicyId())){
+            consent.setStatus(EnumConsentStatus.CONSUMED.toString());
+            consent.setStatusUpdateDateTime(Date.from(Instant.now()));
+            consentRepository.update(consent);
             throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: policy id does not match");
         }
         

@@ -1,6 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.services
 
-import com.raidiam.trustframework.mockinsurance.CleanupSpecification
+import com.raidiam.trustframework.mockinsurance.cleanups.CleanupHousingSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
 import com.raidiam.trustframework.mockinsurance.domain.*
 import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentPermission
@@ -13,7 +13,7 @@ import spock.lang.Stepwise
 
 @Stepwise
 @MicronautTest(transactional = false, environments = ["db"])
-class HousingServiceSpec extends CleanupSpecification {
+class HousingServiceSpec extends CleanupHousingSpecification {
 
     @Inject
     HousingService housingService
@@ -22,10 +22,43 @@ class HousingServiceSpec extends CleanupSpecification {
     HousingPolicyEntity testHousingPolicy
 
     @Shared
+    PersonalInfoEntity testHousingPolicyInsured
+
+    @Shared
+    BeneficiaryInfoEntity testHousingPolicyBeneficiary
+
+    @Shared
+    IntermediaryEntity testHousingPolicyIntermediary
+
+    @Shared
+    HousingPolicyInsuredObjectEntity testHousingPolicyInsuredObject
+
+    @Shared
+    HousingPolicyInsuredObjectCoverageEntity testHousingPolicyInsuredObjectCoverage
+
+    @Shared
+    HousingPolicyBranchInsuredObjectEntity testHousingPolicyBranchInsuredObject
+
+    @Shared
+    HousingPolicyBranchInsuredObjectLenderEntity testHousingPolicyBranchInsuredObjectLender
+
+    @Shared
+    HousingPolicyBranchInsuredEntity testHousingPolicyBranchInsured
+
+    @Shared
     HousingPolicyClaimEntity testHousingPolicyClaim
 
     @Shared
+    HousingPolicyClaimCoverageEntity testHousingPolicyClaimCoverage
+
+    @Shared
     HousingPolicyPremiumEntity testHousingPolicyPremium
+
+    @Shared
+    HousingPolicyPremiumCoverageEntity testHousingPolicyPremiumCoverage
+
+    @Shared
+    PaymentEntity testHousingPolicyPremiumPayment
 
     @Shared
     AccountHolderEntity testAccountHolder
@@ -47,10 +80,27 @@ class HousingServiceSpec extends CleanupSpecification {
             )
             testConsent.setStatus(EnumConsentStatus.AUTHORISED.toString())
             testConsent = consentRepository.save(testConsent)
-            testHousingPolicy = housingPolicyRepository.save(TestEntityDataFactory.aHousingPolicy(testAccountHolder.getAccountHolderId()))
+            testHousingPolicyInsured = personalInfoRepository.save(TestEntityDataFactory.aPolicyInsured())
+            testHousingPolicyBeneficiary = beneficiaryInfoRepository.save(TestEntityDataFactory.aPolicyBeneficiary())
+            testHousingPolicyIntermediary = intermediaryRepository.save(TestEntityDataFactory.aPolicyIntermediary())
+            testHousingPolicy = housingPolicyRepository.save(TestEntityDataFactory.aHousingPolicy(
+                    testAccountHolder.getAccountHolderId(),
+                    List.of(testHousingPolicyInsured.getReferenceId()),
+                    List.of(testHousingPolicyBeneficiary.getReferenceId()),
+                    List.of(testHousingPolicyIntermediary.getReferenceId())))
             consentHousingPolicyRepository.save(new ConsentHousingPolicyEntity(testConsent, testHousingPolicy))
+            testHousingPolicyInsuredObject = housingPolicyInsuredObjectRepository.save(TestEntityDataFactory.aHousingPolicyInsuredObject(testHousingPolicy.getHousingPolicyId()))
+            testHousingPolicyInsuredObjectCoverage = housingPolicyInsuredObjectCoverageRepository.save(TestEntityDataFactory.aHousingPolicyInsuredObjectCoverage(testHousingPolicyInsuredObject.getHousingPolicyInsuredObjectId()))
+            testHousingPolicyBranchInsuredObject = housingPolicyBranchInsuredObjectRepository.save(TestEntityDataFactory.aHousingPolicyBranchInsuredObject(testHousingPolicy.getHousingPolicyId()))
+            testHousingPolicyBranchInsuredObjectLender = housingPolicyBranchInsuredObjectLenderRepository.save(TestEntityDataFactory.aHousingPolicyBranchInsuredObjectLender(testHousingPolicyBranchInsuredObject.getHousingPolicyBranchInsuredObjectId()))
+            testHousingPolicyBranchInsured = housingPolicyBranchInsuredRepository.save(TestEntityDataFactory.aHousingPolicyBranchInsured(testHousingPolicy.getHousingPolicyId()))
             testHousingPolicyClaim = housingPolicyClaimRepository.save(TestEntityDataFactory.aHousingPolicyClaim(testHousingPolicy.getHousingPolicyId()))
-            testHousingPolicyPremium = housingPolicyPremiumRepository.save(TestEntityDataFactory.aHousingPolicyPremium(testHousingPolicy.getHousingPolicyId()))
+            testHousingPolicyClaimCoverage = housingPolicyClaimCoverageRepository.save(TestEntityDataFactory.aHousingPolicyClaimCoverage(testHousingPolicyClaim.getClaimId()))
+            testHousingPolicyPremiumPayment = paymentRepository.save(TestEntityDataFactory.aPolicyPremiumPayment())
+            testHousingPolicyPremium = housingPolicyPremiumRepository.save(TestEntityDataFactory.aHousingPolicyPremium(
+                    testHousingPolicy.getHousingPolicyId(),
+                    List.of(testHousingPolicyPremiumPayment.getPaymentId())))
+            testHousingPolicyPremiumCoverage = housingPolicyPremiumCoverageRepository.save(TestEntityDataFactory.aHousingPolicyPremiumCoverage(testHousingPolicyPremium.getPremiumId()))
             runSetup = false
         }
     }
@@ -63,6 +113,9 @@ class HousingServiceSpec extends CleanupSpecification {
         response.getData()
         response.getData().size() == 1
         response.getData().first()
+        response.getData().first().getBrand() == "Mock"
+        response.getData().first().getCompanies().first().getCnpjNumber() == "12345678901234"
+        response.getData().first().getCompanies().first().getPolicies().first().getPolicyId() == testHousingPolicy.getHousingPolicyId().toString()
     }
 
     def "we can get a policy info" () {
@@ -71,6 +124,15 @@ class HousingServiceSpec extends CleanupSpecification {
 
         then:
         response.getData() != null
+        response.getData().getPolicyId() == testHousingPolicy.getPolicyId()
+        response.getData().getInsureds().first().getIdentification() == testHousingPolicyInsured.getIdentification()
+        response.getData().getBeneficiaries().first().getIdentification() == testHousingPolicyBeneficiary.getIdentification()
+        response.getData().getIntermediaries().first().getIdentification() == testHousingPolicyIntermediary.getIdentification()
+        response.getData().getInsuredObjects().first().getIdentification() == testHousingPolicyInsuredObject.getIdentification()
+        response.getData().getInsuredObjects().first().getCoverages().first().getBranch() == testHousingPolicyInsuredObjectCoverage.getBranch()
+        response.getData().getBranchInfo().getInsuredObjects().first().getIdentification() == testHousingPolicyBranchInsuredObject.getIdentification()
+        response.getData().getBranchInfo().getInsuredObjects().first().getLenders().first().getCnpjNumber() == testHousingPolicyBranchInsuredObjectLender.getCnpjNumber()
+        response.getData().getBranchInfo().getInsureds().first().getIdentification() == testHousingPolicyBranchInsured.getIdentification()
     }
 
     def "we can get a policy's claims" () {
@@ -79,6 +141,8 @@ class HousingServiceSpec extends CleanupSpecification {
 
         then:
         response.getData() != null
+        response.getData().first().getIdentification() == testHousingPolicyClaim.getIdentification()
+        response.getData().first().getCoverages().first().getBranch() == testHousingPolicyClaimCoverage.getBranch()
     }
 
     def "we can get a policy's premium" () {
@@ -87,6 +151,10 @@ class HousingServiceSpec extends CleanupSpecification {
 
         then:
         response.getData() != null
+        response.getData().getPaymentsQuantity() == testHousingPolicyPremium.getPaymentsQuantity()
+        response.getData().getCoverages().first().getBranch() == testHousingPolicyPremiumCoverage.getBranch()
+        response.getData().getPayments().first().getTellerId() == testHousingPolicyPremiumPayment.getTellerId()
+        response.getData().getPaymentsQuantity() == testHousingPolicyPremium.getPaymentsQuantity()
     }
 
     def "enable cleanup"() {

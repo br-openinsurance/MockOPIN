@@ -9,7 +9,6 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.*;
-import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails.CurrencyEnum;
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails.UnitTypeEnum;
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetailsUnit.DescriptionEnum;
 
@@ -27,14 +26,111 @@ public class RuralPolicyEntity extends BaseEntity implements HasStatusInterface 
 
     @Id
     @GeneratedValue
-    @Column(name = "policy_id", unique = true, nullable = false, updatable = false, insertable = false, columnDefinition = "uuid DEFAULT uuid_generate_v4()")
-    private UUID policyId;
+    @Column(name = "rural_policy_id", unique = true, nullable = false, updatable = false, insertable = false, columnDefinition = "uuid DEFAULT uuid_generate_v4()")
+    private UUID ruralPolicyId;
 
     @Column(name = "insurance_id")
     private String insuranceId;
 
     @Column(name = "status")
     private String status;
+
+    @Column(name = "product_name")
+    private String productName;
+
+    @Column(name = "document_type")
+    private String documentType;
+
+    @Column(name = "policy_id")
+    private String policyId;
+
+    @Column(name = "susep_process_number")
+    private String susepProcessNumber;
+
+    @Column(name = "group_certificate_id")
+    private String groupCertificateId;
+
+    @Column(name = "issuance_type")
+    private String issuanceType;
+
+    @Column(name = "issuance_date")
+    private LocalDate issuanceDate;
+
+    @Column(name = "term_start_date")
+    private LocalDate termStartDate;
+
+    @Column(name = "term_end_date")
+    private LocalDate termEndDate;
+
+    @Column(name = "lead_insurer_code")
+    private String leadInsurerCode;
+
+    @Column(name = "lead_insurer_policy_id")
+    private String leadInsurerPolicyId;
+
+    @Column(name = "max_lmg_amount")
+    private String maxLMGAmount;
+
+    @Column(name = "max_lmg_unit_type")
+    private String maxLMGUnitType;
+
+    @Column(name = "max_lmg_unit_type_others")
+    private String maxLMGUnitTypeOthers;
+
+    @Column(name = "max_lmg_unit_code")
+    private String maxLMGUnitCode;
+
+    @Column(name = "max_lmg_unit_description")
+    private String maxLMGUnitDescription;
+
+    @Column(name = "proposal_id")
+    private String proposalId;
+
+    @ElementCollection
+    @CollectionTable(name = "personal_info_ids", joinColumns = @JoinColumn(name = "reference_id", referencedColumnName = "rural_policy_id"))
+    @Column(name = "personal_id")
+    private List<UUID> insuredIds;
+
+    @ElementCollection
+    @CollectionTable(name = "beneficiary_info_ids", joinColumns = @JoinColumn(name = "reference_id", referencedColumnName = "rural_policy_id"))
+    @Column(name = "beneficiary_id")
+    private List<UUID> beneficiaryIds;
+
+    @ElementCollection
+    @CollectionTable(name = "principal_info_ids", joinColumns = @JoinColumn(name = "reference_id", referencedColumnName = "rural_policy_id"))
+    @Column(name = "principal_id")
+    private List<UUID> principalIds;
+
+    @ElementCollection
+    @CollectionTable(name = "intermediary_info_ids", joinColumns = @JoinColumn(name = "reference_id", referencedColumnName = "rural_policy_id"))
+    @Column(name = "intermediary_id")
+    private List<UUID> intermediaryIds;
+    
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @NotAudited
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "ruralPolicy")
+    private List<RuralPolicyInsuredObjectEntity> insuredObjects;
+    
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @NotAudited
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "ruralPolicy")
+    private List<RuralPolicyCoverageEntity> coverages;
+
+    @Column(name = "coinsurance_retained_percentage")
+    private String coinsuranceRetainedPercentage;
+
+    @ElementCollection
+    @CollectionTable(name = "coinsurer_ids", joinColumns = @JoinColumn(name = "reference_id", referencedColumnName = "rural_policy_id"))
+    @Column(name = "coinsurer_id")
+    private List<UUID> coinsurerIds;
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @NotAudited
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "ruralPolicy")
+    private List<RuralPolicyBranchInsuredObjectEntity> branchInsuredObjects;
 
     @Column(name = "account_holder_id")
     private UUID accountHolderId;
@@ -48,110 +144,52 @@ public class RuralPolicyEntity extends BaseEntity implements HasStatusInterface 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @NotAudited
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "policy")
-    private List<RuralClaimEntity> claims = new ArrayList<>();
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "ruralPolicy")
+    private List<RuralPolicyClaimEntity> claims = new ArrayList<>();
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @NotAudited
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "ruralPolicy")
+    private List<RuralPolicyPremiumEntity> premiums = new ArrayList<>();
 
     public BaseBrandAndCompanyDataPolicies mapPolicyDto() {
         return new BaseBrandAndCompanyDataPolicies()
-                .policyId(this.getPolicyId().toString())
+                .policyId(this.getRuralPolicyId().toString())
                 .productName("Mock Insurer Rural Policy");
     }
 
     public ResponseInsuranceRuralPolicyInfo mapPolicyInfoDto() {
         return new ResponseInsuranceRuralPolicyInfo()
-            .data(new InsuranceRuralPolicyInfo()
-                .documentType(InsuranceRuralPolicyInfo.DocumentTypeEnum.APOLICE_INDIVIDUAL)
+            .data(new InsuranceRuralPolicyInfo() 
+                .documentType(InsuranceRuralPolicyInfo.DocumentTypeEnum.valueOf(this.getDocumentType()))
                 .policyId(this.getPolicyId().toString())
-                .issuanceType(InsuranceRuralPolicyInfo.IssuanceTypeEnum.EMISSAO_PROPRIA)
-                .issuanceDate(LocalDate.now())
-                .termStartDate(LocalDate.now())
-                .termEndDate(LocalDate.now().plusYears(1))
+                .susepProcessNumber(this.getSusepProcessNumber())
+                .groupCertificateId(this.getGroupCertificateId())
+                .issuanceType(InsuranceRuralPolicyInfo.IssuanceTypeEnum.valueOf(this.getIssuanceType()))
+                .issuanceDate(this.getIssuanceDate())
+                .termStartDate(this.getTermStartDate())
+                .termEndDate(this.getTermEndDate())
+                .leadInsurerCode(this.getLeadInsurerCode())
+                .leadInsurerPolicyId(this.getLeadInsurerPolicyId())
                 .maxLMG(new AmountDetails()
-                    .amount("2000.00")
-                    .unitType(UnitTypeEnum.MONETARIO)
-                    .unit(new AmountDetailsUnit().code("R$").description(DescriptionEnum.BRL))
-                    .currency(CurrencyEnum.BRL)
+                    .amount(this.getMaxLMGAmount())
+                    .unitType(UnitTypeEnum.valueOf(this.getMaxLMGUnitType()))
+                    .unitTypeOthers(this.getMaxLMGUnitTypeOthers())
+                    .unit(new AmountDetailsUnit().code(this.getMaxLMGUnitCode()).description(DescriptionEnum.valueOf(this.getMaxLMGUnitDescription())))
                 )
-                .proposalId("123456")
-                .insureds(List.of(new PersonalInfo()
-                    .identification("12345678900")
-                    .identificationType(PersonalInfo.IdentificationTypeEnum.CPF)
-                    .name("John Doe")
-                    .postCode("10000000")
-                    .birthDate(LocalDate.now())
-                    .city("Rio Branco")
-                    .state(PersonalInfo.StateEnum.AC)
-                    .country(PersonalInfo.CountryEnum.BRA)
-                    .address("Rua John Doe, 13")
-                ))
-                .insuredObjects(List.of(new InsuranceRuralInsuredObject()
-                    .identification("123456789")
-                    .type(InsuranceRuralInsuredObject.TypeEnum.CONTRATO)
-                    .description("string")
-                    .coverages(List.of(new InsuranceRuralInsuredObjectCoverage()
-                        .branch("0111")
-                        .code(InsuranceRuralInsuredObjectCoverage.CodeEnum.GRANIZO)
-                        .susepProcessNumber("string")
-                        .LMI(new AmountDetails()
-                            .amount("2000.00")
-                            .unitType(UnitTypeEnum.MONETARIO)
-                            .unit(new AmountDetailsUnit().code("R$").description(DescriptionEnum.BRL))
-                            .currency(CurrencyEnum.BRL)
-                        )
-                        .isLMISublimit(true)
-                        .termStartDate(LocalDate.now())
-                        .termEndDate(LocalDate.now().plusYears(1))
-                        .isMainCoverage(true)
-                        .feature(InsuranceRuralInsuredObjectCoverage.FeatureEnum.MASSIFICADOS)
-                        .type(InsuranceRuralInsuredObjectCoverage.TypeEnum.PARAMETRICO)
-                        .gracePeriod(0)
-                        .gracePeriodicity(InsuranceRuralInsuredObjectCoverage.GracePeriodicityEnum.DIA)
-                        .gracePeriodCountingMethod(InsuranceRuralInsuredObjectCoverage.GracePeriodCountingMethodEnum.UTEIS)
-                        .gracePeriodStartDate(LocalDate.now())
-                        .gracePeriodEndDate(LocalDate.now().plusYears(1))
-                        .premiumPeriodicity(InsuranceRuralInsuredObjectCoverage.PremiumPeriodicityEnum.MENSAL)
-                    ))
-                ))
-            );
-    }
-
-    public ResponseInsuranceRuralPremium mapPremiumDto() {
-        return new ResponseInsuranceRuralPremium()
-            .data(new InsuranceRuralPremium()
-                .paymentsQuantity(4)
-                .amount(new AmountDetails()
-                    .amount("2000.00")
-                    .unitType(AmountDetails.UnitTypeEnum.MONETARIO)
-                    .unit(new AmountDetailsUnit().code("R$").description(AmountDetailsUnit.DescriptionEnum.BRL))
-                    .currency(CurrencyEnum.BRL)
+                .proposalId(this.getProposalId())
+                .insuredObjects(this.getInsuredObjects().stream().map(RuralPolicyInsuredObjectEntity::mapDto).toList())
+                .coverages(this.getCoverages().stream().map(RuralPolicyCoverageEntity::mapDto).toList())
+                .coinsuranceRetainedPercentage(this.getCoinsuranceRetainedPercentage())
+                .branchInfo(new InsuranceRuralSpecificPolicyInfo()
+                    .insuredObjects(this.getBranchInsuredObjects().stream().map(RuralPolicyBranchInsuredObjectEntity::mapDto).toList())
                 )
-                .coverages(List.of(new InsuranceRuralPremiumCoverage()
-                    .branch("0111")
-                    .code(InsuranceRuralPremiumCoverage.CodeEnum.GRANIZO)
-                    .premiumAmount(new AmountDetails()
-                        .amount("2000.00")
-                        .unitType(AmountDetails.UnitTypeEnum.MONETARIO)
-                        .unit(new AmountDetailsUnit().code("R$").description(AmountDetailsUnit.DescriptionEnum.BRL))
-                        .currency(CurrencyEnum.BRL)
-                    )
-                ))
-                .payments(List.of(new Payment()
-                    .movementDate(LocalDate.now())
-                    .movementType(Payment.MovementTypeEnum.LIQUIDACAO_DE_PREMIO)
-                    .movementPaymentsNumber("4")
-                    .amount(new AmountDetails()
-                        .amount("7.27")
-                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
-                        .unit(new AmountDetailsUnit().code("R$").description(AmountDetailsUnit.DescriptionEnum.BRL))
-                        .currency(CurrencyEnum.BRL)
-                    )
-                    .maturityDate(LocalDate.now())
-                ))
             );
     }
 
     public ResponseResourceListData mapResourceDTO() {
         return new ResponseResourceListData()
-                .resourceId(this.getPolicyId().toString());
+                .resourceId(this.getRuralPolicyId().toString());
     }
 }

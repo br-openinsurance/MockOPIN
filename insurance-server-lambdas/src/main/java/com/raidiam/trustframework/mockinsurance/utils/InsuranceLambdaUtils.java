@@ -359,6 +359,12 @@ public class InsuranceLambdaUtils {
         setMeta.accept(new Meta().totalRecords(1).totalPages(1));
     }
 
+    public static void decorateResponseSimpleLinkMeta(Consumer<Links> setLinks, Consumer<Meta> setMeta, String self, int records, int pageSize) {
+        setLinks.accept(new Links().self(self));
+        var page = pageSize <= 0 ? 0 : (int) Math.ceil((double) records / pageSize);
+        setMeta.accept(new Meta().totalPages(page).totalRecords(records));
+    }
+
     public static void decorateResponse(Consumer<Links> setLinks, String self) {
         setLinks.accept(new Links().self(self));
     }

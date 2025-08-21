@@ -19819,7 +19819,12 @@ components:
                   items:
                     $ref: '#/components/schemas/CustomInfoData'
         links:
-          $ref: '#/components/schemas/Links'
+          type: object
+          required:
+            - redirect
+          properties:
+            redirect:
+              type: string
       additionalProperties: false
     CreateClaimNotificationDamage:
       type: object
@@ -23029,8 +23034,7 @@ components:
         isFESRParticipant:
           type: boolean
         subventionAmount:
-          allOf:
-            - $ref: '#/components/schemas/AmountDetails'
+          $ref: '#/components/schemas/AmountDetails'
         subventionType:
           type: string
           enum: [AC, AL, AP, AM, BA, CE, DF, ES, GO, MA, MT, MS, MG, PA, PB, PR, PE,

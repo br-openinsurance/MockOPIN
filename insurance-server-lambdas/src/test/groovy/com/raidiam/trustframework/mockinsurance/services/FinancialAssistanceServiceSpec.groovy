@@ -1,6 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.services
 
-import com.raidiam.trustframework.mockinsurance.CleanupSpecification
+import com.raidiam.trustframework.mockinsurance.cleanups.CleanupFinancialAssistanceSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
 import com.raidiam.trustframework.mockinsurance.domain.*
 import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentPermission
@@ -13,7 +13,7 @@ import spock.lang.Stepwise
 
 @Stepwise
 @MicronautTest(transactional = false, environments = ["db"])
-class FinancialAssistanceServiceSpec extends CleanupSpecification {
+class FinancialAssistanceServiceSpec extends CleanupFinancialAssistanceSpecification {
     @Inject
     FinancialAssistanceService financialAssistanceService
 

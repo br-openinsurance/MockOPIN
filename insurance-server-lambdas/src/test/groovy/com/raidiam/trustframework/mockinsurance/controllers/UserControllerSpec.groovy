@@ -43,7 +43,7 @@ class UserControllerSpec extends Specification {
         given:
         userService.getCapitalizationTitlePlans(_ as String) >> new ResponseResourceList()
 
-        def event = AwsProxyHelper.buildBasicEvent('/user/ralph/capitalization-title-plans', HttpMethod.GET)
+        def event = AwsProxyHelper.buildBasicEvent('/user/usuario1/capitalization-title-plans', HttpMethod.GET)
         AuthHelper.authorize(scopes: "op:admin", event)
 
         when:
@@ -58,7 +58,7 @@ class UserControllerSpec extends Specification {
         given:
         userService.getLifePensionContracts(_ as String) >> new ResponseResourceList()
 
-        def event = AwsProxyHelper.buildBasicEvent('/user/ralph/life-pension-contracts', HttpMethod.GET)
+        def event = AwsProxyHelper.buildBasicEvent('/user/usuario1/life-pension-contracts', HttpMethod.GET)
         AuthHelper.authorize(scopes: "op:admin", event)
 
         when:
@@ -73,7 +73,7 @@ class UserControllerSpec extends Specification {
         given:
         userService.getPensionPlanContracts(_ as String) >> new ResponseResourceList()
 
-        def event = AwsProxyHelper.buildBasicEvent('/user/ralph/pension-plan-contracts', HttpMethod.GET)
+        def event = AwsProxyHelper.buildBasicEvent('/user/usuario1/pension-plan-contracts', HttpMethod.GET)
         AuthHelper.authorize(scopes: "op:admin", event)
 
         when:
@@ -88,7 +88,7 @@ class UserControllerSpec extends Specification {
         given:
         userService.getFinancialRiskPolicies(_ as String) >> new ResponseResourceList()
 
-        def event = AwsProxyHelper.buildBasicEvent('/user/ralph/financial-risk-policies', HttpMethod.GET)
+        def event = AwsProxyHelper.buildBasicEvent('/user/usuario1/financial-risk-policies', HttpMethod.GET)
         AuthHelper.authorize(scopes: "op:admin", event)
 
         when:
@@ -103,7 +103,7 @@ class UserControllerSpec extends Specification {
         given:
         userService.getHousingPolicies(_ as String) >> new ResponseResourceList()
 
-        def event = AwsProxyHelper.buildBasicEvent('/user/ralph/housing-policies', HttpMethod.GET)
+        def event = AwsProxyHelper.buildBasicEvent('/user/usuario1/housing-policies', HttpMethod.GET)
         AuthHelper.authorize(scopes: "op:admin", event)
 
         when:
@@ -118,7 +118,7 @@ class UserControllerSpec extends Specification {
         given:
         userService.getResponsibilityPolicies(_ as String) >> new ResponseResourceList()
 
-        def event = AwsProxyHelper.buildBasicEvent('/user/ralph/responsibility-policies', HttpMethod.GET)
+        def event = AwsProxyHelper.buildBasicEvent('/user/usuario1/responsibility-policies', HttpMethod.GET)
         AuthHelper.authorize(scopes: "op:admin", event)
 
         when:
@@ -133,7 +133,7 @@ class UserControllerSpec extends Specification {
         given:
         userService.getPersonPolicies(_ as String) >> new ResponseResourceList()
 
-        def event = AwsProxyHelper.buildBasicEvent('/user/ralph/person-policies', HttpMethod.GET)
+        def event = AwsProxyHelper.buildBasicEvent('/user/usuario1/person-policies', HttpMethod.GET)
         AuthHelper.authorize(scopes: "op:admin", event)
 
         when:
@@ -148,7 +148,7 @@ class UserControllerSpec extends Specification {
         given:
         userService.getFinancialAssistanceContracts(_ as String) >> new ResponseResourceList()
 
-        def event = AwsProxyHelper.buildBasicEvent('/user/ralph/financial-assistance-contracts', HttpMethod.GET)
+        def event = AwsProxyHelper.buildBasicEvent('/user/usuario1/financial-assistance-contracts', HttpMethod.GET)
         AuthHelper.authorize(scopes: "op:admin", event)
 
         when:
@@ -163,7 +163,7 @@ class UserControllerSpec extends Specification {
         given:
         userService.getAcceptanceAndBranchesAbroadPolicies(_ as String) >> new ResponseResourceList()
 
-        def event = AwsProxyHelper.buildBasicEvent('/user/ralph/acceptance-and-branches-abroad-policies', HttpMethod.GET)
+        def event = AwsProxyHelper.buildBasicEvent('/user/usuario1/acceptance-and-branches-abroad-policies', HttpMethod.GET)
         AuthHelper.authorize(scopes: "op:admin", event)
 
         when:
@@ -178,7 +178,7 @@ class UserControllerSpec extends Specification {
         given:
         userService.getPatrimonialPolicies(_ as String) >> new ResponseResourceList()
 
-        def event = AwsProxyHelper.buildBasicEvent('/user/ralph/patrimonial-policies', HttpMethod.GET)
+        def event = AwsProxyHelper.buildBasicEvent('/user/usuario1/patrimonial-policies', HttpMethod.GET)
         AuthHelper.authorize(scopes: "op:admin", event)
 
         when:
@@ -193,7 +193,7 @@ class UserControllerSpec extends Specification {
         given:
         userService.getRuralPolicies(_ as String) >> new ResponseResourceList()
 
-        def event = AwsProxyHelper.buildBasicEvent('/user/ralph/rural-policies', HttpMethod.GET)
+        def event = AwsProxyHelper.buildBasicEvent('/user/usuario1/rural-policies', HttpMethod.GET)
         AuthHelper.authorize(scopes: "op:admin", event)
 
         when:
@@ -208,7 +208,7 @@ class UserControllerSpec extends Specification {
         given:
         userService.getAutoPolicies(_ as String) >> new ResponseResourceList()
 
-        def event = AwsProxyHelper.buildBasicEvent('/user/ralph/auto-policies', HttpMethod.GET)
+        def event = AwsProxyHelper.buildBasicEvent('/user/usuario1/auto-policies', HttpMethod.GET)
         AuthHelper.authorize(scopes: "op:admin", event)
 
         when:
@@ -223,7 +223,7 @@ class UserControllerSpec extends Specification {
         given:
         userService.getTransportPolicies(_ as String) >> new ResponseResourceList()
 
-        def event = AwsProxyHelper.buildBasicEvent('/user/ralph/transport-policies', HttpMethod.GET)
+        def event = AwsProxyHelper.buildBasicEvent('/user/usuario1/transport-policies', HttpMethod.GET)
         AuthHelper.authorize(scopes: "op:admin", event)
 
         when:

@@ -2,7 +2,7 @@ package com.raidiam.trustframework.mockinsurance.repository;
 
 import java.util.UUID;
 
-import com.raidiam.trustframework.mockinsurance.domain.RuralClaimEntity;
+import com.raidiam.trustframework.mockinsurance.domain.RuralPolicyClaimEntity;
 
 import io.micronaut.data.annotation.Join;
 import io.micronaut.data.annotation.Repository;
@@ -12,7 +12,7 @@ import io.micronaut.data.repository.PageableRepository;
 import jakarta.validation.constraints.NotNull;
 
 @Repository
-public interface RuralClaimRepository extends PageableRepository<RuralClaimEntity, UUID> {
-    @Join(value="policy", type = Join.Type.FETCH)
-    Page<RuralClaimEntity> findByPolicyId(@NotNull UUID policyId, Pageable pageable);
+public interface RuralPolicyClaimRepository extends PageableRepository<RuralPolicyClaimEntity, UUID> {
+    @Join(value="ruralPolicy", type = Join.Type.FETCH)
+    Page<RuralPolicyClaimEntity> findByRuralPolicyId(@NotNull UUID policyId, Pageable pageable);
 }

@@ -1,6 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.utils
 
-import com.raidiam.trustframework.mockinsurance.CleanupSpecification
+import com.raidiam.trustframework.mockinsurance.cleanups.CleanupSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
 import com.raidiam.trustframework.mockinsurance.TestRequestDataFactory
 import com.raidiam.trustframework.mockinsurance.domain.AccountHolderEntity

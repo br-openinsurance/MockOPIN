@@ -31,6 +31,8 @@ import jakarta.inject.Inject;
 public class EndorsementController extends BaseInsuranceController {
      private static final Logger LOG = LoggerFactory.getLogger(EndorsementController.class);
 
+    private static final String REDIRECT_LINK = "https://www.raidiam.com/";
+
     @Inject
     private EndorsementService endorsementService;
 
@@ -48,11 +50,6 @@ public class EndorsementController extends BaseInsuranceController {
         LOG.info("Creating new endorsement for client {}", clientId);
         InsuranceLambdaUtils.logObject(mapper, body);
 
-        ResponseEndorsement response = endorsementService.createEndorsement(EndorsementEntity.fromRequest(body, consentId, clientId)).toResponse();
-
-        InsuranceLambdaUtils.decorateResponse(response::setLinks, appBaseUrl + request.getPath());
-        InsuranceLambdaUtils.logObject(mapper, response);
-
-        return response;
+        return endorsementService.createEndorsement(EndorsementEntity.fromRequest(body, consentId, clientId)).toResponse(REDIRECT_LINK);
     }
 }

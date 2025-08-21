@@ -2,13 +2,10 @@ package com.raidiam.trustframework.mockinsurance.domain;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceHousingClaim;
-import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceHousingClaimCoverage;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.hibernate.annotations.Generated;
-import org.hibernate.annotations.GenerationTime;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
@@ -25,9 +22,47 @@ public class HousingPolicyClaimEntity extends BaseEntity {
 
     @Id
     @GeneratedValue
-    @Generated(GenerationTime.INSERT)
     @Column(name = "housing_policy_claim_id", unique = true, nullable = false, updatable = false, insertable = false, columnDefinition = "uuid NOT NULL DEFAULT uuid_generate_v4()")
     private UUID claimId;
+
+    @Column(name = "identification")
+    private String identification;
+
+    @Column(name = "documentation_delivery_date")
+    private LocalDate documentationDeliveryDate;
+
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "status_alteration_date")
+    private LocalDate statusAlterationDate;
+
+    @Column(name = "occurrence_date")
+    private LocalDate occurrenceDate;
+
+    @Column(name = "warning_date")
+    private LocalDate warningDate;
+
+    @Column(name = "third_party_claim_date")
+    private LocalDate thirdPartyClaimDate;
+
+    @Column(name = "amount")
+    private String amount;
+
+    @Column(name = "unit_type")
+    private String unitType;
+
+    @Column(name = "denial_justification")
+    private String denialJustification;
+
+    @Column(name = "denial_justification_description")
+    private String denialJustificationDescription;
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @NotAudited
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "housingPolicyClaim")
+    private List<HousingPolicyClaimCoverageEntity> coverages;
 
     @Column(name = "housing_policy_id")
     private UUID housingPolicyId;
@@ -41,26 +76,19 @@ public class HousingPolicyClaimEntity extends BaseEntity {
 
     public InsuranceHousingClaim mapDTO() {
         return new InsuranceHousingClaim()
-                .identification("string")
-                .documentationDeliveryDate(LocalDate.of(2023, 10, 1))
-                .status(InsuranceHousingClaim.StatusEnum.ABERTO)
-                .statusAlterationDate(LocalDate.of(2023, 10, 1))
-                .occurrenceDate(LocalDate.of(2023, 10, 1))
-                .warningDate(LocalDate.of(2023, 10, 1))
-                .thirdPartyClaimDate(LocalDate.of(2022, 10, 1))
+                .identification(this.getIdentification())
+                .documentationDeliveryDate(this.getDocumentationDeliveryDate())
+                .status(InsuranceHousingClaim.StatusEnum.valueOf(this.getStatus()))
+                .statusAlterationDate(this.getStatusAlterationDate())
+                .occurrenceDate(this.getOccurrenceDate())
+                .warningDate(this.getWarningDate())
+                .thirdPartyClaimDate(this.getThirdPartyClaimDate())
                 .amount(new AmountDetails()
-                        .amount("16")
-                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
+                        .amount(this.getAmount())
+                        .unitType(AmountDetails.UnitTypeEnum.valueOf(this.getUnitType()))
                 )
-                .denialJustification(InsuranceHousingClaim.DenialJustificationEnum.PRESCRICAO)
-                .denialJustificationDescription("string")
-                .coverages(List.of(new InsuranceHousingClaimCoverage()
-                        .insuredObjectId("string")
-                        .branch("0111")
-                        .code(InsuranceHousingClaimCoverage.CodeEnum.DANOS_ELETRICOS)
-                        .description("string")
-                        .warningDate(LocalDate.of(2023, 10, 1))
-                        .thirdPartyClaimDate(LocalDate.of(2023, 10, 1))
-                ));
+                .denialJustification(InsuranceHousingClaim.DenialJustificationEnum.valueOf(this.getDenialJustification()))
+                .denialJustificationDescription(this.getDenialJustificationDescription())
+                .coverages(this.getCoverages().stream().map(HousingPolicyClaimCoverageEntity::mapDto).toList());
     }
 }
