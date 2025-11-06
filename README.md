@@ -206,3 +206,168 @@ curl -v \
   -H "Content-Type: application/x-www-form-urlencoded" \
   https://auth.local/token/introspection -k
 ```
+
+## Architecture Design
+
+The system is composed of three main components: the Authorization Server (AS), the Resource Server (RS), and the Gateway (GW), which together form the MockOPIN architecture.
+
+### Gateway
+
+Implemented in Go under mock-service-os/mock_mtls, the gateway intercepts all incoming requests.
+
+It is responsible for:
+* Handling mTLS connections.
+* Extracting and forwarding client certificate details.
+* Introspecting access tokens via the Authorization Server.
+* Forwarding validated requests to secured endpoints on behalf of the client.
+
+### Authorization Server
+
+Located at mock-service-os/mock_as, this Node.js service leverages the node-oidc-provider library.
+
+Its primary responsibilities include:
+* Managing OAuth2/OpenID Connect logic.
+* Handling client registration, user authentication, and token issuance.
+* Exposing the /token, /introspection, and related endpoints.
+
+### Resource Server
+Implemented in Java (Micronaut) under insurance-server-lambdas, the Resource Server exposes the Open Insurance API endpoints.
+
+It:
+* Consumes access tokens received from the gateway.
+* Enforces scope-based authorization.
+* Executes the business logic for endpoints such as /consents, /customers, and /policies.
+
+### End-to-End Consent Creation Flow
+
+The following diagram illustrates the detailed flow for creating a consent in the MockOPIN architecture:
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    box DarkGreen MockOPIN
+        participant GW as Gateway
+        participant AS as Auth Server
+        participant RS as Resource Server
+    end
+
+    C->>GW: [1] POST /token <br/> {"scope":"consents"}
+    GW->>AS: [2] POST /token <br/> BANK-TLS-Certificate: "-----BEGIN CERTIFICATE..." <br/> {"scope":"consents"}
+    AS->>GW: [3] {"access_token": "xyz"}
+    GW->>C: [4] {"access_token": "xyz"}
+    C->>GW: [5] POST /consents <br/> Authorization: Bearer xyz <br/> {"permissions": [...]}
+    GW->>AS: [6] POST /token/introspection <br/> {"token": "xyz"}
+    AS->>GW: [7] {"is_active": true, "scope": "consents"}
+    GW->>RS: [8] POST /consents <br/> access_token: {"is_active": true, "scope": "consents"} <br/> BANK-TLS-Certificate: "-----BEGIN CERTIFICATE..." <br/> {"permissions": [...]}
+    RS->>GW: [9] {"status": "AWAITING_AUTHORISATION", "permissions": [...]}
+    GW->>C: [10] {"status": "AWAITING_AUTHORISATION", "permissions": [...]}
+```
+
+1. The client establishes an mTLS connection and requests a token:
+   ```
+   POST matls-auth.local/token
+   ```
+   ```json
+   {
+      "client_assertion": "ey...",
+      "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+      "grant_type": "client_credentials",
+      "scope": "consent"
+   }
+   ```
+
+2. The Gateway intercepts the connection, extracts the certificate, and forwards it to the Authorization Server:
+   ```
+   POST auth:3000/token
+   BANK-TLS-Certificate: -----BEGIN CERTIFICATE...
+   X-BANK-Certificate-DN: ...
+   X-BANK-Certificate-Verify: SUCCESS
+   ```
+   ```json
+   {
+      "client_assertion": "ey...",
+      "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+      "grant_type": "client_credentials",
+      "scope": "consent"
+   }
+   ```
+
+3. The Authorization Server validates the request and issues an access token:
+   ```json
+   {
+      "access_token": "xyz",
+      "expires_in": 3600,
+      "token_type": "bearer"
+   }
+   ```
+
+4. The Gateway forwards the response back to the client unchanged.
+
+5. The client then makes a new mTLS request to create a consent:
+   ```
+   POST matls-api.local/open-insurance/consents/v2/consents
+   Authorization: Bearer xyz
+   ```
+   ```json
+   {
+      "permissions": [],
+   }
+   ```
+
+6. The Gateway introspects the access token with the Authorization Server:
+   ```
+   POST auth:3000/token/introspection
+   ```
+   ```json
+   {
+      "token": "xyz"
+   }
+   ```
+
+7. The Authorization Server responds with the token status:
+   ```json
+   {
+      "is_active": true,
+      "scope": "consents"
+   }
+   ```
+
+8. The Gateway forwards the validated token content and client certificate to the Resource Server:
+   ```
+   POST mockapi:8080/token
+   BANK-TLS-Certificate: -----BEGIN CERTIFICATE...
+   X-BANK-Certificate-DN: ...
+   X-BANK-Certificate-Verify: SUCCESS
+   access_token: {"is_active":true,"scope":"consents"}
+   ```
+   ```json
+   {
+      "permissions": [],
+   }
+   ```
+
+9. The Resource Server processes the request, authorizes based on the token scope, and responds.
+   ```json
+   {
+      "status": "AWAITING_AUTHORISATION",
+      "permissions": []
+   }
+   ```
+
+10. The Gateway forwards the final response to the client unchanged.
+   ```json
+   {
+      "status": "AWAITING_AUTHORISATION",
+      "permissions": []
+   }
+   ```
+
+### Cloud Architecture
+Although the project was originally designed and deployed on AWS, its components are largely cloud-agnostic and can be adapted to other providers (such as Azure) with minimal changes.
+
+The primary cloud-specific dependency is how the Authorization Server retrieves its configuration parameters.
+In the current implementation, configuration is fetched from AWS SSM Parameter Store, as defined in: `mock-service-os/mock_as/express.js`.
+
+For local development, this behavior is replicated using LocalStack, provisioned via `mock-service-os/setup_ssm.sh`.
+
+When deploying to another cloud provider, the only required adjustment is replacing the SSM parameter-loading logic with that provider’s equivalent service (e.g., Azure App Configuration, GCP Secret Manager, or simple environment variables).
