@@ -83,9 +83,37 @@ class CapitalizationTitleServiceSpec extends CleanupCapitalizationTitleSpecifica
         plan.getPlanId() == testCapitalizationTitlePlan.getCapitalizationTitlePlanId().toString()
     }
 
+    def "we can get plans V2" () {
+        when:
+        def response = capitalizationTitleService.getPlansV2(testConsent.getConsentId().toString(), Pageable.from(0, 1))
+        def plan = response.getData().first().getBrand().getCompanies().first().getProducts().first()
+
+        then:
+        response.getData()
+        response.getData().size() == 1
+        response.getData().first().getBrand().getName() == "Mock"
+        response.getData().first().getBrand().getCompanies().first().getCompanyName() == "Mock Insurer"
+        plan.getPlanId() == testCapitalizationTitlePlan.getCapitalizationTitlePlanId().toString()
+    }
+
     def "we can get a plan info" () {
         when:
         def response = capitalizationTitleService.getPlanInfo(testCapitalizationTitlePlan.getCapitalizationTitlePlanId(), testConsent.getConsentId().toString())
+
+        then:
+        response.getData() != null
+        response.getData().getSeries().first().getSeriesId() == testCapitalizationTitlePlanSeries.getSeriesId().toString()
+        response.getData().getSeries().first().getQuotas().first().getQuota() == 10
+        response.getData().getSeries().first().getTitles().first().getContributionAmount().getAmount() == "370"
+        response.getData().getSeries().first().getTitles().first().getTechnicalProvisions().first().getPdbAmount().getAmount() == "100.00"
+        response.getData().getSeries().first().getTitles().first().getSubscriber().first().getHolder().first().getHolderName() == "Nome do Titular"
+        response.getData().getSeries().first().getTitles().first().getSubscriber().first().getSubscriberPhones().first().getNumber() == "29875132"
+        response.getData().getSeries().first().getBroker().first().getSusepBrokerCode() == "123123123"
+    }
+
+    def "we can get a plan info V2" () {
+        when:
+        def response = capitalizationTitleService.getPlanInfoV2(testCapitalizationTitlePlan.getCapitalizationTitlePlanId(), testConsent.getConsentId().toString())
 
         then:
         response.getData() != null

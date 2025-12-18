@@ -2,6 +2,8 @@ package com.raidiam.trustframework.mockinsurance.domain;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.BusinessComplimentaryInformationData;
 import com.raidiam.trustframework.mockinsurance.models.generated.BusinessComplimentaryInformationDataProductsServices;
+import com.raidiam.trustframework.mockinsurance.models.generated.BusinessComplimentaryInformationDataV2;
+import com.raidiam.trustframework.mockinsurance.models.generated.BusinessComplimentaryInformationDataV2ProductsServices;
 import com.raidiam.trustframework.mockinsurance.models.generated.EnumProductServiceType;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 import jakarta.persistence.*;
@@ -38,6 +40,15 @@ public class BusinessComplimentaryInformationEntity extends BaseEntity {
                 .updateDateTime(InsuranceLambdaUtils.dateToOffsetDate(this.getUpdatedAt()))
                 .startDate(InsuranceLambdaUtils.dateToLocalDate(this.getCreatedAt()))
                 .productsServices(List.of(new BusinessComplimentaryInformationDataProductsServices()
+                        .contract("12345")
+                        .type(EnumProductServiceType.MICROSSEGUROS)));
+    }
+
+    public BusinessComplimentaryInformationDataV2 mapDtoV2() {
+        return new BusinessComplimentaryInformationDataV2()
+                .updateDateTime(InsuranceLambdaUtils.dateToOffsetDate(this.getUpdatedAt()))
+                .startDate(InsuranceLambdaUtils.dateToLocalDate(this.getCreatedAt()))
+                .productsServices(List.of(new BusinessComplimentaryInformationDataV2ProductsServices()
                         .contract("12345")
                         .type(EnumProductServiceType.MICROSSEGUROS)));
     }

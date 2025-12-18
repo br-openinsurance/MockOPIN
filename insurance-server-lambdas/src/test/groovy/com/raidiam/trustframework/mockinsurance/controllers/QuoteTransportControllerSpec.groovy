@@ -114,4 +114,60 @@ class QuoteTransportControllerSpec extends Specification {
         and:
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
+
+
+    def "We can create a quote transport lead v2" () {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuoteTransportLead(consentId)
+        quoteTransportLeadService.createQuote(_ as QuoteTransportLeadEntity) >> quote
+        idempotencyRepository.findByIdempotencyId( _ as String) >> Optional.empty()
+
+        def req = TestRequestDataFactory.createQuoteTransportLeadRequest()
+
+        String json = mapper.writeValueAsString(req)
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/quote-transport/v2/lead/request', HttpMethod.POST)
+                .withBody(json)
+                .withHeaders(Map.of("x-idempotency-key", UUID.randomUUID().toString(), "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "quote-transport-lead", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.CREATED.code
+        response.body != null
+        ResponseQuote resp = mapper.readValue(response.body, ResponseQuote)
+        resp.getData().getStatus() == QuoteStatus.StatusEnum.RCVD
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "we can revoke a quote transport lead v2" () {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuoteTransportLead(consentId)
+        quoteTransportLeadService.patchQuote(_ as RevokePatchPayload, _ as String, _ as String) >> quote
+
+        def req = TestRequestDataFactory.revokeQuotePatchRequest(quote.getQuoteId())
+        String json = mapper.writeValueAsString(req)
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/quote-transport/v2/lead/request/' + consentId, HttpMethod.PATCH)
+                .withBody(json)
+                .withHeaders(Map.of("x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "quote-transport-lead", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+        ResponseRevokePatch resp = mapper.readValue(response.body, ResponseRevokePatch)
+        resp.getData().getStatus() == ResponseRevokePatchData.StatusEnum.CANC
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
 }

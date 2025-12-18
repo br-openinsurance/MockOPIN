@@ -30,6 +30,21 @@ class QuotePatrimonialHomeServiceSpec extends CleanupSpecification {
         newQuote.consentId == consentId
     }
 
+    def "We can create a quote without max LMG"() {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuotePatrimonialHome(consentId)
+        quote.data.v1.quoteData.maxLMG = null
+
+        when:
+        def newQuote = quotePatrimonialHomeService.createQuote(quote)
+
+        then:
+        noExceptionThrown()
+        newQuote.quoteId != null
+        newQuote.consentId == consentId
+    }
+
     def "We can fetch a quote that moves to ACPT"() {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
@@ -50,7 +65,7 @@ class QuotePatrimonialHomeServiceSpec extends CleanupSpecification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuotePatrimonialHome(consentId)
-        quote.setData(new QuotePatrimonialHomeData()
+        quote.getData().setV1(new QuotePatrimonialHomeData()
                 .quoteData(new QuoteDataPatrimonialHome()))
         quotePatrimonialHomeRepository.save(quote)
 
@@ -141,7 +156,7 @@ class QuotePatrimonialHomeServiceSpec extends CleanupSpecification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuotePatrimonialHome(consentId)
-        quote.setData(new QuotePatrimonialHomeData()
+        quote.getData().setV1(new QuotePatrimonialHomeData()
                 .quoteData(new QuoteDataPatrimonialHome()
                 .maxLMG(new AmountDetails()
                         .unit(new AmountDetailsUnit()
@@ -159,7 +174,7 @@ class QuotePatrimonialHomeServiceSpec extends CleanupSpecification {
         e.getMessage() == "NAO_INFORMADO: Amount missing from amount details"
 
         when:
-        quote.data.quoteData.maxLMG.setAmount("1000.00")
+        quote.data.v1.quoteData.maxLMG.setAmount("1000.00")
         quotePatrimonialHomeService.createQuote(quote)
 
         then:

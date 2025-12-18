@@ -61,9 +61,27 @@ class TransportPolicyServiceSpec extends CleanupSpecification {
         response.getData().first()
     }
 
+    def "we can get policies V2" () {
+        when:
+        def response = transportPolicyService.getPoliciesV2(testConsent.getConsentId().toString(), Pageable.from(0, 1))
+
+        then:
+        response.getData()
+        response.getData().size() == 1
+        response.getData().first()
+    }
+
     def "we can get a policy info" () {
         when:
         def response = transportPolicyService.getPolicyInfo(testTransportPolicy.getTransportPolicyId(), testConsent.getConsentId().toString())
+
+        then:
+        response.getData() != null
+    }
+
+    def "we can get a policy info V2" () {
+        when:
+        def response = transportPolicyService.getPolicyInfoV2(testTransportPolicy.getTransportPolicyId(), testConsent.getConsentId().toString())
 
         then:
         response.getData() != null
@@ -80,6 +98,14 @@ class TransportPolicyServiceSpec extends CleanupSpecification {
     def "we can get a policy's claims" () {
         when:
         def response = transportPolicyService.getPolicyClaims(testTransportPolicy.getTransportPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
+
+        then:
+        response.getData() != null
+    }
+
+    def "we can get a policy's claims V2" () {
+        when:
+        def response = transportPolicyService.getPolicyClaimsV2(testTransportPolicy.getTransportPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
 
         then:
         response.getData() != null

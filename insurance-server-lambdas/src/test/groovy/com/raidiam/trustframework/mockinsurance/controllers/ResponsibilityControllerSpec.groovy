@@ -70,6 +70,27 @@ class ResponsibilityControllerSpec extends Specification {
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
 
+    def "We can fetch policies V2" () {
+        given:
+        def resp = new BaseInsuranceResponseV2().data(List.of())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        responsibilityService.getPoliciesV2(_ as Pageable, _ as String) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-responsibility/v2/insurance-responsibility', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-responsibility consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
     def "We can fetch a policy info" () {
         given:
         def resp = new ResponseInsuranceResponsibilityPolicyInfo().data(
@@ -79,6 +100,29 @@ class ResponsibilityControllerSpec extends Specification {
         responsibilityService.getPolicyInfo(_ as UUID, _ as String) >> resp
 
         def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-responsibility/v1/insurance-responsibility/'+UUID.randomUUID().toString()+'/policy-info', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-responsibility consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "We can fetch a policy info V2" () {
+        given:
+        def resp = new ResponseInsuranceResponsibilityPolicyInfoV2().data(
+                new InsuranceResponsibilityPolicyInfoDataV2()
+        )
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        responsibilityService.getPolicyInfoV2(_ as UUID, _ as String) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-responsibility/v2/insurance-responsibility/'+UUID.randomUUID().toString()+'/policy-info', HttpMethod.GET)
                 .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-responsibility consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
 
@@ -114,6 +158,27 @@ class ResponsibilityControllerSpec extends Specification {
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
 
+    def "We can fetch a policy's claims V2" () {
+        given:
+        def resp = new ResponseInsuranceResponsibilityClaimsV2().data(List.of())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        responsibilityService.getPolicyClaimsV2(_ as UUID, _ as String, _ as Pageable) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-responsibility/v2/insurance-responsibility/'+UUID.randomUUID().toString()+'/claim', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-responsibility consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
     def "We can fetch a policy's premium" () {
         given:
         def resp = new ResponseInsuranceResponsibilityPremium().data(
@@ -123,6 +188,29 @@ class ResponsibilityControllerSpec extends Specification {
         responsibilityService.getPolicyPremium(_ as UUID, _ as String) >> resp
 
         def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-responsibility/v1/insurance-responsibility/'+UUID.randomUUID().toString()+'/premium', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-responsibility consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "We can fetch a policy's premium V2" () {
+        given:
+        def resp = new ResponseInsuranceResponsibilityPremium().data(
+                new InsuranceResponsibilityPremium()
+        )
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        responsibilityService.getPolicyPremium(_ as UUID, _ as String) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-responsibility/v2/insurance-responsibility/'+UUID.randomUUID().toString()+'/premium', HttpMethod.GET)
                 .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-responsibility consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
 

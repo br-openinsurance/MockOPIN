@@ -10,10 +10,13 @@ import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,13 +44,27 @@ public class CustomerController extends BaseInsuranceController {
         return response;
     }
 
-    @Get("/v1/personal/qualifications")
+    @Get("/v2/personal/identifications")
     @XFapiInteractionIdRequired
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
-    public ResponsePersonalCustomersQualification getPersonalQualifications(@NotNull HttpRequest<?> request) {
+    public ResponsePersonalCustomersIdentificationV2 getPersonalIdentificationsV2(@NotNull HttpRequest<?> request) {
         var consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Getting personal qualifications for consent id {} v1", consentId);
+        LOG.info("Getting personal identifications for consent id {} v2", consentId);
+        var response = service.getPersonalIdentificationsV2(consentId);
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
+        LOG.info("Retrieved personal identifications for consent id {}", consentId);
+        InsuranceLambdaUtils.logObject(mapper, response);
+        return response;
+    }
+
+    @Get("/v{version}/personal/qualifications")
+    @XFapiInteractionIdRequired
+    @ResponseErrorWithRequestDateTime
+    @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    public ResponsePersonalCustomersQualification getPersonalQualifications(@PathVariable("version") @Min(1) @Max(2) int version, @NotNull HttpRequest<?> request) {
+        var consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
+        LOG.info("Getting personal qualifications for consent id {} v{}", consentId, version);
         var response = service.getPersonalQualifications(consentId);
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
         LOG.info("Retrieved personal qualifications for consent id {}", consentId);
@@ -55,13 +72,13 @@ public class CustomerController extends BaseInsuranceController {
         return response;
     }
 
-    @Get("/v1/personal/complimentary-information")
+    @Get("/v{version}/personal/complimentary-information")
     @XFapiInteractionIdRequired
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
-    public ResponsePersonalCustomersComplimentaryInformation getPersonalComplimentaryInfo(@NotNull HttpRequest<?> request) {
+    public ResponsePersonalCustomersComplimentaryInformation getPersonalComplimentaryInfo(@PathVariable("version") @Min(1) @Max(2) int version, @NotNull HttpRequest<?> request) {
         var consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Getting personal complimentary info for consent id {} v1", consentId);
+        LOG.info("Getting personal complimentary info for consent id {} v{}", consentId, version);
         var response = service.getPersonalComplimentaryInfo(consentId);
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
         LOG.info("Retrieved personal complimentary info for consent id {}", consentId);
@@ -83,13 +100,27 @@ public class CustomerController extends BaseInsuranceController {
         return response;
     }
 
-    @Get("/v1/business/qualifications")
+    @Get("/v2/business/identifications")
     @XFapiInteractionIdRequired
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
-    public ResponseBusinessCustomersQualification getBusinessQualifications(@NotNull HttpRequest<?> request) {
+    public ResponseBusinessCustomersIdentificationV2 getBusinessIdentificationsV2(@NotNull HttpRequest<?> request) {
         var consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Getting business qualifications for consent id {} v1", consentId);
+        LOG.info("Getting business identifications for consent id {} v2", consentId);
+        var response = service.getBusinessIdentificationsV2(consentId);
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
+        LOG.info("Retrieved business identifications for consent id {}", consentId);
+        InsuranceLambdaUtils.logObject(mapper, response);
+        return response;
+    }
+
+    @Get("/v{version}/business/qualifications")
+    @XFapiInteractionIdRequired
+    @ResponseErrorWithRequestDateTime
+    @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    public ResponseBusinessCustomersQualification getBusinessQualifications(@PathVariable("version") @Min(1) @Max(2) int version, @NotNull HttpRequest<?> request) {
+        var consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
+        LOG.info("Getting business qualifications for consent id {} v{}", consentId, version);
         var response = service.getBusinessQualifications(consentId);
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
         LOG.info("Retrieved business qualifications for consent id {}", consentId);
@@ -105,6 +136,20 @@ public class CustomerController extends BaseInsuranceController {
         var consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
         LOG.info("Getting business complimentary info for consent id {} v1", consentId);
         var response = service.getBusinessComplimentaryInfo(consentId);
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
+        LOG.info("Retrieved business complimentary info for consent id {}", consentId);
+        InsuranceLambdaUtils.logObject(mapper, response);
+        return response;
+    }
+
+    @Get("/v2/business/complimentary-information")
+    @XFapiInteractionIdRequired
+    @ResponseErrorWithRequestDateTime
+    @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    public ResponseBusinessCustomersComplimentaryInformationV2 getBusinessComplimentaryInfoV2(@NotNull HttpRequest<?> request) {
+        var consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
+        LOG.info("Getting business complimentary info for consent id {} v2", consentId);
+        var response = service.getBusinessComplimentaryInfoV2(consentId);
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
         LOG.info("Retrieved business complimentary info for consent id {}", consentId);
         InsuranceLambdaUtils.logObject(mapper, response);

@@ -5,6 +5,7 @@ import com.raidiam.trustframework.mockinsurance.auth.RequiredAuthenticationGrant
 import com.raidiam.trustframework.mockinsurance.domain.ClaimNotificationDamageEntity;
 import com.raidiam.trustframework.mockinsurance.domain.ClaimNotificationPersonEntity;
 import com.raidiam.trustframework.mockinsurance.fapi.Idempotent;
+import com.raidiam.trustframework.mockinsurance.fapi.ResponseErrorWithRequestDateTime;
 import com.raidiam.trustframework.mockinsurance.fapi.XFapiInteractionIdRequired;
 import com.raidiam.trustframework.mockinsurance.models.generated.*;
 import com.raidiam.trustframework.mockinsurance.services.ClaimNotificationDamageService;
@@ -66,6 +67,42 @@ public class ClaimNotificationController extends BaseInsuranceController {
         LOG.info("Creating new claim notification person for client {}", clientId);
         return claimNotificationPersonService.createClaimNotification(
                 ClaimNotificationPersonEntity.fromRequest(body, clientId, consentId)).toResponse(REDIRECT_LINK);
+    }
+
+    @Post("/v2/request/damage/{consentId}")
+    @Status(HttpStatus.CREATED)
+    @Secured({"CLAIM_NOTIFICATION_REQUEST_MANAGE"})
+    @XFapiInteractionIdRequired
+    @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    @Idempotent
+    @ResponseErrorWithRequestDateTime
+    public ResponseClaimNotificationDamageV2 createClaimNotificationRequestDamageV2(
+            @PathVariable("consentId") String consentId,
+            @Body CreateClaimNotificationDamageV2 body,
+            HttpRequest<?> request
+    ) {
+        var clientId = InsuranceLambdaUtils.getRequestMeta(request).getClientId();
+        LOG.info("Creating new claim notification damage for client {}", clientId);
+        ClaimNotificationDamageEntity entity = ClaimNotificationDamageEntity.fromRequestV2(body, clientId, consentId);
+        return claimNotificationDamageService.createClaimNotification(entity).toResponseV2(REDIRECT_LINK);
+    }
+
+    @Post("/v2/request/person/{consentId}")
+    @Status(HttpStatus.CREATED)
+    @Secured({"CLAIM_NOTIFICATION_REQUEST_MANAGE"})
+    @XFapiInteractionIdRequired
+    @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    @Idempotent
+    @ResponseErrorWithRequestDateTime
+    public ResponseClaimNotificationPersonV2 createClaimNotificationRequestPersonV2(
+            @PathVariable("consentId") String consentId,
+            @Body CreateClaimNotificationPersonV2 body,
+            HttpRequest<?> request
+    ) {
+        var clientId = InsuranceLambdaUtils.getRequestMeta(request).getClientId();
+        LOG.info("Creating new claim notification person for client {}", clientId);
+        return claimNotificationPersonService.createClaimNotification(
+                ClaimNotificationPersonEntity.fromRequestV2(body, clientId, consentId)).toResponseV2(REDIRECT_LINK);
     }
 }
 

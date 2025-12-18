@@ -3,6 +3,7 @@ package com.raidiam.trustframework.mockinsurance.domain;
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceAutoClaim;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceAutoClaimCoverage;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceAutoClaimV2;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -40,6 +41,19 @@ public class AutoPolicyClaimEntity extends BaseEntity {
         return new InsuranceAutoClaim()
                 .identification(this.getAutoPolicyClaimId())
                 .status(InsuranceAutoClaim.StatusEnum.fromValue(this.getStatus()))
+                .statusAlterationDate(InsuranceLambdaUtils.dateToLocalDate(this.getUpdatedAt()))
+                .occurrenceDate(InsuranceLambdaUtils.dateToLocalDate(this.getCreatedAt()))
+                .warningDate(InsuranceLambdaUtils.dateToLocalDate(this.getCreatedAt()))
+                .amount(new AmountDetails().amount("100.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
+                .coverages(List.of(new InsuranceAutoClaimCoverage()
+                        .branch("0111")
+                        .code(InsuranceAutoClaimCoverage.CodeEnum.ACESSORIOS_E_EQUIPAMENTOS)));
+    }
+
+    public InsuranceAutoClaimV2 mapV2Dto() {
+        return new InsuranceAutoClaimV2()
+                .identification(this.getAutoPolicyClaimId())
+                .status(InsuranceAutoClaimV2.StatusEnum.fromValue(this.getStatus()))
                 .statusAlterationDate(InsuranceLambdaUtils.dateToLocalDate(this.getUpdatedAt()))
                 .occurrenceDate(InsuranceLambdaUtils.dateToLocalDate(this.getCreatedAt()))
                 .warningDate(InsuranceLambdaUtils.dateToLocalDate(this.getCreatedAt()))

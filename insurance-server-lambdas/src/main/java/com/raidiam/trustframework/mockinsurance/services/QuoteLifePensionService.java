@@ -37,7 +37,7 @@ public class QuoteLifePensionService extends QuoteService<QuoteLifePensionEntity
     protected void validateQuote(QuoteLifePensionEntity quote) {
         super.validateQuote(quote);
 
-        var initialContribution = quote.getData().getQuoteData().getProducts().get(0).getInitialContribution();
+        var initialContribution = quote.getData().getInitialContribution();
 
         if (initialContribution.getUnitType() == null) {
             throw new HttpStatusException(HttpStatus.BAD_REQUEST, "NAO_INFORMADO: Unit type missing from amount details");

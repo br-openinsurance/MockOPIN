@@ -225,4 +225,144 @@ class QuoteLifePensionControllerSpec extends Specification {
         and:
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
+
+
+
+
+
+    def "We can create a quote life pension lead v2"() {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuoteLifePensionLead(consentId)
+        quoteLifePensionLeadService.createQuote(_ as QuoteLifePensionLeadEntity) >> quote
+        idempotencyRepository.findByIdempotencyId(_ as String) >> Optional.empty()
+
+        def req = TestRequestDataFactory.createQuoteLifePensionLeadRequestV2()
+        String json = mapper.writeValueAsString(req)
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/contract-life-pension/v2/lead/request', HttpMethod.POST)
+                .withBody(json)
+                .withHeaders(Map.of(
+                        "x-idempotency-key", UUID.randomUUID().toString(),
+                        "x-fapi-interaction-id", UUID.randomUUID().toString()
+                ))
+        AuthHelper.authorize(scopes: "contract-life-pension-lead", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.CREATED.code
+        response.body != null
+        ResponseQuote resp = mapper.readValue(response.body, ResponseQuote)
+        resp.getData().getStatus() == QuoteStatus.StatusEnum.RCVD
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "We can revoke a quote life pension lead v2"() {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuoteLifePensionLead(consentId)
+
+        quoteLifePensionLeadService.patchQuote(_ as RevokePatchPayload, _ as String, _ as String) >> quote
+
+        def req = TestRequestDataFactory.revokeQuotePatchRequest(quote.getQuoteId())
+        String json = mapper.writeValueAsString(req)
+        def event = AwsProxyHelper.buildBasicEvent("/open-insurance/contract-life-pension/v2/lead/request/${consentId}", HttpMethod.PATCH)
+                .withBody(json)
+                .withHeaders(Map.of("x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "contract-life-pension-lead", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+        ResponseRevokePatch resp = mapper.readValue(response.body, ResponseRevokePatch)
+        resp.getData().getStatus() == resp.getData().getStatus().CANC
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "we can create a quote life pension v2" () {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuoteLifePension(consentId)
+        quoteLifePensionService.createQuote(_ as QuoteLifePensionEntity) >> quote
+        idempotencyRepository.findByIdempotencyId( _ as String) >> Optional.empty()
+
+        def req = TestRequestDataFactory.createQuoteLifePensionRequestV2()
+
+        String json = mapper.writeValueAsString(req)
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/contract-life-pension/v2/request', HttpMethod.POST)
+                .withBody(json)
+                .withHeaders(Map.of("x-idempotency-key", UUID.randomUUID().toString(), "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "contract-life-pension", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.CREATED.code
+        response.body != null
+        ResponseQuote resp = mapper.readValue(response.body, ResponseQuote)
+        resp.getData().getStatus().toString() == "RCVD"
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "we can fetch a quote life pension v2" () {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuoteLifePension(consentId)
+        quoteLifePensionService.getQuote(_ as String, _ as String) >> quote
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/contract-life-pension/v2/request/'+consentId+"/quote-status", HttpMethod.GET)
+                .withHeaders(Map.of("x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "contract-life-pension", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+        ResponseQuote resp = mapper.readValue(response.body, ResponseQuote)
+        resp.getData().getStatus().toString() == "RCVD"
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "we can patch a quote life pension v2" () {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuoteLifePension(UUID.randomUUID(), consentId)
+        quote.status = QuoteStatusEnum.ACKN.toString()
+        quoteLifePensionService.patchQuote(_ as PatchPayload, _ as String, _ as String) >> quote
+
+        def req = TestRequestDataFactory.patchQuoteRequest(quote.getQuoteId())
+
+        String json = mapper.writeValueAsString(req)
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/contract-life-pension/v2/request/'+consentId, HttpMethod.PATCH)
+                .withBody(json)
+                .withHeaders(Map.of("x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "contract-life-pension", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+        ResponsePatch resp = mapper.readValue(response.body, ResponsePatch)
+        resp.getData().getStatus() == ResponsePatchData.StatusEnum.ACKN
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
 }

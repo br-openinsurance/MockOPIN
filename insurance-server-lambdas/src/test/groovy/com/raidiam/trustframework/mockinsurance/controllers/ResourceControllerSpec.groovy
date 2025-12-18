@@ -6,7 +6,9 @@ import com.raidiam.trustframework.mockinsurance.AuthHelper
 import com.raidiam.trustframework.mockinsurance.AwsProxyHelper
 import com.raidiam.trustframework.mockinsurance.models.generated.Meta
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseResourceList
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseResourceListV3
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseResourceListData
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseResourceListV3Data
 import com.raidiam.trustframework.mockinsurance.services.OverrideService
 import com.raidiam.trustframework.mockinsurance.services.ResourcesService
 import io.micronaut.context.ApplicationContext
@@ -73,6 +75,22 @@ class ResourceControllerSpec extends Specification {
         response.body
     }
 
+    def "we get a 403 if there is no consent id in V3"() {
+        given:
+        def event = AwsProxyHelper.buildEventWithHeaders("/open-insurance/resources/v3/resources", HttpMethod.GET,
+                Map.of("x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "resources", event)
+
+        resourcesService.getResourceListV3(_ as Pageable, _ as String) >> { throw new HttpStatusException(HttpStatus.NOT_FOUND, "Consent not found") }
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.FORBIDDEN.code
+        response.body
+    }
+
     def "we get a 403 if the consent isn't found"() {
         given:
         def event =AwsProxyHelper.buildEventWithHeaders("/open-insurance/resources/v2/resources", HttpMethod.GET,
@@ -80,6 +98,22 @@ class ResourceControllerSpec extends Specification {
         AuthHelper.authorize(scopes: "resources consent:12345", event)
 
         resourcesService.getResourceList(_ as Pageable, _ as String) >> { throw new HttpStatusException(HttpStatus.FORBIDDEN, "Consent not found") }
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.FORBIDDEN.code
+        response.body
+    }
+
+    def "we get a 403 if the consent isn't found in V3"() {
+        given:
+        def event =AwsProxyHelper.buildEventWithHeaders("/open-insurance/resources/v3/resources", HttpMethod.GET,
+                Map.of("x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "resources consent:12345", event)
+
+        resourcesService.getResourceListV3(_ as Pageable, _ as String) >> { throw new HttpStatusException(HttpStatus.FORBIDDEN, "Consent not found") }
 
         when:
         def response = handler.handleRequest(event, lambdaContext)
@@ -102,6 +136,33 @@ class ResourceControllerSpec extends Specification {
 
         resourcesService.getResourceList(_ as Pageable, _ as String) >>
                 new ResponseResourceList()
+                        .data(List.of(resource))
+                        .meta(new Meta()
+                                 .totalPages(0)
+                                 .totalRecords(0))
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body
+    }
+
+    void "we can get a resource V3 response"() {
+        given:
+        def event = AwsProxyHelper.buildEventWithHeaders("/open-insurance/resources/v3/resources", HttpMethod.GET,
+                Map.of("x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "resources consent:urn:raidiaminsurance:1234", event)
+
+        def resource = new ResponseResourceListV3Data()
+                .type(ResponseResourceListV3Data.TypeEnum.CAPITALIZATION_TITLES)
+                .status(ResponseResourceListV3Data.StatusEnum.AVAILABLE)
+                .resourceId(UUID.randomUUID().toString())
+
+        resourcesService.getResourceListV3(_ as Pageable, _ as String) >>
+                new ResponseResourceListV3()
                         .data(List.of(resource))
                         .meta(new Meta()
                                  .totalPages(0)

@@ -4,7 +4,9 @@ import com.raidiam.trustframework.mockinsurance.cleanups.CleanupSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
 import com.raidiam.trustframework.mockinsurance.domain.*
 import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentPermission
+import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentV3Permission
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseResourceList
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseResourceListV3
 import io.micronaut.data.model.Pageable
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.exceptions.HttpStatusException
@@ -29,6 +31,9 @@ class ResourceServiceSpec extends CleanupSpecification {
     ConsentEntity testConsent
 
     @Shared
+    ConsentEntity testAuthorisedConsent
+
+    @Shared
     CapitalizationTitlePlanEntity testCapitalizationTitlePlan
 
     @Shared
@@ -48,6 +53,9 @@ class ResourceServiceSpec extends CleanupSpecification {
 
     @Shared
     ResponsibilityPolicyEntity testResponsibilityPolicy
+
+    @Shared
+    ResponsibilityPolicyEntity testUnauthorisedResponsibilityPolicy
 
     @Shared
     ConsentResponsibilityPolicyEntity testConsentResponsibilityPolicy
@@ -75,6 +83,9 @@ class ResourceServiceSpec extends CleanupSpecification {
 
     @Shared
     AcceptanceAndBranchesAbroadPolicyEntity testAcceptanceAndBranchesAbroadPolicy
+
+    @Shared
+    AcceptanceAndBranchesAbroadPolicyEntity testUnavailableAcceptanceAndBranchesAbroadPolicy
 
     @Shared
     ConsentAcceptanceAndBranchesAbroadPolicyEntity testConsentAcceptanceAndBranchesAbroadPolicy
@@ -116,17 +127,30 @@ class ResourceServiceSpec extends CleanupSpecification {
             ))
             testConsent = consentRepository.save(testConsent)
 
+            testAuthorisedConsent = TestEntityDataFactory.aConsent(testAccountHolder.getAccountHolderId())
+            testAuthorisedConsent.setPermissions(List.of(
+                    EnumConsentPermission.RESOURCES_READ.toString()
+            ))
+            testAuthorisedConsent.setStatus("AUTHORISED")
+            testAuthorisedConsent = consentRepository.save(testAuthorisedConsent)
+
             testCapitalizationTitlePlan = capitalizationTitlePlanRepository.save(TestEntityDataFactory.aCapitalizationTitlePlan(testAccountHolder.getAccountHolderId()))
             consentCapitalizationTitlePlanRepository.save(new ConsentCapitalizationTitlePlanEntity(testConsent, testCapitalizationTitlePlan))
+            consentCapitalizationTitlePlanRepository.save(new ConsentCapitalizationTitlePlanEntity(testAuthorisedConsent, testCapitalizationTitlePlan))
 
             testFinancialRiskPolicy = financialRiskPolicyRepository.save(TestEntityDataFactory.aFinancialRiskPolicy(testAccountHolder.getAccountHolderId(), null, null, null, null, null))
             consentFinancialRiskPolicyRepository.save(new ConsentFinancialRiskPolicyEntity(testConsent, testFinancialRiskPolicy))
 
             testHousingPolicy = housingPolicyRepository.save(TestEntityDataFactory.aHousingPolicy(testAccountHolder.getAccountHolderId()))
             consentHousingPolicyRepository.save(new ConsentHousingPolicyEntity(testConsent, testHousingPolicy))
+            consentHousingPolicyRepository.save(new ConsentHousingPolicyEntity(testAuthorisedConsent, testHousingPolicy))
 
             testResponsibilityPolicy = responsibilityPolicyRepository.save(TestEntityDataFactory.aResponsibilityPolicy(testAccountHolder.getAccountHolderId()))
             consentResponsibilityPolicyRepository.save(new ConsentResponsibilityPolicyEntity(testConsent, testResponsibilityPolicy))
+            testUnauthorisedResponsibilityPolicy = TestEntityDataFactory.aResponsibilityPolicy(testAccountHolder.getAccountHolderId())
+            testUnauthorisedResponsibilityPolicy.setStatus("PENDING_AUTHORISATION")
+            testUnauthorisedResponsibilityPolicy = acceptanceAndBranchesAbroadPolicyRepository.save(testUnauthorisedResponsibilityPolicy)
+            consentResponsibilityPolicyRepository.save(new ConsentResponsibilityPolicyEntity(testAuthorisedConsent, testUnauthorisedResponsibilityPolicy))
 
             testPersonPolicy = personPolicyRepository.save(TestEntityDataFactory.aPersonPolicy(testAccountHolder.getAccountHolderId()))
             consentPersonPolicyRepository.save(new ConsentPersonPolicyEntity(testConsent, testPersonPolicy))
@@ -142,6 +166,10 @@ class ResourceServiceSpec extends CleanupSpecification {
 
             testAcceptanceAndBranchesAbroadPolicy = acceptanceAndBranchesAbroadPolicyRepository.save(TestEntityDataFactory.anAcceptanceAndBranchesAbroadPolicy(testAccountHolder.getAccountHolderId()))
             consentAcceptanceAndBranchesAbroadPolicyRepository.save(new ConsentAcceptanceAndBranchesAbroadPolicyEntity(testConsent, testAcceptanceAndBranchesAbroadPolicy))
+            testUnavailableAcceptanceAndBranchesAbroadPolicy = TestEntityDataFactory.anAcceptanceAndBranchesAbroadPolicy(testAccountHolder.getAccountHolderId())
+            testUnavailableAcceptanceAndBranchesAbroadPolicy.setStatus("TEMPORARILY_UNAVAILABLE")
+            testUnavailableAcceptanceAndBranchesAbroadPolicy = acceptanceAndBranchesAbroadPolicyRepository.save(testUnavailableAcceptanceAndBranchesAbroadPolicy)
+            consentAcceptanceAndBranchesAbroadPolicyRepository.save(new ConsentAcceptanceAndBranchesAbroadPolicyEntity(testAuthorisedConsent, testUnavailableAcceptanceAndBranchesAbroadPolicy))
 
             testPatrimonialPolicy = patrimonialPolicyRepository.save(TestEntityDataFactory.aPatrimonialPolicy(testAccountHolder.getAccountHolderId(), "0111"))
             consentPatrimonialPolicyRepository.save(new ConsentPatrimonialPolicyEntity(testConsent, testPatrimonialPolicy))
@@ -162,6 +190,16 @@ class ResourceServiceSpec extends CleanupSpecification {
     def "we can not get resources without permissions"() {
         when:
         resourcesService.getResourceList(Pageable.unpaged(), testConsent.consentId)
+
+        then:
+        HttpStatusException e = thrown()
+        e.status == HttpStatus.NOT_FOUND
+        e.getMessage() == "Resource not found, no appropriate permissions attached to consent"
+    }
+
+    def "we can not get resources V3 without permissions"() {
+        when:
+        resourcesService.getResourceListV3(Pageable.unpaged(), testConsent.consentId)
 
         then:
         HttpStatusException e = thrown()
@@ -205,12 +243,107 @@ class ResourceServiceSpec extends CleanupSpecification {
         page2.getData().size() == 3
     }
 
+    def "we can get V3 pages"() {
+        given:
+        testConsent.setPermissions(List.of(
+                EnumConsentV3Permission.RESOURCES_READ.toString(),
+                EnumConsentV3Permission.CAPITALIZATION_TITLE_READ.toString(),
+                EnumConsentV3Permission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_READ.toString(),
+                EnumConsentV3Permission.DAMAGES_AND_PEOPLE_HOUSING_READ.toString(),
+                EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_READ.toString(),
+                EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PERSON_READ.toString(),
+                EnumConsentV3Permission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_READ.toString(),
+                EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PATRIMONIAL_READ.toString(),
+                EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RURAL_READ.toString(),
+                EnumConsentV3Permission.LIFE_PENSION_READ.toString(),
+                EnumConsentV3Permission.PENSION_PLAN_READ.toString(),
+                EnumConsentV3Permission.FINANCIAL_ASSISTANCE_READ.toString(),
+                EnumConsentV3Permission.DAMAGES_AND_PEOPLE_AUTO_READ.toString(),
+                EnumConsentV3Permission.DAMAGES_AND_PEOPLE_TRANSPORT_READ.toString(),
+        ))
+        consentRepository.update(testConsent)
+
+        when:
+        def page1 = resourcesService.getResourceListV3(Pageable.from(0, 10), testConsent.getConsentId())
+        def page2 = resourcesService.getResourceListV3(Pageable.from(1, 10), testConsent.getConsentId())
+
+        then:
+
+        // we can see the number of pages on each page
+        page1.getMeta().totalPages == 2
+
+        // first page has 2 resources (for now)
+        page1.getData().size() == 10
+
+        // second page has 2 resources (for now)
+        page2.getData().size() == 3
+    }
+
+    def "we can get pages with different resource status"() {
+        given:
+        testAuthorisedConsent.setPermissions(List.of(
+                EnumConsentPermission.RESOURCES_READ.toString(),
+                EnumConsentPermission.CAPITALIZATION_TITLE_READ.toString(),
+                EnumConsentPermission.DAMAGES_AND_PEOPLE_HOUSING_READ.toString(),
+                EnumConsentPermission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_READ.toString(),
+                EnumConsentPermission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_READ.toString(),
+        ))
+        consentRepository.update(testAuthorisedConsent)
+
+        when:
+        def page1 = resourcesService.getResourceList(Pageable.from(0, 10), testAuthorisedConsent.getConsentId())
+
+        then:
+
+        // we can see the number of pages on each page
+        page1.getMeta().totalPages == 1
+
+        // first page has 2 resources (for now)
+        page1.getData().size() == 4
+    }
+
+    def "we can get pages with different resource status in V3"() {
+        given:
+        testAuthorisedConsent.setPermissions(List.of(
+                EnumConsentV3Permission.RESOURCES_READ.toString(),
+                EnumConsentV3Permission.CAPITALIZATION_TITLE_READ.toString(),
+                EnumConsentV3Permission.DAMAGES_AND_PEOPLE_HOUSING_READ.toString(),
+                EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_READ.toString(),
+                EnumConsentV3Permission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_READ.toString(),
+        ))
+        consentRepository.update(testAuthorisedConsent)
+
+        when:
+        def page1 = resourcesService.getResourceListV3(Pageable.from(0, 10), testAuthorisedConsent.getConsentId())
+
+        then:
+
+        // we can see the number of pages on each page
+        page1.getMeta().totalPages == 1
+
+        // first page has 2 resources (for now)
+        page1.getData().size() == 4
+    }
+
     def "we get an 403 on consent not found"() {
         given:
         def consentId = "notfoundconsent"
 
         when:
         resourcesService.getResourceList(Pageable.unpaged(), consentId)
+
+        then:
+        HttpStatusException e = thrown()
+        e.status == HttpStatus.NOT_FOUND
+        e.getLocalizedMessage() == "Consent Id " + consentId + " not found"
+    }
+
+    def "we get an 403 on consent not found in V3"() {
+        given:
+        def consentId = "notfoundconsent"
+
+        when:
+        resourcesService.getResourceListV3(Pageable.unpaged(), consentId)
 
         then:
         HttpStatusException e = thrown()
@@ -246,11 +379,51 @@ class ResourceServiceSpec extends CleanupSpecification {
         response2.getData().isEmpty()
     }
 
+    def "we get an empty list when only customers permissions are granted in V3"() {
+        when:
+        testConsent.setPermissions(List.of(
+                EnumConsentV3Permission.RESOURCES_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_PERSONAL_IDENTIFICATIONS_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_PERSONAL_QUALIFICATION_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_PERSONAL_ADDITIONALINFO_READ.toString()
+        ))
+        consentRepository.update(testConsent)
+        ResponseResourceListV3 response1 = resourcesService.getResourceListV3(Pageable.unpaged(), testConsent.getConsentId())
+
+        then:
+        response1.getData().isEmpty()
+
+        when:
+        testConsent.setPermissions(List.of(
+                EnumConsentV3Permission.RESOURCES_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_BUSINESS_IDENTIFICATIONS_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_BUSINESS_QUALIFICATION_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_BUSINESS_ADDITIONALINFO_READ.toString()
+        ))
+        consentRepository.update(testConsent)
+        ResponseResourceListV3 response2 = resourcesService.getResourceListV3(Pageable.unpaged(), testConsent.getConsentId())
+
+        then:
+        response2.getData().isEmpty()
+    }
+
     def "we get an 403 on wrong permissions"() {
         when:
         testConsent.setPermissions(List.of())
         consentRepository.update(testConsent)
         resourcesService.getResourceList(Pageable.unpaged(), testConsent.consentId)
+
+        then:
+        HttpStatusException e = thrown()
+        e.getStatus() == HttpStatus.FORBIDDEN
+        e.getLocalizedMessage() == "You do not have the correct permission"
+    }
+
+    def "we get an 403 on wrong permissions in V3"() {
+        when:
+        testConsent.setPermissions(List.of())
+        consentRepository.update(testConsent)
+        resourcesService.getResourceListV3(Pageable.unpaged(), testConsent.consentId)
 
         then:
         HttpStatusException e = thrown()

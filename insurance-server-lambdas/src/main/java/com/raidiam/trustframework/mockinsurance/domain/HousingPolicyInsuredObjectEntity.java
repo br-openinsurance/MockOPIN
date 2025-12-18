@@ -11,6 +11,7 @@ import org.hibernate.envers.NotAudited;
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails;
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetailsUnit;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceHousingInsuredObject;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceHousingInsuredObjectV2;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -70,6 +71,22 @@ public class HousingPolicyInsuredObjectEntity extends BaseEntity {
         return new InsuranceHousingInsuredObject()
         .identification(this.getIdentification())
             .type(InsuranceHousingInsuredObject.TypeEnum.valueOf(this.getType()))
+            .description(this.getDescription())
+            .amount(new AmountDetails()
+                    .amount(this.getAmount())
+                    .unitType(AmountDetails.UnitTypeEnum.valueOf(this.getUnitType()))
+                    .unit(new AmountDetailsUnit()
+                            .code(this.getUnitCode())
+                            .description(AmountDetailsUnit.DescriptionEnum.valueOf(this.getUnitDescription()))
+                    )
+            )
+            .coverages(this.getCoverages().stream().map(HousingPolicyInsuredObjectCoverageEntity::mapDto).toList());
+    }
+
+    public InsuranceHousingInsuredObjectV2 mapDtoV2() {
+        return new InsuranceHousingInsuredObjectV2()
+        .identification(this.getIdentification())
+            .type(InsuranceHousingInsuredObjectV2.TypeEnum.valueOf(this.getType()))
             .description(this.getDescription())
             .amount(new AmountDetails()
                     .amount(this.getAmount())

@@ -334,4 +334,222 @@ class QuotePersonControllerSpec extends Specification {
         and:
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
+
+
+
+
+    def "We can create a quote person lead v2"() {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuotePersonLead(consentId)
+        quotePersonLeadService.createQuote(_ as QuotePersonLeadEntity) >> quote
+        idempotencyRepository.findByIdempotencyId(_ as String) >> Optional.empty()
+
+        def req = TestRequestDataFactory.createQuotePersonLeadRequestV2()
+        String json = mapper.writeValueAsString(req)
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/quote-person/v2/lead/request', HttpMethod.POST)
+                .withBody(json)
+                .withHeaders(Map.of(
+                        "x-idempotency-key", UUID.randomUUID().toString(),
+                        "x-fapi-interaction-id", UUID.randomUUID().toString()
+                ))
+        AuthHelper.authorize(scopes: "quote-person-lead", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.CREATED.code
+        response.body != null
+        ResponseQuote resp = mapper.readValue(response.body, ResponseQuote)
+        resp.getData().getStatus() == QuoteStatus.StatusEnum.RCVD
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "We can revoke a quote person lead v2"() {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuotePersonLead(consentId)
+
+        quotePersonLeadService.patchQuote(_ as RevokePatchPayload, _ as String, _ as String) >> quote
+
+        def req = TestRequestDataFactory.revokeQuotePatchRequest(quote.getQuoteId())
+        String json = mapper.writeValueAsString(req)
+        def event = AwsProxyHelper.buildBasicEvent("/open-insurance/quote-person/v2/lead/request/${consentId}", HttpMethod.PATCH)
+                .withBody(json)
+                .withHeaders(Map.of("x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "quote-person-lead", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+        ResponseRevokePatch resp = mapper.readValue(response.body, ResponseRevokePatch)
+        resp.getData().getStatus() == resp.getData().getStatus().CANC
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "we can create a quote person life v2" () {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuotePersonLife(consentId)
+        quotePersonLifeService.createQuote(_ as QuotePersonLifeEntity) >> quote
+        idempotencyRepository.findByIdempotencyId( _ as String) >> Optional.empty()
+
+        def req = TestRequestDataFactory.createQuotePersonLifeRequestV2()
+
+        String json = mapper.writeValueAsString(req)
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/quote-person/v2/life/request', HttpMethod.POST)
+                .withBody(json)
+                .withHeaders(Map.of("x-idempotency-key", UUID.randomUUID().toString(), "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "quote-person-life", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.CREATED.code
+        response.body != null
+        ResponseQuoteStatusPersonLife resp = mapper.readValue(response.body, ResponseQuoteStatusPersonLife)
+        resp.getData().getStatus().toString() == "RCVD"
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "we can fetch a quote person life v2" () {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuotePersonLife(consentId)
+        quotePersonLifeService.getQuote(_ as String, _ as String) >> quote
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/quote-person/v2/life/request/'+consentId+"/quote-status", HttpMethod.GET)
+                .withHeaders(Map.of("x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "quote-person-life", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+        ResponseQuotePersonLifeV2 resp = mapper.readValue(response.body, ResponseQuotePersonLifeV2)
+        resp.getData().getStatus().toString() == "RCVD"
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "we can patch a quote person life v2" () {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuotePersonLife(UUID.randomUUID(), consentId)
+        quote.status = QuoteStatusEnum.ACKN.toString()
+        quotePersonLifeService.patchQuote(_ as PatchPayload, _ as String, _ as String) >> quote
+
+        def req = TestRequestDataFactory.patchQuoteRequest(quote.getQuoteId())
+
+        String json = mapper.writeValueAsString(req)
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/quote-person/v2/life/request/'+consentId, HttpMethod.PATCH)
+                .withBody(json)
+                .withHeaders(Map.of("x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "quote-person-life", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+        ResponsePatch resp = mapper.readValue(response.body, ResponsePatch)
+        resp.getData().getStatus() == ResponsePatchData.StatusEnum.ACKN
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "we can create a quote person travel v2" () {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuotePersonTravel(consentId)
+        quotePersonTravelService.createQuote(_ as QuotePersonTravelEntity) >> quote
+        idempotencyRepository.findByIdempotencyId( _ as String) >> Optional.empty()
+
+        def req = TestRequestDataFactory.createQuotePersonTravelRequestV2()
+
+        String json = mapper.writeValueAsString(req)
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/quote-person/v2/travel/request', HttpMethod.POST)
+                .withBody(json)
+                .withHeaders(Map.of("x-idempotency-key", UUID.randomUUID().toString(), "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "quote-person-travel", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.CREATED.code
+        response.body != null
+        ResponseQuoteStatusPersonTravel resp = mapper.readValue(response.body, ResponseQuoteStatusPersonTravel)
+        resp.getData().getStatus().toString() == "RCVD"
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "we can fetch a quote person travel v2" () {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuotePersonTravel(consentId)
+        quotePersonTravelService.getQuote(_ as String, _ as String) >> quote
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/quote-person/v2/travel/request/'+consentId+"/quote-status", HttpMethod.GET)
+                .withHeaders(Map.of("x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "quote-person-travel", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+        ResponseQuotePersonTravelV2 resp = mapper.readValue(response.body, ResponseQuotePersonTravelV2)
+        resp.getData().getStatus().toString() == "RCVD"
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "we can patch a quote person travel v2" () {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuotePersonTravel(UUID.randomUUID(), consentId)
+        quote.status = QuoteStatusEnum.ACKN.toString()
+        quotePersonTravelService.patchQuote(_ as PatchPayload, _ as String, _ as String) >> quote
+
+        def req = TestRequestDataFactory.patchQuoteRequest(quote.getQuoteId())
+
+        String json = mapper.writeValueAsString(req)
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/quote-person/v2/travel/request/'+consentId, HttpMethod.PATCH)
+                .withBody(json)
+                .withHeaders(Map.of("x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "quote-person-travel", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+        ResponsePatch resp = mapper.readValue(response.body, ResponsePatch)
+        resp.getData().getStatus() == ResponsePatchData.StatusEnum.ACKN
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
 }

@@ -26,26 +26,42 @@ import jakarta.transaction.Transactional;
 public class AcceptanceAndBranchesAbroadService extends BaseInsuranceService {
     private static final Logger LOG = LoggerFactory.getLogger(AcceptanceAndBranchesAbroadService.class);
 
-    public BaseInsuranceResponse getPolicies(String consentId, Pageable pageable) {
+    private List<AcceptanceAndBranchesAbroadPolicyEntity> getPolicyEntities(String consentId, Pageable pageable) {
         LOG.info("Getting acceptance and branches abroad policies response for consent id {}", consentId);
 
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
 
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
-        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_READ);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_READ);
 
-        List<AcceptanceAndBranchesAbroadPolicyEntity> policies = acceptanceAndBranchesAbroadPolicyRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable).getContent();
+        return acceptanceAndBranchesAbroadPolicyRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable).getContent();
+    }
 
+    public BaseInsuranceResponse getPolicies(String consentId, Pageable pageable) {
+        List<AcceptanceAndBranchesAbroadPolicyEntity> policies = getPolicyEntities(consentId, pageable);
+        
         return new BaseInsuranceResponse()
-                .data(List.of(new BaseBrandAndCompanyData()
+            .data(List.of(new BaseBrandAndCompanyData()
+                .brand("Mock")
+                .companies(List.of(new BaseBrandAndCompanyDataCompanies()
+                    .companyName("Mock Insurer")
+                    .cnpjNumber("12345678901234")
+                    .policies(policies.stream().map(AcceptanceAndBranchesAbroadPolicyEntity::mapPolicyDto).toList())))));
+    }
+    
+    public BaseInsuranceResponseV2 getPoliciesV2(String consentId, Pageable pageable) {
+        List<AcceptanceAndBranchesAbroadPolicyEntity> policies = getPolicyEntities(consentId, pageable);
+
+        return new BaseInsuranceResponseV2()
+                .data(List.of(new BaseBrandAndCompanyDataV2()
                     .brand("Mock")
-                    .companies(List.of(new BaseBrandAndCompanyDataCompanies()
+                    .companies(List.of(new BaseBrandAndCompanyDataV2Companies()
                             .companyName("Mock Insurer")
                             .cnpjNumber("12345678901234")
                             .policies(policies.stream().map(AcceptanceAndBranchesAbroadPolicyEntity::mapPolicyDto).toList())))));
     }
 
-    private AcceptanceAndBranchesAbroadPolicyEntity getPolicy(UUID policyId, String consentId, EnumConsentPermission permission) {
+    private AcceptanceAndBranchesAbroadPolicyEntity getPolicy(UUID policyId, String consentId, EnumConsentPermission permission, EnumConsentV3Permission permissionV3) {
         LOG.info("Getting acceptance and branches abroad policy for policy id {} and consent id {}", policyId, consentId);
 
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
@@ -53,7 +69,7 @@ public class AcceptanceAndBranchesAbroadService extends BaseInsuranceService {
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Policy id " + policyId + " not found"));
 
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
-        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, permission);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, permission, permissionV3);
         this.checkConsentCoversPolicy(consentEntity, policy);
         this.checkConsentOwnerIsPolicyOwner(consentEntity, policy);
 
@@ -88,21 +104,42 @@ public class AcceptanceAndBranchesAbroadService extends BaseInsuranceService {
     
     public ResponseInsuranceAcceptanceAndBranchesAbroadPolicyInfo getPolicyInfo(UUID policyId, String consentId) {
         LOG.info("Getting acceptance and branches abroad policy info response for consent id {}", consentId);
-        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_POLICYINFO_READ).mapPolicyInfoDto();
+        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_POLICYINFO_READ).mapPolicyInfoDto();
+    }
+    
+    public ResponseInsuranceAcceptanceAndBranchesAbroadPolicyInfoV2 getPolicyInfoV2(UUID policyId, String consentId) {
+        LOG.info("Getting acceptance and branches abroad policy info response for consent id {}", consentId);
+        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_POLICYINFO_READ).mapPolicyInfoDtoV2();
     }
 
     public ResponseInsuranceAcceptanceAndBranchesAbroadPremium getPremium(UUID policyId, String consentId) {
         LOG.info("Getting acceptance and branches abroad premium response for consent id {}", consentId);
-        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_PREMIUM_READ).mapPremiumDto();
+        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_PREMIUM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_PREMIUM_READ).mapPremiumDto();
+    }
+
+    public ResponseInsuranceAcceptanceAndBranchesAbroadPremiumV2 getPremiumV2(UUID policyId, String consentId) {
+        LOG.info("Getting acceptance and branches abroad premium response for consent id {}", consentId);
+        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_PREMIUM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_PREMIUM_READ).mapPremiumDtoV2();
     }
 
     public ResponseInsuranceAcceptanceAndBranchesAbroadClaims getClaims(UUID policyId, String consentId, Pageable pageable) {
         LOG.info("Getting acceptance and branches abroad claims response for consent id {}", consentId);
-        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_CLAIM_READ);
+        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_CLAIM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_CLAIM_READ);
 
         var claims = acceptanceAndBranchesAbroadClaimRepository.findByPolicyId(policyId, pageable);
         var resp = new ResponseInsuranceAcceptanceAndBranchesAbroadClaims()
                 .data(claims.getContent().stream().map(AcceptanceAndBranchesAbroadClaimEntity::toResponse).toList());
+        resp.setMeta(InsuranceLambdaUtils.getMeta(claims, false));
+        return resp;
+    }
+
+    public ResponseInsuranceAcceptanceAndBranchesAbroadClaimsV2 getClaimsV2(UUID policyId, String consentId, Pageable pageable) {
+        LOG.info("Getting acceptance and branches abroad claims response for consent id {}", consentId);
+        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_CLAIM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_CLAIM_READ);
+
+        var claims = acceptanceAndBranchesAbroadClaimRepository.findByPolicyId(policyId, pageable);
+        var resp = new ResponseInsuranceAcceptanceAndBranchesAbroadClaimsV2()
+                .data(claims.getContent().stream().map(AcceptanceAndBranchesAbroadClaimEntity::toResponseV2).toList());
         resp.setMeta(InsuranceLambdaUtils.getMeta(claims, false));
         return resp;
     }

@@ -70,6 +70,27 @@ class RuralControllerSpec extends Specification {
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
 
+    def "We can fetch policies V2" () {
+        given:
+        def resp = new BaseInsuranceResponseV2().data(List.of())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        ruralService.getPoliciesV2(_ as String, _ as Pageable) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-rural/v2/insurance-rural/', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-rural consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
     def "We can fetch a policy info" () {
         given:
         def resp = new ResponseInsuranceRuralPolicyInfo().data(new InsuranceRuralPolicyInfo())
@@ -77,6 +98,27 @@ class RuralControllerSpec extends Specification {
         ruralService.getPolicyInfo(_ as UUID, _ as String) >> resp
 
         def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-rural/v1/insurance-rural/'+UUID.randomUUID().toString()+'/policy-info', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-rural consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "We can fetch a policy info V2" () {
+        given:
+        def resp = new ResponseInsuranceRuralPolicyInfoV2().data(new InsuranceRuralPolicyInfoV2())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        ruralService.getPolicyInfoV2(_ as UUID, _ as String) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-rural/v2/insurance-rural/'+UUID.randomUUID().toString()+'/policy-info', HttpMethod.GET)
                 .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-rural consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
 
@@ -112,6 +154,27 @@ class RuralControllerSpec extends Specification {
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
 
+    def "We can fetch a policy's premium V2" () {
+        given:
+        def resp = new ResponseInsuranceRuralPremium().data(new InsuranceRuralPremium())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        ruralService.getPremium(_ as UUID, _ as String) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-rural/v2/insurance-rural/'+UUID.randomUUID().toString()+'/premium', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-rural consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
     def "We can fetch a policy's claims" () {
         given:
         def resp = new ResponseInsuranceRuralClaims().data(List.of())
@@ -119,6 +182,27 @@ class RuralControllerSpec extends Specification {
         ruralService.getClaims(_ as UUID, _ as String, _ as Pageable) >> resp
 
         def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-rural/v1/insurance-rural/'+UUID.randomUUID().toString()+'/claim', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-rural consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "We can fetch a policy's claims V2" () {
+        given:
+        def resp = new ResponseInsuranceRuralClaimsV2().data(List.of())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        ruralService.getClaimsV2(_ as UUID, _ as String, _ as Pageable) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-rural/v2/insurance-rural/'+UUID.randomUUID().toString()+'/claim', HttpMethod.GET)
                 .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-rural consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
 

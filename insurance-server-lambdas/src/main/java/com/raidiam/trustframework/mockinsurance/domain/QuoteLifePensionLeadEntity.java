@@ -27,6 +27,18 @@ public class QuoteLifePensionLeadEntity extends QuoteEntity {
         return entity;
     }
 
+    public static QuoteLifePensionLeadEntity fromRequestV2(QuoteRequestLifePensionLeadV2 req, String clientId) {
+        QuoteLifePensionLeadEntity entity = new QuoteLifePensionLeadEntity();
+        entity.setConsentId(req.getData().getConsentId());
+        entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
+        entity.setClientId(clientId);
+        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
+
+        entity.setCustomer(req.getData().getQuoteCustomer());
+
+        return entity;
+    }
+
     public ResponseQuote toResponse() {
         return new ResponseQuote()
                 .data(new QuoteStatus()

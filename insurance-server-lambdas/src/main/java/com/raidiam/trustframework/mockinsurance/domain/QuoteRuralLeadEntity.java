@@ -26,6 +26,17 @@ public class QuoteRuralLeadEntity extends QuoteEntity {
         return entity;
     }
 
+    public static QuoteRuralLeadEntity fromRequestV2(QuoteRequestRuralLeadV2 req, String clientId) {
+        QuoteRuralLeadEntity entity = new QuoteRuralLeadEntity();
+        entity.setConsentId(req.getData().getConsentId());
+        entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
+        entity.setClientId(clientId);
+        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
+        entity.setCustomer(req.getData().getQuoteCustomer());
+
+        return entity;
+    }
+
     public ResponseQuote toResponse() {
         return new ResponseQuote()
                 .data(new QuoteStatus()

@@ -61,9 +61,27 @@ class AcceptanceAndBranchesAbroadServiceSpec extends CleanupSpecification {
         response.getData().first()
     }
 
+    def "we can get policies V2" () {
+        when:
+        def response = acceptanceAndBranchesAbroadService.getPoliciesV2(testConsent.getConsentId().toString(), Pageable.from(0, 1))
+
+        then:
+        response.getData()
+        response.getData().size() == 1
+        response.getData().first()
+    }
+
     def "we can get a policy info" () {
         when:
         def response = acceptanceAndBranchesAbroadService.getPolicyInfo(testAcceptanceAndBranchesAbroadPolicy.getPolicyId(), testConsent.getConsentId().toString())
+
+        then:
+        response.getData() != null
+    }
+
+    def "we can get a policy info V2" () {
+        when:
+        def response = acceptanceAndBranchesAbroadService.getPolicyInfoV2(testAcceptanceAndBranchesAbroadPolicy.getPolicyId(), testConsent.getConsentId().toString())
 
         then:
         response.getData() != null
@@ -77,9 +95,25 @@ class AcceptanceAndBranchesAbroadServiceSpec extends CleanupSpecification {
         response.getData() != null
     }
 
+    def "we can get a policy's premium V2" () {
+        when:
+        def response = acceptanceAndBranchesAbroadService.getPremiumV2(testAcceptanceAndBranchesAbroadPolicy.getPolicyId(), testConsent.getConsentId().toString())
+
+        then:
+        response.getData() != null
+    }
+
     def "we can get a policy's claims" () {
         when:
         def response = acceptanceAndBranchesAbroadService.getClaims(testAcceptanceAndBranchesAbroadPolicy.getPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
+
+        then:
+        response.getData() != null
+    }
+
+    def "we can get a policy's claims V2" () {
+        when:
+        def response = acceptanceAndBranchesAbroadService.getClaimsV2(testAcceptanceAndBranchesAbroadPolicy.getPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
 
         then:
         response.getData() != null

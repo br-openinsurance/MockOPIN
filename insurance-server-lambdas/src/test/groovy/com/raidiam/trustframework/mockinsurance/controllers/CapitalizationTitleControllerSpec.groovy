@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.raidiam.trustframework.mockinsurance.AuthHelper
 import com.raidiam.trustframework.mockinsurance.AwsProxyHelper
 import com.raidiam.trustframework.mockinsurance.models.generated.CapitalizationTitlePlanInfo
+import com.raidiam.trustframework.mockinsurance.models.generated.CapitalizationTitlePlanInfoV2
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseInsuranceCapitalizationTitle
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseInsuranceCapitalizationTitleV2
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseInsuranceCapitalizationTitleEvent
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseInsuranceCapitalizationTitlePlanInfo
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseInsuranceCapitalizationTitlePlanInfoV2
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseInsuranceCapitalizationTitleSettlement
 import com.raidiam.trustframework.mockinsurance.services.CapitalizationTitleService
 import com.raidiam.trustframework.mockinsurance.services.OverrideService
@@ -74,6 +77,27 @@ class CapitalizationTitleControllerSpec extends Specification {
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
 
+    def "We can fetch plans V2" () {
+        given:
+        def resp = new ResponseInsuranceCapitalizationTitleV2().data(List.of())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        capitalizationTitleService.getPlansV2(_ as String, _ as Pageable) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-capitalization-title/v2/insurance-capitalization-title/plans', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "capitalization-title consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
     def "We can fetch a plan info" () {
         given:
         def resp = new ResponseInsuranceCapitalizationTitlePlanInfo().data(new CapitalizationTitlePlanInfo())
@@ -81,6 +105,27 @@ class CapitalizationTitleControllerSpec extends Specification {
         capitalizationTitleService.getPlanInfo(_ as UUID, _ as String) >> resp
 
         def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-capitalization-title/v1/insurance-capitalization-title/'+UUID.randomUUID().toString()+'/plan-info', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "capitalization-title consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "We can fetch a plan info V2" () {
+        given:
+        def resp = new ResponseInsuranceCapitalizationTitlePlanInfoV2().data(new CapitalizationTitlePlanInfoV2())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        capitalizationTitleService.getPlanInfoV2(_ as UUID, _ as String) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-capitalization-title/v2/insurance-capitalization-title/'+UUID.randomUUID().toString()+'/plan-info', HttpMethod.GET)
                 .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "capitalization-title consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
 
@@ -116,6 +161,27 @@ class CapitalizationTitleControllerSpec extends Specification {
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
 
+    def "We can fetch a plan's events V2" () {
+        given:
+        def resp = new ResponseInsuranceCapitalizationTitleEvent().data(List.of())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        capitalizationTitleService.getPlanEvents(_ as UUID, _ as String, _ as Pageable) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-capitalization-title/v2/insurance-capitalization-title/'+UUID.randomUUID().toString()+'/events', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "capitalization-title consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
     def "We can fetch a plan's settlements" () {
         given:
         def resp = new ResponseInsuranceCapitalizationTitleSettlement().data(List.of())
@@ -123,6 +189,27 @@ class CapitalizationTitleControllerSpec extends Specification {
         capitalizationTitleService.getPlanSettlements(_ as UUID, _ as String, _ as Pageable) >> resp
 
         def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-capitalization-title/v1/insurance-capitalization-title/'+UUID.randomUUID().toString()+'/settlements', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "capitalization-title consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "We can fetch a plan's settlements V2" () {
+        given:
+        def resp = new ResponseInsuranceCapitalizationTitleSettlement().data(List.of())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        capitalizationTitleService.getPlanSettlements(_ as UUID, _ as String, _ as Pageable) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-capitalization-title/v2/insurance-capitalization-title/'+UUID.randomUUID().toString()+'/settlements', HttpMethod.GET)
                 .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "capitalization-title consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
 

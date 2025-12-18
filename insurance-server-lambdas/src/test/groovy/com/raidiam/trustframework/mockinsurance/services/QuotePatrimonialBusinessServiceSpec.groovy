@@ -32,6 +32,21 @@ class QuotePatrimonialBusinessServiceSpec extends CleanupSpecification {
         newQuote.consentId == consentId
     }
 
+    def "We can create a quote without max LMG"() {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuotePatrimonialBusiness(consentId)
+        quote.data.v1.quoteData.maxLMG = null
+
+        when:
+        def newQuote = quotePatrimonialBusinessService.createQuote(quote)
+
+        then:
+        noExceptionThrown()
+        newQuote.quoteId != null
+        newQuote.consentId == consentId
+    }
+
     def "We can fetch a quote that moves to ACPT"() {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
@@ -52,8 +67,7 @@ class QuotePatrimonialBusinessServiceSpec extends CleanupSpecification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuotePatrimonialBusiness(consentId)
-        quote.setData(new QuotePatrimonialBusinessData()
-                .quoteData(new QuoteDataPatrimonialBusiness()))
+        quote.getData().setV1(new QuotePatrimonialBusinessData().quoteData(new QuoteDataPatrimonialBusiness()))
         quotePatrimonialBusinessRepository.save(quote)
 
         when:
@@ -70,7 +84,7 @@ class QuotePatrimonialBusinessServiceSpec extends CleanupSpecification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuotePatrimonialBusiness(consentId)
-        quote.data.quoteData.setPolicyId(null)
+        quote.data.v1.quoteData.setPolicyId(null)
         quotePatrimonialBusinessRepository.save(quote)
 
         when:
@@ -87,8 +101,8 @@ class QuotePatrimonialBusinessServiceSpec extends CleanupSpecification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuotePatrimonialBusiness(consentId)
-        quote.data.quoteData.setTermEndDate(LocalDate.of(2025, 1, 1))
-        quote.data.quoteData.setTermStartDate(LocalDate.of(2025, 1, 2))
+        quote.data.v1.quoteData.setTermEndDate(LocalDate.of(2025, 1, 1))
+        quote.data.v1.quoteData.setTermStartDate(LocalDate.of(2025, 1, 2))
         quotePatrimonialBusinessRepository.save(quote)
 
         when:
@@ -105,8 +119,8 @@ class QuotePatrimonialBusinessServiceSpec extends CleanupSpecification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuotePatrimonialBusiness(consentId)
-        quote.data.quoteData.setTermEndDate(null)
-        quote.data.quoteData.setTermStartDate(null)
+        quote.data.v1.quoteData.setTermEndDate(null)
+        quote.data.v1.quoteData.setTermStartDate(null)
 
         when:
         quotePatrimonialBusinessService.createQuote(quote)
@@ -196,7 +210,7 @@ class QuotePatrimonialBusinessServiceSpec extends CleanupSpecification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuotePatrimonialBusiness(consentId)
-        quote.setData(new QuotePatrimonialBusinessData()
+        quote.getData().setV1(new QuotePatrimonialBusinessData()
                 .quoteData(new QuoteDataPatrimonialBusiness()
                 .maxLMG(new AmountDetails()
                         .unit(new AmountDetailsUnit()
@@ -214,7 +228,7 @@ class QuotePatrimonialBusinessServiceSpec extends CleanupSpecification {
         e.getMessage() == "NAO_INFORMADO: Amount missing from amount details"
 
         when:
-        quote.data.quoteData.maxLMG.setAmount("1000.00")
+        quote.data.v1.quoteData.maxLMG.setAmount("1000.00")
         quotePatrimonialBusinessService.createQuote(quote)
 
         then:

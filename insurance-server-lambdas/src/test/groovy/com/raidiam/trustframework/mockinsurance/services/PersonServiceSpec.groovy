@@ -65,6 +65,16 @@ class PersonServiceSpec extends CleanupSpecification {
         response.getData().first()
     }
 
+    def "we can get policies V2" () {
+        when:
+        def response = personService.getPoliciesV2(Pageable.from(0, 1), testConsent.getConsentId().toString())
+
+        then:
+        response.getData()
+        response.getData().size() == 1
+        response.getData().first()
+    }
+
     def "we can get a policy info" () {
         when:
         def response = personService.getPolicyInfo(testPersonPolicy.getPersonPolicyId(), testConsent.getConsentId().toString())
@@ -73,9 +83,25 @@ class PersonServiceSpec extends CleanupSpecification {
         response.getData() != null
     }
 
+    def "we can get a policy info V2" () {
+        when:
+        def response = personService.getPolicyInfoV2(testPersonPolicy.getPersonPolicyId(), testConsent.getConsentId().toString())
+
+        then:
+        response.getData() != null
+    }
+
     def "we can get a policy's claims" () {
         when:
         def response = personService.getPolicyClaims(testPersonPolicy.getPersonPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
+
+        then:
+        response.getData() != null
+    }
+
+    def "we can get a policy's claims V2" () {
+        when:
+        def response = personService.getPolicyClaimsV2(testPersonPolicy.getPersonPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
 
         then:
         response.getData() != null

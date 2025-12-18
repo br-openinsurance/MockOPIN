@@ -239,6 +239,9 @@ class CleanupSpecification extends Specification {
     @Inject
     OverrideResponseRepository overrideResponseRepository
 
+    @Inject
+    DynamicFieldsRepository dynamicFieldsRepository
+
     @Shared
     boolean runSetup = true
 

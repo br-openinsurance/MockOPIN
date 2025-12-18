@@ -22,15 +22,19 @@ public class ResponsibilityService extends BaseInsuranceService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResponsibilityService.class);
 
-    public BaseInsuranceResponse getPolicies(Pageable pageable, String consentId) {
+    private List<ResponsibilityPolicyEntity> getResponsibilityPolicyEntities(Pageable pageable, String consentId) {
         LOG.info("Getting Personal Customers Identification response for consent id {}", consentId);
-
+    
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
-
+    
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
-        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_READ);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_READ);
+    
+        return responsibilityPolicyRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable).getContent();
+    }
 
-        var policies = responsibilityPolicyRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable).getContent();
+    public BaseInsuranceResponse getPolicies(Pageable pageable, String consentId) {
+        var policies = getResponsibilityPolicyEntities(pageable, consentId);
         return new BaseInsuranceResponse()
                 .data(List.of(new BaseBrandAndCompanyData()
                         .brand("Mock")
@@ -40,7 +44,18 @@ public class ResponsibilityService extends BaseInsuranceService {
                                         .policies(policies.stream().map(ResponsibilityPolicyEntity::mapPolicyDTO).toList())))));
     }
 
-    private ResponsibilityPolicyEntity getPolicy(UUID policyId, String consentId, EnumConsentPermission permission) {
+    public BaseInsuranceResponseV2 getPoliciesV2(Pageable pageable, String consentId) {
+        var policies = getResponsibilityPolicyEntities(pageable, consentId);
+        return new BaseInsuranceResponseV2()
+                .data(List.of(new BaseBrandAndCompanyDataV2()
+                        .brand("Mock")
+                        .companies(List.of(new BaseBrandAndCompanyDataV2Companies()
+                                        .companyName("Mock Insurer")
+                                        .cnpjNumber("12345678901234")
+                                        .policies(policies.stream().map(ResponsibilityPolicyEntity::mapPolicyDTO).toList())))));
+    }
+
+    private ResponsibilityPolicyEntity getPolicy(UUID policyId, String consentId, EnumConsentPermission permission, EnumConsentV3Permission permissionV3) {
         LOG.info("Getting responsibility policy for policy id {} and consent id {}", policyId, consentId);
 
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
@@ -48,7 +63,7 @@ public class ResponsibilityService extends BaseInsuranceService {
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Policy id " + policyId + " not found"));
 
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
-        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, permission);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, permission, permissionV3);
         this.checkConsentCoversPolicy(consentEntity, policy);
         this.checkConsentOwnerIsPolicyOwner(consentEntity, policy);
 
@@ -57,12 +72,17 @@ public class ResponsibilityService extends BaseInsuranceService {
 
     public ResponseInsuranceResponsibilityPolicyInfo getPolicyInfo(UUID policyId, String consentId) {
         LOG.info("Getting responsibility policy info response for consent id {}", consentId);
-        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_POLICYINFO_READ).mapPolicyInfoDTO();
+        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_POLICYINFO_READ).mapPolicyInfoDTO();
+    }
+
+    public ResponseInsuranceResponsibilityPolicyInfoV2 getPolicyInfoV2(UUID policyId, String consentId) {
+        LOG.info("Getting responsibility policy info response for consent id {}", consentId);
+        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_POLICYINFO_READ).mapPolicyInfoDTOV2();
     }
 
     public ResponseInsuranceResponsibilityClaims getPolicyClaims(UUID policyId, String consentId, Pageable pageable) {
         LOG.info("Getting responsibility policy claims response for consent id {}", consentId);
-        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_CLAIM_READ);
+        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_CLAIM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_CLAIM_READ);
 
         var claims = responsibilityPolicyClaimRepository.findByResponsibilityPolicyId(policyId, pageable);
         var resp = new ResponseInsuranceResponsibilityClaims()
@@ -71,9 +91,20 @@ public class ResponsibilityService extends BaseInsuranceService {
         return resp;
     }
 
+    public ResponseInsuranceResponsibilityClaimsV2 getPolicyClaimsV2(UUID policyId, String consentId, Pageable pageable) {
+        LOG.info("Getting responsibility policy claims response for consent id {}", consentId);
+        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_CLAIM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_CLAIM_READ);
+
+        var claims = responsibilityPolicyClaimRepository.findByResponsibilityPolicyId(policyId, pageable);
+        var resp = new ResponseInsuranceResponsibilityClaimsV2()
+                .data(claims.getContent().stream().map(ResponsibilityPolicyClaimEntity::mapDTOV2).toList());
+        resp.setMeta(InsuranceLambdaUtils.getMeta(claims, false));
+        return resp;
+    }
+
     public ResponseInsuranceResponsibilityPremium getPolicyPremium(UUID policyId, String consentId) {
         LOG.info("Getting responsibility policy premium response for consent id {}", consentId);
-        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_PREMIUM_READ);
+        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_PREMIUM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_PREMIUM_READ);
 
         var premium = responsibilityPolicyPremiumRepository.findByResponsibilityPolicyId(policyId)
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Policy id " + policyId + " not found"));

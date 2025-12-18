@@ -52,6 +52,13 @@ public abstract class QuoteEntity extends BaseEntity {
         }
     }
 
+    public void setCustomer(QuoteCustomerDataV2 req) {
+        this.setPersonCpf(req.getIdentificationData().getCpfNumber());
+        if (req.getIdentificationData().getDocument() != null) {
+            this.setBusinessCnpj(req.getIdentificationData().getDocument().getBusinesscnpjNumber());
+        }
+    }
+
     public ResponsePatch toPatchResponse(String redirectLink) {
         var patchData = new ResponsePatchData();
         patchData.setStatus(ResponsePatchData.StatusEnum.fromValue(this.getStatus()));

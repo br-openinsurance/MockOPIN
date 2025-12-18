@@ -67,9 +67,27 @@ class LifePensionServiceSpec extends CleanupSpecification {
         response.getData().first()
     }
 
+    def "we can get contracts V2" () {
+        when:
+        def response = lifePensionService.getContractsV2(Pageable.from(0, 1), testConsent.getConsentId().toString())
+
+        then:
+        response.getData()
+        response.getData().size() == 1
+        response.getData().first()
+    }
+
     def "we can get a contract info" () {
         when:
         def response = lifePensionService.getContractInfo(testLifePensionContract.getLifePensionContractId(), testConsent.getConsentId().toString())
+
+        then:
+        response.getData() != null
+    }
+
+    def "we can get a contract info V2" () {
+        when:
+        def response = lifePensionService.getContractInfoV2(testLifePensionContract.getLifePensionContractId(), testConsent.getConsentId().toString())
 
         then:
         response.getData() != null
@@ -83,9 +101,25 @@ class LifePensionServiceSpec extends CleanupSpecification {
         response.getData() != null
     }
 
+    def "we can get a contract's claims V2" () {
+        when:
+        def response = lifePensionService.getContractClaimsV2(testLifePensionContract.getLifePensionContractId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
+
+        then:
+        response.getData() != null
+    }
+
     def "we can get a contract's withdrawals" () {
         when:
         def response = lifePensionService.getContractWithdrawals(testLifePensionContract.getLifePensionContractId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
+
+        then:
+        response.getData() != null
+    }
+
+    def "we can get a contract's withdrawals V2" () {
+        when:
+        def response = lifePensionService.getContractWithdrawalsV2(testLifePensionContract.getLifePensionContractId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
 
         then:
         response.getData() != null
@@ -102,6 +136,14 @@ class LifePensionServiceSpec extends CleanupSpecification {
     def "we can get a contract's portabilities" () {
         when:
         def response = lifePensionService.getContractPortabilities(testLifePensionContract.getLifePensionContractId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
+
+        then:
+        response.getData() != null
+    }
+
+    def "we can get a contract's portabilities V2" () {
+        when:
+        def response = lifePensionService.getContractPortabilitiesV2(testLifePensionContract.getLifePensionContractId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
 
         then:
         response.getData() != null

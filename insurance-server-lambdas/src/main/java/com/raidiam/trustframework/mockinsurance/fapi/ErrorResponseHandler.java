@@ -58,7 +58,7 @@ public class ErrorResponseHandler implements ErrorResponseProcessor<Object> {
 
         insuranceLambdaUtils.decorateResponseError(error, errorContext.getRequest());
         Object respError = error;
-        if (HttpStatus.UNPROCESSABLE_ENTITY.equals(response.getStatus())) {
+        if (errorContext.getRequest().getPath().contains("v1") && HttpStatus.UNPROCESSABLE_ENTITY.equals(response.getStatus())) {
             respError = Map.of("errors", error.getErrors().get(0));
         }
         InsuranceLambdaUtils.logObject(objectMapper, respError);

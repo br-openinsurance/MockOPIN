@@ -79,6 +79,7 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
             entry("insurance-auto", "AUTO_MANAGE"),
             entry("insurance-pension-plan", "PENSION_PLAN_MANAGE"),
             entry("insurance-transport", "TRANSPORT_MANAGE"),
+            entry("dynamic-fields", "DYNAMIC_FIELDS_READ"),
             // op-related scopes, are these real? They govern the PUT endpoints needed for administration.
             entry("op:consent", "CONSENTS_FULL_MANAGE"),
             entry("op:admin", "ADMIN_FULL_MANAGE"),

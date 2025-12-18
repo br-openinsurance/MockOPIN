@@ -118,6 +118,19 @@ class HousingServiceSpec extends CleanupHousingSpecification {
         response.getData().first().getCompanies().first().getPolicies().first().getPolicyId() == testHousingPolicy.getHousingPolicyId().toString()
     }
 
+    def "we can get policies V2" () {
+        when:
+        def response = housingService.getPoliciesV2(Pageable.from(0, 1), testConsent.getConsentId().toString())
+
+        then:
+        response.getData()
+        response.getData().size() == 1
+        response.getData().first()
+        response.getData().first().getBrand() == "Mock"
+        response.getData().first().getCompanies().first().getCnpjNumber() == "12345678901234"
+        response.getData().first().getCompanies().first().getPolicies().first().getPolicyId() == testHousingPolicy.getHousingPolicyId().toString()
+    }
+
     def "we can get a policy info" () {
         when:
         def response = housingService.getPolicyInfo(testHousingPolicy.getHousingPolicyId(), testConsent.getConsentId().toString())
@@ -135,9 +148,36 @@ class HousingServiceSpec extends CleanupHousingSpecification {
         response.getData().getBranchInfo().getInsureds().first().getIdentification() == testHousingPolicyBranchInsured.getIdentification()
     }
 
+    def "we can get a policy info V2" () {
+        when:
+        def response = housingService.getPolicyInfoV2(testHousingPolicy.getHousingPolicyId(), testConsent.getConsentId().toString())
+
+        then:
+        response.getData() != null
+        response.getData().getPolicyId() == testHousingPolicy.getPolicyId()
+        response.getData().getInsureds().first().getIdentification() == testHousingPolicyInsured.getIdentification()
+        response.getData().getBeneficiaries().first().getIdentification() == testHousingPolicyBeneficiary.getIdentification()
+        response.getData().getIntermediaries().first().getIdentification() == testHousingPolicyIntermediary.getIdentification()
+        response.getData().getInsuredObjects().first().getIdentification() == testHousingPolicyInsuredObject.getIdentification()
+        response.getData().getInsuredObjects().first().getCoverages().first().getBranch() == testHousingPolicyInsuredObjectCoverage.getBranch()
+        response.getData().getBranchInfo().getInsuredObjects().first().getIdentification() == testHousingPolicyBranchInsuredObject.getIdentification()
+        response.getData().getBranchInfo().getInsuredObjects().first().getLenders().first().getCnpjNumber() == testHousingPolicyBranchInsuredObjectLender.getCnpjNumber()
+        response.getData().getBranchInfo().getInsureds().first().getIdentification() == testHousingPolicyBranchInsured.getIdentification()
+    }
+
     def "we can get a policy's claims" () {
         when:
         def response = housingService.getPolicyClaims(testHousingPolicy.getHousingPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
+
+        then:
+        response.getData() != null
+        response.getData().first().getIdentification() == testHousingPolicyClaim.getIdentification()
+        response.getData().first().getCoverages().first().getBranch() == testHousingPolicyClaimCoverage.getBranch()
+    }
+
+    def "we can get a policy's claims V2" () {
+        when:
+        def response = housingService.getPolicyClaimsV2(testHousingPolicy.getHousingPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
 
         then:
         response.getData() != null

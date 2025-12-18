@@ -33,7 +33,7 @@ public class TransportPolicyService extends BaseInsuranceService {
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
 
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
-        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.DAMAGES_AND_PEOPLE_TRANSPORT_READ);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.DAMAGES_AND_PEOPLE_TRANSPORT_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_TRANSPORT_READ);
 
         var consentPolicies = consentTransportPolicyRepository.findByConsentConsentIdOrderByCreatedAtAsc(consentId, pageable);
         this.checkConsentOwnerIsPolicyOwner(consentPolicies, consentEntity);
@@ -56,19 +56,53 @@ public class TransportPolicyService extends BaseInsuranceService {
         return response;
     }
 
+    public BaseInsuranceResponseV2 getPoliciesV2(String consentId, Pageable pageable) {
+        LOG.info("Getting transport policies response for consent id {}", consentId);
+
+        var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
+
+        InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.DAMAGES_AND_PEOPLE_TRANSPORT_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_TRANSPORT_READ);
+
+        var consentPolicies = consentTransportPolicyRepository.findByConsentConsentIdOrderByCreatedAtAsc(consentId, pageable);
+        this.checkConsentOwnerIsPolicyOwner(consentPolicies, consentEntity);
+
+        var response = new BaseInsuranceResponseV2()
+                .data(List.of(new BaseBrandAndCompanyDataV2()
+                        .brand("Mock")
+                        .companies(List.of(new BaseBrandAndCompanyDataV2Companies()
+                                .companyName("Mock Insurer")
+                                .cnpjNumber("12345678901234")
+                                .policies(consentPolicies.getContent()
+                                        .stream()
+                                        .map(consentAccountEntity -> {
+                                            resourcesService.checkStatusAvailable(consentAccountEntity.getTransportPolicy(), consentEntity);
+                                            return consentAccountEntity.getTransportPolicy();
+                                        })
+                                        .map(TransportPolicyEntity::mapPolicyDto)
+                                        .toList())))));
+        response.setMeta(InsuranceLambdaUtils.getMeta(consentPolicies, false));
+        return response;
+    }
+
     public ResponseInsuranceTransportPolicyInfo getPolicyInfo(String policyId, String consentId) {
         LOG.info("Getting transport policy info response for consent id {}", consentId);
-        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_TRANSPORT_POLICYINFO_READ).mapInfoDto();
+        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_TRANSPORT_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_TRANSPORT_POLICYINFO_READ).mapInfoDto();
+    }
+
+    public ResponseInsuranceTransportPolicyInfoV2 getPolicyInfoV2(String policyId, String consentId) {
+        LOG.info("Getting transport policy info response for consent id {}", consentId);
+        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_TRANSPORT_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_TRANSPORT_POLICYINFO_READ).mapInfoDtoV2();
     }
 
     public ResponseInsuranceTransportPremium getPolicyPremium(String policyId, String consentId) {
         LOG.info("Getting transport policy premium response for consent id {}", consentId);
-        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_TRANSPORT_PREMIUM_READ).mapPremiumDto();
+        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_TRANSPORT_PREMIUM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_TRANSPORT_PREMIUM_READ).mapPremiumDto();
     }
 
     public ResponseInsuranceTransportClaims getPolicyClaims(String policyId, String consentId, Pageable pageable) {
         LOG.info("Getting transport policy claims response for consent id {}", consentId);
-        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_TRANSPORT_CLAIM_READ);
+        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_TRANSPORT_CLAIM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_TRANSPORT_CLAIM_READ);
 
         var claims = transportPolicyClaimRepository.findByTransportPolicyId(policyId, pageable);
         var resp = new ResponseInsuranceTransportClaims()
@@ -77,7 +111,18 @@ public class TransportPolicyService extends BaseInsuranceService {
         return resp;
     }
 
-    private TransportPolicyEntity getPolicy(String policyId, String consentId, EnumConsentPermission permission) {
+    public ResponseInsuranceTransportClaimsV2 getPolicyClaimsV2(String policyId, String consentId, Pageable pageable) {
+        LOG.info("Getting transport policy claims response for consent id {}", consentId);
+        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_TRANSPORT_CLAIM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_TRANSPORT_CLAIM_READ);
+
+        var claims = transportPolicyClaimRepository.findByTransportPolicyId(policyId, pageable);
+        var resp = new ResponseInsuranceTransportClaimsV2()
+                .data(claims.getContent().stream().map(TransportPolicyClaimEntity::mapDtoV2).toList());
+        resp.setMeta(InsuranceLambdaUtils.getMeta(claims, false));
+        return resp;
+    }
+
+    private TransportPolicyEntity getPolicy(String policyId, String consentId, EnumConsentPermission permission, EnumConsentV3Permission permissionV3) {
         LOG.info("Getting transport policy for policy id {} and consent id {}", policyId, consentId);
 
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
@@ -85,7 +130,7 @@ public class TransportPolicyService extends BaseInsuranceService {
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Policy id " + policyId + " not found"));
 
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
-        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, permission);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, permission, permissionV3);
         this.checkConsentCoversPolicy(consentEntity, policy);
         this.checkConsentOwnerIsPolicyOwner(consentEntity, policy);
 

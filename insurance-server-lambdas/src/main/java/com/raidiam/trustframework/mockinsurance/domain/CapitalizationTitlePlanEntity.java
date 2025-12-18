@@ -80,4 +80,10 @@ public class CapitalizationTitlePlanEntity extends BaseEntity implements HasStat
                         .series(this.getCapitalizationTitlePlanSeries().stream().map(CapitalizationTitlePlanSeriesEntity::toResponse).toList()));
     }
 
+    public ResponseInsuranceCapitalizationTitlePlanInfoV2 mapPlanInfoDtoV2() {
+        return new ResponseInsuranceCapitalizationTitlePlanInfoV2()
+                .data(new CapitalizationTitlePlanInfoV2()
+                        .series(this.getCapitalizationTitlePlanSeries().stream().map(CapitalizationTitlePlanSeriesEntity::toResponseV2).toList()));
+    }
+
 }

@@ -122,4 +122,31 @@ public class CapitalizationTitlePlanTitleEntity extends BaseEntity {
                 .subscriber(this.getSubscribers().stream().map(CapitalizationTitlePlanSubscriberEntity::getDTO).toList())
                 .technicalProvisions(this.getTechnicalProvisions().stream().map(CapitalizationTitlePlanTechnicalProvisionsEntity::getDTO).toList());
     }
+
+    public InsuranceCapitalizationTitleTitleV2 getDTOV2() {
+        return new InsuranceCapitalizationTitleTitleV2()
+                .titleId(String.valueOf(this.getTitleId()))
+                .registrationForm(this.getRegistrationForm())
+                .issueTitleDate(this.getIssueTitleDate())
+                .termStartDate(this.getTermStartDate())
+                .termEndDate(this.getTermEndDate())
+                .rafflePremiumAmount(new AmountDetails()
+                        .amount(this.getRafflePremiumAmount())
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getRafflePremiumUnitType()))
+                        .unitTypeOthers(this.getRafflePremiumUnitTypeOthers())
+                        .unit(new AmountDetailsUnit()
+                                .code(this.getRafflePremiumUnitCode())
+                                .description(AmountDetailsUnit.DescriptionEnum.fromValue(this.getRafflePremiumUnitDescription())))
+                        .currency(AmountDetails.CurrencyEnum.fromValue(this.getRafflePremiumCurrency())))
+                .contributionAmount(new AmountDetails()
+                        .amount(this.getContributionAmount())
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getContributionUnitType()))
+                        .unitTypeOthers(this.getContributionUnitTypeOthers())
+                        .unit(new AmountDetailsUnit()
+                                .code(this.getContributionUnitCode())
+                                .description(AmountDetailsUnit.DescriptionEnum.fromValue(this.getContributionUnitDescription())))
+                        .currency(AmountDetails.CurrencyEnum.fromValue(this.getContributionCurrency())))
+                .subscriber(this.getSubscribers().stream().map(CapitalizationTitlePlanSubscriberEntity::getDTOV2).toList())
+                .technicalProvisions(this.getTechnicalProvisions().stream().map(CapitalizationTitlePlanTechnicalProvisionsEntity::getDTO).toList());
+    }
 }

@@ -14,6 +14,7 @@ import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetailsUn
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetailsUnit.DescriptionEnum;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePatrimonialClaim;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePatrimonialClaimCoverage;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePatrimonialClaimV2;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePatrimonialCoverageCode;
 
 import jakarta.persistence.*;
@@ -50,6 +51,27 @@ public class PatrimonialClaimEntity extends BaseEntity {
             .identification(this.getIdentification())
             .documentationDeliveryDate(LocalDate.now())
             .status(InsurancePatrimonialClaim.StatusEnum.ABERTO)
+            .statusAlterationDate(LocalDate.now())
+            .occurrenceDate(LocalDate.now())
+            .warningDate(LocalDate.now())
+            .thirdPartyClaimDate(LocalDate.now())
+            .amount(new AmountDetails()
+                .amount("2000.00")
+                .unitType(UnitTypeEnum.MONETARIO)
+                .unit(new AmountDetailsUnit().code("R$").description(DescriptionEnum.BRL))
+                .currency(CurrencyEnum.BRL)
+            )
+            .coverages(List.of(new InsurancePatrimonialClaimCoverage()
+                .branch("0111")
+                .code(InsurancePatrimonialCoverageCode.IMOVEL_BASICA)
+            ));
+    }
+
+    public InsurancePatrimonialClaimV2 toResponseV2() {
+        return new InsurancePatrimonialClaimV2()
+            .identification(this.getIdentification())
+            .documentationDeliveryDate(LocalDate.now())
+            .status(InsurancePatrimonialClaimV2.StatusEnum.ABERTO)
             .statusAlterationDate(LocalDate.now())
             .occurrenceDate(LocalDate.now())
             .warningDate(LocalDate.now())

@@ -7,6 +7,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceHousingSpecificInsuredObjectLenders;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceHousingSpecificInsuredObjectV2Lenders;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -44,6 +45,12 @@ public class HousingPolicyBranchInsuredObjectLenderEntity extends BaseEntity {
 
     public InsuranceHousingSpecificInsuredObjectLenders mapDto() {
         return new InsuranceHousingSpecificInsuredObjectLenders()
+            .companyName(this.getCompanyName())
+            .cnpjNumber(this.getCnpjNumber());
+    }
+
+    public InsuranceHousingSpecificInsuredObjectV2Lenders mapDtoV2() {
+        return new InsuranceHousingSpecificInsuredObjectV2Lenders()
             .companyName(this.getCompanyName())
             .cnpjNumber(this.getCnpjNumber());
     }
