@@ -9,6 +9,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceHousingSpecificInsuredObject;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceHousingSpecificInsuredObjectV2;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -70,5 +71,16 @@ public class HousingPolicyBranchInsuredObjectEntity extends BaseEntity {
             .costRate(this.getCostRate())
             .updateIndex(InsuranceHousingSpecificInsuredObject.UpdateIndexEnum.valueOf(this.getUpdateIndex()))
             .lenders(this.getLenders().stream().map(HousingPolicyBranchInsuredObjectLenderEntity::mapDto).toList());
+    }
+
+    public InsuranceHousingSpecificInsuredObjectV2 mapDtoV2() {
+        return new InsuranceHousingSpecificInsuredObjectV2()
+            .identification(this.getIdentification())
+            .propertyType(InsuranceHousingSpecificInsuredObjectV2.PropertyTypeEnum.valueOf(this.getPropertyType()))
+            .postCode(this.getPostcode())
+            .interestRate(this.getInterestRate())
+            .costRate(this.getCostRate())
+            .updateIndex(InsuranceHousingSpecificInsuredObjectV2.UpdateIndexEnum.valueOf(this.getUpdateIndex()))
+            .lenders(this.getLenders().stream().map(HousingPolicyBranchInsuredObjectLenderEntity::mapDtoV2).toList());
     }
 }

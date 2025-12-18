@@ -62,4 +62,31 @@ public class LifePensionContractPortabilityInfoEntity extends BaseEntity {
                 )
         );
     }
+
+    public InsuranceLifePensionPortabilityV2PortabilityInfo mapDTOV2() {
+        return new InsuranceLifePensionPortabilityV2PortabilityInfo()
+                .direction(InsuranceLifePensionPortabilityV2PortabilityInfo.DirectionEnum.ENTRADA)
+                .type(InsuranceLifePensionPortabilityV2PortabilityInfo.TypeEnum.PARCIAL)
+                .amount(new AmountDetails()
+                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
+                        .amount("90.85")
+                )
+                .requestDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
+                .liquidationDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
+                .postedChargedAmount(new AmountDetails()
+                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
+                        .amount("90.85")
+                )
+                .sourceEntity("12345678901234")
+                .targetEntity("12345678901234")
+                .susepProcess("12345")
+                .taxRegime(InsuranceLifePensionPortabilityV2PortabilityInfo.TaxRegimeEnum.PROGRESSIVO)
+                .FIE(List.of(new InsuranceLifePensionPortabilityV2FIE()
+                        .FIECNPJ("12345678901234")
+                        .fiEName("RAZÃO SOCIAL")
+                        .fiETradeName("NOME FANTASIA")
+                        .portedType(InsuranceLifePensionPortabilityV2FIE.PortedTypeEnum.ORIGEM)
+                )
+        );
+    }
 }

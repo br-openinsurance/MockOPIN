@@ -33,11 +33,34 @@ public class ClaimNotificationDamageEntity extends ClaimNotificationEntity {
         return entity;
     }
 
+    public static ClaimNotificationDamageEntity fromRequestV2(CreateClaimNotificationDamageV2 req, String clientId, String consentId) {
+        var entity = new ClaimNotificationDamageEntity();
+
+        entity.setClientId(clientId);
+        entity.setConsentId(consentId);
+        entity.setData(req.getData());
+        return entity;
+    }
+
     public ResponseClaimNotificationDamage toResponse(String redirectLink) {
         this.data.setProtocolNumber("123456");
         this.data.setProtocolDateTime(OffsetDateTime.now());
 
         var resp = new ResponseClaimNotificationDamage();
+        resp.setData(this.data);
+
+        var links = new ClaimNotificationLinks();
+        links.setRedirect(redirectLink);
+        resp.setLinks(links);
+
+        return resp;
+    }
+
+    public ResponseClaimNotificationDamageV2 toResponseV2(String redirectLink) {
+        this.data.setProtocolNumber("123456");
+        this.data.setProtocolDateTime(OffsetDateTime.now());
+
+        var resp = new ResponseClaimNotificationDamageV2();
         resp.setData(this.data);
 
         var links = new ClaimNotificationLinks();

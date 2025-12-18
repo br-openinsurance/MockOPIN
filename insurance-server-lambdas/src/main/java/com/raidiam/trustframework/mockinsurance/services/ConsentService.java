@@ -6,6 +6,9 @@ import com.raidiam.trustframework.mockinsurance.models.generated.*;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 import com.raidiam.trustframework.mockinsurance.utils.PermissionGroup;
 import com.raidiam.trustframework.mockinsurance.utils.PermissionPhase;
+import com.raidiam.trustframework.mockinsurance.utils.PermissionV3Group;
+import com.raidiam.trustframework.mockinsurance.utils.PermissionV3Phase;
+
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.exceptions.HttpStatusException;
 import jakarta.inject.Singleton;
@@ -39,7 +42,19 @@ public class ConsentService extends BaseInsuranceService {
         return this.consentRepository.save(entity);
     }
 
-    public ResponseConsent updateConsent(String consentId, UpdateConsent req) {
+    public ConsentEntity createConsentV3(CreateConsentV3 req, String clientId) {
+        this.validateRequest(req);
+
+        var accountHolderId = this.accountHolderRepository.findByDocumentIdentificationAndDocumentRel(
+                req.getData().getLoggedUser().getDocument().getIdentification(),
+                req.getData().getLoggedUser().getDocument().getRel()
+        ).map(AccountHolderEntity::getAccountHolderId).orElse(null);
+        var entity = ConsentEntity.fromRequest(req, accountHolderId, clientId);
+
+        return this.consentRepository.save(entity);
+    }
+
+    public ConsentEntity updateConsentEntity(String consentId, UpdateConsent req){
         var consent = this.getConsentEntity(consentId);
         if (req.getData().getStatus() != null) {
             consent.setStatus(req.getData().getStatus().toString());
@@ -106,7 +121,15 @@ public class ConsentService extends BaseInsuranceService {
         consentRepository.update(consent);
 
         return consentRepository.findById(consent.getReferenceId())
-                .orElseThrow(() -> new HttpStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not look up consent that has just been updated")).toFullResponse();
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not look up consent that has just been updated"));
+    }
+
+    public ResponseConsent updateConsent(String consentId, UpdateConsent req) {
+        return updateConsentEntity(consentId, req).toFullResponse();
+    }
+
+    public ResponseConsentV3 updateConsentV3(String consentId, UpdateConsent req) {
+        return updateConsentEntity(consentId, req).toFullResponseV3();
     }
 
     private void addCapitalizationTitlePlansToConsent(ConsentEntity consent, List<String> requestedPlans) {
@@ -232,8 +255,16 @@ public class ConsentService extends BaseInsuranceService {
         return getConsentEntity(consentId, OP_CLIENT_ID).toFullResponse();
     }
 
+    public ResponseConsentV3 getFullConsentV3(String consentId) {
+        return getConsentEntity(consentId, OP_CLIENT_ID).toFullResponseV3();
+    }
+
     public ResponseConsent getConsent(String consentId, String clientId) {
         return getConsentEntity(consentId, clientId).toResponse();
+    }
+
+    public ResponseConsentV3 getConsentV3(String consentId, String clientId) {
+        return getConsentEntity(consentId, clientId).toResponseV3();
     }
 
     private ConsentEntity getConsentEntity(String consentId) {
@@ -288,7 +319,27 @@ public class ConsentService extends BaseInsuranceService {
         this.validateExpiration(req);
     }
 
+    private void validateRequest(CreateConsentV3 req) {
+        this.validatePermissions(req);
+        this.validateExpiration(req);
+    }
+
     private void validateExpiration(CreateConsent req) {
+        var expirationDateTime = req.getData().getExpirationDateTime();
+        if (expirationDateTime == null) {
+            throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: expirationDateTime is required");
+        }
+
+        var now = InsuranceLambdaUtils.getOffsetDateTimeUTC();
+        if (expirationDateTime.isBefore(now)) {
+            throw new HttpStatusException(HttpStatus.BAD_REQUEST, "NAO_INFORMADO: The expiration time cannot be in the past");
+        }
+        if (expirationDateTime.isAfter(now.plusYears(1))) {
+            throw new HttpStatusException(HttpStatus.BAD_REQUEST, "NAO_INFORMADO: The expiration time cannot be greater than one year");
+        }
+    }
+
+    private void validateExpiration(CreateConsentV3 req) {
         var expirationDateTime = req.getData().getExpirationDateTime();
         if (expirationDateTime == null) {
             throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: expirationDateTime is required");
@@ -323,8 +374,38 @@ public class ConsentService extends BaseInsuranceService {
         }
     }
 
+    private void validatePermissions(CreateConsentV3 req) {
+        var permissions = req.getData().getPermissions();
+        permissions.forEach(p -> Optional.ofNullable(p)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.BAD_REQUEST, "BAD_PERMISSION: Invalid permission")));
+
+        boolean isPhase2 = PermissionV3Phase.PHASE2.containsAny(permissions);
+        boolean isPhase3 = PermissionV3Phase.PHASE3.containsAny(permissions);
+        if (isPhase2 && isPhase3) {
+            throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: Cannot request permissions from phase 2 and 3 at the same time");
+        }
+
+        if (isPhase2) {
+            validatePhase2PermissionsV3(permissions);
+        }
+
+        if (isPhase3) {
+            validatePhase3PermissionsV3(permissions);
+        }
+    }
+
     private void validatePhase2Permissions(List<EnumConsentPermission> permissions) {
         if (!permissions.contains(EnumConsentPermission.RESOURCES_READ)) {
+            throw new HttpStatusException(HttpStatus.BAD_REQUEST, "NAO_INFORMADO: The permission RESOURCES_READ is required for phase 2");
+        }
+
+        if (permissions.size() == 1) {
+            throw new HttpStatusException(HttpStatus.BAD_REQUEST, "NAO_INFORMADO: The permission RESOURCES_READ cannot be requested alone");
+        }
+    }
+
+    private void validatePhase2PermissionsV3(List<EnumConsentV3Permission> permissions) {
+        if (!permissions.contains(EnumConsentV3Permission.RESOURCES_READ)) {
             throw new HttpStatusException(HttpStatus.BAD_REQUEST, "NAO_INFORMADO: The permission RESOURCES_READ is required for phase 2");
         }
 
@@ -355,6 +436,34 @@ public class ConsentService extends BaseInsuranceService {
         }
 
         for (EnumConsentPermission p : group.getPermissions()) {
+            if (!permissions.contains(p)) {
+                throw new HttpStatusException(HttpStatus.BAD_REQUEST, "NAO_INFORMADO: All the permission from the group must be requested");
+            }
+        }
+    }
+
+    private void validatePhase3PermissionsV3(List<EnumConsentV3Permission> permissions) {
+        PermissionV3Group group = null;
+        int numberOfGroups = 0;
+        for (PermissionV3Group g : PermissionV3Group.values()) {
+            // Check if any of the requested permissions belongs to the current group.
+            if (!g.containsAny(permissions)) {
+                continue;
+            }
+
+            if (!g.isAllowed()) {
+                throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: Permission not allowed");
+            }
+
+            numberOfGroups++;
+            group = g;
+        }
+
+        if (numberOfGroups != 1) {
+            throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "NAO_INFORMADO: The permissions of different phase 3 categories were requested");
+        }
+
+        for (EnumConsentV3Permission p : group.getPermissions()) {
             if (!permissions.contains(p)) {
                 throw new HttpStatusException(HttpStatus.BAD_REQUEST, "NAO_INFORMADO: All the permission from the group must be requested");
             }

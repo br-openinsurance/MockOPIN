@@ -46,4 +46,17 @@ public class TransportPolicyClaimEntity extends BaseEntity {
                         .branch("0111")
                         .code(InsuranceTransportClaimCoverage.CodeEnum.ACIDENTES_PESSOAIS_COM_PASSAGEIROS)));
     }
+
+    public InsuranceTransportClaimV2 mapDtoV2() {
+        return new InsuranceTransportClaimV2()
+                .identification(this.getTransportPolicyClaimId())
+                .status(InsuranceTransportClaimV2.StatusEnum.fromValue(this.getStatus()))
+                .statusAlterationDate(InsuranceLambdaUtils.dateToLocalDate(this.getUpdatedAt()))
+                .occurrenceDate(InsuranceLambdaUtils.dateToLocalDate(this.getCreatedAt()))
+                .warningDate(InsuranceLambdaUtils.dateToLocalDate(this.getCreatedAt()))
+                .amount(new AmountDetails().amount("100.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
+                .coverages(List.of(new InsuranceTransportClaimCoverage()
+                        .branch("0111")
+                        .code(InsuranceTransportClaimCoverage.CodeEnum.ACIDENTES_PESSOAIS_COM_PASSAGEIROS)));
+    }
 }

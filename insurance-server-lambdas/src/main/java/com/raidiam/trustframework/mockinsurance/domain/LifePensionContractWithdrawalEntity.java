@@ -58,4 +58,28 @@ public class LifePensionContractWithdrawalEntity extends BaseEntity {
                         .amount("90.85")
                 );
     }
+
+    public InsuranceLifePensionWithdrawalV2 mapDTOV2() {
+        return new InsuranceLifePensionWithdrawalV2()
+                .withdrawalOccurence(true)
+                .withdrawalInfo(new InsuranceLifePensionWithdrawalV2WithdrawalInfo()
+                        .type(InsuranceLifePensionWithdrawalType.PARCIAL)
+                        .requestDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
+                        .liquidationDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
+                        .nature(InsuranceLifePensionWithdrawalNature.RESGATE_REGULAR)
+                        .FIE(List.of(new InsuranceLifePensionWithdrawalV2WithdrawalInfoFIE()
+                                .FIECNPJ("12345678901234")
+                                .fiEName("RAZÃO SOCIAL")
+                                .fiETradeName("NOME FANTASIA")
+                        ))
+                        .amount(new AmountDetails()
+                                .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
+                                .amount("90.85")
+                        )
+                        .postedChargedAmount(new AmountDetails()
+                                .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
+                                .amount("90.85")
+                        )       
+                );
+    }
 }

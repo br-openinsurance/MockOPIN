@@ -1,5 +1,7 @@
 package com.raidiam.trustframework.mockinsurance.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.raidiam.trustframework.mockinsurance.models.generated.*;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
@@ -11,6 +13,7 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +26,7 @@ public class QuotePatrimonialDiverseRisksEntity extends QuoteEntity {
 
     @Column(name = "data")
     @Type(JsonType.class)
-    private QuotePatrimonialDiverseRisksData data;
+    private QuoteData data;
 
     public static QuotePatrimonialDiverseRisksEntity fromRequest(QuoteRequestPatrimonialDiverseRisks req, String clientId) {
         var entity = new QuotePatrimonialDiverseRisksEntity();
@@ -35,7 +38,25 @@ public class QuotePatrimonialDiverseRisksEntity extends QuoteEntity {
 
         entity.setCustomer(req.getData().getQuoteCustomer());
 
-        entity.setData(req.getData());
+        var data = new QuotePatrimonialDiverseRisksEntity.QuoteData();
+        data.setV1(req.getData());
+        entity.setData(data);
+        return entity;
+    }
+
+    public static QuotePatrimonialDiverseRisksEntity fromRequestV2(QuoteRequestPatrimonialDiverseRisksV2 req, String clientId) {
+        var entity = new QuotePatrimonialDiverseRisksEntity();
+
+        entity.setClientId(clientId);
+        entity.setConsentId(req.getData().getConsentId());
+        entity.setStatus(QuoteStatusEnum.RCVD.toString());
+        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
+
+        entity.setCustomer(req.getData().getQuoteCustomer());
+
+        var data = new QuotePatrimonialDiverseRisksEntity.QuoteData();
+        data.setV2(req.getData());
+        entity.setData(data);
         return entity;
     }
 
@@ -46,9 +67,9 @@ public class QuotePatrimonialDiverseRisksEntity extends QuoteEntity {
 
         if (QuoteStatusEnum.ACPT.toString().equals(this.getStatus())) {
             var customer = new QuoteCustomer();
-            customer.setIdentification(this.getData().getQuoteCustomer().getIdentificationData());
-            customer.setQualification(this.getData().getQuoteCustomer().getQualificationData());
-            customer.setComplimentaryInfo(this.getData().getQuoteCustomer().getComplimentaryInformationData());
+            customer.setIdentification(this.getData().getV1().getQuoteCustomer().getIdentificationData());
+            customer.setQualification(this.getData().getV1().getQuoteCustomer().getQualificationData());
+            customer.setComplimentaryInfo(this.getData().getV1().getQuoteCustomer().getComplimentaryInformationData());
 
             var premium = new QuoteResultPremium();
             premium.setPaymentsQuantity(1);
@@ -80,8 +101,8 @@ public class QuotePatrimonialDiverseRisksEntity extends QuoteEntity {
 
             var quoteInfo = new QuotePatrimonialDiverseRisks();
             quoteInfo.setQuoteCustomer(customer);
-            quoteInfo.setQuoteData(this.getData().getQuoteData());
-            quoteInfo.setQuoteCustomData(this.getData().getQuoteCustomData());
+            quoteInfo.setQuoteData(this.getData().getV1().getQuoteData());
+            quoteInfo.setQuoteCustomData(this.getData().getV1().getQuoteCustomData());
             quoteInfo.setQuotes(List.of(quote));
 
             quoteData.setQuoteInfo(quoteInfo);
@@ -96,11 +117,88 @@ public class QuotePatrimonialDiverseRisksEntity extends QuoteEntity {
         return resp;
     }
 
+    public ResponseQuotePatrimonialDiverseRisksV2 toResponseV2() {
+        var quoteData = new ResponseQuotePatrimonialDiverseRisksV2Data();
+        quoteData.setStatus(QuoteStatusEnum.fromValue(this.getStatus()));
+        quoteData.setStatusUpdateDateTime(InsuranceLambdaUtils.dateToOffsetDate(this.getUpdatedAt()));
+
+        if (QuoteStatusEnum.ACPT.toString().equals(this.getStatus())) {
+            var customer = new QuoteCustomerV2();
+            customer.setIdentification(this.getData().getV2().getQuoteCustomer().getIdentificationData());
+            customer.setQualification(this.getData().getV2().getQuoteCustomer().getQualificationData());
+            customer.setComplimentaryInfo(this.getData().getV2().getQuoteCustomer().getComplimentaryInformationData());
+
+            var premium = new QuoteResultPremium();
+            premium.setPaymentsQuantity(1);
+            premium.setTotalPremiumAmount(new AmountDetails()
+                    .amount("100.00")
+                    .unitType(AmountDetails.UnitTypeEnum.MONETARIO)
+                    .unit(new AmountDetailsUnit().code("R$").description(AmountDetailsUnit.DescriptionEnum.BRL)));
+            premium.setTotalNetAmount(new AmountDetails()
+                    .amount("50.00")
+                    .unitType(AmountDetails.UnitTypeEnum.MONETARIO)
+                    .unit(new AmountDetailsUnit().code("R$").description(AmountDetailsUnit.DescriptionEnum.BRL)));
+            premium.setIOF(new AmountDetails()
+                    .amount("20.00")
+                    .unitType(AmountDetails.UnitTypeEnum.MONETARIO)
+                    .unit(new AmountDetailsUnit().code("R$").description(AmountDetailsUnit.DescriptionEnum.BRL)));
+            premium.setCoverages(List.of());
+            premium.setPayments(List.of(new QuoteResultPayment()
+                    .amount(new AmountDetails()
+                            .amount("100.00")
+                            .unitType(AmountDetails.UnitTypeEnum.MONETARIO)
+                            .unit(new AmountDetailsUnit().code("R$").description(AmountDetailsUnit.DescriptionEnum.BRL)))
+                    .paymentType(QuoteResultPayment.PaymentTypeEnum.PIX)));
+
+            var quote = new QuotePatrimonialItem();
+            quote.setInsurerQuoteId(this.getQuoteId().toString());
+            quote.setQuoteDateTime(InsuranceLambdaUtils.dateToOffsetDate(this.getUpdatedAt()));
+            quote.setCoverages(List.of());
+            quote.setPremiumInfo(premium);
+
+            var quoteInfo = new QuotePatrimonialDiverseRisksV2();
+            quoteInfo.setQuoteCustomer(customer);
+            quoteInfo.setQuoteData(this.getData().getV2().getQuoteData());
+            quoteInfo.setQuoteCustomData(this.getData().getV2().getQuoteCustomData());
+            quoteInfo.setQuotes(List.of(quote));
+
+            quoteData.setQuoteInfo(quoteInfo);
+        }
+
+        if (QuoteStatusEnum.RJCT.toString().equals(this.getStatus())) {
+            quoteData.setRejectionReason("The quote was rejected");
+        }
+
+        var resp = new ResponseQuotePatrimonialDiverseRisksV2();
+        resp.setData(quoteData);
+        return resp;
+    }
+
     @Override
     public boolean shouldReject() {
-        String policyId = Optional.ofNullable(this.getData())
-                .map(QuotePatrimonialDiverseRisksData::getQuoteData)
-                .map(QuoteDataPatrimonialDiverseRisks::getPolicyId).orElse(null);
-        return policyId == null;
+        if (this.getData().getV1() != null) {
+            return Optional.ofNullable(this.getData().getV1())
+                    .map(QuotePatrimonialDiverseRisksData::getQuoteData)
+                    .map(QuoteDataPatrimonialDiverseRisks::getPolicyId).isEmpty();
+        }
+        return Optional.ofNullable(this.getData().getV2())
+                .map(QuotePatrimonialDiverseRisksDataV2::getQuoteData)
+                .map(QuoteDataPatrimonialDiverseRisks::getPolicyId).isEmpty();
+    }
+
+    @Data
+    public static class QuoteData implements Serializable {
+        @JsonProperty("v1")
+        private QuotePatrimonialDiverseRisksData v1;
+        @JsonProperty("v2")
+        private QuotePatrimonialDiverseRisksDataV2 v2;
+
+        @JsonIgnore
+        public AmountDetails getMaxLMG() {
+            if (this.getV1() != null) {
+                return this.getV1().getQuoteData().getMaxLMG();
+            }
+            return this.getV2().getQuoteData().getMaxLMG();
+        }
     }
 }

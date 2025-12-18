@@ -27,6 +27,18 @@ public class QuoteTransportLeadEntity extends QuoteEntity {
         return entity;
     }
 
+    public static QuoteTransportLeadEntity fromRequest(QuoteRequestTransportLeadV2 req, String clientId) {
+        QuoteTransportLeadEntity entity = new QuoteTransportLeadEntity();
+        entity.setConsentId(req.getData().getConsentId());
+        entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
+        entity.setClientId(clientId);
+        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
+
+        entity.setCustomer(req.getData().getQuoteCustomer());
+
+        return entity;
+    }
+
     public ResponseQuote toResponse() {
         return new ResponseQuote()
                 .data(new QuoteStatus()

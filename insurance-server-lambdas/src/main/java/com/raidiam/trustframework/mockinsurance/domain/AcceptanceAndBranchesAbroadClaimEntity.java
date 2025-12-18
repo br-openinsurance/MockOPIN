@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceClaim;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceClaimCoverage;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceClaimV2;
+
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
@@ -48,6 +50,26 @@ public class AcceptanceAndBranchesAbroadClaimEntity extends BaseEntity {
             .identification(this.getIdentification())
             .documentationDeliveryDate(LocalDate.now())
             .status(InsuranceClaim.StatusEnum.ABERTO)
+            .statusAlterationDate(LocalDate.now())
+            .occurrenceDate(LocalDate.now())
+            .warningDate(LocalDate.now())
+            .thirdPartyClaimDate(LocalDate.now())
+            .amount(new AmountDetails()
+                .amount("0372122770.41")
+                .unitType(UnitTypeEnum.PORCENTAGEM)
+                .unit(new AmountDetailsUnit().code("R$").description(DescriptionEnum.BRL))
+            )
+            .coverages(List.of(new InsuranceClaimCoverage()
+                .branch("0111")
+                .code(InsuranceClaimCoverage.CodeEnum.OUTRAS)
+            ));
+    }
+
+    public InsuranceClaimV2 toResponseV2() {
+        return new InsuranceClaimV2()
+            .identification(this.getIdentification())
+            .documentationDeliveryDate(LocalDate.now())
+            .status(InsuranceClaimV2.StatusEnum.ABERTO)
             .statusAlterationDate(LocalDate.now())
             .occurrenceDate(LocalDate.now())
             .warningDate(LocalDate.now())

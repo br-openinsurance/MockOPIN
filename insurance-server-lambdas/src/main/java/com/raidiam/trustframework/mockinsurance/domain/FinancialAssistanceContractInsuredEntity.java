@@ -1,6 +1,8 @@
 package com.raidiam.trustframework.mockinsurance.domain;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceFinancialAssistanceInsured;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceFinancialAssistanceInsuredV2;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -48,6 +50,14 @@ public class FinancialAssistanceContractInsuredEntity extends BaseEntity {
     public InsuranceFinancialAssistanceInsured mapDto() {
         return new InsuranceFinancialAssistanceInsured()
                 .documentType(InsuranceFinancialAssistanceInsured.DocumentTypeEnum.valueOf(this.getDocumentType()))
+                .documentTypeOthers(this.getDocumentTypeOthers())
+                .documentNumber(this.getDocumentNumber())
+                .name(this.getName());
+    }
+
+    public InsuranceFinancialAssistanceInsuredV2 mapDtoV2() {
+        return new InsuranceFinancialAssistanceInsuredV2()
+                .documentType(InsuranceFinancialAssistanceInsuredV2.DocumentTypeEnum.valueOf(this.getDocumentType()))
                 .documentTypeOthers(this.getDocumentTypeOthers())
                 .documentNumber(this.getDocumentNumber())
                 .name(this.getName());

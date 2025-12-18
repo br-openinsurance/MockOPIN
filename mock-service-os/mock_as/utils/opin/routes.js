@@ -279,8 +279,14 @@ export default (app, provider) => {
   });
 
   app.use((err, req, res, next) => {
+    log(`Error: ${JSON.stringify(err)}`);
     if (err instanceof SessionNotFound) {
-      // handle interaction expired / session not found error
+      const orig = res.render;
+      // you'll probably want to use a full blown render engine capable of layouts
+      res.render('error', {
+        title: 'Error',
+        message: 'No session found. Either the token was already used or it is expired. Please try again.',
+      });
     }
     next(err);
   });

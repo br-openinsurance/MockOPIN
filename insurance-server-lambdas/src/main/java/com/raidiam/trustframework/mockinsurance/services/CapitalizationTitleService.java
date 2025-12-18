@@ -31,7 +31,7 @@ public class CapitalizationTitleService extends BaseInsuranceService {
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
 
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
-        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.CAPITALIZATION_TITLE_READ);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.CAPITALIZATION_TITLE_READ, EnumConsentV3Permission.CAPITALIZATION_TITLE_READ);
 
         var consentPlans = consentCapitalizationTitlePlanRepository.findByConsentConsentIdOrderByCreatedAtAsc(consentId, pageable);
         this.checkConsentOwnerIsPlanOwner(consentPlans, consentEntity);
@@ -55,14 +55,49 @@ public class CapitalizationTitleService extends BaseInsuranceService {
         return response;
     }
 
+    public ResponseInsuranceCapitalizationTitleV2 getPlansV2(String consentId, Pageable pageable) {
+        LOG.info("Getting capitalization title plans response for consent id {}", consentId);
+
+        var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
+
+        InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.CAPITALIZATION_TITLE_READ, EnumConsentV3Permission.CAPITALIZATION_TITLE_READ);
+
+        var consentPlans = consentCapitalizationTitlePlanRepository.findByConsentConsentIdOrderByCreatedAtAsc(consentId, pageable);
+        this.checkConsentOwnerIsPlanOwner(consentPlans, consentEntity);
+
+        var response = new ResponseInsuranceCapitalizationTitleV2()
+                .data(List.of(new ResponseInsuranceCapitalizationTitleV2Data()
+                        .brand(new ResponseInsuranceCapitalizationTitleV2Brand()
+                                .name("Mock")
+                                .companies(List.of(new ResponseInsuranceCapitalizationTitleV2BrandCompanies()
+                                        .companyName("Mock Insurer")
+                                        .cnpjNumber("12345678901234")
+                                        .products(consentPlans.getContent()
+                                                .stream()
+                                                .map(consentAccountEntity -> {
+                                                    resourcesService.checkStatusAvailable(consentAccountEntity.getCapitalizationTitlePlan(), consentEntity);
+                                                    return consentAccountEntity.getCapitalizationTitlePlan();
+                                                })
+                                                .map(CapitalizationTitlePlanEntity::mapProductDto)
+                                                .toList()))))));
+        response.setMeta(InsuranceLambdaUtils.getMeta(consentPlans, false));
+        return response;
+    }
+
     public ResponseInsuranceCapitalizationTitlePlanInfo getPlanInfo(UUID planId, String consentId) {
         LOG.info("Getting capitalization title plan info response for consent id {}", consentId);
-        return getPlan(planId, consentId, EnumConsentPermission.CAPITALIZATION_TITLE_PLANINFO_READ).mapPlanInfoDto();
+        return getPlan(planId, consentId, EnumConsentPermission.CAPITALIZATION_TITLE_PLANINFO_READ, EnumConsentV3Permission.CAPITALIZATION_TITLE_PLANINFO_READ).mapPlanInfoDto();
+    }
+
+    public ResponseInsuranceCapitalizationTitlePlanInfoV2 getPlanInfoV2(UUID planId, String consentId) {
+        LOG.info("Getting capitalization title plan info response for consent id {}", consentId);
+        return getPlan(planId, consentId, EnumConsentPermission.CAPITALIZATION_TITLE_PLANINFO_READ, EnumConsentV3Permission.CAPITALIZATION_TITLE_PLANINFO_READ).mapPlanInfoDtoV2();
     }
 
     public ResponseInsuranceCapitalizationTitleEvent getPlanEvents(UUID planId, String consentId, Pageable pageable) {
         LOG.info("Getting capitalization title plan events response for consent id {}", consentId);
-        getPlan(planId, consentId, EnumConsentPermission.CAPITALIZATION_TITLE_EVENTS_READ);
+        getPlan(planId, consentId, EnumConsentPermission.CAPITALIZATION_TITLE_EVENTS_READ, EnumConsentV3Permission.CAPITALIZATION_TITLE_EVENTS_READ);
 
         var events = capitalizationTitlePlanEventRepository.findByCapitalizationTitlePlanId(planId, pageable);
         var resp = new ResponseInsuranceCapitalizationTitleEvent()
@@ -73,7 +108,7 @@ public class CapitalizationTitleService extends BaseInsuranceService {
 
     public ResponseInsuranceCapitalizationTitleSettlement getPlanSettlements(UUID planId, String consentId, Pageable pageable) {
         LOG.info("Getting capitalization title plan settlements response for consent id {}", consentId);
-        getPlan(planId, consentId, EnumConsentPermission.CAPITALIZATION_TITLE_SETTLEMENTS_READ);
+        getPlan(planId, consentId, EnumConsentPermission.CAPITALIZATION_TITLE_SETTLEMENTS_READ, EnumConsentV3Permission.CAPITALIZATION_TITLE_SETTLEMENTS_READ);
 
         var settlements = capitalizationTitlePlanSettlementRepository.findByCapitalizationTitlePlanId(planId, pageable);
         var resp = new ResponseInsuranceCapitalizationTitleSettlement()
@@ -82,7 +117,7 @@ public class CapitalizationTitleService extends BaseInsuranceService {
         return resp;
     }
 
-    private CapitalizationTitlePlanEntity getPlan(UUID planId, String consentId, EnumConsentPermission permission) {
+    private CapitalizationTitlePlanEntity getPlan(UUID planId, String consentId, EnumConsentPermission permission, EnumConsentV3Permission permissionV3) {
         LOG.info("Getting capitalization title plan for plan id {} and consent id {}", planId, consentId);
 
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
@@ -90,7 +125,7 @@ public class CapitalizationTitleService extends BaseInsuranceService {
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Plan id " + planId + " not found"));
 
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
-        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, permission);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, permission, permissionV3);
         this.checkConsentCoversPlan(consentEntity, plan);
         this.checkConsentOwnerIsPlanOwner(consentEntity, plan);
 

@@ -10,6 +10,7 @@ import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails;
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetailsUnit;
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetailsUnit.DescriptionEnum;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralInsuredObject;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralInsuredObjectV2;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -74,6 +75,21 @@ public class RuralPolicyInsuredObjectEntity extends BaseEntity {
         return new InsuranceRuralInsuredObject()
             .identification(this.getIdentification())
             .type(InsuranceRuralInsuredObject.TypeEnum.valueOf(this.getType()))
+            .typeAdditionalInfo(this.getTypeAdditionalInfo())
+            .description(this.getDescription())
+            .amount(new AmountDetails()
+                .amount(this.getAmount())
+                .unitType(AmountDetails.UnitTypeEnum.valueOf(this.getUnitType()))
+                .unitTypeOthers(this.getUnitTypeOthers())
+                .unit(new AmountDetailsUnit().code(this.getUnitCode()).description(DescriptionEnum.valueOf(this.getUnitDescription())))
+            )
+            .coverages(this.getCoverages().stream().map(RuralPolicyInsuredObjectCoverageEntity::mapDto).toList());
+    }
+
+    public InsuranceRuralInsuredObjectV2 mapDtoV2() {
+        return new InsuranceRuralInsuredObjectV2()
+            .identification(this.getIdentification())
+            .type(InsuranceRuralInsuredObjectV2.TypeEnum.valueOf(this.getType()))
             .typeAdditionalInfo(this.getTypeAdditionalInfo())
             .description(this.getDescription())
             .amount(new AmountDetails()

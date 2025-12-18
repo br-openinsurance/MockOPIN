@@ -26,27 +26,42 @@ import jakarta.transaction.Transactional;
 public class RuralService extends BaseInsuranceService {
     private static final Logger LOG = LoggerFactory.getLogger(RuralService.class);
 
-    public BaseInsuranceResponse getPolicies(String consentId, Pageable pageable) {
+    private List<RuralPolicyEntity> getRuralPolicyEntities(Pageable pageable, String consentId){
         LOG.info("Getting rural policies response for consent id {}", consentId);
-
+    
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
-
+    
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
-        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.DAMAGES_AND_PEOPLE_RURAL_READ);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.DAMAGES_AND_PEOPLE_RURAL_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RURAL_READ);
+    
+        return ruralPolicyRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable).getContent();
+    }
 
-        List<RuralPolicyEntity> policies = ruralPolicyRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable).getContent();
+    public BaseInsuranceResponse getPolicies(String consentId, Pageable pageable) {
+        List<RuralPolicyEntity> policies = getRuralPolicyEntities(pageable, consentId);
 
-        var response = new BaseInsuranceResponse()
+        return new BaseInsuranceResponse()
                 .data(List.of(new BaseBrandAndCompanyData()
                     .brand("Mock")
                     .companies(List.of(new BaseBrandAndCompanyDataCompanies()
                             .companyName("Mock Insurer")
                             .cnpjNumber("12345678901234")
                             .policies(policies.stream().map(RuralPolicyEntity::mapPolicyDto).toList()))))); 
-        return response;
     }
 
-    private RuralPolicyEntity getPolicy(UUID policyId, String consentId, EnumConsentPermission permission) {
+    public BaseInsuranceResponseV2 getPoliciesV2(String consentId, Pageable pageable) {
+        List<RuralPolicyEntity> policies = getRuralPolicyEntities(pageable, consentId);
+
+        return new BaseInsuranceResponseV2()
+                .data(List.of(new BaseBrandAndCompanyDataV2()
+                    .brand("Mock")
+                    .companies(List.of(new BaseBrandAndCompanyDataV2Companies()
+                            .companyName("Mock Insurer")
+                            .cnpjNumber("12345678901234")
+                            .policies(policies.stream().map(RuralPolicyEntity::mapPolicyDto).toList()))))); 
+    }
+
+    private RuralPolicyEntity getPolicy(UUID policyId, String consentId, EnumConsentPermission permission, EnumConsentV3Permission permissionV3) {
         LOG.info("Getting rural policy for policy id {} and consent id {}", policyId, consentId);
 
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
@@ -54,7 +69,7 @@ public class RuralService extends BaseInsuranceService {
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Policy id " + policyId + " not found"));
 
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
-        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, permission);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, permission, permissionV3);
         this.checkConsentCoversPolicy(consentEntity, policy);
         this.checkConsentOwnerIsPolicyOwner(consentEntity, policy);
 
@@ -93,7 +108,7 @@ public class RuralService extends BaseInsuranceService {
     
     public ResponseInsuranceRuralPolicyInfo getPolicyInfo(UUID policyId, String consentId) {
         LOG.info("Getting rural policy info response for consent id {}", consentId);
-        var policy = getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RURAL_POLICYINFO_READ);
+        var policy = getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RURAL_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RURAL_POLICYINFO_READ);
         var response = policy.mapPolicyInfoDto();
 
         policy.getBeneficiaryIds().forEach(beneficiaryId -> response.getData().addBeneficiariesItem(beneficiaryInfoRepository.findById(beneficiaryId)
@@ -118,10 +133,38 @@ public class RuralService extends BaseInsuranceService {
          
         return response;
     }
+    
+    public ResponseInsuranceRuralPolicyInfoV2 getPolicyInfoV2(UUID policyId, String consentId) {
+        LOG.info("Getting rural policy info response for consent id {}", consentId);
+        var policy = getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RURAL_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RURAL_POLICYINFO_READ);
+        var response = policy.mapPolicyInfoDtoV2();
+
+        policy.getBeneficiaryIds().forEach(beneficiaryId -> response.getData().addBeneficiariesItem(beneficiaryInfoRepository.findById(beneficiaryId)
+            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Beneficiary not found for UUID %s", beneficiaryId)))
+            .mapDTO()));
+        
+        policy.getInsuredIds().forEach(insuredIds -> response.getData().addInsuredsItem(personalInfoRepository.findById(insuredIds)
+            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Personal info not found for UUID %s", insuredIds)))
+            .mapDTOV2()));
+        
+        policy.getIntermediaryIds().forEach(intermediaryId -> response.getData().addIntermediariesItem(intermediaryRepository.findById(intermediaryId)
+            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Intermediary not found for UUID %s", intermediaryId)))
+            .mapDTOV2()));
+        
+        policy.getPrincipalIds().forEach(principalId -> response.getData().addPrincipalsItem(principalInfoRepository.findById(principalId)
+            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Principal not found for UUID %s", principalId)))
+            .mapDTOV2()));
+        
+        policy.getCoinsurerIds().forEach(coinsurerId -> response.getData().addCoinsurersItem(coinsurerRepository.findById(coinsurerId)
+            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Coinsurer not found for UUID %s", coinsurerId)))
+            .mapDTO()));
+         
+        return response;
+    }
 
     public ResponseInsuranceRuralPremium getPremium(UUID policyId, String consentId) {
         LOG.info("Getting rural premium response for consent id {}", consentId);
-        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RURAL_PREMIUM_READ);
+        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RURAL_PREMIUM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RURAL_PREMIUM_READ);
 
         var premium = ruralPolicyPremiumRepository.findByRuralPolicyId(policyId)
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Policy id " + policyId + " not found"));
@@ -135,11 +178,22 @@ public class RuralService extends BaseInsuranceService {
 
     public ResponseInsuranceRuralClaims getClaims(UUID policyId, String consentId, Pageable pageable) {
         LOG.info("Getting rural claims response for consent id {}", consentId);
-        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RURAL_CLAIM_READ);
+        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RURAL_CLAIM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RURAL_CLAIM_READ);
 
         var claims = ruralPolicyClaimRepository.findByRuralPolicyId(policyId, pageable);
         var resp = new ResponseInsuranceRuralClaims()
                 .data(claims.getContent().stream().map(RuralPolicyClaimEntity::toResponse).toList());
+        resp.setMeta(InsuranceLambdaUtils.getMeta(claims, false));
+        return resp;
+    }
+
+    public ResponseInsuranceRuralClaimsV2 getClaimsV2(UUID policyId, String consentId, Pageable pageable) {
+        LOG.info("Getting rural claims response for consent id {}", consentId);
+        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_RURAL_CLAIM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RURAL_CLAIM_READ);
+
+        var claims = ruralPolicyClaimRepository.findByRuralPolicyId(policyId, pageable);
+        var resp = new ResponseInsuranceRuralClaimsV2()
+                .data(claims.getContent().stream().map(RuralPolicyClaimEntity::toResponseV2).toList());
         resp.setMeta(InsuranceLambdaUtils.getMeta(claims, false));
         return resp;
     }

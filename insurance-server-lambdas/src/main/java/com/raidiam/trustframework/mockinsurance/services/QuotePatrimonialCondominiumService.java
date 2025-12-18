@@ -31,8 +31,8 @@ public class QuotePatrimonialCondominiumService extends QuoteService<QuotePatrim
     protected void validateQuote(QuotePatrimonialCondominiumEntity quote) {
         super.validateQuote(quote);
 
-        if (quote.getData().getQuoteData().getMaxLMG() != null) {
-            validateAmountDetails(quote.getData().getQuoteData().getMaxLMG());
+        if (quote.getData().getMaxLMG() != null) {
+            validateAmountDetails(quote.getData().getMaxLMG());
         }
     }
 }

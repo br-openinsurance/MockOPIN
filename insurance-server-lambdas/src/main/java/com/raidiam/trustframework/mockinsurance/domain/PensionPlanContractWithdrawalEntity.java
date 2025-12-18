@@ -2,6 +2,9 @@ package com.raidiam.trustframework.mockinsurance.domain;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePensionPlanWithdrawal;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePensionPlanWithdrawalV2;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePensionPlanWithdrawalV2WithdrawalInfo;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -46,5 +49,18 @@ public class PensionPlanContractWithdrawalEntity extends BaseEntity {
                 .nature(InsurancePensionPlanWithdrawal.NatureEnum.RESGATE_REGULAR)
                 .amount(new AmountDetails().unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM).amount("90.85"))
                 .postedChargedAmount(new AmountDetails().unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM).amount("90.85"));
+    }
+
+    public InsurancePensionPlanWithdrawalV2 mapDTOV2() {
+        return new InsurancePensionPlanWithdrawalV2()
+                .withdrawalOccurence(true)
+                .withdrawalInfo(new InsurancePensionPlanWithdrawalV2WithdrawalInfo()
+                    .type(InsurancePensionPlanWithdrawalV2WithdrawalInfo.TypeEnum.PARCIAL)
+                    .requestDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
+                    .liquidationDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
+                    .nature(InsurancePensionPlanWithdrawalV2WithdrawalInfo.NatureEnum.RESGATE_REGULAR)
+                    .amount(new AmountDetails().unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM).amount("90.85"))
+                    .postedChargedAmount(new AmountDetails().unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM).amount("90.85"))
+                );
     }
 }

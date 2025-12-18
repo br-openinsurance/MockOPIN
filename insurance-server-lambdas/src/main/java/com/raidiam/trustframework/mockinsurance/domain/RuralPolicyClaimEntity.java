@@ -11,11 +11,11 @@ import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails;
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails.UnitTypeEnum;
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetailsUnit;
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetailsUnit.DescriptionEnum;
-import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralClaim.DenialJustificationEnum;
-import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralSpecificClaim.SurveyCountryCodeEnum;
-import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralSpecificClaim.SurveyCountrySubDivisionEnum;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralClaim;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralClaimV2;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralSpecificClaim;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralSpecificClaimV2;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralSpecificClaimV2SurveyAddress;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -90,6 +90,9 @@ public class RuralPolicyClaimEntity extends BaseEntity {
     @Column(name = "survey_address")
     private String surveyAddress;
 
+    @Column(name = "survey_address_complementary_info")
+    private String surveyAddressComplementaryInfo;
+
     @Column(name = "survey_country_sub_division")
     private String surveyCountrySubDivision;
 
@@ -121,15 +124,47 @@ public class RuralPolicyClaimEntity extends BaseEntity {
                 .unitTypeOthers(this.getUnitTypeOthers())
                 .unit(new AmountDetailsUnit().code(this.getUnitCode()).description(DescriptionEnum.valueOf(this.getUnitDescription())))
             )
-            .denialJustification(DenialJustificationEnum.valueOf(this.getDenialJustification()))
+            .denialJustification(InsuranceRuralClaim.DenialJustificationEnum.valueOf(this.getDenialJustification()))
             .denialJustificationDescription(this.getDenialJustificationDescription())
             .coverages(this.getCoverages().stream().map(RuralPolicyClaimCoverageEntity::mapDto).toList())
             .branchInfo(new InsuranceRuralSpecificClaim()
                 .surveyDate(this.getSurveyDate())
                 .surveyAddress(this.getSurveyAddress())
-                .surveyCountrySubDivision(SurveyCountrySubDivisionEnum.valueOf(this.getSurveyCountrySubDivision()))
+                .surveyCountrySubDivision(InsuranceRuralSpecificClaim.SurveyCountrySubDivisionEnum.valueOf(this.getSurveyCountrySubDivision()))
                 .surveyPostCode(this.getSurveyPostCode())
-                .surveyCountryCode(SurveyCountryCodeEnum.valueOf(this.getSurveyCountryCode()))
+                .surveyCountryCode(InsuranceRuralSpecificClaim.SurveyCountryCodeEnum.valueOf(this.getSurveyCountryCode()))
+            );
+    }
+
+    public InsuranceRuralClaimV2 toResponseV2() {
+        return new InsuranceRuralClaimV2()
+            .identification(this.getIdentification())
+            .documentationDeliveryDate(this.getDocumentationDeliveryDate())
+            .status(InsuranceRuralClaimV2.StatusEnum.valueOf(this.getStatus()))
+            .statusAlterationDate(this.getStatusAlterationDate())
+            .occurrenceDate(this.getOccurrenceDate())
+            .warningDate(this.getWarningDate())
+            .thirdPartyClaimDate(this.getThirdPartyClaimDate())
+            .amount(new AmountDetails()
+                .amount(this.getAmount())
+                .unitType(UnitTypeEnum.valueOf(this.getUnitType()))
+                .unitTypeOthers(this.getUnitTypeOthers())
+                .unit(new AmountDetailsUnit().code(this.getUnitCode()).description(DescriptionEnum.valueOf(this.getUnitDescription())))
+            )
+            .denialJustification(InsuranceRuralClaimV2.DenialJustificationEnum.valueOf(this.getDenialJustification()))
+            .denialJustificationDescription(this.getDenialJustificationDescription())
+            .coverages(this.getCoverages().stream().map(RuralPolicyClaimCoverageEntity::mapDto).toList())
+            .branchInfo(new InsuranceRuralSpecificClaimV2()
+                .surveyDate(this.getSurveyDate())
+                .surveyAddress(new InsuranceRuralSpecificClaimV2SurveyAddress()
+                    .name(this.getSurveyAddress().split(" ", 2)[1].split(",")[0])
+                    .number(this.getSurveyAddress().split(" ", 2)[1].split(",")[1])
+                    .type(InsuranceRuralSpecificClaimV2SurveyAddress.TypeEnum.valueOf(this.getSurveyAddress().split(" ")[0].toUpperCase()))
+                    .addressComplementaryInfo(this.getSurveyAddressComplementaryInfo())
+                )
+                .surveyCountrySubDivision(InsuranceRuralSpecificClaimV2.SurveyCountrySubDivisionEnum.valueOf(this.getSurveyCountrySubDivision()))
+                .surveyPostCode(this.getSurveyPostCode())
+                .surveyCountryCode(InsuranceRuralSpecificClaimV2.SurveyCountryCodeEnum.valueOf(this.getSurveyCountryCode()))
             );
     }
 }

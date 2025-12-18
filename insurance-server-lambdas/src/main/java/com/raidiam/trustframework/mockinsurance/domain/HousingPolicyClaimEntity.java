@@ -2,6 +2,8 @@ package com.raidiam.trustframework.mockinsurance.domain;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceHousingClaim;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceHousingClaimV2;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -88,6 +90,24 @@ public class HousingPolicyClaimEntity extends BaseEntity {
                         .unitType(AmountDetails.UnitTypeEnum.valueOf(this.getUnitType()))
                 )
                 .denialJustification(InsuranceHousingClaim.DenialJustificationEnum.valueOf(this.getDenialJustification()))
+                .denialJustificationDescription(this.getDenialJustificationDescription())
+                .coverages(this.getCoverages().stream().map(HousingPolicyClaimCoverageEntity::mapDto).toList());
+    }
+
+    public InsuranceHousingClaimV2 mapDTOV2() {
+        return new InsuranceHousingClaimV2()
+                .identification(this.getIdentification())
+                .documentationDeliveryDate(this.getDocumentationDeliveryDate())
+                .status(InsuranceHousingClaimV2.StatusEnum.valueOf(this.getStatus()))
+                .statusAlterationDate(this.getStatusAlterationDate())
+                .occurrenceDate(this.getOccurrenceDate())
+                .warningDate(this.getWarningDate())
+                .thirdPartyClaimDate(this.getThirdPartyClaimDate())
+                .amount(new AmountDetails()
+                        .amount(this.getAmount())
+                        .unitType(AmountDetails.UnitTypeEnum.valueOf(this.getUnitType()))
+                )
+                .denialJustification(InsuranceHousingClaimV2.DenialJustificationEnum.valueOf(this.getDenialJustification()))
                 .denialJustificationDescription(this.getDenialJustificationDescription())
                 .coverages(this.getCoverages().stream().map(HousingPolicyClaimCoverageEntity::mapDto).toList());
     }
