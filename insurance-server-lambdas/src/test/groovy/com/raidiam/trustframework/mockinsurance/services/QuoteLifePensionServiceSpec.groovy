@@ -50,8 +50,8 @@ class QuoteLifePensionServiceSpec extends CleanupSpecification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuoteLifePension(consentId)
-        quote.data.quoteData.products[0].initialContribution.unitType = AmountDetails.UnitTypeEnum.PORCENTAGEM
-        quote.data.quoteData.products[0].initialContribution.amount = "1000.00"
+        quote.data.v1.quoteData.products[0].initialContribution.unitType = AmountDetails.UnitTypeEnum.PORCENTAGEM
+        quote.data.v1.quoteData.products[0].initialContribution.amount = "1000.00"
         quoteLifePensionRepository.save(quote)
 
         when:
@@ -142,7 +142,7 @@ class QuoteLifePensionServiceSpec extends CleanupSpecification {
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuoteLifePension(consentId)
 
-        quote.data.quoteData.products[0].initialContribution.unitType = null
+        quote.data.v1.quoteData.products[0].initialContribution.unitType = null
 
         when:
         quoteLifePensionService.createQuote(quote)
@@ -153,8 +153,8 @@ class QuoteLifePensionServiceSpec extends CleanupSpecification {
         e.getMessage() == "NAO_INFORMADO: Unit type missing from amount details"
 
         when:
-        quote.data.quoteData.products[0].initialContribution.unitType = AmountDetails.UnitTypeEnum.MONETARIO
-        quote.data.quoteData.products[0].initialContribution.amount = null
+        quote.data.v1.quoteData.products[0].initialContribution.unitType = AmountDetails.UnitTypeEnum.MONETARIO
+        quote.data.v1.quoteData.products[0].initialContribution.amount = null
         quoteLifePensionService.createQuote(quote)
 
         then:

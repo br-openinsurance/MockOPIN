@@ -70,6 +70,27 @@ class PatrimonialControllerSpec extends Specification {
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
 
+    def "We can fetch policies V2" () {
+        given:
+        def resp = new BaseInsuranceResponseV2().data(List.of())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        patrimonialService.getPoliciesV2(_ as String, _ as Pageable) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-patrimonial/v2/insurance-patrimonial/', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-patrimonial consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
     def "We can fetch a policy info" () {
         given:
         def resp = new ResponseInsurancePatrimonialPolicyInfo().data(new InsurancePatrimonialPolicyInfo())
@@ -77,6 +98,26 @@ class PatrimonialControllerSpec extends Specification {
         patrimonialService.getPolicyInfo(_ as UUID, _ as String) >> resp
 
         def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-patrimonial/v1/insurance-patrimonial/'+UUID.randomUUID().toString()+'/policy-info', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-patrimonial consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+    def "We can fetch a policy info V2" () {
+        given:
+        def resp = new ResponseInsurancePatrimonialPolicyInfoV2().data(new InsurancePatrimonialPolicyInfoV2())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        patrimonialService.getPolicyInfoV2(_ as UUID, _ as String) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-patrimonial/v2/insurance-patrimonial/'+UUID.randomUUID().toString()+'/policy-info', HttpMethod.GET)
                 .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-patrimonial consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
 
@@ -112,6 +153,27 @@ class PatrimonialControllerSpec extends Specification {
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
 
+    def "We can fetch a policy's premium V2" () {
+        given:
+        def resp = new ResponseInsurancePatrimonialPremium().data(new InsurancePremium())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        patrimonialService.getPremium(_ as UUID, _ as String) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-patrimonial/v2/insurance-patrimonial/'+UUID.randomUUID().toString()+'/premium', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-patrimonial consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
     def "We can fetch a policy's claims" () {
         given:
         def resp = new ResponseInsurancePatrimonialClaims().data(List.of())
@@ -119,6 +181,27 @@ class PatrimonialControllerSpec extends Specification {
         patrimonialService.getClaims(_ as UUID, _ as String, _ as Pageable) >> resp
 
         def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-patrimonial/v1/insurance-patrimonial/'+UUID.randomUUID().toString()+'/claim', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-patrimonial consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "We can fetch a policy's claims V2" () {
+        given:
+        def resp = new ResponseInsurancePatrimonialClaimsV2().data(List.of())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        patrimonialService.getClaimsV2(_ as UUID, _ as String, _ as Pageable) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-patrimonial/v2/insurance-patrimonial/'+UUID.randomUUID().toString()+'/claim', HttpMethod.GET)
                 .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-patrimonial consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
 

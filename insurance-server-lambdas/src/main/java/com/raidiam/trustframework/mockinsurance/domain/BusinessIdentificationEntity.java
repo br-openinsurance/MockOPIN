@@ -53,4 +53,30 @@ public class BusinessIdentificationEntity extends BaseEntity {
                                 .postCode("17500001")
                                 .country("Brasil"))));
     }
+
+    public BusinessIdentificationDataV2 mapDtoV2() {
+        return new BusinessIdentificationDataV2()
+                .updateDateTime(InsuranceLambdaUtils.dateToOffsetDate(this.getUpdatedAt()))
+                .businessId(this.getBusinessIdentificationId().toString())
+                .brandName("MockOPIN")
+                .companyInfo(new CompanyInfoV2()
+                        .cnpjNumber("01773247000563")
+                        .name("MockOPIN"))
+                .businessName("Luiza e Benjamin Assessoria Jurídica Ltda")
+                .document(new BusinessDocumentV2()
+                        .businesscnpjNumber(this.getCnpjNumber()))
+                .contact(new BusinessContactV2()
+                        .postalAddresses(List.of(new BusinessPostalAddressV2()
+                                .address(new Address()
+                                        .flagPostCode(Address.FlagPostCodeEnum.NACIONAL)
+                                        .address((AllOfAddressAddress) new AllOfAddressAddress()
+                                                .type(NationalAddress.TypeEnum.AVENIDA)
+                                                .name("Naburo Ykesaki")
+                                                .number("1270")
+                                                .districtName("Liberdade")
+                                                .townName("Sao Paulo")
+                                                .ibgeTownCode("5002704")
+                                                .countrySubDivision(EnumCountrySubDivision.SP)
+                                                .postCode("10000000"))))));
+    }
 }

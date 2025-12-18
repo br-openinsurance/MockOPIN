@@ -145,15 +145,17 @@ CREATE OR REPLACE FUNCTION addCapitalizationTitlePlanSubscriber(titleId uuid, su
 subscriberDocumentType varchar, subscriberDocumentTypeOthers varchar, subscriberDocumentNumber varchar,
 subscriberAddress varchar, subscriberAddressAdditionalInfo varchar, subscriberTownName varchar,
 subscriberCountrySubDivision varchar, subscriberCountryCode varchar, subscriberPostcode varchar,
+subscriberFlagPostCode varchar, subscriberDistrictName varchar, subscriberTownCode varchar,
 subscriberCountryCallingCode varchar, subscriberAreaCode varchar, subscriberNumber varchar)  RETURNS uuid AS $$
     INSERT INTO capitalization_title_plan_subscribers(capitalization_title_plan_title_id, subscriber_name, subscriber_document_type,
     subscriber_document_type_others, subscriber_document_number, subscriber_address, subscriber_address_additional_info,
     subscriber_town_name, subscriber_country_sub_division, subscriber_country_code, subscriber_postcode,
-    subscriber_country_calling_code, subscriber_area_code, subscriber_number, created_at, created_by,
-    updated_at, updated_by)
+    subscriber_flag_post_code, subscriber_district_name, subscriber_town_code, subscriber_country_calling_code, subscriber_area_code, 
+    subscriber_number, created_at, created_by, updated_at, updated_by)
     VALUES (titleId, subscriberName, subscriberDocumentType, subscriberDocumentTypeOthers, subscriberDocumentNumber,
     subscriberAddress, subscriberAddressAdditionalInfo, subscriberTownName, subscriberCountrySubDivision,
-    subscriberCountryCode, subscriberPostcode, subscriberCountryCallingCode, subscriberAreaCode, subscriberNumber,
+    subscriberCountryCode, subscriberPostcode, subscriberFlagPostCode, subscriberDistrictName, subscriberTownCode,
+    subscriberCountryCallingCode, subscriberAreaCode, subscriberNumber,
     NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING capitalization_title_plan_subscriber_id
 $$ LANGUAGE SQL;
@@ -161,17 +163,19 @@ $$ LANGUAGE SQL;
 CREATE OR REPLACE FUNCTION addCapitalizationTitlePlanHolder(subscriberId uuid, holderName varchar,
 holderDocumentType varchar, holderDocumentTypeOthers varchar, holderDocumentNumber varchar,
 holderAddress varchar, holderAddressAdditionalInfo varchar, holderTownName varchar,
-holderCountrySubdivision varchar, holderCountryCode varchar, holderPostcode varchar, holderRedemption boolean,
-holderRaffle boolean, holderCountryCallingCode varchar, holderAreaCode varchar,
-holderNumber varchar)  RETURNS uuid AS $$
+holderCountrySubdivision varchar, holderCountryCode varchar, holderPostcode varchar, 
+holderFlagPostCode varchar, holderDistrictName varchar, holderTownCode varchar, holderRedemption boolean,
+holderRaffle boolean, holderCountryCallingCode varchar, holderAreaCode varchar, holderNumber varchar)  RETURNS uuid AS $$
     INSERT INTO capitalization_title_plan_holders(capitalization_title_plan_subscriber_id, holder_name, holder_document_type,
     holder_document_type_others, holder_document_number, holder_address, holder_address_additional_info,
-    holder_town_name, holder_country_subdivision, holder_country_code, holder_postcode, holder_redemption, holder_raffle,
+    holder_town_name, holder_country_subdivision, holder_country_code, holder_postcode, holder_flag_post_code, 
+    holder_district_name, holder_town_code, holder_redemption, holder_raffle,
     holder_country_calling_code, holder_area_code, holder_number, created_at, created_by,
     updated_at, updated_by)
     VALUES (subscriberId, holderName, holderDocumentType, holderDocumentTypeOthers, holderDocumentNumber,
     holderAddress, holderAddressAdditionalInfo, holderTownName, holderCountrySubDivision,
-    holderCountryCode, holderPostcode, holderRedemption, holderRaffle, holderCountryCallingCode,
+    holderCountryCode, holderPostcode, holderFlagPostCode, holderDistrictName, 
+    holderTownCode, holderRedemption, holderRaffle, holderCountryCallingCode,
     holderAreaCode, holderNumber, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING capitalization_title_plan_holder_id
 $$ LANGUAGE SQL;
@@ -216,11 +220,14 @@ $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addPersonalInfo(identification varchar,
 identificationType varchar, identificationTypeOthers varchar, name varchar, birthDate date, postCode varchar,
-email varchar, city varchar, state varchar, country varchar, address varchar, addressAdditionalInfo varchar) RETURNS uuid AS $$
+email varchar, city varchar, state varchar, country varchar, address varchar, addressAdditionalInfo varchar, 
+flagPostCode varchar, districtName varchar, townCode varchar) RETURNS uuid AS $$
     INSERT INTO personal_info(identification, identification_type, identification_type_others,
-    name, birth_date, post_code, email, city, state, country, address, address_additional_info, created_at, created_by, updated_at, updated_by)
+    name, birth_date, post_code, email, city, state, country, address, address_additional_info, 
+    flag_post_code, district_name, town_code, created_at, created_by, updated_at, updated_by)
     VALUES(identification, identificationType, identificationTypeOthers, name, birthDate, postCode,
-    email, city, state, country, address, addressAdditionalInfo, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    email, city, state, country, address, addressAdditionalInfo, flagPostCode, districtName, townCode, 
+    NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING reference_id
 $$ LANGUAGE SQL;
 
@@ -251,12 +258,14 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION addPrincipalInfo(identification varchar,
 identificationType varchar, identificationTypeOthers varchar, name varchar, postCode varchar, email varchar, city varchar,
-state varchar, country varchar, address varchar, addressAdditionalInfo varchar) RETURNS uuid AS $$
+state varchar, country varchar, address varchar, addressAdditionalInfo varchar, flagPostCode varchar, 
+districtName varchar, townCode varchar) RETURNS uuid AS $$
     INSERT INTO principal_info(identification, identification_type, identification_type_others,
-    name, post_code, email, city, state, country, address, address_additional_info, created_at, created_by, updated_at,
-    updated_by)
+    name, post_code, email, city, state, country, address, address_additional_info, flag_post_code, 
+    district_name, town_code, created_at, created_by, updated_at, updated_by)
     VALUES(identification, identificationType, identificationTypeOthers, name, postCode, email, city,
-           state, country, address, addressAdditionalInfo, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+           state, country, address, addressAdditionalInfo, flagPostCode, districtName, townCode, 
+           NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING reference_id
 $$ LANGUAGE SQL;
 
@@ -270,11 +279,14 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION addIntermediaryInfo(identification varchar,
 identificationType varchar, identificationTypeOthers varchar, name varchar, postCode varchar,
-city varchar, state varchar, country varchar, address varchar, type varchar) RETURNS uuid AS $$
+city varchar, state varchar, country varchar, address varchar, type varchar, flagPostCode varchar, 
+districtName varchar, townCode varchar, addressAdditionalInfo varchar) RETURNS uuid AS $$
     INSERT INTO intermediaries(identification, identification_type, identification_type_others,
-    name, post_code, city, state, country, address, type, created_at, created_by, updated_at, updated_by)
+    name, post_code, city, state, country, address, type, flag_post_code, district_name, 
+    town_code, address_additional_info, created_at, created_by, updated_at, updated_by)
     VALUES(identification, identificationType, identificationTypeOthers, name, postCode,
-    city, state, country, address, type, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    city, state, country, address, type, flagPostCode, districtName, townCode, 
+    addressAdditionalInfo, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING reference_id
 $$ LANGUAGE SQL;
 
@@ -679,15 +691,15 @@ CREATE OR REPLACE FUNCTION addRuralPolicyCoverage(ruralPolicyId UUID, branch VAR
     RETURNING rural_policy_coverage_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addRuralPolicyBranchInsuredObject(ruralPolicyId UUID, identification VARCHAR, fesrParticipant BOOLEAN, amount VARCHAR, unitType VARCHAR, unitTypeOthers VARCHAR, unitCode VARCHAR, unitDescription VARCHAR, subventionType VARCHAR, safeArea VARCHAR, unitMeasure VARCHAR, unitMeasureOthers VARCHAR, cultureCode VARCHAR, flockCode VARCHAR, flockCodeOthers VARCHAR, forestCode VARCHAR, forestCodeOthers VARCHAR, surveyDate DATE, surveyAddress VARCHAR, surveyCountrySubDivision VARCHAR, surveyPostcode VARCHAR, surveyCountryCode VARCHAR, surveyorIdType VARCHAR, surveyorIdOthers VARCHAR, surveyorId VARCHAR, surveyorName VARCHAR, modelType VARCHAR, modelTypeOthers VARCHAR, assetsCovered BOOLEAN, coveredAnimalDestination VARCHAR, animalType VARCHAR) RETURNS UUID AS $$
-    INSERT INTO rural_policy_branch_insured_objects(rural_policy_id, identification, fesr_participant, amount, unit_type, unit_type_others, unit_code, unit_description, subvention_type, safe_area, unit_measure, unit_measure_others, culture_code, flock_code, flock_code_others, forest_code, forest_code_others, survey_date, survey_address, survey_country_sub_division, survey_postcode, survey_country_code, surveyor_id_type, surveyor_id_others, surveyor_id, surveyor_name, model_type, model_type_others, assets_covered, covered_animal_destination, animal_type, created_at, created_by, updated_at, updated_by)
-    VALUES (ruralPolicyId, identification, fesrParticipant, amount, unitType, unitTypeOthers, unitCode, unitDescription, subventionType, safeArea, unitMeasure, unitMeasureOthers, cultureCode, flockCode, flockCodeOthers, forestCode, forestCodeOthers, surveyDate, surveyAddress, surveyCountrySubDivision, surveyPostcode, surveyCountryCode, surveyorIdType, surveyorIdOthers, surveyorId, surveyorName, modelType, modelTypeOthers, assetsCovered, coveredAnimalDestination, animalType, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+CREATE OR REPLACE FUNCTION addRuralPolicyBranchInsuredObject(ruralPolicyId UUID, identification VARCHAR, fesrParticipant BOOLEAN, amount VARCHAR, unitType VARCHAR, unitTypeOthers VARCHAR, unitCode VARCHAR, unitDescription VARCHAR, subventionType VARCHAR, safeArea VARCHAR, unitMeasure VARCHAR, unitMeasureOthers VARCHAR, cultureCode VARCHAR, flockCode VARCHAR, flockCodeOthers VARCHAR, forestCode VARCHAR, forestCodeOthers VARCHAR, surveyDate DATE, surveyAddress VARCHAR, surveyCountrySubDivision VARCHAR, surveyPostcode VARCHAR, surveyCountryCode VARCHAR, surveyorIdType VARCHAR, surveyorIdOthers VARCHAR, surveyorId VARCHAR, surveyorName VARCHAR, modelType VARCHAR, modelTypeOthers VARCHAR, assetsCovered BOOLEAN, coveredAnimalDestination VARCHAR, animalType VARCHAR, surveyAddressComplementaryInfo VARCHAR) RETURNS UUID AS $$
+    INSERT INTO rural_policy_branch_insured_objects(rural_policy_id, identification, fesr_participant, amount, unit_type, unit_type_others, unit_code, unit_description, subvention_type, safe_area, unit_measure, unit_measure_others, culture_code, flock_code, flock_code_others, forest_code, forest_code_others, survey_date, survey_address, survey_country_sub_division, survey_postcode, survey_country_code, surveyor_id_type, surveyor_id_others, surveyor_id, surveyor_name, model_type, model_type_others, assets_covered, covered_animal_destination, animal_type, survey_address_complementary_info, created_at, created_by, updated_at, updated_by)
+    VALUES (ruralPolicyId, identification, fesrParticipant, amount, unitType, unitTypeOthers, unitCode, unitDescription, subventionType, safeArea, unitMeasure, unitMeasureOthers, cultureCode, flockCode, flockCodeOthers, forestCode, forestCodeOthers, surveyDate, surveyAddress, surveyCountrySubDivision, surveyPostcode, surveyCountryCode, surveyorIdType, surveyorIdOthers, surveyorId, surveyorName, modelType, modelTypeOthers, assetsCovered, coveredAnimalDestination, animalType, surveyAddressComplementaryInfo, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING rural_policy_branch_insured_object_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addRuralPolicyClaim(ruralPolicyId UUID, identification VARCHAR, documentationDeliveryDate DATE, status VARCHAR, statusAlterationDate DATE, ocurranceDate DATE, warningDate DATE, thirdPartyDate DATE, amount VARCHAR, unitType VARCHAR, unitTypeOthers VARCHAR, unitCode VARCHAR, unitDescription VARCHAR, denialJustification VARCHAR, denialJustificationDescription VARCHAR, surveyDate DATE, surveyAddress VARCHAR, surveyCountrySubDivision VARCHAR, surveyPostcode VARCHAR, surveyCountryCode VARCHAR) RETURNS UUID AS $$
-    INSERT INTO rural_policy_claims(rural_policy_id, identification, documentation_delivery_date, status, status_alteration_date, ocurrance_date, warning_date, third_party_date, amount, unit_type, unit_type_others, unit_code, unit_description, denial_justification, denial_justification_description, survey_date, survey_address, survey_country_sub_division, survey_postcode, survey_country_code, created_at, created_by, updated_at, updated_by)
-    VALUES (ruralPolicyId, identification, documentationDeliveryDate, status, statusAlterationDate, ocurranceDate, warningDate, thirdPartyDate, amount, unitType, unitTypeOthers, unitCode, unitDescription, denialJustification, denialJustificationDescription, surveyDate, surveyAddress, surveyCountrySubDivision, surveyPostcode, surveyCountryCode, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+CREATE OR REPLACE FUNCTION addRuralPolicyClaim(ruralPolicyId UUID, identification VARCHAR, documentationDeliveryDate DATE, status VARCHAR, statusAlterationDate DATE, ocurranceDate DATE, warningDate DATE, thirdPartyDate DATE, amount VARCHAR, unitType VARCHAR, unitTypeOthers VARCHAR, unitCode VARCHAR, unitDescription VARCHAR, denialJustification VARCHAR, denialJustificationDescription VARCHAR, surveyDate DATE, surveyAddress VARCHAR, surveyCountrySubDivision VARCHAR, surveyPostcode VARCHAR, surveyCountryCode VARCHAR, surveyAddressComplementaryInfo VARCHAR) RETURNS UUID AS $$
+    INSERT INTO rural_policy_claims(rural_policy_id, identification, documentation_delivery_date, status, status_alteration_date, ocurrance_date, warning_date, third_party_date, amount, unit_type, unit_type_others, unit_code, unit_description, denial_justification, denial_justification_description, survey_date, survey_address, survey_country_sub_division, survey_postcode, survey_country_code, survey_address_complementary_info, created_at, created_by, updated_at, updated_by)
+    VALUES (ruralPolicyId, identification, documentationDeliveryDate, status, statusAlterationDate, ocurranceDate, warningDate, thirdPartyDate, amount, unitType, unitTypeOthers, unitCode, unitDescription, denialJustification, denialJustificationDescription, surveyDate, surveyAddress, surveyCountrySubDivision, surveyPostcode, surveyCountryCode, surveyAddressComplementaryInfo, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING rural_policy_claim_id
 $$ LANGUAGE SQL; 
 
@@ -818,9 +830,9 @@ CREATE OR REPLACE FUNCTION addAutoPolicy(docId varchar, policyId varchar, s varc
     RETURNING auto_policy_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addAutoPolicyClaim(policyId varchar, s varchar) RETURNS varchar AS $$
-    INSERT INTO auto_policy_claims(auto_policy_claim_id, status, created_at, created_by, updated_at, updated_by)
-    VALUES (policyId, s, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+CREATE OR REPLACE FUNCTION addAutoPolicyClaim(claimId varchar, policyId varchar, s varchar) RETURNS varchar AS $$
+    INSERT INTO auto_policy_claims(auto_policy_claim_id, auto_policy_id, status, created_at, created_by, updated_at, updated_by)
+    VALUES (claimId, policyId, s, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING auto_policy_claim_id
 $$ LANGUAGE SQL;
 
@@ -834,4 +846,10 @@ CREATE OR REPLACE FUNCTION addTransportPolicyClaim(policyId varchar, s varchar) 
     INSERT INTO transport_policy_claims(transport_policy_claim_id, status, created_at, created_by, updated_at, updated_by)
     VALUES (policyId, s, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING transport_policy_claim_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addDynamicField(apiName varchar) RETURNS uuid AS $$
+    INSERT INTO dynamic_fields(api, created_at, created_by, updated_at, updated_by)
+    VALUES (apiName, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING dynamic_field_id
 $$ LANGUAGE SQL;

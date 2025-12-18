@@ -3,6 +3,7 @@ micronaut:
     name: lambdas
   security:
     enabled: true
+    reject-not-found: false
   data:
     pageable:
       max-page-size: 50000

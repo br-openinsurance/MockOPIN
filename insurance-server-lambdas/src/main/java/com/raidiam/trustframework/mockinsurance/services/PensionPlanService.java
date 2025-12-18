@@ -19,15 +19,19 @@ public class PensionPlanService extends BaseInsuranceService {
 
     private static final Logger LOG = LoggerFactory.getLogger(PensionPlanService.class);
 
-    public ResponseInsurancePensionPlan getContracts(Pageable pageable, String consentId) {
+    private List<PensionPlanContractEntity> getPensionPlanContractEntities(Pageable pageable, String consentId) {
         LOG.info("Getting Pension Plan Contracts response for consent id {}", consentId);
-
+    
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
-
+    
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
-        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.PENSION_PLAN_READ);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.PENSION_PLAN_READ, EnumConsentV3Permission.PENSION_PLAN_READ);
+    
+        return pensionPlanContractRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable).getContent();
+    }
 
-        var contracts = pensionPlanContractRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable).getContent();
+    public ResponseInsurancePensionPlan getContracts(Pageable pageable, String consentId) {
+        var contracts = getPensionPlanContractEntities(pageable, consentId);
         return new ResponseInsurancePensionPlan()
                 .data(List.of(new ResponseInsurancePensionPlanData()
                         .brand(new ResponseInsurancePensionPlanBrand()
@@ -38,7 +42,19 @@ public class PensionPlanService extends BaseInsuranceService {
                                         .contracts(contracts.stream().map(PensionPlanContractEntity::mapContractDTO).toList()))))));
     }
 
-    private PensionPlanContractEntity getContract(String contractId, String consentId, EnumConsentPermission permission) {
+    public ResponseInsurancePensionPlanV2 getContractsV2(Pageable pageable, String consentId) {
+        var contracts = getPensionPlanContractEntities(pageable, consentId);
+        return new ResponseInsurancePensionPlanV2()
+                .data(List.of(new ResponseInsurancePensionPlanV2Data()
+                        .brand(new ResponseInsurancePensionPlanV2Brand()
+                                .name("Mock")
+                                .companies(List.of(new ResponseInsurancePensionPlanV2BrandCompanies()
+                                        .companyName("Mock Insurer")
+                                        .cnpjNumber("12345678901234")
+                                        .contracts(contracts.stream().map(PensionPlanContractEntity::mapContractDTO).toList()))))));
+    }
+
+    private PensionPlanContractEntity getContract(String contractId, String consentId, EnumConsentPermission permission, EnumConsentV3Permission permissionV3) {
         LOG.info("Getting pension plan contract for contract id {} and consent id {}", contractId, consentId);
 
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
@@ -46,7 +62,7 @@ public class PensionPlanService extends BaseInsuranceService {
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Certificate id " + contractId + " not found"));
 
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
-        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, permission);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, permission, permissionV3);
         this.checkConsentCoversContract(consentEntity, contract);
         this.checkConsentOwnerIsContractOwner(consentEntity, contract);
 
@@ -55,12 +71,17 @@ public class PensionPlanService extends BaseInsuranceService {
 
     public ResponseInsurancePensionPlanContractInfo getContractInfo(String contractId, String consentId) {
         LOG.info("Getting pension plan contract info response for consent id {}", consentId);
-        return getContract(contractId, consentId, EnumConsentPermission.PENSION_PLAN_CONTRACTINFO_READ).mapContractInfoDTO();
+        return getContract(contractId, consentId, EnumConsentPermission.PENSION_PLAN_CONTRACTINFO_READ, EnumConsentV3Permission.PENSION_PLAN_CONTRACTINFO_READ).mapContractInfoDTO();
+    }
+
+    public ResponseInsurancePensionPlanContractInfoV2 getContractInfoV2(String contractId, String consentId) {
+        LOG.info("Getting pension plan contract info response for consent id {}", consentId);
+        return getContract(contractId, consentId, EnumConsentPermission.PENSION_PLAN_CONTRACTINFO_READ, EnumConsentV3Permission.PENSION_PLAN_CONTRACTINFO_READ).mapContractInfoDTOV2();
     }
 
     public ResponseInsurancePensionPlanWithdrawals getContractWithdrawals(String contractId, String consentId, Pageable pageable) {
         LOG.info("Getting pension plan contract withdrawals response for consent id {}", consentId);
-        getContract(contractId, consentId, EnumConsentPermission.PENSION_PLAN_WITHDRAWALS_READ);
+        getContract(contractId, consentId, EnumConsentPermission.PENSION_PLAN_WITHDRAWALS_READ, EnumConsentV3Permission.PENSION_PLAN_WITHDRAWALS_READ);
 
         var withdrawals = pensionPlanContractWithdrawalRepository.findByPensionPlanContractId(contractId, pageable);
         var resp = new ResponseInsurancePensionPlanWithdrawals()
@@ -69,9 +90,20 @@ public class PensionPlanService extends BaseInsuranceService {
         return resp;
     }
 
+    public ResponseInsurancePensionPlanWithdrawalsV2 getContractWithdrawalsV2(String contractId, String consentId, Pageable pageable) {
+        LOG.info("Getting pension plan contract withdrawals response for consent id {}", consentId);
+        getContract(contractId, consentId, EnumConsentPermission.PENSION_PLAN_WITHDRAWALS_READ, EnumConsentV3Permission.PENSION_PLAN_WITHDRAWALS_READ);
+
+        var withdrawals = pensionPlanContractWithdrawalRepository.findByPensionPlanContractId(contractId, pageable);
+        var resp = new ResponseInsurancePensionPlanWithdrawalsV2()
+                .data(withdrawals.getContent().stream().map(PensionPlanContractWithdrawalEntity::mapDTOV2).toList());
+        resp.setMeta(InsuranceLambdaUtils.getMeta(withdrawals, false));
+        return resp;
+    }
+
     public ResponseInsurancePensionPlanClaim getContractClaims(String contractId, String consentId, Pageable pageable) {
         LOG.info("Getting pension plan contract claims response for consent id {}", consentId);
-        getContract(contractId, consentId, EnumConsentPermission.PENSION_PLAN_CLAIM);
+        getContract(contractId, consentId, EnumConsentPermission.PENSION_PLAN_CLAIM, EnumConsentV3Permission.PENSION_PLAN_CLAIM_READ);
 
         var withdrawals = pensionPlanContractClaimRepository.findByPensionPlanContractId(contractId, pageable);
         var resp = new ResponseInsurancePensionPlanClaim()
@@ -80,10 +112,21 @@ public class PensionPlanService extends BaseInsuranceService {
         return resp;
     }
 
+    public ResponseInsurancePensionPlanClaimV2 getContractClaimsV2(String contractId, String consentId, Pageable pageable) {
+        LOG.info("Getting pension plan contract claims response for consent id {}", consentId);
+        getContract(contractId, consentId, EnumConsentPermission.PENSION_PLAN_CLAIM, EnumConsentV3Permission.PENSION_PLAN_CLAIM_READ);
+
+        var withdrawals = pensionPlanContractClaimRepository.findByPensionPlanContractId(contractId, pageable);
+        var resp = new ResponseInsurancePensionPlanClaimV2()
+                .data(withdrawals.getContent().stream().map(PensionPlanContractClaimEntity::mapDTOV2).toList());
+        resp.setMeta(InsuranceLambdaUtils.getMeta(withdrawals, false));
+        return resp;
+    }
+
     public ResponseInsurancePensionPlanPortabilities getContractPortabilities(String contractId, String consentId,
                                                                               Pageable pageable) {
         LOG.info("Getting pension plan contract portability response for consent id {}", consentId);
-        getContract(contractId, consentId, EnumConsentPermission.PENSION_PLAN_PORTABILITIES_READ);
+        getContract(contractId, consentId, EnumConsentPermission.PENSION_PLAN_PORTABILITIES_READ, EnumConsentV3Permission.PENSION_PLAN_PORTABILITIES_READ);
 
         var portability = pensionPlanContractPortabilityRepository.findByPensionPlanContractId(contractId, pageable);
         var resp = new ResponseInsurancePensionPlanPortabilities()
@@ -97,7 +140,7 @@ public class PensionPlanService extends BaseInsuranceService {
 
     public ResponseInsurancePensionPlanMovements getContractMovements(String contractId, String consentId, Pageable pageable) {
         LOG.info("Getting pension plan contract movement response for consent id {}", consentId);
-        getContract(contractId, consentId, EnumConsentPermission.PENSION_PLAN_MOVEMENTS_READ);
+        getContract(contractId, consentId, EnumConsentPermission.PENSION_PLAN_MOVEMENTS_READ, EnumConsentV3Permission.PENSION_PLAN_MOVEMENTS_READ);
 
         var benefits = pensionPlanContractMovementBenefitRepository.findByPensionPlanContractId(contractId, pageable);
         var contributions = pensionPlanContractMovementContributionRepository.findByPensionPlanContractId(contractId, pageable);

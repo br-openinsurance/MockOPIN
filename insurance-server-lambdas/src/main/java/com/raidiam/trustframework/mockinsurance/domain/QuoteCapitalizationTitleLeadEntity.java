@@ -1,18 +1,12 @@
 package com.raidiam.trustframework.mockinsurance.domain;
 
-import org.hibernate.envers.Audited;
-
-import com.raidiam.trustframework.mockinsurance.models.generated.QuoteRequestCapitalizationTitleLead;
-import com.raidiam.trustframework.mockinsurance.models.generated.QuoteStatus;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseQuote;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokePatch;
-import com.raidiam.trustframework.mockinsurance.models.generated.ResponseRevokePatchData;
+import com.raidiam.trustframework.mockinsurance.models.generated.*;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.envers.Audited;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -27,6 +21,17 @@ public class QuoteCapitalizationTitleLeadEntity extends QuoteEntity {
     }
 
     public static QuoteCapitalizationTitleLeadEntity fromRequest(QuoteRequestCapitalizationTitleLead req, String clientId) {
+        QuoteCapitalizationTitleLeadEntity entity = new QuoteCapitalizationTitleLeadEntity();
+        entity.setConsentId(req.getData().getConsentId());
+        entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
+        entity.setClientId(clientId);
+        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
+        entity.setCustomer(req.getData().getQuoteCustomer());
+
+        return entity;
+    }
+
+    public static QuoteCapitalizationTitleLeadEntity fromRequestV2(QuoteRequestCapitalizationTitleLeadV2 req, String clientId) {
         QuoteCapitalizationTitleLeadEntity entity = new QuoteCapitalizationTitleLeadEntity();
         entity.setConsentId(req.getData().getConsentId());
         entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());

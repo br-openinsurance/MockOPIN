@@ -27,6 +27,18 @@ public class QuoteFinancialRiskLeadEntity extends QuoteEntity {
         return entity;
     }
 
+    public static QuoteFinancialRiskLeadEntity fromRequestV2(QuoteRequestFinancialRiskLeadV2 req, String clientId) {
+        QuoteFinancialRiskLeadEntity entity = new QuoteFinancialRiskLeadEntity();
+        entity.setConsentId(req.getData().getConsentId());
+        entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
+        entity.setClientId(clientId);
+        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
+
+        entity.setCustomer(req.getData().getQuoteCustomer());
+
+        return entity;
+    }
+
     public ResponseQuote toResponse() {
         return new ResponseQuote()
                 .data(new QuoteStatus()

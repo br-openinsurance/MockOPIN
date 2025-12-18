@@ -55,8 +55,8 @@ class QuotePersonTravelServiceSpec extends CleanupSpecification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuotePersonTravel(consentId)
-        quote.data.quoteData.setTermEndDate(LocalDate.of(2025, 1, 1))
-        quote.data.quoteData.setTermStartDate(LocalDate.of(2025, 1, 2))
+        quote.data.v1.quoteData.setTermEndDate(LocalDate.of(2025, 1, 1))
+        quote.data.v1.quoteData.setTermStartDate(LocalDate.of(2025, 1, 2))
         quotePersonTravelRepository.save(quote)
 
         when:

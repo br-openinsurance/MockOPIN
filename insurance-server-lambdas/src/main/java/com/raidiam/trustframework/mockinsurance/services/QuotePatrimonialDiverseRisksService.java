@@ -31,8 +31,8 @@ public class QuotePatrimonialDiverseRisksService extends QuoteService<QuotePatri
     protected void validateQuote(QuotePatrimonialDiverseRisksEntity quote) {
         super.validateQuote(quote);
 
-        if (quote.getData().getQuoteData().getMaxLMG() != null) {
-            validateAmountDetails(quote.getData().getQuoteData().getMaxLMG());
+        if (quote.getData().getMaxLMG() != null) {
+            validateAmountDetails(quote.getData().getMaxLMG());
         }
     }
 }

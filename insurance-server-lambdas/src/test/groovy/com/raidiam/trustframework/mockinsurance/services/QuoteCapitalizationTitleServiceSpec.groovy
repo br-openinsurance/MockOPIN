@@ -34,15 +34,14 @@ public class QuoteCapitalizationTitleServiceSpec extends CleanupSpecification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuoteCapitalizationTitle(consentId)
-        quote.setData(new QuoteCapitalizationTitleData()
-            .quoteData(new QuoteDataCapitalizationTitle()
+        quote.getData().setV1(new QuoteCapitalizationTitleData()
+                .quoteData(new QuoteDataCapitalizationTitle()
                         .paymentType(QuoteDataCapitalizationTitle.PaymentTypeEnum.MENSAL)
                         .singlePayment(new AmountDetails()
-                            .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
-                            .amount("100.00")
+                                .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
+                                .amount("100.00")
                         )
-                )
-        )
+                ))
 
         when:
         def newQuote = quoteCapitalizationTitleService.createQuote(quote)
@@ -73,16 +72,12 @@ public class QuoteCapitalizationTitleServiceSpec extends CleanupSpecification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuoteCapitalizationTitle(consentId)
-        quote.setData(new QuoteCapitalizationTitleData()
-            .quoteData(new QuoteDataCapitalizationTitle()
-                        .paymentType(QuoteDataCapitalizationTitle.PaymentTypeEnum.UNICO)
-                        .singlePayment(new AmountDetails()
-                            .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
-                            .amount("1000.00")
-                        )
-                )
-        )
-                
+        quote.getData().getV1().setQuoteData(new QuoteDataCapitalizationTitle()
+                .paymentType(QuoteDataCapitalizationTitle.PaymentTypeEnum.UNICO)
+                .singlePayment(new AmountDetails()
+                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
+                        .amount("1000.00")))
+
         quoteCapitalizationTitleRepository.save(quote)
 
         when:

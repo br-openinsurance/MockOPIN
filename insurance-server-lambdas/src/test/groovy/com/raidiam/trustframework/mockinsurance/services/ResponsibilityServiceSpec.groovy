@@ -65,6 +65,16 @@ class ResponsibilityServiceSpec extends CleanupSpecification {
         response.getData().first()
     }
 
+    def "we can get policies V2" () {
+        when:
+        def response = responsibilityService.getPoliciesV2(Pageable.from(0, 1), testConsent.getConsentId().toString())
+
+        then:
+        response.getData()
+        response.getData().size() == 1
+        response.getData().first()
+    }
+
     def "we can get a policy info" () {
         when:
         def response = responsibilityService.getPolicyInfo(testResponsibilityPolicy.getResponsibilityPolicyId(), testConsent.getConsentId().toString())
@@ -73,9 +83,25 @@ class ResponsibilityServiceSpec extends CleanupSpecification {
         response.getData() != null
     }
 
+    def "we can get a policy info V2" () {
+        when:
+        def response = responsibilityService.getPolicyInfoV2(testResponsibilityPolicy.getResponsibilityPolicyId(), testConsent.getConsentId().toString())
+
+        then:
+        response.getData() != null
+    }
+
     def "we can get a policy's claims" () {
         when:
         def response = responsibilityService.getPolicyClaims(testResponsibilityPolicy.getResponsibilityPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
+
+        then:
+        response.getData() != null
+    }
+
+    def "we can get a policy's claims V2" () {
+        when:
+        def response = responsibilityService.getPolicyClaimsV2(testResponsibilityPolicy.getResponsibilityPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
 
         then:
         response.getData() != null

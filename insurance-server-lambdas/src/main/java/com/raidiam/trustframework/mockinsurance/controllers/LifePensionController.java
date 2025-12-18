@@ -16,6 +16,8 @@ import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,9 +38,25 @@ public class LifePensionController extends BaseInsuranceController {
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
     public ResponseInsuranceLifePension getContracts(Pageable pageable, @NotNull HttpRequest<?> request) {
+        var adjustedPageable = InsuranceLambdaUtils.adjustPageable(pageable, request, maxPageSize);
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
         LOG.info("Getting contracts for consent id {} v1", consentId);
-        ResponseInsuranceLifePension response = service.getContracts(pageable, consentId);
+        ResponseInsuranceLifePension response = service.getContracts(adjustedPageable, consentId);
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
+        LOG.info("Retrieved contracts for consent id {}", consentId);
+        InsuranceLambdaUtils.logObject(mapper, response);
+        return response;
+    }
+
+    @Get("/v2/insurance-life-pension/contracts")
+    @XFapiInteractionIdRequired
+    @ResponseErrorWithRequestDateTime
+    @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    public ResponseInsuranceLifePensionV2 getContractsV2(Pageable pageable, @NotNull HttpRequest<?> request) {
+        var adjustedPageable = InsuranceLambdaUtils.adjustPageable(pageable, request, maxPageSize);
+        String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
+        LOG.info("Getting contracts for consent id {} v2", consentId);
+        ResponseInsuranceLifePensionV2 response = service.getContractsV2(adjustedPageable, consentId);
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
         LOG.info("Retrieved contracts for consent id {}", consentId);
         InsuranceLambdaUtils.logObject(mapper, response);
@@ -60,15 +78,31 @@ public class LifePensionController extends BaseInsuranceController {
         return response;
     }
 
-    @Get("/v1/insurance-life-pension/{certificateId}/movements")
+    @Get("/v2/insurance-life-pension/{certificateId}/contract-info")
     @XFapiInteractionIdRequired
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
-    public ResponseInsuranceLifePensionMovements getMovements(Pageable pageable, @NotNull HttpRequest<?> request,
-                                                              @PathVariable UUID certificateId) {
+    public ResponseInsuranceLifePensionContractInfoV2 getPersonalQualificationsV2(@NotNull HttpRequest<?> request,
+                                                                              @PathVariable UUID certificateId) {
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Getting movements for certificate id {} v1", consentId);
-        ResponseInsuranceLifePensionMovements response = service.getContractMovements(certificateId, consentId, pageable);
+        LOG.info("Getting contract info for certificate id {} v2", consentId);
+        ResponseInsuranceLifePensionContractInfoV2 response = service.getContractInfoV2(certificateId, consentId);
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
+        LOG.info("Retrieved contract info for certificate id {}", certificateId);
+        InsuranceLambdaUtils.logObject(mapper, response);
+        return response;
+    }
+
+    @Get("/v{version}/insurance-life-pension/{certificateId}/movements")
+    @XFapiInteractionIdRequired
+    @ResponseErrorWithRequestDateTime
+    @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    public ResponseInsuranceLifePensionMovements getMovements(@PathVariable("version") @Min(1) @Max(2) int version, Pageable pageable, @NotNull HttpRequest<?> request,
+                                                              @PathVariable UUID certificateId) {
+        var adjustedPageable = InsuranceLambdaUtils.adjustPageable(pageable, request, maxPageSize);
+        String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
+        LOG.info("Getting movements for certificate id {} v{}", consentId, version);
+        ResponseInsuranceLifePensionMovements response = service.getContractMovements(certificateId, consentId, adjustedPageable);
         // Calculates total movements by summing benefits and contributions
         // This is acceptable for the current mock setup, but may not reflect real pagination behavior when total movements exceed maxPageSize
         int totalMovements = response.getData().getMovementBenefits().size() + response.getData().getMovementContributions().size();
@@ -85,9 +119,26 @@ public class LifePensionController extends BaseInsuranceController {
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
     public ResponseInsuranceLifePensionPortabilities getPortabilities(Pageable pageable, @NotNull HttpRequest<?> request,
                                                                       @PathVariable UUID certificateId) {
+        var adjustedPageable = InsuranceLambdaUtils.adjustPageable(pageable, request, maxPageSize);
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
         LOG.info("Getting portabilities for certificate id {} v1", consentId);
-        ResponseInsuranceLifePensionPortabilities response = service.getContractPortabilities(certificateId, consentId, pageable);
+        ResponseInsuranceLifePensionPortabilities response = service.getContractPortabilities(certificateId, consentId, adjustedPageable);
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
+        LOG.info("Retrieved portabilities for certificate id {}", certificateId);
+        InsuranceLambdaUtils.logObject(mapper, response);
+        return response;
+    }
+
+    @Get("/v2/insurance-life-pension/{certificateId}/portabilities")
+    @XFapiInteractionIdRequired
+    @ResponseErrorWithRequestDateTime
+    @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    public ResponseInsuranceLifePensionPortabilitiesV2 getPortabilitiesV2(Pageable pageable, @NotNull HttpRequest<?> request,
+                                                                      @PathVariable UUID certificateId) {
+        var adjustedPageable = InsuranceLambdaUtils.adjustPageable(pageable, request, maxPageSize);
+        String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
+        LOG.info("Getting portabilities for certificate id {} v2", consentId);
+        ResponseInsuranceLifePensionPortabilitiesV2 response = service.getContractPortabilitiesV2(certificateId, consentId, adjustedPageable);
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
         LOG.info("Retrieved portabilities for certificate id {}", certificateId);
         InsuranceLambdaUtils.logObject(mapper, response);
@@ -100,9 +151,26 @@ public class LifePensionController extends BaseInsuranceController {
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
     public ResponseInsuranceLifePensionWithdrawal getWithdrawals(Pageable pageable, @NotNull HttpRequest<?> request,
                                                                  @PathVariable UUID certificateId) {
+        var adjustedPageable = InsuranceLambdaUtils.adjustPageable(pageable, request, maxPageSize);
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
         LOG.info("Getting withdrawals for certificate id {} v1", consentId);
-        ResponseInsuranceLifePensionWithdrawal response = service.getContractWithdrawals(certificateId, consentId, pageable);
+        ResponseInsuranceLifePensionWithdrawal response = service.getContractWithdrawals(certificateId, consentId, adjustedPageable);
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
+        LOG.info("Retrieved withdrawals for certificate id {}", certificateId);
+        InsuranceLambdaUtils.logObject(mapper, response);
+        return response;
+    }
+
+    @Get("/v2/insurance-life-pension/{certificateId}/withdrawals")
+    @XFapiInteractionIdRequired
+    @ResponseErrorWithRequestDateTime
+    @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    public ResponseInsuranceLifePensionWithdrawalV2 getWithdrawalsV2(Pageable pageable, @NotNull HttpRequest<?> request,
+                                                                 @PathVariable UUID certificateId) {
+        var adjustedPageable = InsuranceLambdaUtils.adjustPageable(pageable, request, maxPageSize);
+        String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
+        LOG.info("Getting withdrawals for certificate id {} v2", consentId);
+        ResponseInsuranceLifePensionWithdrawalV2 response = service.getContractWithdrawalsV2(certificateId, consentId, adjustedPageable);
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
         LOG.info("Retrieved withdrawals for certificate id {}", certificateId);
         InsuranceLambdaUtils.logObject(mapper, response);
@@ -115,9 +183,26 @@ public class LifePensionController extends BaseInsuranceController {
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
     public ResponseInsuranceLifePensionClaim getClaims(Pageable pageable, @NotNull HttpRequest<?> request,
                                                                  @PathVariable UUID certificateId) {
+        var adjustedPageable = InsuranceLambdaUtils.adjustPageable(pageable, request, maxPageSize);
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
         LOG.info("Getting claims for certificate id {} v1", consentId);
-        ResponseInsuranceLifePensionClaim response = service.getContractClaims(certificateId, consentId, pageable);
+        ResponseInsuranceLifePensionClaim response = service.getContractClaims(certificateId, consentId, adjustedPageable);
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
+        LOG.info("Retrieved claims for certificate id {}", certificateId);
+        InsuranceLambdaUtils.logObject(mapper, response);
+        return response;
+    }
+
+    @Get("/v2/insurance-life-pension/{certificateId}/claim")
+    @XFapiInteractionIdRequired
+    @ResponseErrorWithRequestDateTime
+    @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    public ResponseInsuranceLifePensionClaimV2 getClaimsV2(Pageable pageable, @NotNull HttpRequest<?> request,
+                                                                 @PathVariable UUID certificateId) {
+        var adjustedPageable = InsuranceLambdaUtils.adjustPageable(pageable, request, maxPageSize);
+        String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
+        LOG.info("Getting claims for certificate id {} v2", consentId);
+        ResponseInsuranceLifePensionClaimV2 response = service.getContractClaimsV2(certificateId, consentId, adjustedPageable);
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
         LOG.info("Retrieved claims for certificate id {}", certificateId);
         InsuranceLambdaUtils.logObject(mapper, response);

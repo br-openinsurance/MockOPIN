@@ -30,6 +30,21 @@ class QuotePatrimonialDiverseRisksServiceSpec extends CleanupSpecification {
         newQuote.consentId == consentId
     }
 
+    def "We can create a quote without max LMG"() {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuotePatrimonialDiverseRisks(consentId)
+        quote.data.v1.quoteData.maxLMG = null
+
+        when:
+        def newQuote = quotePatrimonialDiverseRisksService.createQuote(quote)
+
+        then:
+        noExceptionThrown()
+        newQuote.quoteId != null
+        newQuote.consentId == consentId
+    }
+
     def "We can fetch a quote that moves to ACPT"() {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
@@ -50,7 +65,7 @@ class QuotePatrimonialDiverseRisksServiceSpec extends CleanupSpecification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuotePatrimonialDiverseRisks(consentId)
-        quote.setData(new QuotePatrimonialDiverseRisksData()
+        quote.getData().setV1(new QuotePatrimonialDiverseRisksData()
                 .quoteData(new QuoteDataPatrimonialDiverseRisks()))
         quotePatrimonialDiverseRisksRepository.save(quote)
 
@@ -141,7 +156,7 @@ class QuotePatrimonialDiverseRisksServiceSpec extends CleanupSpecification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuotePatrimonialDiverseRisks(consentId)
-        quote.setData(new QuotePatrimonialDiverseRisksData()
+        quote.getData().setV1(new QuotePatrimonialDiverseRisksData()
                 .quoteData(new QuoteDataPatrimonialDiverseRisks()
                 .maxLMG(new AmountDetails()
                         .unit(new AmountDetailsUnit()
@@ -159,7 +174,7 @@ class QuotePatrimonialDiverseRisksServiceSpec extends CleanupSpecification {
         e.getMessage() == "NAO_INFORMADO: Amount missing from amount details"
 
         when:
-        quote.data.quoteData.maxLMG.setAmount("1000.00")
+        quote.data.v1.quoteData.maxLMG.setAmount("1000.00")
         quotePatrimonialDiverseRisksService.createQuote(quote)
 
         then:

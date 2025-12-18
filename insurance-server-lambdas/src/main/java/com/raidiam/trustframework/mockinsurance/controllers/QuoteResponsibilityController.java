@@ -57,4 +57,34 @@ public class QuoteResponsibilityController extends BaseInsuranceController {
         LOG.info("Patching quote responsibility for consent id");
         return quoteResponsibilityLeadService.patchQuote(body, consentId, clientId).toRevokePatchResponse();
     }
+
+    @Post("/v2/lead/request")
+    @Status(HttpStatus.CREATED)
+    @Secured({"QUOTE_RESPONSIBILITY_LEAD_MANAGE"})
+    @XFapiInteractionIdRequired
+    @Idempotent
+    @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    public ResponseQuote createLeadQuoteV2(
+            @Body QuoteRequestResponsibilityLeadV2 body,
+            @NotNull HttpRequest<?> request) {
+        String clientId = (String) request.getAttribute("clientId").orElse("");
+        LOG.info("Creating new quote responsibility for client {}", clientId);
+
+
+        var responseQuoteResponsibilityLead = quoteResponsibilityLeadService.createQuote(QuoteResponsibilityLeadEntity.fromRequestV2(body, clientId)).toResponse();
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(responseQuoteResponsibilityLead::setLinks, responseQuoteResponsibilityLead::setMeta, appBaseUrl + request.getPath());
+        InsuranceLambdaUtils.logObject(mapper, responseQuoteResponsibilityLead);
+
+        return responseQuoteResponsibilityLead;
+    }
+
+    @Patch("/v2/lead/request/{consentId}")
+    @Secured({"QUOTE_RESPONSIBILITY_LEAD_MANAGE"})
+    @XFapiInteractionIdRequired
+    @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    public ResponseRevokePatch patchLeadQuoteV2(@PathVariable("consentId") String consentId, @Body RevokePatchPayload body, HttpRequest<?> request) {
+        String clientId = (String) request.getAttribute("clientId").orElse("");
+        LOG.info("Patching quote responsibility for consent id");
+        return quoteResponsibilityLeadService.patchQuote(body, consentId, clientId).toRevokePatchResponse();
+    }
 }

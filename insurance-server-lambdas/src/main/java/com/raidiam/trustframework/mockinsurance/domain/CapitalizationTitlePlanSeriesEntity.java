@@ -115,4 +115,27 @@ public class CapitalizationTitlePlanSeriesEntity extends BaseEntity {
                 .titles(this.getTitles().stream().map(CapitalizationTitlePlanTitleEntity::getDTO).toList())
                 .broker(this.getBrokers().stream().map(CapitalizationTitlePlanBrokerEntity::getDTO).toList());
     }
+
+    public InsuranceCapitalizationTitleSeriesV2 toResponseV2() {
+        return new InsuranceCapitalizationTitleSeriesV2()
+                .planId(this.getCapitalizationTitlePlan().getCapitalizationTitlePlanId().toString())
+                .seriesId(String.valueOf(this.getSeriesId()))
+                .modality(InsuranceCapitalizationTitleSeriesV2.ModalityEnum.fromValue(this.getModality()))
+                .susepProcessNumber(this.getSusepProcessNumber())
+                .serieSize(this.getSerieSize())
+                .quotas(this.getQuotas().stream().map(CapitalizationTitlePlanQuotaEntity::getDTO).toList())
+                .gracePeriodForFullRedemption(this.getGracePeriodForFullRedemption())
+                .gracePeriodRedemption(this.getGracePeriodRedemption())
+                .updateIndex(InsuranceCapitalizationTitleSeriesV2.UpdateIndexEnum.fromValue(this.getUpdateIndex()))
+                .updateIndexOthers(this.getUpdateIndexOthers())
+                .readjustmentIndex(InsuranceCapitalizationTitleSeriesV2.ReadjustmentIndexEnum.fromValue(this.getReadjustmentIndex()))
+                .readjustmentIndexOthers(this.getReadjustmentIndexOthers())
+                .bonusClause(this.getBonusClause())
+                .frequency(InsuranceCapitalizationTitleSeriesV2.FrequencyEnum.fromValue(this.getFrequency()))
+                .frequencyDescription(this.getFrequencyDescription())
+                .interestRate(this.getInterestRate())
+                .commercialDenomination(this.getCommercialDenomination())
+                .titles(this.getTitles().stream().map(CapitalizationTitlePlanTitleEntity::getDTOV2).toList())
+                .broker(this.getBrokers().stream().map(CapitalizationTitlePlanBrokerEntity::getDTO).toList());
+    }
 }

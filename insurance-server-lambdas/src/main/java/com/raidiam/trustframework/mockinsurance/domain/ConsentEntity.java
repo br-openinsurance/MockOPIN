@@ -238,8 +238,120 @@ public class ConsentEntity extends BaseEntity {
         return entity;
     }
 
+    public static ConsentEntity fromRequest(CreateConsentV3 req, UUID accountHolderId, String clientId) {
+        ConsentEntity entity = new ConsentEntity();
+        UUID uuid = UUID.randomUUID();
+        String consentId = String.format(CONSENT_ID_FORMAT, uuid);
+        entity.setConsentId(consentId);
+        entity.setClientId(clientId);
+
+        entity.setAccountHolderId(accountHolderId);
+        if (req.getData().getBusinessEntity() != null) {
+            entity.setBusinessDocumentIdentification(req.getData().getBusinessEntity().getDocument().getIdentification());
+            entity.setBusinessDocumentRel(req.getData().getBusinessEntity().getDocument().getRel());
+        }
+
+        entity.setCreationDateTime(Date.from(Instant.now()));
+        entity.setStatusUpdateDateTime(Date.from(Instant.now()));
+        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
+        entity.setStatus(EnumConsentStatus.AWAITING_AUTHORISATION.toString());
+        Optional.ofNullable(req.getData().getBusinessEntity())
+                .map(BusinessEntity::getDocument)
+                .ifPresent(d -> entity.setBusinessDocumentIdentification(d.getIdentification()));
+        entity.setPermissions(req.getData().getPermissions()
+                .stream()
+                .map(permission -> Optional.ofNullable(permission).map(EnumConsentV3Permission::toString).orElse(null))
+                .toList());
+        entity.setEndorsementInformation(req.getData().getEndorsementInformation());
+
+        entity.setClaimNotificationInformation(req.getData().getClaimNotificationInformation());
+
+        return entity;
+    }
+
     public ResponseConsent toFullResponse() {
         var resp = this.toResponse();
+        if (this.accountHolderId != null) {
+            resp.getData().setSub(accountHolder.getUserId());
+            resp.getData().setLoggedUser(new LoggedUser()
+                    .document(new LoggedUserDocument()
+                            .identification(accountHolder.getDocumentIdentification())
+                            .rel(accountHolder.getDocumentRel())));
+        }
+        if (businessDocumentIdentification != null) {
+            resp.getData().setBusinessEntity(new BusinessEntity()
+                    .document(new BusinessEntityDocument()
+                            .identification(businessDocumentIdentification)
+                            .rel(businessDocumentRel))
+            );
+        }
+
+        resp.getData().linkedCapitalizationTilePlanIds(capitalizationTitlePlans.stream()
+                .map(CapitalizationTitlePlanEntity::getCapitalizationTitlePlanId)
+                .map(UUID::toString)
+                .toList());
+
+        resp.getData().linkedFinancialRiskPolicyIds(financialRiskPolicies.stream()
+                .map(FinancialRiskPolicyEntity::getFinancialRiskPolicyId)
+                .map(UUID::toString)
+                .toList());
+
+        resp.getData().linkedHousingPolicyIds(housingPolicies.stream()
+                .map(HousingPolicyEntity::getHousingPolicyId)
+                .map(UUID::toString)
+                .toList());
+
+        resp.getData().linkedResponsibilityPolicyIds(responsibilityPolicies.stream()
+                .map(ResponsibilityPolicyEntity::getResponsibilityPolicyId)
+                .map(UUID::toString)
+                .toList());
+
+        resp.getData().linkedPersonPolicyIds(personPolicies.stream()
+                .map(PersonPolicyEntity::getPersonPolicyId)
+                .map(UUID::toString)
+                .toList());
+
+        resp.getData().linkedLifePensionContractIds(lifePensionContracts.stream()
+                .map(LifePensionContractEntity::getLifePensionContractId)
+                .map(UUID::toString)
+                .toList());
+
+        resp.getData().linkedPensionPlanContractIds(pensionPlanContracts.stream()
+                .map(PensionPlanContractEntity::getPensionPlanContractId)
+                .toList());
+
+        resp.getData().linkedAcceptanceAndBranchesAbroadPolicyIds(acceptanceAndBranchesAbroadPolicies.stream()
+                .map(AcceptanceAndBranchesAbroadPolicyEntity::getPolicyId)
+                .map(UUID::toString)
+                .toList());
+
+        resp.getData().linkedPatrimonialPolicyIds(patrimonialPolicies.stream()
+                .map(PatrimonialPolicyEntity::getPolicyId)
+                .map(UUID::toString)
+                .toList());
+
+        resp.getData().linkedRuralPolicyIds(ruralPolicies.stream()
+                .map(RuralPolicyEntity::getRuralPolicyId)
+                .map(UUID::toString)
+                .toList());
+
+        resp.getData().linkedFinancialAssistanceContractIds(financialAssistanceContracts.stream()
+                .map(FinancialAssistanceContractEntity::getFinancialAssistanceContractId)
+                .toList());
+
+        resp.getData().linkedAutoPolicyIds(autoPolicies.stream()
+                .map(AutoPolicyEntity::getAutoPolicyId)
+                .toList());
+
+        resp.getData().linkedTransportPolicyIds(transportPolicies.stream()
+                .map(TransportPolicyEntity::getTransportPolicyId)
+                .toList());
+
+        return resp;
+    }
+
+    public ResponseConsentV3 toFullResponseV3() {
+        var resp = this.toResponseV3();
         if (this.accountHolderId != null) {
             resp.getData().setSub(accountHolder.getUserId());
             resp.getData().setLoggedUser(new LoggedUser()
@@ -341,5 +453,29 @@ public class ConsentEntity extends BaseEntity {
         }
 
         return new ResponseConsent().data(consentData);
+    }
+
+    public ResponseConsentV3 toResponseV3() {
+        ResponseConsentV3Data consentData = new ResponseConsentV3Data()
+                .creationDateTime(InsuranceLambdaUtils.dateToOffsetDate(creationDateTime))
+                .statusUpdateDateTime(InsuranceLambdaUtils.dateToOffsetDate(statusUpdateDateTime))
+                .status(EnumConsentStatus.fromValue(status))
+                .expirationDateTime(InsuranceLambdaUtils.dateToOffsetDate(expirationDateTime))
+                .expirationDateTime(InsuranceLambdaUtils.dateToOffsetDate(expirationDateTime))
+                .consentId(consentId)
+                .permissions(this.getPermissions()
+                .stream()
+                .map(EnumConsentV3Permission::valueOf)
+                .toList());
+
+        if (EnumConsentStatus.REJECTED.toString().equals(this.status)) {
+            consentData.rejection(new ResponseConsentV3DataRejection()
+                    .rejectedBy(EnumRejectedBy.fromValue(this.rejectedBy))
+                    .reason(new RejectedReasonV3()
+                            .code(EnumReasonCodeV3.fromValue(this.rejectionCode))
+                            .additionalInformation("the consent was rejected")));
+        }
+
+        return new ResponseConsentV3().data(consentData);
     }
 }

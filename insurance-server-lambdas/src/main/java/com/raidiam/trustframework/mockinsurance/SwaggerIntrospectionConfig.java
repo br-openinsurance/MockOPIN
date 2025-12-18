@@ -44,6 +44,11 @@ import io.micronaut.core.annotation.Introspected;
         ResponseInsuranceFinancialAssistanceBrandContracts.class,
         ResponseInsuranceFinancialAssistanceContractInfo.class,
         InsuranceFinancialAssistanceMovements.class,
+        DynamicFieldListData.class,
+        DynamicFieldListBranch.class,
+        Fields.class,
+        FieldsArray.class,
+        DynamicFieldsCapitalizationListData.class,
 })
 public class SwaggerIntrospectionConfig {
 }

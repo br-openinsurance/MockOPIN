@@ -50,8 +50,17 @@ public class CapitalizationTitlePlanHolderEntity extends BaseEntity {
     @Column(name = "holder_address_additional_info")
     private String holderAddressAdditionalInfo;
     
+    @Column(name = "holder_flag_post_code")
+    private String holderFlagPostCode;
+    
+    @Column(name = "holder_district_name")
+    private String holderDistrictName;
+    
     @Column(name = "holder_town_name")
     private String holderTownName;
+    
+    @Column(name = "holder_town_code")
+    private String holderTownCode;
     
     @Column(name = "holder_country_subdivision")
     private String holderCountrySubdivision;
@@ -94,6 +103,33 @@ public class CapitalizationTitlePlanHolderEntity extends BaseEntity {
                 .holderCountrySubDivision(EnumCountrySubDivision.fromValue(this.getHolderCountrySubdivision()))
                 .holderCountryCode(this.getHolderCountryCode())
                 .holderPostCode(this.getHolderPostcode())
+                .holderRedemption(this.getHolderRedemption())
+                .holderRaffle(this.getHolderRaffle());
+    }
+
+    public InsuranceCapitalizationTitleHolderV2 getDTOV2() {
+        return new InsuranceCapitalizationTitleHolderV2()
+                .holderName(this.getHolderName())
+                .holderDocumentType(InsuranceCapitalizationTitleHolderV2.HolderDocumentTypeEnum.fromValue(this.getHolderDocumentType()))
+                .holderDocumentTypeOthers(this.getHolderDocumentTypeOthers())
+                .holderDocumentNumber(this.getHolderDocumentNumber())
+                .holderPhones(List.of(new RequestorPhone()
+                        .countryCallingCode(this.getHolderCountryCallingCode())
+                        .areaCode(EnumAreaCode.fromValue(this.getHolderAreaCode()))
+                        .number(this.getHolderNumber())))
+                .holderAddress(new Address()
+                    .flagPostCode(Address.FlagPostCodeEnum.valueOf(this.getHolderFlagPostCode()))
+                    .address((AllOfAddressAddress) new AllOfAddressAddress()
+                        .type(NationalAddress.TypeEnum.valueOf(this.getHolderAddress().split(" ")[0].toUpperCase()))
+                        .name(this.getHolderAddress().split(" ", 2)[1].split(",")[0])
+                        .number(this.getHolderAddress().split(" ", 2)[1].split(",")[1])
+                        .addressComplementaryInfo(this.getHolderAddressAdditionalInfo())
+                        .districtName(this.getHolderDistrictName())
+                        .townName(this.getHolderTownName())
+                        .ibgeTownCode(this.getHolderTownCode())
+                        .countrySubDivision(EnumCountrySubDivision.fromValue(this.getHolderCountrySubdivision()))
+                        .postCode(this.getHolderPostcode())
+                        ))
                 .holderRedemption(this.getHolderRedemption())
                 .holderRaffle(this.getHolderRaffle());
     }

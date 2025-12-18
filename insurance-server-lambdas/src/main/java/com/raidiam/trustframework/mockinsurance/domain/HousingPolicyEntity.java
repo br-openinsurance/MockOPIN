@@ -166,6 +166,36 @@ public class HousingPolicyEntity extends BaseEntity implements HasStatusInterfac
                 );
     }
 
+    public ResponseInsuranceHousingPolicyInfoV2 mapPolicyInfoDTOV2() {
+        return new ResponseInsuranceHousingPolicyInfoV2()
+                .data(new InsuranceHousingPolicyInfoDataV2()
+                        .documentType(InsuranceHousingPolicyInfoDataV2.DocumentTypeEnum.valueOf(this.getDocumentType()))
+                        .policyId(this.getPolicyId())
+                        .susepProcessNumber(this.getSusepProcessNumber())
+                        .groupCertificateId(this.getGroupCertificateId())
+                        .issuanceType(InsuranceHousingPolicyInfoDataV2.IssuanceTypeEnum.valueOf(this.getIssuanceType()))
+                        .issuanceDate(this.getIssuanceDate())
+                        .termStartDate(this.getTermStartDate())
+                        .termEndDate(this.getTermEndDate())
+                        .leadInsurerCode(this.getLeadInsurerCode())
+                        .leadInsurerPolicyId(this.getLeadInsurerPolicyId())
+                        .maxLMG(new AmountDetails()
+                                .amount(this.getMaxLMGAmount())
+                                .unitType(AmountDetails.UnitTypeEnum.valueOf(this.getMaxLMGUnitType()))
+                                .unit(new AmountDetailsUnit()
+                                        .code(this.getMaxLMGUnitCode())
+                                        .description(AmountDetailsUnit.DescriptionEnum.valueOf(this.getMaxLMGUnitDescription()))
+                                )
+                        )
+                        .proposalId(this.proposalId)
+                        .insuredObjects(this.getInsuredObjects().stream().map(HousingPolicyInsuredObjectEntity::mapDtoV2).toList())
+                        .branchInfo(new InsuranceHousingSpecificPolicyInfoV2()
+                                .insuredObjects(this.getBranchInsuredObjects().stream().map(HousingPolicyBranchInsuredObjectEntity::mapDtoV2).toList())
+                                .insureds(this.getBranchInsureds().stream().map(HousingPolicyBranchInsuredEntity::mapDto).toList())
+                        )
+                );
+    }
+
     public ResponseResourceListData mapResourceDTO() {
         return new ResponseResourceListData()
                 .resourceId(this.getHousingPolicyId().toString());

@@ -101,4 +101,83 @@ public class QuoteLifePensionController extends BaseInsuranceController {
         var clientId = InsuranceLambdaUtils.getRequestMeta(request).getClientId();
         return quoteLifePensionService.patchQuote(body, consentId, clientId).toResponsePatchLifePension(REDIRECT_LINK);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @Post("/v2/lead/request")
+    @Status(HttpStatus.CREATED)
+    @Secured({"QUOTE_LIFE_PENSION_LEAD_MANAGE"})
+    @XFapiInteractionIdRequired
+    @Idempotent
+    @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    public ResponseQuote createLeadQuoteV2(
+            @Body QuoteRequestLifePensionLeadV2 body,
+            @NotNull HttpRequest<?> request) {
+        var clientId = InsuranceLambdaUtils.getRequestMeta(request).getClientId();
+        LOG.info("Creating new quote life pension for client {}", clientId);
+        var resp = quoteLifePensionLeadService.createQuote(QuoteLifePensionLeadEntity.fromRequestV2(body, clientId)).toResponse();
+
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, appBaseUrl + request.getPath());
+        InsuranceLambdaUtils.logObject(mapper, resp);
+
+        return resp;
+    }
+
+    @Patch("/v2/lead/request/{consentId}")
+    @Secured({"QUOTE_LIFE_PENSION_LEAD_MANAGE"})
+    @XFapiInteractionIdRequired
+    @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    public ResponseRevokePatch patchLeadQuoteV2(@PathVariable("consentId") String consentId, @Body RevokePatchPayload body, HttpRequest<?> request) {
+        LOG.info("Patching quote life pension for consent id");
+        var clientId = InsuranceLambdaUtils.getRequestMeta(request).getClientId();
+        return quoteLifePensionLeadService.patchQuote(body, consentId, clientId).toRevokePatchResponse();
+    }
+
+    @Post("/v2/request")
+    @Status(HttpStatus.CREATED)
+    @Secured({"QUOTE_LIFE_PENSION_MANAGE"})
+    @XFapiInteractionIdRequired
+    @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @Idempotent
+    public QuoteStatusLifePensionV2 createBusinessQuoteV2(@Body RequestContractLifePensionV2 body, HttpRequest<?> request) {
+        var clientId = InsuranceLambdaUtils.getRequestMeta(request).getClientId();
+        LOG.info("Creating new quote life pension for client {}", clientId);
+        var resp = quoteLifePensionService.createQuote(QuoteLifePensionEntity.fromRequestV2(body, clientId)).toResponseV2();
+        var selfLink = String.format("%s/open-insurance/contract-life-pension/v2/request/%s/quote-status", appBaseUrl, body.getData().getConsentId());
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, selfLink);
+        return resp;
+    }
+
+    @Get("/v2/request/{consentId}/quote-status")
+    @Secured({"QUOTE_LIFE_PENSION_MANAGE"})
+    @XFapiInteractionIdRequired
+    @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    public QuoteStatusLifePensionV2 getBusinessQuoteV2(@PathVariable("consentId") String consentId, HttpRequest<?> request) {
+        LOG.info("Fetching quote life pension for consent id {}", consentId);
+        var clientId = InsuranceLambdaUtils.getRequestMeta(request).getClientId();
+        var resp = quoteLifePensionService.getQuote(consentId, clientId).toResponseV2();
+        var selfLink = String.format("%s/open-insurance/contract-life-pension/v2/request/%s/quote-status", appBaseUrl, consentId);
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, selfLink);
+        return resp;
+    }
+
+    @Patch("/v2/request/{consentId}")
+    @Secured({"QUOTE_LIFE_PENSION_MANAGE"})
+    @XFapiInteractionIdRequired
+    @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    public ResponsePatchLifePension patchBusinessQuoteV2(@PathVariable("consentId") String consentId, @Body PatchPayload body, HttpRequest<?> request) {
+        LOG.info("Patching quote life pension for consent id {}", consentId);
+        var clientId = InsuranceLambdaUtils.getRequestMeta(request).getClientId();
+        return quoteLifePensionService.patchQuote(body, consentId, clientId).toResponsePatchLifePension(REDIRECT_LINK);
+    }
 }

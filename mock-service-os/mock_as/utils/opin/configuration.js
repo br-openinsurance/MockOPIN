@@ -77,6 +77,7 @@ export default function (mtlsIssuer, ssaJwks) {
       'insurance-life-pension',
       'insurance-pension-plan',
       'insurance-financial-assistance',
+      'dynamic-fields',
       'op:admin',
       'override',
     ],
@@ -190,11 +191,7 @@ export default function (mtlsIssuer, ssaJwks) {
       jwtResponseModes: { enabled: true },
       clientCredentials: { enabled: true },
       requestObjects: {
-        mode: 'strict',
-        request: true,
-        requestUri: false,
-        requireSignedRequestObject: false,
-        requireUriRegistration: true,
+        enabled: true,
       },
       registration: {
         enabled: true,
@@ -436,6 +433,7 @@ export default function (mtlsIssuer, ssaJwks) {
               'insurance-life-pension',
               'insurance-pension-plan',
               'insurance-financial-assistance',
+              'dynamic-fields',
             );
 
             let requestedArray;

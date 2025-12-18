@@ -116,9 +116,36 @@ class RuralServiceSpec extends CleanupRuralSpecification {
         response.getData().first().getCompanies().first().getPolicies().first().getProductName() == testRuralPolicy.getProductName()
     }
 
+    def "we can get policies V2" () {
+        when:
+        def response = ruralService.getPoliciesV2(testConsent.getConsentId().toString(), Pageable.from(0, 1))
+
+        then:
+        response.getData()
+        response.getData().size() == 1
+        response.getData().first()
+        response.getData().first().getBrand() == "Mock"
+        response.getData().first().getCompanies().first().getCompanyName() == "Mock Insurer"
+        response.getData().first().getCompanies().first().getPolicies().first().getProductName() == testRuralPolicy.getProductName()
+    }
+
     def "we can get a policy info" () {
         when:
         def response = ruralService.getPolicyInfo(testRuralPolicy.getRuralPolicyId(), testConsent.getConsentId().toString())
+
+        then:
+        response.getData() != null
+        response.getData().getPolicyId() == testRuralPolicy.getPolicyId()
+        response.getData().getInsureds().first().getName() == testRuralPolicyInsured.getName()
+        response.getData().getBeneficiaries().first().getName() == testRuralPolicyBeneficiary.getName()
+        response.getData().getIntermediaries().first().getName() == testRuralPolicyIntermediary.getName()
+        response.getData().getPrincipals().first().getName() == testRuralPolicyPrincipal.getName()
+        response.getData().getCoinsurers().first().getIdentification() == testRuralPolicyCoinsurer.getIdentification()
+    }
+
+    def "we can get a policy info V2" () {
+        when:
+        def response = ruralService.getPolicyInfoV2(testRuralPolicy.getRuralPolicyId(), testConsent.getConsentId().toString())
 
         then:
         response.getData() != null
@@ -139,11 +166,22 @@ class RuralServiceSpec extends CleanupRuralSpecification {
         response.getData().getAmount().getAmount() == testRuralPolicyPremium.getAmount()
         response.getData().getCoverages().first().getBranch() == "0111"
         response.getData().getPayments().first().getPaymentType().toString() == "BOLETO"
-}
+    }
 
     def "we can get a policy's claims" () {
         when:
         def response = ruralService.getClaims(testRuralPolicy.getRuralPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
+
+        then:
+        response.getData() != null
+        response.getData().first().getIdentification() == testRuralPolicyClaim.getIdentification()
+        response.getData().first().getCoverages().first().getInsuredObjectId() == "string"
+        response.getData().first().getAmount().getAmount() == testRuralPolicyClaim.getAmount()
+    }
+
+    def "we can get a policy's claims V2" () {
+        when:
+        def response = ruralService.getClaimsV2(testRuralPolicy.getRuralPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
 
         then:
         response.getData() != null

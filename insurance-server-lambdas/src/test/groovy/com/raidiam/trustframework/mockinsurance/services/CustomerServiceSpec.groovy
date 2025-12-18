@@ -75,9 +75,33 @@ class CustomerServiceSpec extends CleanupSpecification {
         responseData.getBusinessId() == testBusinessIdentification.getBusinessIdentificationId().toString()
     }
 
+    def "we can get business identifications V2" () {
+        when:
+        def response = customerService.getBusinessIdentificationsV2(consent.getConsentId())
+
+        then:
+        response.getData()
+        response.getData().size() == 1
+        response.getData().first()
+
+        when:
+        def responseData = response.getData().first()
+
+        then:
+        responseData.getBusinessId() == testBusinessIdentification.getBusinessIdentificationId().toString()
+    }
+
     def "we can get business complimentary information" () {
         when:
         def response = customerService.getBusinessComplimentaryInfo(consent.getConsentId())
+
+        then:
+        response.getData() != null
+    }
+
+    def "we can get business complimentary information" () {
+        when:
+        def response = customerService.getBusinessComplimentaryInfoV2(consent.getConsentId())
 
         then:
         response.getData() != null
@@ -94,6 +118,16 @@ class CustomerServiceSpec extends CleanupSpecification {
     def "we can get personal identifications" () {
         when:
         def response = customerService.getPersonalIdentifications(consent.getConsentId())
+
+        then:
+        response.getData()
+        response.getData().size() == 1
+        response.getData().get(0).getPersonalId() == testPersonalIdentification.getPersonalIdentificationsId().toString()
+    }
+
+    def "we can get personal identifications" () {
+        when:
+        def response = customerService.getPersonalIdentificationsV2(consent.getConsentId())
 
         then:
         response.getData()
@@ -165,6 +199,37 @@ class CustomerServiceSpec extends CleanupSpecification {
 
         when:
         customerService.getBusinessComplimentaryInfo(consent.getConsentId())
+
+        then:
+        HttpStatusException e5 = thrown()
+        e5.status == HttpStatus.UNAUTHORIZED
+        e5.getMessage() == errorMessage
+    }
+
+    def "we cannot get response V2 without authorised status"() {
+        setup:
+        def errorMessage = "Bad request, consent not Authorised!"
+        consent.setStatus(EnumConsentStatus.AWAITING_AUTHORISATION.name())
+        consentRepository.update(consent)
+
+        when:
+        customerService.getPersonalIdentificationsV2( consent.getConsentId())
+
+        then:
+        HttpStatusException e = thrown()
+        e.status == HttpStatus.UNAUTHORIZED
+        e.getMessage() == errorMessage
+
+        when:
+        customerService.getBusinessIdentificationsV2(consent.getConsentId())
+
+        then:
+        HttpStatusException e4 = thrown()
+        e4.status == HttpStatus.UNAUTHORIZED
+        e4.getMessage() == errorMessage
+
+        when:
+        customerService.getBusinessComplimentaryInfoV2(consent.getConsentId())
 
         then:
         HttpStatusException e5 = thrown()

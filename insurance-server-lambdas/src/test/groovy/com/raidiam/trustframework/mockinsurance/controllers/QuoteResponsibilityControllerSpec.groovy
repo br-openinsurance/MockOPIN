@@ -114,4 +114,60 @@ class QuoteResponsibilityControllerSpec extends Specification {
         and:
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
+
+
+    def "We can create a quote responsibility lead v2" () {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuoteResponsibilityLead(consentId)
+        quoteResponsibilityLeadService.createQuote(_ as QuoteResponsibilityLeadEntity) >> quote
+        idempotencyRepository.findByIdempotencyId( _ as String) >> Optional.empty()
+
+        def req = TestRequestDataFactory.createQuoteResponsibilityLeadRequest()
+
+        String json = mapper.writeValueAsString(req)
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/quote-responsibility/v2/lead/request', HttpMethod.POST)
+                .withBody(json)
+                .withHeaders(Map.of("x-idempotency-key", UUID.randomUUID().toString(), "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "quote-responsibility-lead", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.CREATED.code
+        response.body != null
+        ResponseQuote resp = mapper.readValue(response.body, ResponseQuote)
+        resp.getData().getStatus() == QuoteStatus.StatusEnum.RCVD
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "we can revoke a quote responsibility lead v2" () {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuoteResponsibilityLead(consentId)
+        quoteResponsibilityLeadService.patchQuote(_ as RevokePatchPayload, _ as String, _ as String) >> quote
+
+        def req = TestRequestDataFactory.revokeQuotePatchRequest(quote.getQuoteId())
+        String json = mapper.writeValueAsString(req)
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/quote-responsibility/v2/lead/request/' + consentId, HttpMethod.PATCH)
+                .withBody(json)
+                .withHeaders(Map.of("x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorize(scopes: "quote-responsibility-lead", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+        ResponseRevokePatch resp = mapper.readValue(response.body, ResponseRevokePatch)
+        resp.getData().getStatus() == ResponseRevokePatchData.StatusEnum.CANC
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
 }

@@ -1,6 +1,7 @@
 package com.raidiam.trustframework.mockinsurance.domain;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.*;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -50,8 +51,17 @@ public class CapitalizationTitlePlanSubscriberEntity extends BaseEntity {
     @Column(name = "subscriber_address_additional_info")
     private String subscriberAddressAdditionalInfo;
     
+    @Column(name = "subscriber_flag_post_code")
+    private String subscriberFlagPostCode;
+    
+    @Column(name = "subscriber_district_name")
+    private String subscriberDistrictName;
+    
     @Column(name = "subscriber_town_name")
     private String subscriberTownName;
+    
+    @Column(name = "subscriber_town_code")
+    private String subscriberTownCode;
     
     @Column(name = "subscriber_country_sub_division")
     private String subscriberCountrySubDivision;
@@ -95,5 +105,31 @@ public class CapitalizationTitlePlanSubscriberEntity extends BaseEntity {
                         .areaCode(EnumAreaCode.fromValue(this.getSubscriberAreaCode()))
                         .number(this.getSubscriberNumber())))
                 .holder(this.getHolders().stream().map(CapitalizationTitlePlanHolderEntity::getDTO).toList());
+    }
+
+    public InsuranceCapitalizationTitleSubscriberV2 getDTOV2() {
+        return new InsuranceCapitalizationTitleSubscriberV2()
+                .subscriberName(this.getSubscriberName())
+                .subscriberDocumentType(InsuranceCapitalizationTitleSubscriberV2.SubscriberDocumentTypeEnum.fromValue(this.getSubscriberDocumentType()))
+                .subscriberDocumentTypeOthers(this.getSubscriberDocumentTypeOthers())
+                .subscriberDocumentNumber(this.getSubscriberDocumentNumber())
+                .subscriberAddress(new Address()
+                    .flagPostCode(Address.FlagPostCodeEnum.valueOf(this.getSubscriberFlagPostCode()))
+                    .address((AllOfAddressAddress) new AllOfAddressAddress()
+                        .type(NationalAddress.TypeEnum.valueOf(this.getSubscriberAddress().split(" ")[0].toUpperCase()))
+                        .name(this.getSubscriberAddress().split(" ", 2)[1].split(",")[0])
+                        .number(this.getSubscriberAddress().split(" ", 2)[1].split(",")[1])
+                        .addressComplementaryInfo(this.getSubscriberAddressAdditionalInfo())
+                        .districtName(this.getSubscriberDistrictName())
+                        .townName(this.getSubscriberTownName())
+                        .ibgeTownCode(this.getSubscriberTownCode())
+                        .countrySubDivision(EnumCountrySubDivision.fromValue(this.getSubscriberCountrySubDivision()))
+                        .postCode(this.getSubscriberPostcode())
+                        ))
+                .subscriberPhones(List.of(new RequestorPhone()
+                        .countryCallingCode(this.getSubscriberCountryCallingCode())
+                        .areaCode(EnumAreaCode.fromValue(this.getSubscriberAreaCode()))
+                        .number(this.getSubscriberNumber())))
+                .holder(this.getHolders().stream().map(CapitalizationTitlePlanHolderEntity::getDTOV2).toList());
     }
 }

@@ -3,6 +3,8 @@ package com.raidiam.trustframework.mockinsurance.domain;
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceResponsibilityClaim;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceResponsibilityClaimCoverage;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceResponsibilityClaimV2;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -53,6 +55,31 @@ public class ResponsibilityPolicyClaimEntity extends BaseEntity {
                         .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
                 )
                 .denialJustification(InsuranceResponsibilityClaim.DenialJustificationEnum.PRESCRICAO)
+                .denialJustificationDescription("string")
+                .coverages(List.of(new InsuranceResponsibilityClaimCoverage()
+                        .insuredObjectId("string")
+                        .branch("0111")
+                        .code(InsuranceResponsibilityClaimCoverage.CodeEnum.ALAGAMENTO_E_OU_INUNDACAO)
+                        .description("string")
+                        .warningDate(LocalDate.of(2023, 10, 1))
+                        .thirdPartyClaimDate(LocalDate.of(2023, 10, 1))
+                ));
+    }
+
+    public InsuranceResponsibilityClaimV2 mapDTOV2() {
+        return new InsuranceResponsibilityClaimV2()
+                .identification("string")
+                .documentationDeliveryDate(LocalDate.of(2023, 10, 1))
+                .status(InsuranceResponsibilityClaimV2.StatusEnum.ABERTO)
+                .statusAlterationDate(LocalDate.of(2023, 10, 1))
+                .occurrenceDate(LocalDate.of(2023, 10, 1))
+                .warningDate(LocalDate.of(2023, 10, 1))
+                .thirdPartyClaimDate(LocalDate.of(2022, 10, 1))
+                .amount(new AmountDetails()
+                        .amount("16")
+                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
+                )
+                .denialJustification(InsuranceResponsibilityClaimV2.DenialJustificationEnum.PRESCRICAO)
                 .denialJustificationDescription("string")
                 .coverages(List.of(new InsuranceResponsibilityClaimCoverage()
                         .insuredObjectId("string")

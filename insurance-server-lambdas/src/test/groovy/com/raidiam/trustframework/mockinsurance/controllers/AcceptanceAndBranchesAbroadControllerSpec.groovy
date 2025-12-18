@@ -70,6 +70,27 @@ class AcceptanceAndBranchesAbroadControllerSpec extends Specification {
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
 
+    def "We can fetch policies V2" () {
+        given:
+        def resp = new BaseInsuranceResponseV2().data(List.of())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        acceptanceAndBranchesAbroadService.getPoliciesV2(_ as String, _ as Pageable) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-acceptance-and-branches-abroad/v2/insurance-acceptance-and-branches-abroad/', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-acceptance-and-branches-abroad consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
     def "We can fetch a policy info" () {
         given:
         def resp = new ResponseInsuranceAcceptanceAndBranchesAbroadPolicyInfo().data(new InsuranceAcceptanceAndBranchesAbroadPolicyInfo())
@@ -77,6 +98,27 @@ class AcceptanceAndBranchesAbroadControllerSpec extends Specification {
         acceptanceAndBranchesAbroadService.getPolicyInfo(_ as UUID, _ as String) >> resp
 
         def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-acceptance-and-branches-abroad/v1/insurance-acceptance-and-branches-abroad/'+UUID.randomUUID().toString()+'/policy-info', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-acceptance-and-branches-abroad consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "We can fetch a policy info V2" () {
+        given:
+        def resp = new ResponseInsuranceAcceptanceAndBranchesAbroadPolicyInfoV2().data(new InsuranceAcceptanceAndBranchesAbroadPolicyInfoV2())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        acceptanceAndBranchesAbroadService.getPolicyInfoV2(_ as UUID, _ as String) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-acceptance-and-branches-abroad/v2/insurance-acceptance-and-branches-abroad/'+UUID.randomUUID().toString()+'/policy-info', HttpMethod.GET)
                 .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-acceptance-and-branches-abroad consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
 
@@ -112,6 +154,27 @@ class AcceptanceAndBranchesAbroadControllerSpec extends Specification {
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
 
+    def "We can fetch a policy's premium V2" () {
+        given:
+        def resp = new ResponseInsuranceAcceptanceAndBranchesAbroadPremiumV2().data(new InsuranceAcceptanceAndBranchesAbroadPremiumV2())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        acceptanceAndBranchesAbroadService.getPremiumV2(_ as UUID, _ as String) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-acceptance-and-branches-abroad/v2/insurance-acceptance-and-branches-abroad/'+UUID.randomUUID().toString()+'/premium', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-acceptance-and-branches-abroad consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
     def "We can fetch a policy's claims" () {
         given:
         def resp = new ResponseInsuranceAcceptanceAndBranchesAbroadClaims().data(List.of())
@@ -119,6 +182,27 @@ class AcceptanceAndBranchesAbroadControllerSpec extends Specification {
         acceptanceAndBranchesAbroadService.getClaims(_ as UUID, _ as String, _ as Pageable) >> resp
 
         def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-acceptance-and-branches-abroad/v1/insurance-acceptance-and-branches-abroad/'+UUID.randomUUID().toString()+'/claim', HttpMethod.GET)
+                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
+        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-acceptance-and-branches-abroad consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.OK.code
+        response.body != null
+
+        and:
+        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "We can fetch a policy's claims V2" () {
+        given:
+        def resp = new ResponseInsuranceAcceptanceAndBranchesAbroadClaimsV2().data(List.of())
+        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
+        acceptanceAndBranchesAbroadService.getClaimsV2(_ as UUID, _ as String, _ as Pageable) >> resp
+
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-acceptance-and-branches-abroad/v2/insurance-acceptance-and-branches-abroad/'+UUID.randomUUID().toString()+'/claim', HttpMethod.GET)
                 .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-acceptance-and-branches-abroad consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
 

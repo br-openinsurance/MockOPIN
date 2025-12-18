@@ -188,6 +188,35 @@ public class RuralPolicyEntity extends BaseEntity implements HasStatusInterface 
             );
     }
 
+    public ResponseInsuranceRuralPolicyInfoV2 mapPolicyInfoDtoV2() {
+        return new ResponseInsuranceRuralPolicyInfoV2()
+            .data(new InsuranceRuralPolicyInfoV2() 
+                .documentType(InsuranceRuralPolicyInfoV2.DocumentTypeEnum.valueOf(this.getDocumentType()))
+                .policyId(this.getPolicyId().toString())
+                .susepProcessNumber(this.getSusepProcessNumber())
+                .groupCertificateId(this.getGroupCertificateId())
+                .issuanceType(InsuranceRuralPolicyInfoV2.IssuanceTypeEnum.valueOf(this.getIssuanceType()))
+                .issuanceDate(this.getIssuanceDate())
+                .termStartDate(this.getTermStartDate())
+                .termEndDate(this.getTermEndDate())
+                .leadInsurerCode(this.getLeadInsurerCode())
+                .leadInsurerPolicyId(this.getLeadInsurerPolicyId())
+                .maxLMG(new AmountDetails()
+                    .amount(this.getMaxLMGAmount())
+                    .unitType(UnitTypeEnum.valueOf(this.getMaxLMGUnitType()))
+                    .unitTypeOthers(this.getMaxLMGUnitTypeOthers())
+                    .unit(new AmountDetailsUnit().code(this.getMaxLMGUnitCode()).description(DescriptionEnum.valueOf(this.getMaxLMGUnitDescription())))
+                )
+                .proposalId(this.getProposalId())
+                .insuredObjects(this.getInsuredObjects().stream().map(RuralPolicyInsuredObjectEntity::mapDtoV2).toList())
+                .coverages(this.getCoverages().stream().map(RuralPolicyCoverageEntity::mapDtoV2).toList())
+                .coinsuranceRetainedPercentage(this.getCoinsuranceRetainedPercentage())
+                .branchInfo(new InsuranceRuralSpecificPolicyInfoV2()
+                    .insuredObjects(this.getBranchInsuredObjects().stream().map(RuralPolicyBranchInsuredObjectEntity::mapDtoV2).toList())
+                )
+            );
+    }
+
     public ResponseResourceListData mapResourceDTO() {
         return new ResponseResourceListData()
                 .resourceId(this.getRuralPolicyId().toString());

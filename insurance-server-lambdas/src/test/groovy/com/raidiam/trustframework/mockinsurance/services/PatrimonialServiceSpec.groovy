@@ -61,9 +61,27 @@ class PatrimonialServiceSpec extends CleanupSpecification {
         response.getData().first()
     }
 
+    def "we can get policies V2" () {
+        when:
+        def response = patrimonialService.getPoliciesV2(testConsent.getConsentId().toString(), Pageable.from(0, 1))
+
+        then:
+        response.getData()
+        response.getData().size() == 1
+        response.getData().first()
+    }
+
     def "we can get a policy info" () {
         when:
         def response = patrimonialService.getPolicyInfo(testPatrimonialPolicy.getPolicyId(), testConsent.getConsentId().toString())
+
+        then:
+        response.getData() != null
+    }
+
+    def "we can get a policy info V2" () {
+        when:
+        def response = patrimonialService.getPolicyInfoV2(testPatrimonialPolicy.getPolicyId(), testConsent.getConsentId().toString())
 
         then:
         response.getData() != null
@@ -80,6 +98,14 @@ class PatrimonialServiceSpec extends CleanupSpecification {
     def "we can get a policy's claims" () {
         when:
         def response = patrimonialService.getClaims(testPatrimonialPolicy.getPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
+
+        then:
+        response.getData() != null
+    }
+
+    def "we can get a policy's claims V2" () {
+        when:
+        def response = patrimonialService.getClaimsV2(testPatrimonialPolicy.getPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
 
         then:
         response.getData() != null

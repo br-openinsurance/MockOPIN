@@ -6,6 +6,8 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralCoverage;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralCoverageV2;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -66,5 +68,14 @@ public class RuralPolicyCoverageEntity extends BaseEntity {
             .description(this.getDescription())
             .deductible(this.getDeductible().mapDTO())
             .POS(this.getPos().mapDTO());
+    }
+
+    public InsuranceRuralCoverageV2 mapDtoV2() {
+        return new InsuranceRuralCoverageV2()
+            .branch(this.getBranch())
+            .code(InsuranceRuralCoverageV2.CodeEnum.valueOf(this.getCode()))
+            .description(this.getDescription())
+            .deductible(this.getDeductible().mapDTOV2())
+            .POS(this.getPos().mapDTOV2());
     }
 }

@@ -26,7 +26,7 @@ public class FinancialRiskService extends BaseInsuranceService {
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
 
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
-        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_READ);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_READ);
 
         var policies = financialRiskPolicyRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable).getContent();
         return new BaseInsuranceResponse()
@@ -38,7 +38,7 @@ public class FinancialRiskService extends BaseInsuranceService {
                                         .policies(policies.stream().map(FinancialRiskPolicyEntity::mapPolicyDTO).toList())))));
     }
 
-    private FinancialRiskPolicyEntity getPolicy(UUID policyId, String consentId, EnumConsentPermission permission) {
+    private FinancialRiskPolicyEntity getPolicy(UUID policyId, String consentId, EnumConsentPermission permission, EnumConsentV3Permission permissionV3) {
         LOG.info("Getting financial risk policy for policy id {} and consent id {}", policyId, consentId);
 
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
@@ -46,7 +46,7 @@ public class FinancialRiskService extends BaseInsuranceService {
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Policy id " + policyId + " not found"));
 
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
-        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, permission);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, permission, permissionV3);
         this.checkConsentCoversPolicy(consentEntity, policy);
         this.checkConsentOwnerIsPolicyOwner(consentEntity, policy);
 
@@ -55,7 +55,7 @@ public class FinancialRiskService extends BaseInsuranceService {
 
     public ResponseInsuranceFinancialRiskPolicyInfo getPolicyInfo(UUID policyId, String consentId) {
         LOG.info("Getting financial risk policy info response for consent id {}", consentId);
-        var policy = getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_POLICYINFO_READ);
+        var policy = getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_POLICYINFO_READ);
         var response = policy.mapPolicyInfoDTO();
 
         policy.getBeneficiaryIds().forEach(beneficiaryId -> response.getData().addBeneficiariesItem(beneficiaryInfoRepository.findById(beneficiaryId)
@@ -83,7 +83,7 @@ public class FinancialRiskService extends BaseInsuranceService {
 
     public ResponseInsuranceFinancialRiskClaims getPolicyClaims(UUID policyId, String consentId, Pageable pageable) {
         LOG.info("Getting financial risk policy claims response for consent id {}", consentId);
-        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_CLAIM_READ);
+        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_CLAIM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_CLAIM_READ);
 
         var claims = financialRiskPolicyClaimRepository.findByFinancialRiskPolicyId(policyId, pageable);
         var resp = new ResponseInsuranceFinancialRiskClaims()
@@ -94,7 +94,7 @@ public class FinancialRiskService extends BaseInsuranceService {
 
     public ResponseInsuranceFinancialRiskPremium getPolicyPremium(UUID policyId, String consentId) {
         LOG.info("Getting financial risk policy premium response for consent id {}", consentId);
-        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_PREMIUM_READ);
+        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_PREMIUM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_PREMIUM_READ);
 
         var premium = financialRiskPolicyPremiumRepository.findByFinancialRiskPolicyId(policyId)
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Policy id " + policyId + " not found"));

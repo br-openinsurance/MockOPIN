@@ -51,13 +51,12 @@ public class QuoteAutoServiceSpec extends CleanupSpecification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuoteAuto(consentId)
-        quote.setData(new QuoteAutoData()
-            .quoteData(new QuoteDataAuto()
-                .policyId("random_policy_id")
-                .termStartDate(LocalDate.now().plusYears(1))
-                .termEndDate(LocalDate.now().minusYears(1))
-            )
-        )
+        quote.getData().setV1(new QuoteAutoData()
+                .quoteData(new QuoteDataAuto()
+                        .policyId("random_policy_id")
+                        .termStartDate(LocalDate.now().plusYears(1))
+                        .termEndDate(LocalDate.now().minusYears(1))
+                ))
         quoteAutoRepository.save(quote)
 
         when:

@@ -319,6 +319,9 @@ abstract class BaseInsuranceService {
     CoinsurerRepository coinsurerRepository;
 
     @Inject
+    DynamicFieldsRepository dynamicFieldsRepository;
+
+    @Inject
     WebhookRepository webhookRepository;
 
     @Inject

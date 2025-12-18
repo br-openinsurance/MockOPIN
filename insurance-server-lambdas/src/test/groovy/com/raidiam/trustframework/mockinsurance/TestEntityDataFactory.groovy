@@ -148,11 +148,11 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.quoteId = quoteId
         quote.consentId = consentId
         quote.status = QuoteStatusEnum.RCVD.toString()
-        quote.data = new QuotePatrimonialBusinessData()
         quote.personCpf = "random_cpf"
         quote.clientId = "random_client_id"
         quote.expirationDateTime = new Date()
-        quote.data = new QuotePatrimonialBusinessData()
+        var data = new QuotePatrimonialBusinessEntity.QuoteData()
+        data.setV1(new QuotePatrimonialBusinessData()
                 .quoteData(new QuoteDataPatrimonialBusiness().policyId("random_policy_id")
                         .maxLMG(new AmountDetails()
                                 .amount("1000")
@@ -161,7 +161,8 @@ class TestEntityDataFactory extends CleanupSpecification {
                                         .code("code")
                                         .description(AmountDetailsUnit.DescriptionEnum.ADP))
                                 .unitTypeOthers("unitTypeOthers"))
-                )
+                ))
+        quote.data = data
         quote
     }
 
@@ -174,11 +175,11 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.quoteId = quoteId
         quote.consentId = consentId
         quote.status = QuoteStatusEnum.RCVD.toString()
-        quote.data = new QuotePatrimonialHomeData()
         quote.personCpf = "random_cpf"
         quote.clientId = "random_client_id"
         quote.expirationDateTime = new Date()
-        quote.data = new QuotePatrimonialHomeData()
+        quote.data = new QuotePatrimonialHomeEntity.QuoteData()
+        quote.data.setV1(new QuotePatrimonialHomeData()
                 .quoteData(new QuoteDataPatrimonialHome().policyId("random_policy_id")
                         .maxLMG(new AmountDetails()
                                 .amount("1000")
@@ -187,7 +188,7 @@ class TestEntityDataFactory extends CleanupSpecification {
                                         .code("code")
                                         .description(AmountDetailsUnit.DescriptionEnum.ADP))
                                 .unitTypeOthers("unitTypeOthers"))
-                )
+                ))
         quote
     }
 
@@ -200,11 +201,11 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.quoteId = quoteId
         quote.consentId = consentId
         quote.status = QuoteStatusEnum.RCVD.toString()
-        quote.data = new QuotePatrimonialCondominiumData()
         quote.personCpf = "random_cpf"
         quote.clientId = "random_client_id"
         quote.expirationDateTime = new Date()
-        quote.data = new QuotePatrimonialCondominiumData()
+        quote.data = new QuotePatrimonialCondominiumEntity.QuoteData()
+        quote.data.setV1(new QuotePatrimonialCondominiumData()
                 .quoteData(new QuoteDataPatrimonialCondominium().policyId("random_policy_id")
                         .maxLMG(new AmountDetails()
                                 .amount("1000")
@@ -213,7 +214,7 @@ class TestEntityDataFactory extends CleanupSpecification {
                                         .code("code")
                                         .description(AmountDetailsUnit.DescriptionEnum.ADP))
                                 .unitTypeOthers("unitTypeOthers"))
-                )
+                ))
         quote
     }
 
@@ -226,11 +227,11 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.quoteId = quoteId
         quote.consentId = consentId
         quote.status = QuoteStatusEnum.RCVD.toString()
-        quote.data = new QuotePatrimonialDiverseRisksData()
         quote.personCpf = "random_cpf"
         quote.clientId = "random_client_id"
         quote.expirationDateTime = new Date()
-        quote.data = new QuotePatrimonialDiverseRisksData()
+        quote.data = new QuotePatrimonialDiverseRisksEntity.QuoteData()
+        quote.data.setV1(new QuotePatrimonialDiverseRisksData()
                 .quoteData(new QuoteDataPatrimonialDiverseRisks().policyId("random_policy_id")
                         .maxLMG(new AmountDetails()
                                 .amount("1000")
@@ -239,7 +240,7 @@ class TestEntityDataFactory extends CleanupSpecification {
                                         .code("code")
                                         .description(AmountDetailsUnit.DescriptionEnum.ADP))
                                 .unitTypeOthers("unitTypeOthers"))
-                )
+                ))
         quote
     }
 
@@ -353,8 +354,8 @@ class TestEntityDataFactory extends CleanupSpecification {
         quoteDataLifePension.setComplementaryIdentification(complementaryId)
         quoteDataLifePension.setProducts(products)
 
-        quote.data = new RequestContractLifePensionData()
-        quote.data.setQuoteData(quoteDataLifePension)
+        quote.data = new QuoteLifePensionEntity.QuoteData()
+        quote.data.v1 = new RequestContractLifePensionData().quoteData(quoteDataLifePension)
 
         return quote
     }
@@ -389,10 +390,8 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.clientId = "random_client_id"
         quote.expirationDateTime = new Date()
 
-        QuoteDataPersonLife quoteDataPersonLife = new QuoteDataPersonLife()
-
-        quote.data = new QuoteRequestPersonLifeData()
-        quote.data.setQuoteData(quoteDataPersonLife)
+        quote.data = new QuotePersonLifeEntity.QuoteData()
+        quote.data.v1 = new QuoteRequestPersonLifeData().quoteData(new QuoteDataPersonLife())
 
         return quote
     }
@@ -411,10 +410,8 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.clientId = "random_client_id"
         quote.expirationDateTime = new Date()
 
-        QuoteDataPersonTravel quoteDataPersonTravel = new QuoteDataPersonTravel()
-
-        quote.data = new QuoteRequestPersonTravelData()
-        quote.data.setQuoteData(quoteDataPersonTravel)
+        quote.data = new QuotePersonTravelEntity.QuoteData()
+        quote.data.v1 = new QuoteRequestPersonTravelData().quoteData(new QuoteDataPersonTravel())
 
         return quote
     }
@@ -491,12 +488,14 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.personCpf = "123456789"
         quote.clientId = "random_client_id"
         quote.expirationDateTime = new Date()
-        quote.data = new QuoteAutoData()
+        var data = new QuoteAutoEntity.QuoteData()
+        data.setV1(new QuoteAutoData()
                 .quoteData(new QuoteDataAuto()
                         .policyId("random_policy_id")
                         .termStartDate(LocalDate.now().minusYears(1))
                         .termEndDate(LocalDate.now().plusYears(1))
-                )
+                ))
+        quote.data = data
         quote
     }
 
@@ -527,14 +526,14 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.personCpf = "123456789"
         quote.clientId = "random_client_id"
         quote.expirationDateTime = new Date()
-        quote.data = new QuoteCapitalizationTitleData()
+        var data = new QuoteCapitalizationTitleEntity.QuoteData()
+        data.v1 = new QuoteCapitalizationTitleData()
                 .quoteData(new QuoteDataCapitalizationTitle()
                         .paymentType(QuoteDataCapitalizationTitle.PaymentTypeEnum.MENSAL)
                         .monthlyPayment(new AmountDetails()
-                            .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
-                            .amount("100")
-                        )
-                )
+                                .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
+                                .amount("100")))
+        quote.data = data
         quote
     }
 
@@ -682,7 +681,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         subscriber.setSubscriberDocumentType("OUTROS")
         subscriber.setSubscriberDocumentTypeOthers("string")
         subscriber.setSubscriberDocumentNumber("string")
-        subscriber.setSubscriberAddress("Av Naburo Ykesaki, 1270")
+        subscriber.setSubscriberAddress("Avenida Naburo Ykesaki, 1270")
         subscriber.setSubscriberAddressAdditionalInfo("Fundos")
         subscriber.setSubscriberTownName("Rio de Janeiro")
         subscriber.setSubscriberCountrySubDivision("RJ")
@@ -691,6 +690,9 @@ class TestEntityDataFactory extends CleanupSpecification {
         subscriber.setSubscriberCountryCallingCode("55")
         subscriber.setSubscriberAreaCode("11")
         subscriber.setSubscriberNumber("29875132")
+        subscriber.setSubscriberFlagPostCode("NACIONAL")
+        subscriber.setSubscriberDistrictName("Botafogo")
+        subscriber.setSubscriberTownCode("3304557")
         subscriber
     }
 
@@ -701,7 +703,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         holder.setHolderDocumentType("OUTROS")
         holder.setHolderDocumentTypeOthers("string")
         holder.setHolderDocumentNumber("string")
-        holder.setHolderAddress("Av Naburo Ykesaki, 1270")
+        holder.setHolderAddress("Avenida Naburo Ykesaki, 1270")
         holder.setHolderAddressAdditionalInfo("Fundos")
         holder.setHolderTownName("Rio de Janeiro")
         holder.setHolderCountrySubdivision("RJ")
@@ -712,6 +714,9 @@ class TestEntityDataFactory extends CleanupSpecification {
         holder.setHolderCountryCallingCode("55")
         holder.setHolderAreaCode("11")
         holder.setHolderNumber("29875132")
+        holder.setHolderFlagPostCode("NACIONAL")
+        holder.setHolderDistrictName("Botafogo")
+        holder.setHolderTownCode("3304557")
         holder
     }
 
@@ -788,12 +793,16 @@ class TestEntityDataFactory extends CleanupSpecification {
         insured.setIdentificationTypeOthers("RNE")
         insured.setName("Nome Sobrenome")
         insured.setBirthDate(LocalDate.of(1999, 06, 12))
-        insured.setPostCode("10000000")
+        insured.setPostCode("17500001")
         insured.setEmail("string")
-        insured.setCity("string")
-        insured.setState("AC")
+        insured.setCity("Rio de Janeiro")
+        insured.setState("RJ")
         insured.setCountry("BRA")
-        insured.setAddress("string")
+        insured.setAddress("Avenida Naburo Ykesaki, 1270")
+        insured.setAddressAdditionalInfo("Fundos")
+        insured.setFlagPostCode("NACIONAL")
+        insured.setDistrictName("Botafogo")
+        insured.setTownCode("3304557")
         insured
     }
 
@@ -812,12 +821,16 @@ class TestEntityDataFactory extends CleanupSpecification {
         principal.setIdentificationType("CPF")
         principal.setIdentificationTypeOthers("RNE")
         principal.setName("Nome Sobrenome")
-        principal.setPostCode("10000000")
+        principal.setPostCode("17500001")
         principal.setEmail("string")
-        principal.setCity("string")
-        principal.setState("AC")
+        principal.setCity("Rio de Janeiro")
+        principal.setState("RJ")
         principal.setCountry("BRA")
-        principal.setAddress("string")
+        principal.setAddress("Avenida Naburo Ykesaki, 1270")
+        principal.setAddressAdditionalInfo("Fundos")
+        principal.setFlagPostCode("NACIONAL")
+        principal.setDistrictName("Botafogo")
+        principal.setTownCode("3304557")
         principal
     }
 
@@ -827,11 +840,15 @@ class TestEntityDataFactory extends CleanupSpecification {
         intermediary.setIdentificationType("CPF")
         intermediary.setIdentificationTypeOthers("RNE")
         intermediary.setName("Nome Sobrenome")
-        intermediary.setPostCode("10000000")
-        intermediary.setCity("string")
-        intermediary.setState("AC")
+        intermediary.setPostCode("17500001")
+        intermediary.setCity("Rio de Janeiro")
+        intermediary.setState("RJ")
         intermediary.setCountry("BRA")
-        intermediary.setAddress("string")
+        intermediary.setAddress("Avenida Naburo Ykesaki, 1270")
+        intermediary.setAddressAdditionalInfo("Fundos")
+        intermediary.setFlagPostCode("NACIONAL")
+        intermediary.setDistrictName("Botafogo")
+        intermediary.setTownCode("3304557")
         intermediary
     }
 
@@ -1538,7 +1555,8 @@ static aHousingPolicy(UUID accountHolderId) {
         branchInsuredObject.setForestCode(InsuranceRuralSpecificInsuredObject.ForestCodeEnum.PINUS.toString())
         branchInsuredObject.setForestCodeOthers("string")
         branchInsuredObject.setSurveyDate(LocalDate.of(2022, 12, 31))
-        branchInsuredObject.setSurveyAddress("string")
+        branchInsuredObject.setSurveyAddress("Avenida Naburo Ykesaki, 1270")
+        branchInsuredObject.setSurveyAddressComplementaryInfo("Fundos")
         branchInsuredObject.setSurveyCountrySubDivision(InsuranceRuralSpecificInsuredObject.SurveyCountrySubDivisionEnum.SP.toString())
         branchInsuredObject.setSurveyPostCode("10000000")
         branchInsuredObject.setSurveyCountryCode(InsuranceRuralSpecificInsuredObject.SurveyCountryCodeEnum.BRA.toString())
@@ -1572,7 +1590,8 @@ static aHousingPolicy(UUID accountHolderId) {
         claim.setDenialJustification(InsuranceRuralClaim.DenialJustificationEnum.RISCO_EXCLUIDO.toString())
         claim.setDenialJustificationDescription("string")
         claim.setSurveyDate(LocalDate.of(2022, 12, 31))
-        claim.setSurveyAddress("string")
+        claim.setSurveyAddress("Avenida Naburo Ykesaki, 1270")
+        claim.setSurveyAddressComplementaryInfo("Fundos")
         claim.setSurveyCountrySubDivision(InsuranceRuralSpecificClaim.SurveyCountrySubDivisionEnum.SP.toString())
         claim.setSurveyPostCode("10000000")
         claim.setSurveyCountryCode(InsuranceRuralSpecificClaim.SurveyCountryCodeEnum.BRA.toString())
@@ -1625,9 +1644,10 @@ static aHousingPolicy(UUID accountHolderId) {
         policy
     }
 
-    static anAutoPolicyClaim(String policyId) {
+    static anAutoPolicyClaim(String claimId, String policyId) {
         def claim = new AutoPolicyClaimEntity()
-        claim.setAutoPolicyClaimId(policyId)
+        claim.setAutoPolicyClaimId(claimId)
+        claim.setAutoPolicyId(policyId)
         claim
     }
 

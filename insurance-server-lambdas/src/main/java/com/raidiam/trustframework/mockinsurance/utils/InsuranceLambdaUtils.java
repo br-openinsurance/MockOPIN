@@ -489,8 +489,9 @@ public class InsuranceLambdaUtils {
         }
     }
 
-    public static void checkConsentPermissions(ConsentEntity consent, EnumConsentPermission permissionsEnum) {
-        if (!consent.getPermissions().contains(permissionsEnum.name())) {
+    public static void checkConsentPermissions(ConsentEntity consent, EnumConsentPermission permissionsEnum, EnumConsentV3Permission permissionsEnumV3) {
+        if (!consent.getPermissions().contains(permissionsEnum.name()) &&
+            !consent.getPermissions().contains(permissionsEnumV3.name())) {
             throw new HttpStatusException(HttpStatus.FORBIDDEN, "You do not have the correct permission");
         }
     }
@@ -508,6 +509,13 @@ public class InsuranceLambdaUtils {
     public static Set<EnumConsentPermission> getConsentPermissions(ConsentEntity consent) {
         return consent.getPermissions().stream()
                 .map(EnumConsentPermission::fromValue)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
+
+    public static Set<EnumConsentV3Permission> getConsentV3Permissions(ConsentEntity consent) {
+        return consent.getPermissions().stream()
+                .map(EnumConsentV3Permission::fromValue)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }

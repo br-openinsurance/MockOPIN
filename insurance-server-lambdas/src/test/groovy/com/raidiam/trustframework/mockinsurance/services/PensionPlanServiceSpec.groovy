@@ -67,9 +67,27 @@ class PensionPlanServiceSpec extends CleanupSpecification {
         response.getData().first()
     }
 
+    def "we can get contracts V2" () {
+        when:
+        def response = pensionPlanService.getContractsV2(Pageable.from(0, 1), testConsent.getConsentId().toString())
+
+        then:
+        response.getData()
+        response.getData().size() == 1
+        response.getData().first()
+    }
+
     def "we can get a contract info" () {
         when:
         def response = pensionPlanService.getContractInfo(testPensionPlanContract.getPensionPlanContractId(), testConsent.getConsentId().toString())
+
+        then:
+        response.getData() != null
+    }
+
+    def "we can get a contract info V2" () {
+        when:
+        def response = pensionPlanService.getContractInfoV2(testPensionPlanContract.getPensionPlanContractId(), testConsent.getConsentId().toString())
 
         then:
         response.getData() != null
@@ -83,9 +101,25 @@ class PensionPlanServiceSpec extends CleanupSpecification {
         response.getData() != null
     }
 
+    def "we can get a contract's claims V2" () {
+        when:
+        def response = pensionPlanService.getContractClaimsV2(testPensionPlanContract.getPensionPlanContractId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
+
+        then:
+        response.getData() != null
+    }
+
     def "we can get a contract's withdrawals" () {
         when:
         def response = pensionPlanService.getContractWithdrawals(testPensionPlanContract.getPensionPlanContractId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
+
+        then:
+        response.getData() != null
+    }
+
+    def "we can get a contract's withdrawals V2" () {
+        when:
+        def response = pensionPlanService.getContractWithdrawalsV2(testPensionPlanContract.getPensionPlanContractId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
 
         then:
         response.getData() != null
