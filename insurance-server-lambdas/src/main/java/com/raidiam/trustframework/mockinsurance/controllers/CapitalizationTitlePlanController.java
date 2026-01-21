@@ -2,6 +2,7 @@ package com.raidiam.trustframework.mockinsurance.controllers;
 
 import com.raidiam.trustframework.mockinsurance.auth.AuthenticationGrant;
 import com.raidiam.trustframework.mockinsurance.auth.RequiredAuthenticationGrant;
+import com.raidiam.trustframework.mockinsurance.fapi.ResponseErrorWithRequestDateTime;
 import com.raidiam.trustframework.mockinsurance.fapi.XFapiInteractionIdRequired;
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseInsuranceCapitalizationTitle;
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseInsuranceCapitalizationTitleEvent;
@@ -51,6 +52,7 @@ public class CapitalizationTitlePlanController extends BaseInsuranceController {
     }
 
     @Get("/v2/insurance-capitalization-title/plans")
+    @ResponseErrorWithRequestDateTime
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
     public ResponseInsuranceCapitalizationTitleV2 getPlansV2(HttpRequest<?> request, Pageable pageable) {
@@ -75,6 +77,7 @@ public class CapitalizationTitlePlanController extends BaseInsuranceController {
     }
 
     @Get("/v2/insurance-capitalization-title/{planId}/plan-info")
+    @ResponseErrorWithRequestDateTime
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
     public ResponseInsuranceCapitalizationTitlePlanInfoV2 getPlanInfoV2(HttpRequest<?> request, @PathVariable("planId") UUID planId) {
@@ -86,6 +89,7 @@ public class CapitalizationTitlePlanController extends BaseInsuranceController {
     }
 
     @Get("/v{version}/insurance-capitalization-title/{planId}/events")
+    @ResponseErrorWithRequestDateTime
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
     public ResponseInsuranceCapitalizationTitleEvent getPlanEvents(HttpRequest<?> request, @PathVariable("version") @Min(1) @Max(2) int version, @PathVariable("planId") UUID planId, Pageable pageable) {
@@ -98,6 +102,7 @@ public class CapitalizationTitlePlanController extends BaseInsuranceController {
     }
 
     @Get("/v{version}/insurance-capitalization-title/{planId}/settlements")
+    @ResponseErrorWithRequestDateTime
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
     public ResponseInsuranceCapitalizationTitleSettlement getPlanSettlements(HttpRequest<?> request, @PathVariable("version") @Min(1) @Max(2) int version, @PathVariable("planId") UUID planId, Pageable pageable) {

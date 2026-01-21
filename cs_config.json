@@ -89,6 +89,9 @@
   "server": {
     "discoveryUrl": "https://auth.local/.well-known/openid-configuration"
   },
+  "consent": {
+    "productType": "personal"
+  },
   "resource": {
     "brazilOrganizationId": "76b370e3-def5-4798-8b6a-915cb5d6dd74",
     "consentUrl": "https://api.local/open-insurance/consents/v2/consents",

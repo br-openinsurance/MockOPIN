@@ -71,10 +71,10 @@ services:
       - LOCAL_STACK_ENDPOINT=http://localstack:4566
       - AWS_LOCAL=true
       - DEBUG=raidiam:server:*,oidc-provider:*
-      - TRUSTFRAMEWORK_SSA_KEYSET=http://localstack:4566/keystore/jwks.json
+      - TRUSTFRAMEWORK_SSA_KEYSET=http://directory/jwks
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
     ports:
       - 3000:3000
-    command: ["node", "lambda.js"]
     depends_on:
       localstack:
         condition: service_healthy
@@ -93,15 +93,12 @@ services:
       - DEBUG=1
       - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:
-      - ../mock-service-os/setup_ssm.sh:/etc/localstack/init/ready.d/init-aws.sh
+      - ../mock-service-os/aws.sh:/etc/localstack/init/ready.d/aws.sh
       - /var/run/docker.sock:/var/run/docker.sock
       - ../mock-service-os/certs/op.key:/init/certs/client.key
       - ../mock-service-os/certs/op.crt:/init/certs/client.crt
-      - ../mock-service-os/ssa/jwks.json:/init/ssa/jwks.json
-      - ../mock-service-os/ssa/private_jwk.json:/init/ssa/private_jwk.json
-      - config:/init/config
     healthcheck:
-      test: [ "CMD-SHELL", "if [ -s /init/config/config.txt ]; then exit 0; else exit 1; fi" ]
+      test: bash -c 'awslocal ssm get-parameter --name /mock/ready >/dev/null 2>&1'
       interval: 5s
       retries: 5
       timeout: 5s
@@ -111,7 +108,19 @@ services:
       - cs
     build:
       context: ./conformance-suite/httpd
-      dockerfile: Dockerfile-static
+      # Modified version of the httpd/Dockerfile_static from the Conformance Suite
+      # to use debian/eol:buster.
+      dockerfile_inline: |
+        FROM debian/eol:buster
+        RUN apt-get update \
+          && apt-get install -y apache2 ssl-cert \
+          && apt-get clean
+        RUN \
+          echo 'Listen 8443' > /etc/apache2/ports.conf \
+          && a2enmod headers proxy proxy_http rewrite ssl \
+          && a2dissite 000-default.conf
+        COPY server-static.conf /etc/apache2/sites-enabled
+        ENTRYPOINT ["apachectl", "-DFOREGROUND"]
     ports:
       - "8443:8443"
     volumes:
@@ -127,9 +136,12 @@ services:
     profiles:
       - cs
     hostname: server
-    image: openjdk:17-jdk-slim
     build:
-      context: ./conformance-suite/server-dev
+      dockerfile_inline: |
+        # Modified version of the server/Dockerfile from the Conformance Suite
+        # to use eclipse-temurin:17-jdk-jammy.
+        FROM eclipse-temurin:17-jdk-jammy
+        RUN apt-get update && apt-get install redir
     ports:
       - "9999:9999"
     volumes:
@@ -137,7 +149,7 @@ services:
     command: >
       java
       -Xdebug -Xrunjdwp:transport=dt_socket,address=*:9999,server=y,suspend=n
-      -jar /server/libopin.jar
+      -jar /server/fapi-test-suite.jar
       -Djdk.tls.maxHandshakeMessageSize=65536
       -Dcom.sun.net.ssl.checkRevocation=false -Dcom.sun.net.ssl.trustStoreType=JKS -Dcom.sun.net.ssl.trustStorePassword=changeit
       --fintechlabs.base_url=https://localhost.emobix.co.uk:8443
@@ -169,6 +181,8 @@ services:
       - dev
     build:
       context: ../mock-service-os/mock_as/mongo-seed
+    environment:
+      - BRAND=OPIN_LOCAL
     command: ["/start.sh", "mongodb:27017"]
     volumes:
       - ../mock-service-os/certs/:/certs/
@@ -186,8 +200,6 @@ services:
     command: mvn -B clean package -DskipTests=true
 
 volumes:
-  config:
-    driver: local
   maven-cache:
     driver: local
   mongo-data:

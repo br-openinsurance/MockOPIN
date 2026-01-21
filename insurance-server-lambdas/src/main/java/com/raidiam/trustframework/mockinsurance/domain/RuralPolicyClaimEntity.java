@@ -158,7 +158,7 @@ public class RuralPolicyClaimEntity extends BaseEntity {
                 .surveyDate(this.getSurveyDate())
                 .surveyAddress(new InsuranceRuralSpecificClaimV2SurveyAddress()
                     .name(this.getSurveyAddress().split(" ", 2)[1].split(",")[0])
-                    .number(this.getSurveyAddress().split(" ", 2)[1].split(",")[1])
+                    .number(this.getSurveyAddress().split(" ", 2)[1].split(",")[1].trim())
                     .type(InsuranceRuralSpecificClaimV2SurveyAddress.TypeEnum.valueOf(this.getSurveyAddress().split(" ")[0].toUpperCase()))
                     .addressComplementaryInfo(this.getSurveyAddressComplementaryInfo())
                 )

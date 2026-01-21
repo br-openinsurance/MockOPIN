@@ -15,6 +15,10 @@ public class DbInitHandler implements RequestHandler<Map<String, Object>, String
 
     private static final Logger log = LoggerFactory.getLogger(DbInitHandler.class);
 
+    public static void main(String[] args) {
+        new DbInitHandler().handleRequest(Map.of(), null);
+    }
+
     @Override
     public String handleRequest(Map<String, Object> event, Context context) {
         log.info("Starting Flyway migrations");

@@ -15,6 +15,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -54,13 +55,13 @@ public class PensionPlanContractWithdrawalEntity extends BaseEntity {
     public InsurancePensionPlanWithdrawalV2 mapDTOV2() {
         return new InsurancePensionPlanWithdrawalV2()
                 .withdrawalOccurence(true)
-                .withdrawalInfo(new InsurancePensionPlanWithdrawalV2WithdrawalInfo()
+                .withdrawalInfo(List.of(new InsurancePensionPlanWithdrawalV2WithdrawalInfo()
                     .type(InsurancePensionPlanWithdrawalV2WithdrawalInfo.TypeEnum.PARCIAL)
                     .requestDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
                     .liquidationDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
                     .nature(InsurancePensionPlanWithdrawalV2WithdrawalInfo.NatureEnum.RESGATE_REGULAR)
                     .amount(new AmountDetails().unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM).amount("90.85"))
                     .postedChargedAmount(new AmountDetails().unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM).amount("90.85"))
-                );
+                ));
     }
 }

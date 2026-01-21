@@ -1,20 +1,26 @@
-FROM golang:1.23
+# Step 1: Build Stage.
+FROM golang:1.24-alpine AS builder
+
+ENV GO111MODULE=on
+ENV CGO_ENABLED=0
+ENV GOOS=linux
+ENV GOARCH=amd64
+
 WORKDIR /app
-# Download Go modules
-# COPY certs /app/certs
-COPY go.mod ./
-COPY go.sum ./
-# Copy the entrypoint script into the container
-COPY entrypoint.sh ./
-# Copy the source code. Note the slash at the end, as explained in
-# https://docs.docker.com/reference/dockerfile/#copy
-COPY *.go ./
+
+COPY . /app
+
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -o /mtls_go
-# Make the entrypoint script executable
-RUN chmod +x ./entrypoint.sh
+
+RUN go build -o main .
+
+# Step 2: Run Stage.
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY --from=builder /app/main ./main
+
 EXPOSE 443
 
-ENTRYPOINT ["./entrypoint.sh"]
-# Run
-CMD ["/mtls_go"]
+ENTRYPOINT [ "./main" ]

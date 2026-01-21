@@ -116,9 +116,9 @@
         <summary style="text-align: center">
           (Click to expand) DEBUG information
         </summary>
-        <div><strong>uid</strong>: <%= uid %></div>
+        <div><strong>uid</strong>: <% if (typeof uid !== 'undefined' && uid) { %><%= uid %><% } else { %>Not provided<% } %></div>
 
-        <% if (session) { %>
+        <% if (typeof session !== 'undefined' && session) { %>
         <div>
           SESSION <br />
           ========= <br />
@@ -126,17 +126,21 @@
         </div>
         <% } %>
 
+        <% if (typeof dbg !== 'undefined' && typeof dbg.params !== 'undefined' && dbg && dbg.params) { %>
         <div>
           PARAMS <br />
           ======== <br />
           <%- dbg.params %>
         </div>
+        <% } %>
 
+        <% if (typeof dbg !== 'undefined' && typeof dbg.prompt !== 'undefined' && dbg && dbg.prompt) { %>
         <div>
           PROMPT <br />
           ======== <br />
           <%- dbg.prompt %>
         </div>
+        <% } %>
       </details>
     </div>
   </body>
