@@ -9424,41 +9424,43 @@ components:
         withdrawalOccurence:
           type: boolean
         withdrawalInfo:
-          type: object
-          properties:
-            type:
-              $ref: '#/components/schemas/InsuranceLifePensionWithdrawalType'
-            requestDate:
-              type: string
-              format: date-time
-              maxLength: 20
-              pattern:
-                ^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])T(?:[01]\d|2[0123]):(?:[012345]\d):(?:[012345]\d)Z$
-            amount:
-              $ref: '#/components/schemas/AmountDetails'
-            liquidationDate:
-              type: string
-              format: date-time
-              pattern:
-                (\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])T(?:[01]\d|2[0123]):(?:[012345]\d):(?:[012345]\d)Z$
-              maxLength: 20
-            postedChargedAmount:
-              $ref: '#/components/schemas/AmountDetails'
-            nature:
-              $ref: '#/components/schemas/InsuranceLifePensionWithdrawalNature'
-            FIE:
-              type: array
-              items:
-                type: object
-                properties:
-                  FIECNPJ:
-                    type: string
-                    maxLength: 14
-                    pattern: '[A-Z0-9]{12}\d{2}'
-                  FIEName:
-                    type: string
-                  FIETradeName:
-                    type: string
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                $ref: '#/components/schemas/InsuranceLifePensionWithdrawalType'
+              requestDate:
+                type: string
+                format: date-time
+                maxLength: 20
+                pattern:
+                  ^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])T(?:[01]\d|2[0123]):(?:[012345]\d):(?:[012345]\d)Z$
+              amount:
+                $ref: '#/components/schemas/AmountDetails'
+              liquidationDate:
+                type: string
+                format: date-time
+                pattern:
+                  (\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])T(?:[01]\d|2[0123]):(?:[012345]\d):(?:[012345]\d)Z$
+                maxLength: 20
+              postedChargedAmount:
+                $ref: '#/components/schemas/AmountDetails'
+              nature:
+                $ref: '#/components/schemas/InsuranceLifePensionWithdrawalNature'
+              FIE:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    FIECNPJ:
+                      type: string
+                      maxLength: 14
+                      pattern: '[A-Z0-9]{12}\d{2}'
+                    FIEName:
+                      type: string
+                    FIETradeName:
+                      type: string
     InsuranceLifePensionClaim:
       type: object
       required:
@@ -10575,38 +10577,40 @@ components:
         withdrawalOccurence:
           type: boolean
         withdrawalInfo:
-          type: object
-          properties:
-            type:
-              type: string
-              enum:
-                - TOTAL
-                - PARCIAL
-            requestDate:
-              type: string
-              format: date-time
-              maxLength: 20
-              pattern:
-                ^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])T(?:[01]\d|2[0123]):(?:[012345]\d):(?:[012345]\d)Z$
-            amount:
-              $ref: '#/components/schemas/AmountDetails'
-            liquidationDate:
-              type: string
-              format: date-time
-              pattern:
-                (\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])T(?:[01]\d|2[0123]):(?:[012345]\d):(?:[012345]\d)Z$
-              maxLength: 20
-            postedChargedAmount:
-              $ref: '#/components/schemas/AmountDetails'
-            nature:
-              type: string
-              enum:
-                - RESGATE_REGULAR
-                - MORTE
-                - INVALIDEZ
-                - PAGAMENTO_FINANCEIRO_PROGRAMADO
-                - CUSTEIO_DE_COBERTURA_DE_RISCO_EM_PLANOS_CONJUGADOS
-                - ASSISTENCIA_FINANCEIRA
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - TOTAL
+                  - PARCIAL
+              requestDate:
+                type: string
+                format: date-time
+                maxLength: 20
+                pattern:
+                  ^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])T(?:[01]\d|2[0123]):(?:[012345]\d):(?:[012345]\d)Z$
+              amount:
+                $ref: '#/components/schemas/AmountDetails'
+              liquidationDate:
+                type: string
+                format: date-time
+                pattern:
+                  (\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])T(?:[01]\d|2[0123]):(?:[012345]\d):(?:[012345]\d)Z$
+                maxLength: 20
+              postedChargedAmount:
+                $ref: '#/components/schemas/AmountDetails'
+              nature:
+                type: string
+                enum:
+                  - RESGATE_REGULAR
+                  - MORTE
+                  - INVALIDEZ
+                  - PAGAMENTO_FINANCEIRO_PROGRAMADO
+                  - CUSTEIO_DE_COBERTURA_DE_RISCO_EM_PLANOS_CONJUGADOS
+                  - ASSISTENCIA_FINANCEIRA
     InsurancePensionPlanClaim:
       type: object
       required:

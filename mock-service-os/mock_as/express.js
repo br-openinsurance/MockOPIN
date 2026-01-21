@@ -23,6 +23,9 @@ const log = Debug('raidiam:server:info');
 const __dirname = dirname(import.meta.url);
 const {
   BRAND = 'NO_BRAND',
+  ISSUER,
+  TRANSPORT_CERT,
+  TRANSPORT_CERT_KEY,
   AWS_SSM_REGION = 'us-east-1',
   AWS_LOCAL = false,
   LOCAL_STACK_ENDPOINT,
@@ -39,17 +42,10 @@ const ssmClient = new SSMClient({
 const brandConfig = {
   [BRAND_NAME.OPIN]: {
     brand: 'opin',
-    clientId: 'QZY-zq89jUAnkOgBhRp19',
-    dynamicScopesSupported: ['consent:'],
-  },
-  [BRAND_NAME.OPIN_LOCAL]: {
-    brand: 'opin',
-    clientId: 'client',
     dynamicScopesSupported: ['consent:'],
   },
   default: {
     brand: 'opin',
-    clientId: 'client',
     dynamicScopesSupported: ['consent:'],
   },
 };
@@ -69,11 +65,11 @@ async function getSsmParameter(name) {
   }
 }
 
-async function loadSsmParameters() {
-  let issuer = await getSsmParameter(`${SSM_PARAMETER_PREFIX}/issuer`);
+async function loadParameters() {
+  let issuer = ISSUER || (await getSsmParameter(`${SSM_PARAMETER_PREFIX}/issuer`));
   issuer = issuer.startsWith('https://') ? issuer : `https://${issuer}`;
-  const clientCert = await getSsmParameter(`${SSM_PARAMETER_PREFIX}/transport_certificate`);
-  const clientCertKey = await getSsmParameter(`${SSM_PARAMETER_PREFIX}/transport_key`);
+  const clientCert = TRANSPORT_CERT || (await getSsmParameter(`${SSM_PARAMETER_PREFIX}/transport_certificate`));
+  const clientCertKey = TRANSPORT_CERT_KEY || (await getSsmParameter(`${SSM_PARAMETER_PREFIX}/transport_key`));
 
   return { issuer, clientCert, clientCertKey };
 }
@@ -93,6 +89,9 @@ async function loadOidcConfiguration(brand, mtlsIssuer) {
 
   log(`Load Directory Key Set: ${TRUSTFRAMEWORK_SSA_KEYSET}`);
   const ssaJwksResponse = await got(TRUSTFRAMEWORK_SSA_KEYSET);
+  if (ssaJwksResponse.statusCode !== 200) {
+    throw new Error(`Failed to load JWKS: ${ssaJwksResponse.statusCode}`);
+  }
   const ssaJwks = JWKS.asKeyStore(JSON.parse(ssaJwksResponse.body));
 
   let configuration = configFunc.default(mtlsIssuer, ssaJwks);
@@ -128,7 +127,7 @@ async function main() {
 
   log(`Load configuration for ${BRAND}`);
   const config = brandConfig[BRAND] || brandConfig.default;
-  const { issuer, clientCert, clientCertKey } = await loadSsmParameters();
+  const { issuer, clientCert, clientCertKey } = await loadParameters();
 
   let mtlsIssuer = new URL(issuer);
   mtlsIssuer.host = `matls-${mtlsIssuer.host}`;
@@ -146,13 +145,38 @@ async function main() {
     await adapter.connect('openid-server');
   }
 
-  let provider = new Provider(issuer, { adapter, ...oidcConfig });
+  let provider = new Provider(issuer, {
+    adapter,
+    ...oidcConfig,
+    ...{
+      clients: [
+        {
+          client_id: 'introspection-client',
+          client_secret: 'introspection-client-secret',
+          redirect_uris: ['https://localhost.emobix.co.uk:8443/test/a/mock/callback'],
+          grant_types: ['authorization_code', 'implicit', 'refresh_token'],
+          jwks: {
+            keys: [
+              {
+                kty: 'RSA',
+                e: 'AQAB',
+                use: 'sig',
+                kid: 'CfbVPtmKe6h0A29BEyHdLeCOKIs4SxhYwKKQxhidhEE',
+                alg: 'PS256',
+                n: 'nwBAiEo-6HY1eSt22s1D3GqfWVsco0Tp1ymSgMoDaSxWayr52lOEx0hluB2bKrscuJ0cfLuYrjEOY2f0ZjeHioRjl-1eDzMnHtp5bzCznWxMFEUuBnvRio7ZyuqZVGQLaY95I4sce06_Wd9lQeGytb654aYTuSJrkVwRQLtplPEQuYYMcH3DD8BADztuIC2DrYc4zJuWwXdgU_EPkObZPlu49op5kVwJav9wY-XiK-r6ruUgZ5-MxXNVFf39AnNszVw8urwMXiQ2aHijKNMy2pJHaQSPOyaeICKBcQw9L-mGtXfuT00aota054GkrPVn8V7HXdlYH3tKJY-SKfzRwQ',
+              },
+            ],
+          },
+        },
+      ],
+    },
+  });
   log(`Create Account adapter`);
   await Account.initialiseAdapter('accounts');
 
   log(`Init Adapter for ${BRAND || 'Default'}`);
   const { init } = await import(`./utils/${config.brand}/adapter.js`);
-  init(apiUrl, provider, config.clientId, clientCert, clientCertKey);
+  init(apiUrl, provider, 'openid-provider-client', clientCert, clientCertKey);
 
   loadSupportFunctions(provider, config.dynamicScopesSupported);
 
@@ -169,6 +193,13 @@ async function main() {
     }
   });
 
+  // Implemented as requested by OCI-1785
+  provider.on('client_credentials.saved', (token) => {
+    if (token.kind == 'ClientCredentials' && token.scope.includes('openid')) {
+      log('Remove openId scope at client_credential flow');
+      token.scope = token.scope.replace('openid', '').trim();
+    }
+  });
   // Trust the proxy
   app.enable('trust proxy');
   provider.proxy = true;

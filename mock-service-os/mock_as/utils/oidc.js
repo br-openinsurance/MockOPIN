@@ -5,8 +5,8 @@ const log = Debug('raidiam:server:info');
 function getDynamicScopeIdFromArray(scopes, dynamicScopePrefix) {
   // eslint-disable-next-line no-shadow
   const result = scopes.filter((s) => {
-    if (s.name && s.name.includes(dynamicScopePrefix)) return true;
-    if (!s.name && s.includes(dynamicScopePrefix)) return true;
+    if (s.name && s.name.startsWith(dynamicScopePrefix)) return true;
+    if (!s.name && s.startsWith(dynamicScopePrefix)) return true;
     return false;
   });
   if (result.length === 0) {
@@ -19,7 +19,7 @@ function getDynamicScopeIdFromArray(scopes, dynamicScopePrefix) {
 }
 
 function getDynamicScopeIdFromString(scopes, dynamicScopePrefix) {
-  const result = scopes.split(' ').filter((s) => s.includes(dynamicScopePrefix));
+  const result = scopes.split(' ').filter((s) => s.startsWith(dynamicScopePrefix));
   return result.length > 0 ? result[0].split(`${dynamicScopePrefix}`)[1] : undefined;
 }
 

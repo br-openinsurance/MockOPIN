@@ -169,7 +169,7 @@ DO $$DECLARE
         PERFORM addRuralPolicyCoverage(ruralPolicyId1, '0111', 'GRANIZO', 'string', ruralPolicyCoverageDeductibleId1, ruralPolicyCoveragePosId1);
         ruralPolicyCoinsurerId1 := addCoinsurer('string', '10.00');
         perform addCoinsurerIds(ruralPolicyId1, ARRAY[ruralPolicyCoinsurerId1]);
-        PERFORM addRuralPolicyBranchInsuredObject(ruralPolicyId1, 'string', true, '8.38', 'PORCENTAGEM', 'Horas', 'R$', 'BRL', 'AC', '2000.00', 'HECTAR', 'string', '11111111', 'BOVINOS', 'string', 'PINUS', 'string', '2022-12-31', 'Avenida Naburo Ykesaki, 1270', 'RJ', '17500001', 'BRA', 'CPF', 'string', '40', 'string', 'CLIMATICOS', 'string', true, 'CONSUMO', 'ELITE', 'Fundos');
+        PERFORM addRuralPolicyBranchInsuredObject(ruralPolicyId1, 'string', true, '8.38', 'PORCENTAGEM', 'Horas', 'R$', 'BRL', 'AC', '2000.00', 'HECTAR', 'string', '11111111', 'BOVINOS', 'string', 'PINUS', 'string', '2022-12-31', 'Avenida Naburo Ykesaki, 1270', 'RJ', '17500001', 'BRA', 'CPF', 'string', '11111111111', 'string', 'CLIMATICOS', 'string', true, 'CONSUMO', 'ELITE', 'Fundos');
         ruralPolicyClaimId1 := addRuralPolicyClaim(ruralPolicyId1, 'string', '2022-12-31', 'ABERTO', '2022-12-31', '2022-12-31', '2022-12-31', '2022-12-31', '18', 'PORCENTAGEM', 'Horas', 'R$', 'BRL', 'RISCO_EXCLUIDO', 'string', '2022-12-31', 'Avenida Naburo Ykesaki, 1270', 'RJ', '17500001', 'BRA', 'Fundos');
         PERFORM addRuralPolicyClaimCoverage(ruralPolicyClaimId1, 'string', '0111', 'GRANIZO', 'string', '2022-12-31', '2022-12-31');
         ruralPolicyPremiumId1 := addRuralPolicyPremium(ruralPolicyId1, 4, '61.70', 'PORCENTAGEM', 'Horas', 'R$', 'BRL');

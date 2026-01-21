@@ -22,6 +22,48 @@
                         ]
                     },
                     {
+                        "ApiFamilyType": "resources",
+                        "ApiVersion": "2.5.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/resources/v2/resources"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "claim-notification",
+                        "ApiVersion": "1.4.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/claim-notification/v1/request/person/{consentId}"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/claim-notification/v1/request/damage/{consentId}"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "patrimonial",
+                        "ApiVersion": "1.5.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-patrimonial/v1/insurance-patrimonial"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-patrimonial/v1/insurance-patrimonial/{policyId}/policy-info"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-patrimonial/v1/insurance-patrimonial/{policyId}/premium"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-patrimonial/v1/insurance-patrimonial/{policyId}/claim"
+                            }
+                        ]
+                    },
+                    {
                         "ApiFamilyType": "quote-patrimonial-business",
                         "ApiVersion": "1.8.0",
                         "Status": "Active",
@@ -136,6 +178,25 @@
                         ]
                     },
                     {
+                        "ApiFamilyType": "insurance-acceptance-and-branches-abroad",
+                        "ApiVersion": "1.4.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-acceptance-and-branches-abroad/v1/insurance-acceptance-and-branches-abroad"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-acceptance-and-branches-abroad/v1/insurance-acceptance-and-branches-abroad/{policyId}/policy-info"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-acceptance-and-branches-abroad/v1/insurance-acceptance-and-branches-abroad/{policyId}/premium"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-acceptance-and-branches-abroad/v1/insurance-acceptance-and-branches-abroad/{policyId}/claim"
+                            }
+                        ]
+                    },
+                    {
                         "ApiFamilyType": "quote-housing",
                         "ApiVersion": "1.9.0",
                         "Status": "Active",
@@ -175,6 +236,25 @@
                         ]
                     },
                     {
+                        "ApiFamilyType": "rural",
+                        "ApiVersion": "1.4.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-rural/v1/insurance-rural"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-rural/v1/insurance-rural/{policyId}/policy-info"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-rural/v1/insurance-rural/{policyId}/premium"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-rural/v1/insurance-rural/{policyId}/claim"
+                            }
+                        ]
+                    },
+                    {
                         "ApiFamilyType": "quote-rural",
                         "ApiVersion": "1.9.0",
                         "Status": "Active",
@@ -210,6 +290,28 @@
                         ]
                     },
                     {
+                        "ApiFamilyType": "quote-auto",
+                        "ApiVersion": "2.0.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-auto/v2/lead/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-auto/v2/lead/request/{consentId}"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-auto/v2/request/{consentId}/quote-status"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-auto/v2/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-auto/v2/request/{consentId}"
+                            }
+                        ]
+                    },
+                    {
                         "ApiFamilyType": "contract-life-pension",
                         "ApiVersion": "1.13.0",
                         "Status": "Active",
@@ -232,8 +334,87 @@
                         ]
                     },
                     {
+                        "ApiFamilyType": "quote-capitalization-title",
+                        "ApiVersion": "1.10.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/lead/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/lead/request/{consentId}"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/request/{consentId}/quote-status"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/request/{consentId}"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/raffle/request"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "quote-person-life",
+                        "ApiVersion": "1.11.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-person/v1/life/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-person/v1/life/request/{consentId}/quote-status"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-person/v1/life/request/{consentId}"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-person/v1/lead/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-person/v1/lead/request/{consentId}"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "quote-person-travel",
+                        "ApiVersion": "1.11.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-person/v1/travel/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-person/v1/travel/request/{consentId}/quote-status"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-person/v1/travel/request/{consentId}"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-person/v1/lead/request"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/quote-person/v1/lead/request/{consentId}"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "endorsement",
+                        "ApiVersion": "1.3.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/endorsement/v1/request/{consentId}"
+                            }
+                        ]
+                    },
+                    {
                         "ApiFamilyType": "insurance-capitalization-title",
-                        "ApiVersion": "1.5.0",
+                        "ApiVersion": "1.10.0",
                         "Status": "Active",
                         "ApiDiscoveryEndpoints": [
                             {
@@ -251,30 +432,188 @@
                         ]
                     },
                     {
-                        "ApiFamilyType": "quote-capitalization-title",
-                        "ApiVersion": "1.10.0",
+                        "ApiFamilyType": "financial-risk",
+                        "ApiVersion": "1.4.0",
                         "Status": "Active",
                         "ApiDiscoveryEndpoints": [
                             {
-                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/request"
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-financial-risk/v1/insurance-financial-risk/policies"
                             },
                             {
-                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/request/{consentId}/quote-status"
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-financial-risk/v1/insurance-financial-risk/{policyId}/policy-info"
                             },
                             {
-                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/request/{consentId}"
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-financial-risk/v1/insurance-financial-risk/{policyId}/claim"
                             },
                             {
-                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/lead/request"
-                            },
-                            {
-                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/lead/request/{consentId}"
-                            },
-                            {
-                                "ApiEndpoint": "https://api.local/open-insurance/quote-capitalization-title/v1/raffle/request"
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-financial-risk/v1/insurance-financial-risk/{policyId}/premium"
                             }
                         ]
-                    }
+                    },
+                    {
+                        "ApiFamilyType": "housing",
+                        "ApiVersion": "1.4.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-housing/v1/insurance-housing/policies"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-housing/v1/insurance-housing/{policyId}/policy-info"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-housing/v1/insurance-housing/{policyId}/claim"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-housing/v1/insurance-housing/{policyId}/premium"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "responsibility",
+                        "ApiVersion": "1.4.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-responsibility/v1/insurance-responsibility/policies"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-responsibility/v1/insurance-responsibility/{policyId}/policy-info"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-responsibility/v1/insurance-responsibility/{policyId}/claim"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-responsibility/v1/insurance-responsibility/{policyId}/premium"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "person",
+                        "ApiVersion": "1.6.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-person/v1/insurance-person/policies"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-person/v1/insurance-person/{policyId}/policy-info"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-person/v1/insurance-person/{policyId}/claim"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-person/v1/insurance-person/{policyId}/premium"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "life-pension",
+                        "ApiVersion": "1.5.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-life-pension/v1/insurance-life-pension/contracts"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-life-pension/v1/insurance-life-pension/{certificateId}/contract-info"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-life-pension/v1/insurance-life-pension/{certificateId}/movements"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-life-pension/v1/insurance-life-pension/{certificateId}/portabilities"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-life-pension/v1/insurance-life-pension/{certificateId}/withdrawals"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-life-pension/v1/insurance-life-pension/{certificateId}/claims"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "transport",
+                        "ApiVersion": "1.3.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-transport/v1/insurance-transport"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-transport/v1/insurance-transport/{policyId}/policy-info"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-transport/v1/insurance-transport/{policyId}/claim"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-transport/v1/insurance-transport/{policyId}/premium"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "insurance-pension-plan",
+                        "ApiVersion": "1.5.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-pension-plan/v1/insurance-pension-plan/contracts"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-pension-plan/v1/insurance-pension-plan/{pensionIdentification}/contract-info"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-pension-plan/v1/insurance-pension-plan/{pensionIdentification}/movements"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-pension-plan/v1/insurance-pension-plan/{pensionIdentification}/portabilites"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-pension-plan/v1/insurance-pension-plan/{pensionIdentification}/withdrawals"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-pension-plan/v1/insurance-pension-plan/{pensionIdentification}/claim"
+                            }
+                        ]
+                    },
+                    {
+                        "ApiFamilyType": "insurance-life-pension",
+                        "ApiVersion": "1.5.0",
+                        "Status": "Active",
+                        "ApiDiscoveryEndpoints": [
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-life-pension/v1/insurance-life-pension/contracts"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-life-pension/v1/insurance-life-pension/{pensionIdentification}/contract-info"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-life-pension/v1/insurance-life-pension/{pensionIdentification}/movements"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-life-pension/v1/insurance-life-pension/{pensionIdentification}/portabilites"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-life-pension/v1/insurance-life-pension/{pensionIdentification}/withdrawals"
+                            },
+                            {
+                                "ApiEndpoint": "https://api.local/open-insurance/insurance-life-pension/v1/insurance-life-pension/{pensionIdentification}/claim"
+                            }
+                        ]
+                    },
+                  {
+                    "ApiFamilyType": "dynamic-fields",
+                    "ApiVersion": "1.5.0",
+                    "Status": "Active",
+                    "ApiDiscoveryEndpoints": [
+                      {
+                        "ApiEndpoint": "https://api.local/open-insurance/dynamic-fields/v1/damage-and-person"
+                      },
+                      {
+                        "ApiEndpoint": "https://api.local/open-insurance/dynamic-fields/v1/capitalization-title"
+                      }
+                    ]
+                  }
                 ]
             }
         ]

@@ -8,17 +8,19 @@ run:
 	cd insurance-server-lambdas; docker-compose --profile main up
 
 setup-cs:
-	git clone --branch main --single-branch --depth=1 https://gitlab.com/raidiam-conformance/open-insurance/open-insurance-brasil.git insurance-server-lambdas/conformance-suite
-	mkdir -p insurance-server-lambdas/conformance-suite/server-dev
-	echo 'FROM openjdk:17-jdk-slim\n\nRUN apt-get update && apt-get install redir' > insurance-server-lambdas/conformance-suite/server-dev/Dockerfile
+	@if test ! -d "conformance-suite"; then \
+	  echo "Cloning open insurance conformance suite repository..."; \
+	  git clone --branch main --single-branch --depth=1 https://gitlab.com/raidiam-conformance/open-insurance/open-insurance-brasil.git insurance-server-lambdas/conformance-suite; \
+	fi
 	
-	cd insurance-server-lambdas; docker-compose run cs-builder
+	@cd insurance-server-lambdas; docker compose run cs-builder
 
 run-with-cs:
 	cd insurance-server-lambdas; ./gradlew optimizedDockerBuild -x test
 	cd insurance-server-lambdas; docker-compose --profile main --profile cs up
 
-rebuild:
+build:
 	cd insurance-swagger; BUILD_NUMBER=2 ./gradlew publishToMavenLocal
-	cd insurance-server-lambdas; docker-compose build auth
-	cd insurance-server-lambdas; docker-compose build mtls
+	cd insurance-server-lambdas; ./gradlew optimizedDockerBuild -x test
+	cd insurance-server-lambdas; docker compose build auth
+	cd insurance-server-lambdas; docker compose build mtls

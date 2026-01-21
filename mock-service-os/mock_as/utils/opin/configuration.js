@@ -520,6 +520,9 @@ export default function (mtlsIssuer, ssaJwks) {
 
       return claims;
     },
+    expiresWithSession: async (ctx, code) => {
+      return false;
+    },
     discovery: {
       mtls_endpoint_aliases: {
         token_endpoint: `${mtlsIssuer}/token`,

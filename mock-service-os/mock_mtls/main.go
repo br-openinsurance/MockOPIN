@@ -1,175 +1,448 @@
 package main
 
 import (
+	"context"
 	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"io"
-	"log"
 	"log/slog"
-	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"regexp"
+	"runtime/debug"
 	"strings"
 	"time"
 
-	"github.com/lestrrat-go/jwx/v3/jwa"
-	"github.com/lestrrat-go/jwx/v3/jwk"
-	"github.com/lestrrat-go/jwx/v3/jws"
+	"github.com/go-jose/go-jose/v4"
+	"github.com/go-jose/go-jose/v4/jwt"
+	"github.com/google/uuid"
 )
 
+type ContextKey string
+
 const (
-	caCertFilePath            = "certs/ca.crt"
-	serverCertFilePath        = "certs/mtls.crt"
-	serverKeyFilePath         = "certs/mtls.key"
-	clientOnePublicJWKSPath   = "certs/client_one_pub.jwks"
-	authURI                   = "http://auth:3000"
-	participantsFilePath      = "mocks/participants.json"
-	softwareStatementFilePath = "mocks/software_statement.json"
+	CtxKeyCorrelationID ContextKey = "correlation_id"
+	CtxKeyInteractionID ContextKey = "interaction_id"
 )
 
 var (
-	apiURI    = os.Getenv("API_GATEWAY_URI")
-	ssaJwkURL = os.Getenv("SSA_JWK_URL")
-	ssaJWK    jwk.Key
+	APIHost  = envValue("API_HOST", "http://mockapi:8080")
+	AuthHost = envValue("AUTH_HOST", "http://auth:3000")
 )
+
+const (
+	HeaderClientCert       = "BANK-TLS-Certificate"
+	HeaderClientCertVerify = "X-BANK-Certificate-Verify"
+	HeaderClientCertDN     = "X-BANK-Certificate-DN"
+)
+
+type Environment string
+
+const (
+	EnvironmentLocal Environment = "LOCAL"
+)
+
+var (
+	Env = envValue("ENV", EnvironmentLocal)
+)
+
+const (
+	IntrospectionClientID     = "introspection-client"
+	IntrospectionClientSecret = "introspection-client-secret"
+)
+
+// Constants for local development.
+const (
+	CACertFilePath            = "certs/ca.crt"
+	ServerCertFilePath        = "certs/mtls.crt"
+	ServerKeyFilePath         = "certs/mtls.key"
+	ClientOnePublicJWKSPath   = "certs/client_one_pub.jwks"
+	ClientTwoPublicJWKSPath   = "certs/client_two_pub.jwks"
+	ParticipantsFilePath      = "mocks/participants.json"
+	SoftwareStatementFilePath = "mocks/software_statement.json"
+)
+
+var certRegex = regexp.MustCompile(`(?:-----(?:BEGIN|END) CERTIFICATE-----|\s)`)
 
 func main() {
 	l := logger()
 	slog.SetDefault(l)
 
-	key, err := loadSsaKey()
-	if err != nil {
-		slog.Error("Could not fetch ssa_jwk from S3", slog.String("error", err.Error()))
-		os.Exit(1)
-	}
-	ssaJWK = key
-	slog.Info("Successfully fetched ssa_jwk from S3")
-
 	mux := http.NewServeMux()
-
-	dirHandler := directoryHandler()
-	mux.Handle("directory/", dirHandler)
-
-	go func() {
-		_ = http.ListenAndServe(":80", mux)
-	}()
-
+	authHandler := authHandler()
 	apiHandler := apiHandler()
-	mux.Handle("api.local/", apiHandler)
-	mux.Handle("matls-api.local/", apiHandler)
-	mux.Handle("mtls/", apiHandler)
 
-	mux.Handle("auth.local/", authHandler())
-	mux.Handle("matls-auth.local/", authHandler())
-
-	tlsConfig := tlsConfiguration()
-	server := http.Server{
-		Handler:   mux,
-		ErrorLog:  slog.NewLogLogger(l.Handler(), slog.LevelError),
-		TLSConfig: tlsConfig,
+	if Env == EnvironmentLocal {
+		mux.Handle("directory/", directoryHandler())
 	}
-	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", 443))
-	if err != nil {
+
+	mux.Handle("/health", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		slog.Info("health check request")
+		_, _ = w.Write([]byte("OK"))
+	}))
+
+	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		host := r.Header.Get("X-Forwarded-Host")
+		if strings.HasPrefix(host, "api.") || strings.HasPrefix(host, "matls-api.") {
+			slog.Info("api request", slog.String("host", host))
+			apiHandler.ServeHTTP(w, r)
+			return
+		}
+
+		slog.Info("defaulting to auth request", slog.String("host", host))
+		authHandler.ServeHTTP(w, r)
+	}))
+
+	handler := middleware(mux)
+
+	if Env == EnvironmentLocal {
+		tlsConfig := tlsConfiguration()
+		tlsServer := http.Server{
+			Addr:      ":443",
+			Handler:   middlewareLocal(handler),
+			ErrorLog:  slog.NewLogLogger(l.Handler(), slog.LevelError),
+			TLSConfig: tlsConfig,
+		}
+		go func() {
+			slog.Info("tls server starting")
+			if err := tlsServer.ListenAndServeTLS("", ""); err != nil && err != http.ErrServerClosed {
+				slog.Error("tls server error", slog.String("err", err.Error()))
+				os.Exit(1)
+			}
+			slog.Info("tls server shutdown")
+		}()
+	}
+
+	server := &http.Server{
+		Addr:              ":80",
+		Handler:           handler,
+		ReadTimeout:       5 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       120 * time.Second,
+		ReadHeaderTimeout: 2 * time.Second,
+	}
+	slog.Info("http server starting")
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		slog.Error("server error", slog.String("err", err.Error()))
 		os.Exit(1)
 	}
-	slog.Info("Listening on port 443")
-	slog.Error("server error", slog.String("err", server.Serve(tls.NewListener(ln, tlsConfig)).Error()))
+	slog.Info("http server shutdown")
 }
 
-func loadSsaKey() (jwk.Key, error) {
-	if ssaJwkURL == "" {
-		return nil, fmt.Errorf("SSA_JWK_URL environment variable not set")
+func authHandler() http.Handler {
+	authHost, err := url.Parse(AuthHost)
+	if err != nil {
+		slog.Error("unable to upstream url", slog.String("err", err.Error()))
+		os.Exit(1)
+	}
+	proxy := httputil.NewSingleHostReverseProxy(authHost)
+	// Rewrite Host header to match the target.
+	originalDirector := proxy.Director
+	proxy.Director = func(req *http.Request) {
+		originalDirector(req)
+		req.Host = authHost.Host
+	}
+	return proxy
+}
+
+func apiHandler() http.Handler {
+	apiHost, err := url.Parse(APIHost)
+	if err != nil {
+		slog.Error("unable to upstream url", slog.String("err", err.Error()))
+		os.Exit(1)
 	}
 
-	resp, err := http.Get(ssaJwkURL)
+	proxy := httputil.NewSingleHostReverseProxy(apiHost)
+	// Rewrite Host header to match the target.
+	originalDirector := proxy.Director
+	proxy.Director = func(req *http.Request) {
+		originalDirector(req)
+		req.Host = apiHost.Host
+	}
+	return accessTokenMiddleware(proxy)
+}
+
+func logger() *slog.Logger {
+	return slog.New(&logCtxHandler{
+		Handler: slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+			Level: slog.LevelDebug,
+			// Make sure time is logged in UTC.
+			ReplaceAttr: func(groups []string, attr slog.Attr) slog.Attr {
+				if attr.Key == slog.TimeKey {
+					now := time.Now().UTC()
+					return slog.Attr{Key: slog.TimeKey, Value: slog.StringValue(now.String())}
+				}
+				return attr
+			},
+		}),
+	})
+}
+
+type logCtxHandler struct {
+	slog.Handler
+}
+
+func (h *logCtxHandler) Handle(ctx context.Context, r slog.Record) error {
+	if correlationID, ok := ctx.Value(CtxKeyCorrelationID).(string); ok {
+		r.AddAttrs(slog.String("correlation_id", correlationID))
+	}
+
+	if interactionID, ok := ctx.Value(CtxKeyInteractionID).(string); ok {
+		r.AddAttrs(slog.String("interaction_id", interactionID))
+	}
+
+	return h.Handler.Handle(ctx, r)
+}
+
+func middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.Header.Get("Authorization"), "Basic ") {
+			slog.Error("basic authentication is not supported", "authorization", r.Header.Get("Authorization"))
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		ctx := r.Context()
+		ctx = context.WithValue(ctx, CtxKeyCorrelationID, uuid.NewString())
+		if fapiID := r.Header.Get("X-Fapi-Interaction-Id"); fapiID != "" {
+			ctx = context.WithValue(ctx, CtxKeyInteractionID, fapiID)
+		}
+		slog.InfoContext(ctx, "request received", "method", r.Method, "path", r.URL.Path)
+
+		if cert := r.Header.Get(HeaderClientCert); cert != "" {
+			cert = normalizeCertificate(cert)
+			r.Header.Set(HeaderClientCert, cert)
+			slog.InfoContext(ctx, "client certificate", slog.String("cert", cert))
+		}
+
+		start := time.Now().UTC()
+		rw := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+		defer func() {
+			if rec := recover(); rec != nil {
+				slog.Error("panic recovered", "error", rec, "stack", string(debug.Stack()))
+				http.Error(w, "internal error", http.StatusInternalServerError)
+			}
+			slog.InfoContext(ctx, "request completed", slog.Duration("duration", time.Since(start)), slog.Int("status", rw.statusCode))
+		}()
+
+		r = r.WithContext(ctx)
+		next.ServeHTTP(rw, r)
+	})
+}
+
+func envValue[T ~string](key, fallback T) T {
+	if value, exists := os.LookupEnv(string(key)); exists {
+		return T(value)
+	}
+	return fallback
+}
+
+type responseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (rw *responseWriter) WriteHeader(code int) {
+	rw.statusCode = code
+	rw.ResponseWriter.WriteHeader(code)
+}
+
+func middlewareLocal(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.Header.Set("X-Forwarded-Proto", "https")
+		r.Header.Set("X-Forwarded-Host", r.Host)
+
+		// Extract and set the client's certificate and DN.
+		if r.TLS != nil && len(r.TLS.PeerCertificates) > 0 {
+			// The TLS Block Ensures that the correct ordering has taken place and that the leaf certificate will be at block 0.
+			clientCert := r.TLS.PeerCertificates[0]
+			certPEM := string(pem.EncodeToMemory(&pem.Block{
+				Type:  "CERTIFICATE",
+				Bytes: clientCert.Raw,
+			}))
+			certPEM = strings.ReplaceAll(certPEM, "\n", " ")
+			r.Header.Set(HeaderClientCert, certPEM)
+			r.Header.Set(HeaderClientCertDN, clientCert.Subject.String())
+			r.Header.Set(HeaderClientCertVerify, "SUCCESS")
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func accessTokenMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		accessToken := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+		if accessToken == "" {
+			slog.ErrorContext(r.Context(), "no authorization header", "status", http.StatusUnauthorized)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		tokenInfo, err := introspect(r, accessToken)
+		if err != nil {
+			slog.ErrorContext(r.Context(), "introspection failed", slog.String("error", err.Error()))
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		r.Header.Set("access_token", tokenInfo)
+		next.ServeHTTP(w, r)
+	})
+}
+
+func introspect(r *http.Request, token string) (string, error) {
+	introspectionURL := AuthHost + "/token/introspection"
+
+	data := url.Values{}
+	data.Set("token", token)
+
+	req, err := http.NewRequestWithContext(r.Context(), http.MethodPost, introspectionURL, strings.NewReader(data.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch ssa_jwk: %w", err)
+		return "", fmt.Errorf("failed to create introspection request: %w", err)
+	}
+
+	req.SetBasicAuth(IntrospectionClientID, IntrospectionClientSecret)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	httpClient := &http.Client{Timeout: 3 * time.Second}
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to introspect token: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("ssa_jwk fetch returned status: %d", resp.StatusCode)
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return "", fmt.Errorf("token introspection returned non-200 status: %s. %w", resp.Status, err)
+		}
+		slog.ErrorContext(r.Context(), "introspection failed", slog.String("status", resp.Status), slog.String("body", string(body)))
+		return "", fmt.Errorf("token introspection returned non-200 status: %s", resp.Status)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read ssa_jwk response body: %w", err)
+		return "", fmt.Errorf("failed to read introspection response body: %w", err)
 	}
 
-	key, err := jwk.ParseKey(body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse ssa_jwk: %w", err)
+	var introspectionResponse map[string]any
+	if err := json.Unmarshal(body, &introspectionResponse); err != nil {
+		return "", fmt.Errorf("failed to unmarshal introspection response: %w", err)
 	}
 
-	return key, nil
+	slog.InfoContext(r.Context(), "introspection response", slog.Any("response", introspectionResponse))
+
+	if active, ok := introspectionResponse["active"].(bool); !ok || !active {
+		return "", fmt.Errorf("token is not active")
+	}
+
+	// Check x5t#S256 against client certificate's SHA-256 thumbprint.
+	if cnf, ok := introspectionResponse["cnf"].(map[string]any); ok {
+		if x5tS256, ok := cnf["x5t#S256"].(string); ok {
+			if err := verifyCertificateThumbprint(r, x5tS256); err != nil {
+				return "", fmt.Errorf("client certificate thumbprint verification failed: %w", err)
+			}
+		}
+	}
+
+	return string(body), nil
 }
 
-func authHandler() http.Handler {
-	// Auth Host
-	parsedAuthHost, err := url.Parse("http://auth:3000")
+func verifyCertificateThumbprint(r *http.Request, x5tS256 string) error {
+	cert := r.Header.Get(HeaderClientCert)
+	if cert == "" {
+		return errors.New("no client certificate found")
+	}
+	cert = certRegex.ReplaceAllString(cert, "")
+
+	certData, err := base64.StdEncoding.DecodeString(cert)
 	if err != nil {
-		slog.Error("unable to upstream url", slog.String("err", err.Error()))
-		os.Exit(1)
-	}
-	// Create reverse proxies with custom director to add headers
-	authProxy := httputil.NewSingleHostReverseProxy(parsedAuthHost)
-
-	// Add custom Director to set required headers
-	authProxy.Director = func(req *http.Request) {
-		setCustomHeaders(req, parsedAuthHost)
+		return fmt.Errorf("failed to decode base64 certificate data: %w", err)
 	}
 
-	return loggingMiddleware(authProxy)
+	hash := sha256.Sum256(certData)
+	certThumbprint := base64.RawURLEncoding.EncodeToString(hash[:])
+	if certThumbprint != x5tS256 {
+		return fmt.Errorf("client certificate thumbprint verification failed. want: %s, got: %s", x5tS256, certThumbprint)
+	}
+	return nil
 }
 
-func apiHandler() http.Handler {
-	apiHost, err := url.Parse(apiURI)
-	if err != nil {
-		slog.Error("unable to upstream url", slog.String("err", err.Error()))
-		os.Exit(1)
+// normalizeCertificate handles certificates that may come URL-encoded or with spaces.
+func normalizeCertificate(cert string) string {
+	if cert == "" {
+		return cert
 	}
-	// Create reverse proxies with custom director to add headers
-	apiProxy := httputil.NewSingleHostReverseProxy(apiHost)
-
-	// Add custom Director to set required headers
-	apiProxy.Director = func(req *http.Request) {
-		setCustomHeaders(req, apiHost)
+	if strings.Contains(cert, "%") {
+		if decoded, err := url.QueryUnescape(cert); err == nil {
+			cert = decoded
+		}
 	}
-	apiProxyHandler := loggingMiddleware(apiProxy)
-	apiProxyHandler = enforceAccessTokenMiddleware(apiProxyHandler)
-
-	return apiProxyHandler
+	// Normalize newlines to spaces to keep consistent format
+	cert = strings.ReplaceAll(cert, "\n", " ")
+	return cert
 }
 
 func directoryHandler() http.Handler {
-	participantsBytes, err := os.ReadFile(participantsFilePath)
-	if err != nil {
-		slog.Info("unable to read participants.json", slog.String("err", err.Error()))
-		participantsBytes = []byte(`{}`)
+	var jwk jose.JSONWebKey
+	if err := json.Unmarshal([]byte(`{
+		"p": "4ZwqFaaF6CyPzkiURyECv7nb3QBH7tkfn3drjiY1ZaHKiyprdoANagibeha0rbgZIGhkkErBosKwecuLQ8yQz-9mTeHQ1FgOlmxSJL9Eod2s_WLqxUr3WDUbOr724i5VfOaUo8fZYA867y_MomhwFyO5BzFfbECztwCmj-zH61E",
+		"kty": "RSA",
+		"q": "ww4Ur8cD54BgnHSx6yQHN8S0ArzI_2NdF-d267Xtb0HUyqSbiaRcvAqIrRXkgz_bD-ySDzVXfUbl_z_hYumLGx3RVsRDacniBianlrFdVZJx-7jH4uS3FSTTnFnnzThyKg4ClV73K8lsfx0N5LT4TqnZmKQbvFlzTGZL49LkI-U",
+		"d": "DLsqL1iCWaa1IpdMC7FS3bfIhFgShPgKl1md9lss5McNj7AbcbaHobBIpGaSEpD9h3H73Q-_C1z7my_jeolepdQYrCleso6Go1cGnq1o85YJIc0Oq2cKXcuBtFiXIxCkRIPn1Sp9b2W7bKt3a-dcthqvsD8KQXE0olwkPQ-TMKm0VrZkrF9S6ckMUN95q7ctJgIO57g01HpXghbgVgf-sAtiOS72p8zsn5RQCn3bRkNSuAXJQGLyKTzPduBGveFpdLKFaM39NRlAJN8v_-VjOFGmAVqLA0vQ7RAJ_7UTPCVc9Y0iHdMWD10py87ccG3LOYTFkbHSJMqyT3zQwq8-sQ",
+		"e": "AQAB",
+		"use": "sig",
+		"kid": "5BoZidMo6GVSAstsPgI10rZj-FmlpW8jVur2FjKJ0Zs",
+		"qi": "kAvfh8Rx4vbEXnmzLmXGbxNqT6hV6HTXmrdnhY16nOBube9FVknGfY2aB8RAYH9ZXuFBpkmlNRxDclBHjs6eFJ7YZ3nxGR4wXzTjjCjG6xmyp3NG0Pbe0TqCBqcC79iQhxUxDidoMncbqlU7mYe_1HVM9ZxxNAY5qZXkOo7sOiM",
+		"dp": "KdRhfSgl1blFZHLSgymcr92O5TfjHmbFVTS4DWAKMHDB8_GGgS8WzZ0Q7p79GuRyTC7uzk39_uZn__z8MjLgep0hc7k1ldlJwxwMUuHfoL9QDp7jdncCyyj1hnvXnHIIyaKa1o78P7IzNBvBri788V1fNfUygwiwCXMmbrLxEjE",
+		"alg": "PS256",
+		"dq": "EIuGN67C5wUdrMe9O7vPnOxjdIP87KTKBbgNf0rsO-6ylQnHY7J8ZzrhgwUDYBqvgzdG4GFe7XJxGeiaPqCeuwsZcamuKjAEqw7mUkLzLsoAPyDaW6WY3gNEq9N4dRDfpi-QComGn8EzIckeH5M2KL4BhhANhjl0LTvUHhwKW_0",
+		"n": "q-Zc0-d1ZoxPjUEvHKVFvcNU9klv4fdadhNYwFwnm3g0kiHyaMWlKYRqNQtFuEyxZZHqdP05MSu8PAwc-moaCfszUbACGxhdPffZYG2vb253y-Zx0RHu-1a44cEhORGzFUBTLdZWrT4He_qthEfQtuFHlN1-QICXPkOfEc3UGrBNA_JJyVz-tvHs6tv5jhD80WRlbfv7Ll_WwxpaXhyRFyfjFWjALeLcEFDsvPaIl_5d_7s8a0nSh0xuxQaMKeaPbhrCS02xf6y32TuuIHiR06p7Q6BtZWCrcxAjJudAuCdmIU7onHstFAO504b7sQwG4fHG3_v5Y-KIQfEHKiWSdQ"
+	}`), &jwk); err != nil {
+		slog.Error("failed to unmarshal jwk", slog.String("err", err.Error()))
+		os.Exit(1)
 	}
 
-	ssBytes, err := os.ReadFile(softwareStatementFilePath)
+	signSsa := func(ss map[string]any) (string, error) {
+		now := time.Now().Unix()
+		ss["iat"] = now
+		ss["exp"] = now + 3600
+		key := jose.SigningKey{
+			Algorithm: jose.PS256,
+			Key:       jwk,
+		}
+		opts := (&jose.SignerOptions{}).WithType("JWT")
+
+		joseSigner, err := jose.NewSigner(key, opts)
+		if err != nil {
+			return "", fmt.Errorf("failed to create jose signer: %w", err)
+		}
+
+		jws, err := jwt.Signed(joseSigner).Claims(ss).Serialize()
+		if err != nil {
+			return "", fmt.Errorf("failed to serialize ssa: %w", err)
+		}
+
+		return jws, nil
+	}
+
+	ssBytes, err := os.ReadFile(SoftwareStatementFilePath)
 	if err != nil {
 		slog.Info("unable to read software_statement.json", slog.String("err", err.Error()))
 		ssBytes = []byte(`{}`)
 	}
-	var ss map[string]interface{}
+	var ss map[string]any
 	if err := json.Unmarshal(ssBytes, &ss); err != nil {
 		slog.Info("unable to parse software_statement.json", slog.String("err", err.Error()))
 		ss = map[string]any{}
-	}
-
-	clientJWKSBytes, err := os.ReadFile(clientOnePublicJWKSPath)
-	if err != nil {
-		slog.Info("unable to read client_one_pub.json", slog.String("err", err.Error()))
-		clientJWKSBytes = []byte(`{}`)
 	}
 
 	mux := http.NewServeMux()
@@ -192,77 +465,58 @@ func directoryHandler() http.Handler {
 	})
 
 	mux.HandleFunc("/participants", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, ParticipantsFilePath)
+	})
+
+	mux.HandleFunc("/jwks", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		if _, err := w.Write(participantsBytes); err != nil {
-			http.Error(w, "failed to write response", http.StatusInternalServerError)
-		}
+		_ = json.NewEncoder(w).Encode(jose.JSONWebKeySet{Keys: []jose.JSONWebKey{jwk}})
 	})
 
 	mux.HandleFunc("/organisations/{org_id}/softwarestatements/{ss_id}/assertion", func(w http.ResponseWriter, r *http.Request) {
+		ssa, err := signSsa(ss)
+		if err != nil {
+			slog.Error("failed to sign ssa", slog.String("err", err.Error()))
+			http.Error(w, "failed to sign ssa", http.StatusInternalServerError)
+			return
+		}
 		w.Header().Set("Content-Type", "application/jwt")
 		w.WriteHeader(http.StatusOK)
-		ssa := signSsa(ss)
-		if _, err := w.Write(ssa); err != nil {
+		if _, err := w.Write([]byte(ssa)); err != nil {
 			http.Error(w, "failed to write response", http.StatusInternalServerError)
 		}
 	})
 
 	mux.HandleFunc("/{org_id}/application.jwks", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		if _, err := w.Write(clientJWKSBytes); err != nil {
-			http.Error(w, "failed to write response", http.StatusInternalServerError)
-		}
+		http.ServeFile(w, r, ClientOnePublicJWKSPath)
+	})
+	mux.HandleFunc("/{org_id}/client_one/application.jwks", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, ClientOnePublicJWKSPath)
+	})
+	mux.HandleFunc("/{org_id}/client_two/application.jwks", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, ClientTwoPublicJWKSPath)
 	})
 
-	return loggingMiddleware(mux)
+	return mux
 }
 
 func tlsConfiguration() *tls.Config {
 
-	serverCertBytes, err := os.ReadFile(serverCertFilePath)
+	serverCert, err := tls.LoadX509KeyPair(ServerCertFilePath, ServerKeyFilePath)
 	if err != nil {
-		slog.Error("unable to read mtls.crt", slog.String("err", err.Error()))
-		os.Exit(1)
-	}
-	matlsBlock, _ := pem.Decode(serverCertBytes)
-	if matlsBlock == nil {
-		slog.Error("unable to decode mtls.crt")
-		os.Exit(1)
-	}
-	serverBytes := matlsBlock.Bytes
-
-	serverKeyBytes, err := os.ReadFile(serverKeyFilePath)
-	if err != nil {
-		slog.Error("unable to read mtls.key", slog.String("err", err.Error()))
-		os.Exit(1)
-	}
-	serverKeyBlock, _ := pem.Decode(serverKeyBytes)
-	if serverKeyBlock == nil {
-		slog.Error("unable to decode mtls.key")
-		os.Exit(1)
-	}
-	serverKey, err := x509.ParsePKCS8PrivateKey(serverKeyBlock.Bytes)
-	if err != nil {
-		slog.Error("unable to parse mtls.key", slog.String("err", err.Error()))
+		slog.Error("failed to load server certificate", slog.String("err", err.Error()))
 		os.Exit(1)
 	}
 
 	caCerts := caCertPool()
 	return &tls.Config{
-		Certificates: []tls.Certificate{{
-			Certificate: [][]byte{
-				serverBytes,
-			},
-			PrivateKey: serverKey,
-		}},
-		InsecureSkipVerify: true,
-		ClientCAs:          caCerts,
-		ClientAuth:         tls.VerifyClientCertIfGiven,
-		MinVersion:         tls.VersionTLS12,
-		MaxVersion:         tls.VersionTLS13,
-		CurvePreferences:   []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+		Certificates:     []tls.Certificate{serverCert},
+		ClientCAs:        caCerts,
+		ClientAuth:       tls.VerifyClientCertIfGiven,
+		MinVersion:       tls.VersionTLS12,
+		MaxVersion:       tls.VersionTLS13,
+		CurvePreferences: []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
 
 		CipherSuites: []uint16{
 			//TLS 1.2
@@ -279,300 +533,16 @@ func tlsConfiguration() *tls.Config {
 }
 
 func caCertPool() *x509.CertPool {
-	caBytes, err := os.ReadFile(caCertFilePath)
+	caCertPEM, err := os.ReadFile(CACertFilePath)
 	if err != nil {
 		slog.Error("unable to read ca.crt", slog.String("err", err.Error()))
 		os.Exit(1)
 	}
-
-	caCertPool := x509.NewCertPool()
-	for block, rest := pem.Decode(caBytes); block != nil; block, rest = pem.Decode(rest) {
-		switch block.Type {
-		case "CERTIFICATE":
-			cert, err := x509.ParseCertificate(block.Bytes)
-			if err != nil {
-				panic(err)
-			}
-			caCertPool.AddCert(cert)
-			slog.Info("loaded certificate", slog.String("subject", cert.Subject.String()))
-
-		default:
-			panic("unknown block type " + block.Type)
-		}
+	caPool := x509.NewCertPool()
+	if ok := caPool.AppendCertsFromPEM(caCertPEM); !ok {
+		slog.Error("unable to append ca certs")
+		os.Exit(1)
 	}
 
-	return caCertPool
-}
-
-func loggingMiddleware(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rec := &statusRecorder{ResponseWriter: w}
-		h.ServeHTTP(rec, r)
-		attrs := []slog.Attr{
-			slog.String("remoteIP", r.RemoteAddr),
-			slog.String("host", r.Host),
-			slog.String("request", r.RequestURI),
-			slog.String("query", r.URL.RawQuery),
-			slog.String("method", r.Method),
-			slog.String("status", fmt.Sprintf("%d", rec.status)),
-			slog.String("userAgent", r.UserAgent()),
-			slog.String("referer", r.Referer()),
-		}
-		if _, ok := h.(*httputil.ReverseProxy); ok {
-			h.(*httputil.ReverseProxy).Director(r)
-			attrs = append(attrs, slog.String("target", fmt.Sprintf("proxy:%s", r.URL.String())))
-		}
-		slog.LogAttrs(r.Context(), slog.LevelInfo, "access log", attrs...)
-	})
-}
-
-func setCustomHeaders(req *http.Request, target *url.URL) {
-	req.Header.Set("X-Forwarded-Proto", "https") // Adjust to "https" if using HTTPS
-	req.Header.Set("Host", req.Host)
-	req.Header.Set("X-Real-IP", getRemoteIP(req))
-	req.Header.Set("X-Forwarded-For", getForwardedFor(req))
-
-	// Extract and set the client's certificate and DN
-	if len(req.TLS.PeerCertificates) > 0 {
-		// The TLS Block Ensures that the correct ordering has taken place and that the leaf certificate will be at block 0
-		clientCert := req.TLS.PeerCertificates[0]
-		certPEM := pem.EncodeToMemory(&pem.Block{
-			Type:  "CERTIFICATE",
-			Bytes: clientCert.Raw,
-		})
-		// Base64 encode the certificate to ensure it's valid for HTTP headers
-		certPEMString := strings.ReplaceAll(string(certPEM), "\n", " ")
-		req.Header.Set("BANK-TLS-Certificate", string(certPEMString))
-		req.Header.Set("X-BANK-Certificate-DN", clientCert.Subject.String())
-		req.Header.Set("X-BANK-Certificate-Verify", "SUCCESS")
-	}
-
-	req.URL.Scheme = target.Scheme
-	req.URL.Host = target.Host
-	req.URL.Path = singleJoiningSlash(target.Path, req.URL.Path)
-	if target.RawQuery == "" || req.URL.RawQuery == "" {
-		req.URL.RawQuery = target.RawQuery + req.URL.RawQuery
-	} else {
-		req.URL.RawQuery = target.RawQuery + "&" + req.URL.RawQuery
-	}
-	if _, ok := req.Header["User-Agent"]; !ok {
-		// explicitly disable User-Agent so it's not set to default value
-		req.Header.Set("User-Agent", "")
-	}
-}
-
-func getRemoteIP(req *http.Request) string {
-	ip, _, err := net.SplitHostPort(req.RemoteAddr)
-	if err != nil {
-		return ""
-	}
-	return ip
-}
-
-func getForwardedFor(req *http.Request) string {
-	forwardedFor := req.Header.Get("X-Forwarded-For")
-	if forwardedFor != "" {
-		return forwardedFor + ", " + getRemoteIP(req)
-	}
-	return getRemoteIP(req)
-}
-
-func enforceAccessTokenMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		accessToken := getAccessToken(r)
-		if accessToken == "" {
-			slog.Error("No Authorization header, returning 401")
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		if !introspectAndAddHeaders(r, accessToken) {
-			slog.Error("Introspection failed, returning 401")
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
-}
-
-func getAccessToken(req *http.Request) string {
-	authHeader := req.Header.Get("Authorization")
-	if authHeader == "" {
-		authHeader = req.Header.Get("authorization")
-	}
-	if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
-		return strings.TrimPrefix(authHeader, "Bearer ")
-	}
-	return ""
-}
-
-func introspectAndAddHeaders(req *http.Request, token string) bool {
-	introspectionURL := "http://auth:3000/token/introspection"
-	clientID := "client"
-	clientSecret := "1234"
-
-	data := url.Values{}
-	data.Set("token", token)
-
-	client := &http.Client{}
-	introspectionReq, err := http.NewRequest("POST", introspectionURL, strings.NewReader(data.Encode()))
-	if err != nil {
-		slog.Error("Failed to create introspection request", slog.String("error", err.Error()))
-		return false
-	}
-
-	introspectionReq.SetBasicAuth(clientID, clientSecret)
-	introspectionReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	resp, err := client.Do(introspectionReq)
-	if err != nil {
-		slog.Error("Failed to introspect token", slog.String("error", err.Error()))
-		return false
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		slog.Error("Token introspection returned non-200 status", slog.String("status", resp.Status))
-		return false
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		slog.Error("Failed to read introspection response body", slog.String("error", err.Error()))
-		return false
-	}
-
-	var introspectionResponse map[string]interface{}
-	if err := json.Unmarshal(body, &introspectionResponse); err != nil {
-		slog.Error("Failed to unmarshal introspection response", slog.String("error", err.Error()))
-		return false
-	}
-
-	slog.Info("Introspection response", slog.Any("response", introspectionResponse))
-
-	if active, ok := introspectionResponse["active"].(bool); !ok || !active {
-		slog.Error("Token is not active")
-		return false
-	}
-
-	// Check x5t#S256 against client certificate's SHA-256 thumbprint
-	if cnf, ok := introspectionResponse["cnf"].(map[string]interface{}); ok {
-		if x5tS256, ok := cnf["x5t#S256"].(string); ok {
-			if !verifyCertificateThumbprint(req, x5tS256) {
-				slog.Error("Client certificate thumbprint verification failed")
-				return false
-			}
-		}
-	}
-
-	// Base64 encode the introspection response and set as header
-	introspectionResponseBase64 := base64.StdEncoding.EncodeToString(body)
-	req.Header.Set("X-Introspection-Response", introspectionResponseBase64)
-	//To be compliant with the lambda - to be removed
-	req.Header.Set("access_token", string(body))
-
-	// Check for 'sub' property and fetch user info if present
-	if _, ok := introspectionResponse["sub"].(string); ok {
-		fetchAndAddUserInfo(req, token)
-	}
-
-	return true
-}
-
-func fetchAndAddUserInfo(req *http.Request, token string) {
-	userInfoURL := "http://auth/me"
-
-	client := &http.Client{}
-	userInfoReq, err := http.NewRequest("GET", userInfoURL, nil)
-	if err != nil {
-		slog.Error("Failed to create user info request", slog.String("error", err.Error()))
-		return
-	}
-
-	userInfoReq.Header.Set("Authorization", "Bearer "+token)
-
-	resp, err := client.Do(userInfoReq)
-	if err != nil {
-		slog.Error("Failed to fetch user info", slog.String("error", err.Error()))
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		slog.Error("User info request returned non-200 status", slog.String("status", resp.Status))
-		return
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		slog.Error("Failed to read user info response body", slog.String("error", err.Error()))
-		return
-	}
-
-	// Base64 encode the user info response and set as header
-	userInfoResponseBase64 := base64.StdEncoding.EncodeToString(body)
-	req.Header.Set("X-User-Info-Response", userInfoResponseBase64)
-}
-
-func verifyCertificateThumbprint(req *http.Request, x5tS256 string) bool {
-	if len(req.TLS.PeerCertificates) == 0 {
-		return false
-	}
-
-	clientCert := req.TLS.PeerCertificates[0]
-	hash := sha256.Sum256(clientCert.Raw)
-	certThumbprint := base64.RawURLEncoding.EncodeToString(hash[:])
-
-	return certThumbprint == x5tS256
-}
-
-func logger() *slog.Logger {
-	opts := &slog.HandlerOptions{
-		Level: slog.LevelDebug,
-	}
-	handler := slog.NewJSONHandler(os.Stdout, opts)
-
-	return slog.New(handler)
-}
-
-type statusRecorder struct {
-	http.ResponseWriter
-	status int
-}
-
-func (rec *statusRecorder) WriteHeader(code int) {
-	rec.status = code
-	rec.ResponseWriter.WriteHeader(code)
-}
-
-func singleJoiningSlash(a, b string) string {
-	if a == "" || b == "" {
-		return a + b
-	}
-	aslash := a[len(a)-1] == '/'
-	bslash := b[0] == '/'
-	switch {
-	case aslash && bslash:
-		return a + b[1:]
-	case !aslash && !bslash:
-		return a + "/" + b
-	}
-	return a + b
-}
-
-func signSsa(ss map[string]any) []byte {
-
-	now := time.Now().Unix()
-	ss["iat"] = now
-	ss["exp"] = now + 3600
-	ssa, _ := json.Marshal(ss)
-
-	headers := jws.NewHeaders()
-	_ = headers.Set(jws.TypeKey, "JWT")
-
-	signed, err := jws.Sign(ssa, jws.WithKey(jwa.PS256(), ssaJWK, jws.WithProtectedHeaders(headers)))
-	if err != nil {
-		log.Fatalf("Erro ao assinar os dados: %v", err)
-	}
-
-	return signed
+	return caPool
 }

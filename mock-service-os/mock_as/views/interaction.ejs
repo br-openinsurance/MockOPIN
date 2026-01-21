@@ -1,6 +1,3 @@
-<% let isConsent = !!(details.consent.consentId || details.consent.recurringConsentId); %>
-<% let isEnrollment = !!(details.consent.enrollmentId); %>
-
 <h1 class="text-[24px] font-semibold text-gray-800 mb-4 text-left">
   Authorize the information below
 </h1>
@@ -9,9 +6,7 @@
   Before proceeding, we need to confirm some information:
 </p>
 
-<% if (isConsent) { %>
-  <h2 class="font-semibold text-gray-800 mb-2">Data that will be consented</h2>
-<% } %>
+<h2 class="font-semibold text-gray-800 mb-2">Data that will be consented</h2>
 
 <form id="consentForm" method="POST" action="/interaction/<%= uid %>/confirm">
   <% missingOIDCScope = new Set(details.scopes); %>
@@ -29,7 +24,7 @@
             <div class="flex items-center space-x-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="toggle-icon h-5 w-5 text-gray-600 transition-transform transform rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>              
+              </svg>
               <span class="text-gray-800 font-medium pl-4">
                 <%= scope.scope.replace(/-/g, ' ').toUpperCase() %>
               </span>
@@ -53,89 +48,9 @@
 
           <!-- Scope details -->
           <div id="details-<%= scope.scope %>" class="hidden mt-3">
-            <!-- ACCOUNTS SCOPE -->
-            <% if (scope.scope === 'accounts') { %>
-              <ul class="mt-2 space-y-2">
-                <% accounts = new Set(scope.accounts); %>
-                <% accounts.forEach((account) => { %>
-                  <li class="flex justify-between items-center py-2 border-b border-gray-200">
-                    <div>
-                      <p class="text-gray-700 font-medium pl-[44px]">Selectable Account:</p>
-                      <p class="text-gray-600 text-sm pl-[44px]"><%= account.number %></p>
-                    </div>
-                    <!-- Toggle for account -->
-                    <label class="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        class="sr-only peer"
-                        checked
-                        data-scope="accounts" 
-                        data-accounts-id="<%= account.accountId %>"
-                      />
-                      <div
-                        class="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-[#147d9666]
-                        peer-checked:after:translate-x-full after:content-[''] after:absolute
-                        after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300
-                        after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
-                      ></div>
-                    </label>
-
-                    <input
-                      type="hidden"
-                      name="accounts-accounts"
-                      value="<%= account.accountId %>"
-                    />
-                  </li>
-                <% }) %>
-              </ul>
-            <% } %>
-
-            <!-- PAYMENTS SCOPE -->
-            <% if (scope.scope === 'payments') { %>
-              <ul class="mt-2 space-y-2">
-                <% accounts = new Set(scope.accounts); %>
-                <% accounts.forEach((account) => { %>
-                  <li class="flex justify-between items-center py-2 border-b border-gray-200">
-                    <div>
-                      <p class="text-gray-700 font-medium pl-[44px]">Selectable Account:</p>
-                      <p class="text-gray-600 text-sm pl-[44px]"><%= account.number %></p>
-                    </div>
-                    <!-- Toggle for payments account -->
-                    <label class="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        class="sr-only peer"
-                        checked
-                        data-scope="payments"
-                        data-payments-number="<%= account.number %>"
-                        data-payments-branch="<%= account.branchCode %>"
-                      />
-                      <div
-                        class="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-[#147d9666]
-                        peer-checked:after:translate-x-full after:content-[''] after:absolute
-                        after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300
-                        after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
-                      ></div>
-                    </label>
-
-                    <!-- need to send branch to? -->
-                    <input
-                      type="hidden"
-                      name="payments-accounts"
-                      value="<%= account.number %>"
-                    />
-                    <input
-                      type="hidden"
-                      name="payments-accounts-branch"
-                      value="<%= account.branchCode %>"
-                    />
-                  </li>
-                <% }) %>
-              </ul>
-            <% } %>
 
             <!-- LOANS, FINANCINGS, ETC. -->
-            <% if (['loans', 'financings', 'invoice-financings', 'unarranged-accounts-overdraft',
+            <% if (['loans', 'financings', 'invoice-financings', 'unarranged-accounts-overdraft', 'exchanges',
               'capitalization-title', 'life-pension', 'pension-plan', 'insurance-acceptance-and-branches-abroad', 'financial-risk', 'housing', 'responsibility', 'person',
               'financial-assistance', 'auto', 'patrimonial', 'rural', 'transport'].includes(scope.scope)) { %>
               <ul class="mt-2 space-y-2">
@@ -174,63 +89,17 @@
               </ul>
             <% } %>
 
-            <!-- CREDIT CARDS -->
-            <% if (scope.scope === 'credit-cards-accounts') { %>
-              <ul class="mt-2 space-y-2">
-                <% accounts = new Set(scope.accounts); %>
-                <% accounts.forEach((account) => { %>
-                  <li class="flex justify-between items-center py-2 border-b border-gray-200">
-                    <div>
-                      <p class="text-gray-700 font-medium pl-[44px]">Selectable Account:</p>
-                      <p class="text-gray-600 text-sm pl-[44px]"><%= account.name %></p>
-                    </div>
-                    <!-- Toggle for credit card account -->
-                    <label class="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        class="sr-only peer"
-                        checked
-                        data-scope="credit-cards-accounts"
-                        data-creditcard-id="<%= account.creditCardAccountId %>"
-                      />
-                      <div
-                        class="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-[#147d9666]
-                        peer-checked:after:translate-x-full after:content-[''] after:absolute
-                        after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300
-                        after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
-                      ></div>
-                    </label>
-
-                    <input
-                      type="hidden"
-                      name="credit-cards-accounts"
-                      value="<%= account.creditCardAccountId %>"
-                    />
-                  </li>
-                <% }) %>
-              </ul>
-            <% } %>
-
           </div>
         </li>
       <% }) %>
     </ul>
   <% } %>
 
-  <% if (isConsent) { %>
-    <div class="bg-gray-100 p-4 rounded-lg shadow-md mt-4">
-      <h3 class="font-semibold text-gray-800">Consent Status:</h3>
-      <p class="text-gray-600 text-sm"><strong>Status:</strong> <%= details.consent.status %></p>
-      <p class="text-gray-600 text-sm"><strong>Expiration Date:</strong> <%= details.consent.expirationDateTime %></p>
-    </div>
-  <% } %>
-  <% if (isEnrollment) { %>
-    <div class="bg-gray-100 p-4 rounded-lg shadow-md mt-4">
-      <h3 class="font-semibold text-gray-800">Enrollment Status:</h3>
-      <p class="text-gray-600 text-sm"><strong>Status:</strong> <%= details.consent.status %></p>
-      <p class="text-gray-600 text-sm"><strong>Expiration Date:</strong> <%= details.consent.expirationDateTime %></p>
-    </div>
-  <% } %>
+  <div class="bg-gray-100 p-4 rounded-lg shadow-md mt-4">
+    <h3 class="font-semibold text-gray-800">Consent Status:</h3>
+    <p class="text-gray-600 text-sm"><strong>Status:</strong> <%= details.consent.status %></p>
+    <p class="text-gray-600 text-sm"><strong>Expiration Date:</strong> <%= details.consent.expirationDateTime %></p>
+  </div>
 
   <div class="flex justify-between items-center mt-6">
     <span class="text-gray-700 text-sm">I consent to the above data.</span>
@@ -250,10 +119,19 @@
 
   <button
     type="submit"
+    formaction="/interaction/<%= uid %>/abort"
+    id="cancel-button"
+    formmethod="get"
+    class="w-full bg-gray-300 text-gray-500 h-[50px] py-2 mt-4 transition hover:bg-gray-300"
+  >
+    Cancel
+  </button>
+  <button
+    type="submit"
     id="continue-button"
     class="w-full bg-gray-300 text-gray-500 h-[50px] py-2 mt-4 transition hover:bg-gray-300 cursor-not-allowed"
     disabled
   >
-    Continue
+    Confirm Consent
   </button>
 </form>

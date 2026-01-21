@@ -44,33 +44,3 @@ task checkSize {
     }
     onlyIf { !isTestMode }
 }
-
-task packageLayer(type: Zip) {
-    destinationDirectory = file("$buildDir/dists")
-    archiveClassifier = 'layer'
-
-    from file('node_modules')
-    into 'nodejs/node_modules'
-}
-
-task packageAssets(type: Zip) {
-    destinationDirectory = file("$buildDir/dists")
-    archiveClassifier = 'ui'
-
-    from("public")
-}
-
-task packageApp(type: Zip) {
-    destinationDirectory = file("$buildDir/dists")
-    
-    from('utils'){
-        into 'utils'
-    }
-    from('views'){
-        into 'views'
-    }
-    
-    from file('lambda.js')
-    from file('express.js')
-    from file('package.json')
-}

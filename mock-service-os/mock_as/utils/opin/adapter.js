@@ -117,6 +117,7 @@ export class InsurerAdapter {
       'LIFE_PENSION_PORTABILITIES_READ',
       'LIFE_PENSION_WITHDRAWALS_READ',
       'LIFE_PENSION_CLAIM',
+      'LIFE_PENSION_CLAIM_READ',
     ];
     hasPermission = consentRecord.permissions.some((i) => lifePensionPermissions.includes(i));
     if (hasPermission) {
@@ -131,6 +132,7 @@ export class InsurerAdapter {
       'PENSION_PLAN_PORTABILITIES_READ',
       'PENSION_PLAN_WITHDRAWALS_READ',
       'PENSION_PLAN_CLAIM',
+      'PENSION_PLAN_CLAIM_READ',
     ];
     hasPermission = consentRecord.permissions.some((i) => pensionPlanPermissions.includes(i));
     if (hasPermission) {
