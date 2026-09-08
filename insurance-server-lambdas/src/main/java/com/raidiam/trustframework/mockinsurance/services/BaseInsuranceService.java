@@ -46,6 +46,18 @@ abstract class BaseInsuranceService {
     PatrimonialClaimRepository patrimonialClaimRepository;
 
     @Inject
+    PatrimonialInsuredObjectRepository patrimonialInsuredObjectRepository;
+
+    @Inject
+    PatrimonialInsuredObjectCoverageRepository patrimonialInsuredObjectCoverageRepository;
+
+    @Inject
+    PatrimonialPremiumRepository patrimonialPremiumRepository;
+
+    @Inject
+    PatrimonialPremiumCoverageRepository patrimonialPremiumCoverageRepository;
+
+    @Inject
     ConsentRuralPolicyRepository consentRuralPolicyRepository;
 
     @Inject
@@ -232,19 +244,43 @@ abstract class BaseInsuranceService {
     PersonPolicyPremiumRepository personPolicyPremiumRepository;
 
     @Inject
+    PersonPolicyInsuredObjectRepository personPolicyInsuredObjectRepository;
+
+    @Inject
+    PersonPolicyInsuredObjectCoverageRepository personPolicyInsuredObjectCoverageRepository;
+
+    @Inject
+    PersonPolicyPremiumCoverageRepository personPolicyPremiumCoverageRepository;
+
+    @Inject
+    PersonPolicyClaimCoverageRepository personPolicyClaimCoverageRepository;
+
+    @Inject
     ConsentPersonPolicyRepository consentPersonPolicyRepository;
 
     @Inject
     LifePensionContractRepository lifePensionContractRepository;
 
     @Inject
+    LifePensionContractSusepRepository lifePensionContractSusepRepository;
+
+    @Inject
+    LifePensionContractSusepFIERepository lifePensionContractSusepFIERepository;
+
+    @Inject
     LifePensionContractWithdrawalRepository lifePensionContractWithdrawalRepository;
+
+    @Inject
+    LifePensionContractWithdrawalFIERepository lifePensionContractWithdrawalFIERepository;
 
     @Inject
     LifePensionContractClaimRepository lifePensionContractClaimRepository;
 
     @Inject
     LifePensionContractPortabilityRepository lifePensionContractPortabilityRepository;
+
+    @Inject
+    LifePensionContractPortabilityFIERepository lifePensionContractPortabilityFIERepository;
 
     @Inject
     LifePensionContractMovementBenefitRepository lifePensionContractMovementBenefitRepository;
@@ -269,6 +305,15 @@ abstract class BaseInsuranceService {
 
     @Inject
     PensionPlanContractMovementContributionRepository pensionPlanContractMovementContributionRepository;
+
+    @Inject
+    PensionPlanContractDocumentRepository pensionPlanContractDocumentRepository;
+
+    @Inject
+    PensionPlanContractDocumentInsuredRepository pensionPlanContractDocumentInsuredRepository;
+
+    @Inject
+    PensionPlanContractDocumentCoverageRepository pensionPlanContractDocumentCoverageRepository;
 
     @Inject
     ConsentPensionPlanContractRepository consentPensionPlanContractRepository;
@@ -320,6 +365,15 @@ abstract class BaseInsuranceService {
 
     @Inject
     DynamicFieldsRepository dynamicFieldsRepository;
+
+    @Inject
+    WithdrawalPensionRepository withdrawalPensionRepository;
+
+    @Inject
+    WithdrawalPensionLeadRepository withdrawalPensionLeadRepository;
+
+    @Inject
+    WithdrawalCapitalizationTitleRepository withdrawalCapitalizationTitleRepository;
 
     @Inject
     WebhookRepository webhookRepository;

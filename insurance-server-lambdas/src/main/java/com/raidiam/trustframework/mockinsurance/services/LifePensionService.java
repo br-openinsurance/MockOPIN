@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 
 import java.util.List;
@@ -21,39 +22,43 @@ public class LifePensionService extends BaseInsuranceService {
 
     private static final Logger LOG = LoggerFactory.getLogger(LifePensionService.class);
 
-    private List<LifePensionContractEntity> getlLifePensionContractEntities(Pageable pageable, String consentId) {
+    private Page<LifePensionContractEntity> getlLifePensionContractEntities(Pageable pageable, String consentId) {
         LOG.info("Getting Personal Customers Identification response for consent id {}", consentId);
-    
+
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
-    
+
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
         InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.LIFE_PENSION_READ, EnumConsentV3Permission.LIFE_PENSION_READ);
-    
-        return lifePensionContractRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable).getContent();
+
+        return lifePensionContractRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable);
     }
 
     public ResponseInsuranceLifePension getContracts(Pageable pageable, String consentId) {
         var contracts = getlLifePensionContractEntities(pageable, consentId);
-        return new ResponseInsuranceLifePension()
+        var response = new ResponseInsuranceLifePension()
                 .data(List.of(new ResponseInsuranceLifePensionData()
                         .brand(new ResponseInsuranceLifePensionBrand()
                                 .name("Mock")
                                 .companies(List.of(new ResponseInsuranceLifePensionBrandCompanies()
                                         .companyName("Mock Insurer")
                                         .cnpjNumber("12345678901234")
-                                        .contracts(contracts.stream().map(LifePensionContractEntity::mapContractDTO).toList()))))));
+                                        .contracts(contracts.getContent().stream().map(LifePensionContractEntity::mapContractDTO).toList()))))));
+        response.setMeta(InsuranceLambdaUtils.getMeta(contracts, false));
+        return response;
     }
 
     public ResponseInsuranceLifePensionV2 getContractsV2(Pageable pageable, String consentId) {
         var contracts = getlLifePensionContractEntities(pageable, consentId);
-        return new ResponseInsuranceLifePensionV2()
+        var response = new ResponseInsuranceLifePensionV2()
                 .data(List.of(new ResponseInsuranceLifePensionV2Data()
                         .brand(new ResponseInsuranceLifePensionV2Brand()
                                 .name("Mock")
                                 .companies(List.of(new ResponseInsuranceLifePensionV2BrandCompanies()
                                         .companyName("Mock Insurer")
                                         .cnpjNumber("12345678901234")
-                                        .contracts(contracts.stream().map(LifePensionContractEntity::mapContractDTO).toList()))))));
+                                        .contracts(contracts.getContent().stream().map(LifePensionContractEntity::mapContractDTO).toList()))))));
+        response.setMeta(InsuranceLambdaUtils.getMeta(contracts, false));
+        return response;
     }
 
     private LifePensionContractEntity getContract(UUID certificateId, String consentId, EnumConsentPermission permission, EnumConsentV3Permission permissionV3) {

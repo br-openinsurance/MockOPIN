@@ -129,6 +129,7 @@ public enum PermissionV3Phase {
             EnumConsentV3Permission.CONTRACT_LIFE_PENSION_LEAD_UPDATE,
             EnumConsentV3Permission.CONTRACT_LIFE_PENSION_LEAD_PORTABILITY_CREATE,
             EnumConsentV3Permission.CONTRACT_LIFE_PENSION_LEAD_PORTABILITY_UPDATE,
+            EnumConsentV3Permission.PENSION_WITHDRAWAL_LEAD_CREATE,
             EnumConsentV3Permission.PENSION_WITHDRAWAL_CREATE,
             EnumConsentV3Permission.CAPITALIZATION_TITLE_WITHDRAWAL_CREATE
     ));

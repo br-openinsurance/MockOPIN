@@ -135,6 +135,12 @@ class CleanupSpecification extends Specification {
     LifePensionContractRepository lifePensionContractRepository
 
     @Inject
+    LifePensionContractSusepRepository lifePensionContractSusepRepository
+
+    @Inject
+    LifePensionContractSusepFIERepository lifePensionContractSusepFIERepository
+
+    @Inject
     ConsentLifePensionContractRepository consentLifePensionContractRepository
 
     @Inject
@@ -144,7 +150,13 @@ class CleanupSpecification extends Specification {
     LifePensionContractPortabilityRepository lifePensionContractPortabilityRepository
 
     @Inject
+    LifePensionContractPortabilityFIERepository lifePensionContractPortabilityFIERepository
+
+    @Inject
     LifePensionContractWithdrawalRepository lifePensionContractWithdrawalRepository
+
+    @Inject
+    LifePensionContractWithdrawalFIERepository lifePensionContractWithdrawalFIERepository
 
     @Inject
     LifePensionContractMovementBenefitRepository lifePensionContractMovementBenefitRepository
@@ -174,6 +186,15 @@ class CleanupSpecification extends Specification {
     PensionPlanContractMovementContributionRepository pensionPlanContractMovementContributionRepository
 
     @Inject
+    PensionPlanContractDocumentRepository pensionPlanContractDocumentRepository
+
+    @Inject
+    PensionPlanContractDocumentInsuredRepository pensionPlanContractDocumentInsuredRepository
+
+    @Inject
+    PensionPlanContractDocumentCoverageRepository pensionPlanContractDocumentCoverageRepository
+
+    @Inject
     AcceptanceAndBranchesAbroadPolicyRepository acceptanceAndBranchesAbroadPolicyRepository
 
     @Inject
@@ -190,6 +211,24 @@ class CleanupSpecification extends Specification {
 
     @Inject
     ConsentPatrimonialPolicyRepository consentPatrimonialPolicyRepository
+
+    @Inject
+    PersonalInfoRepository personalInfoRepository
+
+    @Inject
+    PatrimonialInsuredObjectRepository patrimonialInsuredObjectRepository
+
+    @Inject
+    PatrimonialInsuredObjectCoverageRepository patrimonialInsuredObjectCoverageRepository
+
+    @Inject
+    PatrimonialPremiumRepository patrimonialPremiumRepository
+
+    @Inject
+    PatrimonialPremiumCoverageRepository patrimonialPremiumCoverageRepository
+
+    @Inject
+    PaymentRepository paymentRepository
 
     @Inject
     AutoPolicyRepository autoPolicyRepository
@@ -232,6 +271,15 @@ class CleanupSpecification extends Specification {
 
     @Inject
     ConsentRuralPolicyRepository consentRuralPolicyRepository
+
+    @Inject
+    WithdrawalPensionRepository withdrawalPensionRepository
+
+    @Inject
+    WithdrawalPensionLeadRepository withdrawalPensionLeadRepository
+
+    @Inject
+    WithdrawalCapitalizationTitleRepository withdrawalCapitalizationTitleRepository
 
     @Inject
     WebhookRepository webhookRepository
@@ -290,6 +338,10 @@ class CleanupSpecification extends Specification {
             consentPersonPolicyRepository.deleteAll()
             personPolicyClaimRepository.deleteAll()
             personPolicyPremiumRepository.deleteAll()
+            lifePensionContractPortabilityFIERepository.deleteAll()
+            lifePensionContractWithdrawalFIERepository.deleteAll()
+            lifePensionContractSusepFIERepository.deleteAll()
+            lifePensionContractSusepRepository.deleteAll()
             lifePensionContractPortabilityRepository.deleteAll()
             lifePensionContractMovementBenefitRepository.deleteAll()
             lifePensionContractClaimRepository.deleteAll()
@@ -297,9 +349,15 @@ class CleanupSpecification extends Specification {
             acceptanceAndBranchesAbroadPolicyRepository.deleteAll()
             acceptanceAndBranchesAbroadClaimRepository.deleteAll()
             consentAcceptanceAndBranchesAbroadPolicyRepository.deleteAll()
+            patrimonialInsuredObjectCoverageRepository.deleteAll()
+            patrimonialInsuredObjectRepository.deleteAll()
+            patrimonialPremiumCoverageRepository.deleteAll()
+            patrimonialPremiumRepository.deleteAll()
             patrimonialPolicyRepository.deleteAll()
             patrimonialClaimRepository.deleteAll()
             consentPatrimonialPolicyRepository.deleteAll()
+            personalInfoRepository.deleteAll()
+            paymentRepository.deleteAll()
             autoPolicyRepository.deleteAll()
             autoPolicyClaimRepository.deleteAll()
             consentAutoPolicyRepository.deleteAll()
@@ -308,6 +366,9 @@ class CleanupSpecification extends Specification {
             pensionPlanContractClaimRepository.deleteAll()
             pensionPlanContractMovementContributionRepository.deleteAll()
             pensionPlanContractWithdrawalRepository.deleteAll()
+            pensionPlanContractDocumentCoverageRepository.deleteAll()
+            pensionPlanContractDocumentInsuredRepository.deleteAll()
+            pensionPlanContractDocumentRepository.deleteAll()
             consentPensionPlanContractRepository.deleteAll()
             transportPolicyRepository.deleteAll()
             transportPolicyClaimRepository.deleteAll()
@@ -320,6 +381,9 @@ class CleanupSpecification extends Specification {
             consentFinancialRiskPolicyRepository.deleteAll()
             ruralPolicyRepository.deleteAll()
             consentRuralPolicyRepository.deleteAll()
+            withdrawalPensionRepository.deleteAll()
+            withdrawalPensionLeadRepository.deleteAll()
+            withdrawalCapitalizationTitleRepository.deleteAll()
             overrideResponseRepository.deleteAll()
             runCleanup = false
             runSetup = true

@@ -76,7 +76,7 @@ public class DeductibleEntity extends BaseIdEntity {
                         .currency(AmountDetails.CurrencyEnum.fromValue(this.getCurrency())))
                 .period(this.getPeriod())
                 .periodicity(Deductible.PeriodicityEnum.fromValue(this.getPeriodicity()))
-                .periodCountingMethod(Deductible.PeriodCountingMethodEnum.valueOf(this.getPeriodCountingMethod()))
+                .periodCountingMethod(Deductible.PeriodCountingMethodEnum.fromValue(this.getPeriodCountingMethod()))
                 .periodStartDate(this.getPeriodStartDate())
                 .periodEndDate(this.getPeriodEndDate())
                 .description(this.getDescription());
@@ -96,7 +96,7 @@ public class DeductibleEntity extends BaseIdEntity {
                         .currency(AmountDetails.CurrencyEnum.fromValue(this.getCurrency())))
                 .period(this.getPeriod())
                 .periodicity(DeductibleV2.PeriodicityEnum.fromValue(this.getPeriodicity()))
-                .periodCountingMethod(DeductibleV2.PeriodCountingMethodEnum.valueOf(this.getPeriodCountingMethod()))
+                .periodCountingMethod(DeductibleV2.PeriodCountingMethodEnum.fromValue(this.getPeriodCountingMethod()))
                 .periodStartDate(this.getPeriodStartDate())
                 .periodEndDate(this.getPeriodEndDate())
                 .description(this.getDescription());

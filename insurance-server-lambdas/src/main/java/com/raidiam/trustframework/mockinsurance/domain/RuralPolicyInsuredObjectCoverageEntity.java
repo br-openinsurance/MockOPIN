@@ -128,7 +128,7 @@ public class RuralPolicyInsuredObjectCoverageEntity extends BaseEntity {
             .type(InsuranceRuralInsuredObjectCoverage.TypeEnum.valueOf(this.getType()))
             .gracePeriod(this.getGracePeriod())
             .gracePeriodicity(InsuranceRuralInsuredObjectCoverage.GracePeriodicityEnum.valueOf(this.getGracePeriodicity()))
-            .gracePeriodCountingMethod(InsuranceRuralInsuredObjectCoverage.GracePeriodCountingMethodEnum.valueOf(this.getGracePeriodCountingMethod()))
+            .gracePeriodCountingMethod(InsuranceRuralInsuredObjectCoverage.GracePeriodCountingMethodEnum.fromValue(this.getGracePeriodCountingMethod()))
             .gracePeriodStartDate(this.getGracePeriodStartDate())
             .gracePeriodEndDate(this.getGracePeriodEndDate())
             .premiumPeriodicity(InsuranceRuralInsuredObjectCoverage.PremiumPeriodicityEnum.valueOf(this.getPremiumPeriodicity()))

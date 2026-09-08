@@ -2,7 +2,7 @@ import Debug from 'debug';
 
 const log = Debug('raidiam:server:info');
 
-function getDynamicScopeIdFromArray(scopes, dynamicScopePrefix) {
+function getDynamicScopeFromArray(scopes, dynamicScopePrefix) {
   // eslint-disable-next-line no-shadow
   const result = scopes.filter((s) => {
     if (s.name && s.name.startsWith(dynamicScopePrefix)) return true;
@@ -13,14 +13,12 @@ function getDynamicScopeIdFromArray(scopes, dynamicScopePrefix) {
     return undefined;
   }
 
-  return result[0].name
-    ? result[0].name.split(`${dynamicScopePrefix}`)[1]
-    : result[0].split(`${dynamicScopePrefix}`)[1];
+  return result[0].name ? result[0].name : result[0];
 }
 
-function getDynamicScopeIdFromString(scopes, dynamicScopePrefix) {
+function getDynamicScopeFromString(scopes, dynamicScopePrefix) {
   const result = scopes.split(' ').filter((s) => s.startsWith(dynamicScopePrefix));
-  return result.length > 0 ? result[0].split(`${dynamicScopePrefix}`)[1] : undefined;
+  return result.length > 0 ? result[0] : undefined;
 }
 
 // Test if a variable is a string
@@ -28,11 +26,11 @@ function isString(variable) {
   return typeof variable === 'string';
 }
 
-export function getDynamicScopeId(scopes, dynamicScopePrefix) {
+export function getDynamicScope(scopes, dynamicScopePrefix) {
   if (Array.isArray(scopes)) {
-    return getDynamicScopeIdFromArray(scopes, dynamicScopePrefix);
+    return getDynamicScopeFromArray(scopes, dynamicScopePrefix);
   } else if (isString(scopes)) {
-    return getDynamicScopeIdFromString(scopes, dynamicScopePrefix);
+    return getDynamicScopeFromString(scopes, dynamicScopePrefix);
   }
 }
 

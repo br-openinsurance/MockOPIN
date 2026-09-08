@@ -110,8 +110,8 @@ class ClaimNotificationDamageServiceSpec extends CleanupSpecification {
 
         then:
         def e2 = thrown(HttpStatusException)
-        e2.status == HttpStatus.FORBIDDEN
-        e2.getMessage() == "NAO_INFORMADO: consent is not authorised"
+        e2.status == HttpStatus.UNAUTHORIZED
+        e2.getMessage() == "consent is not authorised"
     }
 
     def "We can't create a claim notification with null policyId if documentType is APOLICE_INDIVIDUAL" () {
@@ -168,8 +168,8 @@ class ClaimNotificationDamageServiceSpec extends CleanupSpecification {
 
         then:
         def e2 = thrown(HttpStatusException)
-        e2.status == HttpStatus.FORBIDDEN
-        e2.getMessage() == "NAO_INFORMADO: consent is not authorised"
+        e2.status == HttpStatus.UNAUTHORIZED
+        e2.getMessage() == "consent is not authorised"
     }
 
     def "We can't create a claim notification with null groupCertificateId if documentType is CERTIFICADO" () {
@@ -272,8 +272,8 @@ class ClaimNotificationDamageServiceSpec extends CleanupSpecification {
 
         then:
         def e2 = thrown(HttpStatusException)
-        e2.status == HttpStatus.FORBIDDEN
-        e2.getMessage() == "NAO_INFORMADO: consent is not authorised"
+        e2.status == HttpStatus.UNAUTHORIZED
+        e2.getMessage() == "consent is not authorised"
     }
 
     def "We can't create a claim notification without a consentId"() {
@@ -309,7 +309,7 @@ class ClaimNotificationDamageServiceSpec extends CleanupSpecification {
 
         then:
         def e = thrown(HttpStatusException)
-        e.status == HttpStatus.FORBIDDEN
+        e.status == HttpStatus.UNAUTHORIZED
     }
 
     def "We can't create a claim notification with a consent that's awaiting authorisation"() {
@@ -332,7 +332,7 @@ class ClaimNotificationDamageServiceSpec extends CleanupSpecification {
 
         then:
         def e = thrown(HttpStatusException)
-        e.status == HttpStatus.FORBIDDEN
+        e.status == HttpStatus.UNAUTHORIZED
     }
 
     def "We can't create a claim notification with a wrong clientId" () {

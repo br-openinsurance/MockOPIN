@@ -44,9 +44,17 @@ class PatrimonialServiceSpec extends CleanupSpecification {
                     EnumConsentPermission.DAMAGES_AND_PEOPLE_PATRIMONIAL_CLAIM_READ)
             testConsent.setStatus(EnumConsentStatus.AUTHORISED.toString())
             testConsent = consentRepository.save(testConsent)
-            testPatrimonialPolicy = patrimonialPolicyRepository.save(TestEntityDataFactory.aPatrimonialPolicy(testAccountHolder.getAccountHolderId(), "0111"))
+            def testInsured = personalInfoRepository.save(TestEntityDataFactory.aPolicyInsured())
+            def patrimonialPolicy = TestEntityDataFactory.aPatrimonialPolicy(testAccountHolder.getAccountHolderId(), "0111")
+            patrimonialPolicy.setInsuredIds([testInsured.getReferenceId()])
+            testPatrimonialPolicy = patrimonialPolicyRepository.save(patrimonialPolicy)
             consentPatrimonialPolicyRepository.save(new ConsentPatrimonialPolicyEntity(testConsent, testPatrimonialPolicy))
             testPatrimonialClaim = patrimonialClaimRepository.save(TestEntityDataFactory.aPatrimonialClaim(testPatrimonialPolicy.getPolicyId()))
+            def testInsuredObject = patrimonialInsuredObjectRepository.save(TestEntityDataFactory.aPatrimonialInsuredObject(testPatrimonialPolicy.getPolicyId()))
+            patrimonialInsuredObjectCoverageRepository.save(TestEntityDataFactory.aPatrimonialInsuredObjectCoverage(testInsuredObject.getPatrimonialInsuredObjectId()))
+            def testPayment = paymentRepository.save(TestEntityDataFactory.aPolicyPremiumPayment())
+            def testPremium = patrimonialPremiumRepository.save(TestEntityDataFactory.aPatrimonialPremium(testPatrimonialPolicy.getPolicyId(), [testPayment.getPaymentId()]))
+            patrimonialPremiumCoverageRepository.save(TestEntityDataFactory.aPatrimonialPremiumCoverage(testPremium.getPatrimonialPremiumId()))
             runSetup = false
         }
     }
@@ -77,6 +85,20 @@ class PatrimonialServiceSpec extends CleanupSpecification {
 
         then:
         response.getData() != null
+        response.getData().getDocumentType().toString() == "APOLICE_INDIVIDUAL"
+        response.getData().getIssuanceType().toString() == "EMISSAO_PROPRIA"
+        response.getData().getIssuanceDate().toString() == "2022-12-31"
+        response.getData().getTermStartDate().toString() == "2022-12-31"
+        response.getData().getTermEndDate().toString() == "2023-12-31"
+        response.getData().getProposalId() == "123456"
+        response.getData().getMaxLMG().getAmount() == "2000.00"
+        response.getData().getMaxLMG().getCurrency().toString() == "BRL"
+        response.getData().getMaxLMG().getUnitType() == null
+        response.getData().getInsureds().size() == 1
+        response.getData().getInsureds().first().getName() == "Nome Sobrenome"
+        response.getData().getInsuredObjects().size() == 1
+        response.getData().getInsuredObjects().first().getCoverages().size() == 1
+        response.getData().getInsuredObjects().first().getCoverages().first().getBranch() == "0114"
     }
 
     def "we can get a policy info V2" () {
@@ -85,6 +107,10 @@ class PatrimonialServiceSpec extends CleanupSpecification {
 
         then:
         response.getData() != null
+        response.getData().getInsureds().size() == 1
+        response.getData().getInsureds().first().getName() == "Nome Sobrenome"
+        response.getData().getInsuredObjects().size() == 1
+        response.getData().getInsuredObjects().first().getCoverages().size() == 1
     }
 
     def "we can get a policy's premium" () {
@@ -93,6 +119,15 @@ class PatrimonialServiceSpec extends CleanupSpecification {
 
         then:
         response.getData() != null
+        response.getData().getPaymentsQuantity() == 4
+        response.getData().getAmount().getAmount() == "2000.00"
+        response.getData().getCoverages().size() == 1
+        response.getData().getPayments().size() == 1
+        response.getData().getPayments().first().getPaymentType().toString() == "BOLETO"
+        response.getData().getPayments().first().getAmount().getAmount() == "55595"
+        response.getData().getPayments().first().getAmount().getCurrency().toString() == "BRL"
+        response.getData().getPayments().first().getAmount().getUnitType() == null
+        response.getData().getPayments().first().getAmount().getUnit() == null
     }
 
     def "we can get a policy's claims" () {

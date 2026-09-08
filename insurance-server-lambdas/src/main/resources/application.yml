@@ -35,8 +35,11 @@ datasources:
   default:
     url: ${DB_URL}
     username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    password: ${DB_PASSWORD:}
     driverClassName: ${DB_DRIVER}
+    data-source-properties:
+      wrapperDialect: ${DB_DIALECT:aurora-pg}
+      wrapperPlugins: ${DB_PLUGINS:iam}
     jdbc-interceptors: com.amazonaws.xray.sql.postgres.TracingInterceptor
     initialSize: 2
     minIdle: 2

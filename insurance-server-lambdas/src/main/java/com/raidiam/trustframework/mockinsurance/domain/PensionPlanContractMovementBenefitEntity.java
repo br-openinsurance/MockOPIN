@@ -30,6 +30,27 @@ public class PensionPlanContractMovementBenefitEntity extends BaseEntity {
     @Column(name = "pension_plan_contract_id")
     private String pensionPlanContractId;
 
+    @Column(name = "benefit_amount")
+    private String benefitAmount;
+
+    @Column(name = "benefit_unit_type")
+    private String benefitUnitType;
+
+    @Column(name = "benefit_unit_type_others")
+    private String benefitUnitTypeOthers;
+
+    @Column(name = "benefit_unit_code")
+    private String benefitUnitCode;
+
+    @Column(name = "benefit_unit_description")
+    private String benefitUnitDescription;
+
+    @Column(name = "benefit_currency")
+    private String benefitCurrency;
+
+    @Column(name = "benefit_payment_date")
+    private LocalDate benefitPaymentDate;
+
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,8 +61,8 @@ public class PensionPlanContractMovementBenefitEntity extends BaseEntity {
     public InsurancePensionPlanMovementsMovementBenefits mapDTO() {
         return new InsurancePensionPlanMovementsMovementBenefits()
                 .benefitAmount(new AmountDetails()
-                        .amount("95.90")
-                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM))
-                .benefitPaymentDate(LocalDate.of(2023, 10, 1));
+                        .amount(this.getBenefitAmount())
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getBenefitUnitType())))
+                .benefitPaymentDate(this.getBenefitPaymentDate());
     }
 }

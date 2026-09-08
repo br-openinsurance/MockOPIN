@@ -104,17 +104,46 @@ public class PatrimonialService extends BaseInsuranceService {
     
     public ResponseInsurancePatrimonialPolicyInfo getPolicyInfo(UUID policyId, String consentId) {
         LOG.info("Getting patrimonial policy info response for consent id {}", consentId);
-        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_PATRIMONIAL_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PATRIMONIAL_POLICYINFO_READ).mapPolicyInfoDto();
+        var policy = getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_PATRIMONIAL_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PATRIMONIAL_POLICYINFO_READ);
+        var response = policy.mapPolicyInfoDto();
+
+        policy.getInsuredIds().forEach(insuredId -> response.getData().addInsuredsItem(personalInfoRepository.findById(insuredId)
+            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Personal info not found for UUID %s", insuredId)))
+            .mapDTO()));
+
+        return response;
     }
-    
+
     public ResponseInsurancePatrimonialPolicyInfoV2 getPolicyInfoV2(UUID policyId, String consentId) {
         LOG.info("Getting patrimonial policy info response for consent id {}", consentId);
-        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_PATRIMONIAL_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PATRIMONIAL_POLICYINFO_READ).mapPolicyInfoDtoV2();
+        var policy = getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_PATRIMONIAL_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PATRIMONIAL_POLICYINFO_READ);
+        var response = policy.mapPolicyInfoDtoV2();
+
+        policy.getInsuredIds().forEach(insuredId -> response.getData().addInsuredsItem(personalInfoRepository.findById(insuredId)
+            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Personal info not found for UUID %s", insuredId)))
+            .mapDTOV2()));
+
+        return response;
     }
 
     public ResponseInsurancePatrimonialPremium getPremium(UUID policyId, String consentId) {
         LOG.info("Getting patrimonial premium response for consent id {}", consentId);
-        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_PATRIMONIAL_PREMIUM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PATRIMONIAL_PREMIUM_READ).mapPremiumDto();
+        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_PATRIMONIAL_PREMIUM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PATRIMONIAL_PREMIUM_READ);
+
+        var premium = patrimonialPremiumRepository.findByPolicyId(policyId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Policy id " + policyId + " not found"));
+        var response = new ResponseInsurancePatrimonialPremium().data(premium.mapDto());
+
+        premium.getPaymentIds().forEach(paymentId -> {
+            Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Payment not found for UUID %s", paymentId)))
+                .mapDTO();
+            payment.setAmount(new AmountDetails()
+                .amount(payment.getAmount().getAmount())
+                .currency(AmountDetails.CurrencyEnum.BRL));
+            response.getData().addPaymentsItem(payment);
+        });
+        return response;
     }
 
     public ResponseInsurancePatrimonialClaims getClaims(UUID policyId, String consentId, Pageable pageable) {

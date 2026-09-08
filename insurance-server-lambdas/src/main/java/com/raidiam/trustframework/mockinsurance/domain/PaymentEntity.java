@@ -96,4 +96,27 @@ public class PaymentEntity extends BaseEntity {
                 .financialInstitutionCode(this.getFinancialInstitutionCode())
                 .paymentType(Payment.PaymentTypeEnum.fromValue(this.getPaymentType()));
     }
+
+    public PaymentV2 mapDTOV2() {
+        return new PaymentV2()
+                .movementDate(this.getMovementDate())
+                .movementType(PaymentV2.MovementTypeEnum.fromValue(this.getMovementType()))
+                .movementOrigin(PaymentV2.MovementOriginEnum.fromValue(this.getMovementOrigin()))
+                .movementPaymentsNumber(this.getMovementPaymentsNumber())
+                .amount(new AmountDetails()
+                        .amount(this.getAmount())
+                        .unit(new AmountDetailsUnit()
+                                .code(this.getUnitCode())
+                                .description(AmountDetailsUnit.DescriptionEnum.fromValue(this.getUnitDescription())))
+                        .currency(AmountDetails.CurrencyEnum.fromValue(this.getCurrency()))
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getUnitType()))
+                        .unitTypeOthers(this.getUnitTypeOthers()))
+                .maturityDate(this.getMaturityDate())
+                .tellerId(this.getTellerId())
+                .tellerIdType(PaymentV2.TellerIdTypeEnum.fromValue(this.getTellerIdType()))
+                .tellerIdTypeOthers(this.getTellerIdTypeOthers())
+                .tellerName(this.getTellerName())
+                .financialInstitutionCode(this.getFinancialInstitutionCode())
+                .paymentType(PaymentV2.PaymentTypeEnum.fromValue(this.getPaymentType()));
+    }
 }

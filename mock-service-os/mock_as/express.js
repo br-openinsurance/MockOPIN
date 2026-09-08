@@ -5,42 +5,27 @@ import * as url from 'node:url';
 import { dirname } from 'desm';
 import express from 'express'; // eslint-disable-line import/no-unresolved
 import helmet from 'helmet';
-import josePkg from 'jose';
-const { JWKS } = josePkg;
-import got from 'got';
 import Provider from 'oidc-provider';
 import { randomUUID, randomBytes } from 'node:crypto';
 import Debug from 'debug';
-import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
 import bodyParser from 'body-parser';
 
 import Account from './utils/account.js';
 import BRAND_NAME from './utils/brandHelper.js';
 import { supportDynamicScopes, ensureTokenEndpointAsAudience } from './utils/oidc.js';
+import { loadParameters, prepareOidcConfiguration } from './utils/startup.js';
 
 const log = Debug('raidiam:server:info');
 
 const __dirname = dirname(import.meta.url);
-const {
-  BRAND = 'NO_BRAND',
-  ISSUER,
-  TRANSPORT_CERT,
-  TRANSPORT_CERT_KEY,
-  AWS_SSM_REGION = 'us-east-1',
-  AWS_LOCAL = false,
-  LOCAL_STACK_ENDPOINT,
-  TRUSTFRAMEWORK_SSA_KEYSET,
-  SSM_PARAMETER_PREFIX = '/local/op_fapi_client_config',
-} = process.env;
-
-const ssmClient = new SSMClient({
-  ...(AWS_LOCAL && { endpoint: LOCAL_STACK_ENDPOINT }),
-  maxAttempts: 3,
-  region: AWS_SSM_REGION,
-});
+const { BRAND = 'NO_BRAND' } = process.env;
 
 const brandConfig = {
   [BRAND_NAME.OPIN]: {
+    brand: 'opin',
+    dynamicScopesSupported: ['consent:'],
+  },
+  [BRAND_NAME.OPIN_LOCAL]: {
     brand: 'opin',
     dynamicScopesSupported: ['consent:'],
   },
@@ -50,54 +35,11 @@ const brandConfig = {
   },
 };
 
-async function getSsmParameter(name) {
-  const command = new GetParameterCommand({
-    Name: name,
-    WithDecryption: true,
-  });
-
-  try {
-    const result = await ssmClient.send(command);
-    return result.Parameter.Value;
-  } catch (error) {
-    console.error('Error fetching parameter:', error);
-    throw error;
-  }
-}
-
-async function loadParameters() {
-  let issuer = ISSUER || (await getSsmParameter(`${SSM_PARAMETER_PREFIX}/issuer`));
-  issuer = issuer.startsWith('https://') ? issuer : `https://${issuer}`;
-  const clientCert = TRANSPORT_CERT || (await getSsmParameter(`${SSM_PARAMETER_PREFIX}/transport_certificate`));
-  const clientCertKey = TRANSPORT_CERT_KEY || (await getSsmParameter(`${SSM_PARAMETER_PREFIX}/transport_key`));
-
-  return { issuer, clientCert, clientCertKey };
-}
-
 async function loadSupportFunctions(provider, dynamicScopes) {
   log(`Configure support dynamic scopes function - ${dynamicScopes}`);
   supportDynamicScopes(provider, ...dynamicScopes);
   log(`Configure token endpoint as audience function`);
   ensureTokenEndpointAsAudience(provider);
-}
-
-async function loadOidcConfiguration(brand, mtlsIssuer) {
-  let configPath = `./utils/${brand}/configuration.js`;
-  log(`Loading configuration from ${configPath}`);
-  // Import the module
-  const configFunc = await import(configPath);
-
-  log(`Load Directory Key Set: ${TRUSTFRAMEWORK_SSA_KEYSET}`);
-  const ssaJwksResponse = await got(TRUSTFRAMEWORK_SSA_KEYSET);
-  if (ssaJwksResponse.statusCode !== 200) {
-    throw new Error(`Failed to load JWKS: ${ssaJwksResponse.statusCode}`);
-  }
-  const ssaJwks = JWKS.asKeyStore(JSON.parse(ssaJwksResponse.body));
-
-  let configuration = configFunc.default(mtlsIssuer, ssaJwks);
-  // Add the findAccount property
-  configuration.findAccount = Account.findAccount;
-  return configuration;
 }
 
 async function main() {
@@ -127,6 +69,20 @@ async function main() {
 
   log(`Load configuration for ${BRAND}`);
   const config = brandConfig[BRAND] || brandConfig.default;
+
+  // Kick off the Mongo connection immediately so it runs concurrently with the
+  // SSM parameter/JWKS lookups below instead of waiting on them first.
+  const adapterPromise = process.env.MONGODB_URI
+    ? import('./utils/mongodb.js').then(async ({ default: adapter }) => {
+        await adapter.connect('openid-server');
+        return adapter;
+      })
+    : Promise.resolve(undefined);
+
+  // Also independent of the issuer value, so start it alongside loadParameters()
+  // and the Mongo connection above instead of waiting for the SSM lookup first.
+  const oidcConfigFactoryPromise = prepareOidcConfiguration(config.brand);
+
   const { issuer, clientCert, clientCertKey } = await loadParameters();
 
   let mtlsIssuer = new URL(issuer);
@@ -137,13 +93,8 @@ async function main() {
   apiUrl = apiUrl.toString().replace(/\/$/, ''); // Remove trailing slash.
   log(`Issuer: ${issuer}, mTLS Issuer: ${mtlsIssuer}, API Host: ${apiUrl}`);
 
-  let oidcConfig = await loadOidcConfiguration(config.brand, mtlsIssuer);
-
-  let adapter;
-  if (process.env.MONGODB_URI) {
-    ({ default: adapter } = await import('./utils/mongodb.js'));
-    await adapter.connect('openid-server');
-  }
+  const [oidcConfigFactory, adapter] = await Promise.all([oidcConfigFactoryPromise, adapterPromise]);
+  const oidcConfig = oidcConfigFactory(mtlsIssuer, clientCert, clientCertKey);
 
   let provider = new Provider(issuer, {
     adapter,
@@ -190,6 +141,21 @@ async function main() {
       ctx.set('x-fapi-interaction-id', randomUUID());
     } else {
       ctx.set('x-fapi-interaction-id', ctx.get('x-fapi-interaction-id'));
+    }
+  });
+
+  // Omit the optional `scope` field on token responses for the
+  // enrollments and payments journeys (RFC 6749 §5.1).
+  provider.use(async (ctx, next) => {
+    await next();
+
+    if (ctx.oidc?.route !== 'token' || typeof ctx.body?.scope !== 'string') {
+      return;
+    }
+
+    const grantedScopes = new Set(ctx.body.scope.split(' '));
+    if (grantedScopes.has('nrp-consents') || grantedScopes.has('payments')) {
+      delete ctx.body.scope;
     }
   });
 

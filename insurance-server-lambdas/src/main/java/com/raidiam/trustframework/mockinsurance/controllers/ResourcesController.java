@@ -1,5 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.controllers;
 
+import com.raidiam.trustframework.mockinsurance.fapi.ResponseErrorWithRequestDateTime;
 import com.raidiam.trustframework.mockinsurance.services.ResourcesService;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseResourceList;
@@ -40,6 +41,7 @@ public class ResourcesController extends BaseInsuranceController {
     }
 
     @Get(value = "/v3/resources")
+    @ResponseErrorWithRequestDateTime
     public ResponseResourceListV3 getResourcesV3(Pageable pageable, @NotNull HttpRequest<?> request) {
         var consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
         LOG.info("Looking up all resources for consent id {} v3", consentId);

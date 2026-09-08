@@ -37,6 +37,70 @@ class TestRequestDataFactory {
     }
 
     static createConsentRequest(
+            String loggedUserIdentification,
+            String loggedUserRel,
+            OffsetDateTime expirationDateTime,
+            List<EnumConsentPermission> permissions,
+            CreateConsentDataWithdrawalLifePensionInformation withdrawalInfo
+    ) {
+        CreateConsentData consentRequestData = new CreateConsentData()
+                .loggedUser(new LoggedUser().document(new LoggedUserDocument().rel(loggedUserRel).identification(loggedUserIdentification)))
+                .permissions(permissions)
+                .expirationDateTime(expirationDateTime)
+                .withdrawalLifePensionInformation(withdrawalInfo)
+
+        return new CreateConsent().data(consentRequestData)
+    }
+
+    static createConsentV3Request(
+            String loggedUserIdentification,
+            String loggedUserRel,
+            OffsetDateTime expirationDateTime,
+            List<EnumConsentV3Permission> permissions,
+            CreateConsentV3DataWithdrawalLifePensionInformation withdrawalInfo
+    ) {
+        CreateConsentV3Data consentRequestData = new CreateConsentV3Data()
+                .loggedUser(new LoggedUser().document(new LoggedUserDocument().rel(loggedUserRel).identification(loggedUserIdentification)))
+                .permissions(permissions)
+                .expirationDateTime(expirationDateTime)
+                .withdrawalLifePensionInformation(withdrawalInfo)
+
+        return new CreateConsentV3().data(consentRequestData)
+    }
+
+    static createConsentRequest(
+            String loggedUserIdentification,
+            String loggedUserRel,
+            OffsetDateTime expirationDateTime,
+            List<EnumConsentPermission> permissions,
+            CreateConsentDataWithdrawalCaptalizationInformation withdrawalCapInfo
+    ) {
+        CreateConsentData consentRequestData = new CreateConsentData()
+                .loggedUser(new LoggedUser().document(new LoggedUserDocument().rel(loggedUserRel).identification(loggedUserIdentification)))
+                .permissions(permissions)
+                .expirationDateTime(expirationDateTime)
+                .withdrawalCaptalizationInformation(withdrawalCapInfo)
+
+        return new CreateConsent().data(consentRequestData)
+    }
+
+    static createConsentV3Request(
+            String loggedUserIdentification,
+            String loggedUserRel,
+            OffsetDateTime expirationDateTime,
+            List<EnumConsentV3Permission> permissions,
+            CreateConsentDataWithdrawalCaptalizationInformation withdrawalCapInfo
+    ) {
+        CreateConsentV3Data consentRequestData = new CreateConsentV3Data()
+                .loggedUser(new LoggedUser().document(new LoggedUserDocument().rel(loggedUserRel).identification(loggedUserIdentification)))
+                .permissions(permissions)
+                .expirationDateTime(expirationDateTime)
+                .withdrawalCapitalizationInformation(withdrawalCapInfo)
+
+        return new CreateConsentV3().data(consentRequestData)
+    }
+
+    static createConsentRequest(
             String businessIdentityDocumentIdentification,
             String businessIdentityDocumentREL,
             String loggedUserIdentification,
@@ -480,5 +544,60 @@ class TestRequestDataFactory {
                         .raffleCustomData(new RaffleCustomData())
                 )
         req
+    }
+
+    static RequestPensionWithdrawal createPensionWithdrawalRequest() {
+        return new RequestPensionWithdrawal()
+                .data(new RequestPensionWithdrawalData()
+                        .generalInfo(new GeneralInfoPensionWithdrawal()
+                                .certificateId("certificate_123")
+                                .productName("product_name"))
+                        .withdrawalInfo(new WithdrawalInfoPensionWithdrawal()
+                                .withdrawalType(WithdrawalInfoPensionWithdrawal.WithdrawalTypeEnum._1_TOTAL)
+                                .withdrawalReason(WithdrawalInfoPensionWithdrawal.WithdrawalReasonEnum._1_EMERGENCIAS_DE_SAUDE))
+                        .withdrawalCustomData(new WithdrawalCustomDataPension()))
+    }
+
+    static RequestPensionWithdrawalV2 createPensionWithdrawalV2Request() {
+        return new RequestPensionWithdrawalV2()
+                .data(new RequestPensionWithdrawalV2Data()
+                        .generalInfo(new GeneralInfoPensionWithdrawal()
+                                .certificateId("certificate_123")
+                                .productName("product_name"))
+                        .withdrawalCustomData(new WithdrawalCustomDataPension()))
+    }
+
+    static RequestCapitalizationTitleWithdrawal createCapitalizationTitleWithdrawalRequest() {
+        return new RequestCapitalizationTitleWithdrawal()
+                .data(new RequestCapitalizationTitleWithdrawalData()
+                        .modality(RequestCapitalizationTitleWithdrawalData.ModalityEnum.TRADICIONAL)
+                        .susepProcessNumber("random_process_number")
+                        .productInformation(new ProductInformationCapitalizationTitleWithdrawal()
+                                .capitalizationTitleName("title_name")
+                                .planId("plan_123")
+                                .titleId("title_123")
+                                .seriesId("series_123")
+                                .termEndDate(LocalDate.of(2025, 12, 31)))
+                        .withdrawalInformation(new WithdrawalInformationCapitalizationTitleWithdrawal()
+                                .withdrawalReason(WithdrawalInformationCapitalizationTitleWithdrawal.WithdrawalReasonEnum.COMPROMISSOS_PESSOAIS_EMERGENCIAIS)
+                                .withdrawalTotalAmount(new AmountDetails().amount("1000.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO)))
+                        .withdrawalCustomData(new WithdrawalCustomDataCapitalization()))
+    }
+
+    static RequestCapitalizationTitleWithdrawalV2 createCapitalizationTitleWithdrawalV2Request() {
+        return new RequestCapitalizationTitleWithdrawalV2()
+                .data(new RequestCapitalizationTitleWithdrawalData()
+                        .modality(RequestCapitalizationTitleWithdrawalData.ModalityEnum.TRADICIONAL)
+                        .susepProcessNumber("random_process_number")
+                        .productInformation(new ProductInformationCapitalizationTitleWithdrawal()
+                                .capitalizationTitleName("title_name")
+                                .planId("plan_123")
+                                .titleId("title_123")
+                                .seriesId("series_123")
+                                .termEndDate(LocalDate.of(2025, 12, 31)))
+                        .withdrawalInformation(new WithdrawalInformationCapitalizationTitleWithdrawal()
+                                .withdrawalReason(WithdrawalInformationCapitalizationTitleWithdrawal.WithdrawalReasonEnum.COMPROMISSOS_PESSOAIS_EMERGENCIAIS)
+                                .withdrawalTotalAmount(new AmountDetails().amount("1000.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO)))
+                        .withdrawalCustomData(new WithdrawalCustomDataCapitalization()))
     }
 }

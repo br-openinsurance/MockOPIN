@@ -149,6 +149,29 @@ class LifePensionServiceSpec extends CleanupSpecification {
         response.getData() != null
     }
 
+    def "getContractsV2 returns at least two contracts with distinct certificateIds when the consent covers more than one, and meta reflects the leaf contract count"() {
+        given: "a second life-pension contract linked to the same consent"
+        def secondContract = lifePensionContractRepository.save(TestEntityDataFactory.aLifePensionContract(testAccountHolder.getAccountHolderId()))
+        consentLifePensionContractRepository.save(new ConsentLifePensionContractEntity(testConsent, secondContract))
+
+        when:
+        def response = lifePensionService.getContractsV2(Pageable.from(0, 5), testConsent.getConsentId().toString())
+
+        then:
+        response.getData().size() == 1
+        def contracts = response.getData().first().getBrand().getCompanies().first().getContracts()
+        contracts.size() >= 2
+        def certificateIds = contracts*.getCertificateId()
+        certificateIds.toSet().size() == certificateIds.size()
+        certificateIds.contains(testLifePensionContract.getLifePensionContractId().toString())
+        certificateIds.contains(secondContract.getLifePensionContractId().toString())
+
+        and: "meta is populated and matches the actual leaf contract count (required by OPIN OpinPaginationValidator)"
+        response.getMeta() != null
+        response.getMeta().getTotalRecords() == contracts.size()
+        response.getMeta().getTotalPages() == 1
+    }
+
     def "enable cleanup"() {
         //This must be the final test
         when:

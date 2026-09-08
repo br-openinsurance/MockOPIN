@@ -9,9 +9,6 @@ import org.hibernate.envers.NotAudited;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails;
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails.CurrencyEnum;
-import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails.UnitTypeEnum;
-import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetailsUnit;
-import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetailsUnit.DescriptionEnum;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePatrimonialClaim;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePatrimonialClaimCoverage;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePatrimonialClaimV2;
@@ -57,8 +54,6 @@ public class PatrimonialClaimEntity extends BaseEntity {
             .thirdPartyClaimDate(LocalDate.now())
             .amount(new AmountDetails()
                 .amount("2000.00")
-                .unitType(UnitTypeEnum.MONETARIO)
-                .unit(new AmountDetailsUnit().code("R$").description(DescriptionEnum.BRL))
                 .currency(CurrencyEnum.BRL)
             )
             .coverages(List.of(new InsurancePatrimonialClaimCoverage()
@@ -78,8 +73,6 @@ public class PatrimonialClaimEntity extends BaseEntity {
             .thirdPartyClaimDate(LocalDate.now())
             .amount(new AmountDetails()
                 .amount("2000.00")
-                .unitType(UnitTypeEnum.MONETARIO)
-                .unit(new AmountDetailsUnit().code("R$").description(DescriptionEnum.BRL))
                 .currency(CurrencyEnum.BRL)
             )
             .coverages(List.of(new InsurancePatrimonialClaimCoverage()

@@ -12,6 +12,7 @@ import { insurerAdapter } from './adapter.js';
 import layout from './layout.js';
 import { addWebhookMiddleware } from '../oidc.js';
 import Debug from 'debug';
+import { requestSentLock } from '../requestSentLock.js';
 
 const body = urlencoded({ extended: false });
 const log = Debug('raidiam:server:info');
@@ -165,7 +166,7 @@ export default (app, provider) => {
     }
   });
 
-  app.post('/interaction/:uid/confirm', setNoCache, body, async (req, res, next) => {
+  app.post('/interaction/:uid/confirm', setNoCache, body, requestSentLock.isSent, async (req, res, next) => {
     try {
       const interactionDetails = await provider.interactionDetails(req, res);
       const {
@@ -248,7 +249,7 @@ export default (app, provider) => {
     }
   });
 
-  app.get('/interaction/:uid/abort', setNoCache, async (req, res, next) => {
+  app.get('/interaction/:uid/abort', setNoCache, requestSentLock.isSent, async (req, res, next) => {
     const { prompt } = await provider.interactionDetails(req, res);
 
     let consentId = getConsentId(prompt.details.missingOIDCScope);

@@ -2,7 +2,6 @@ package com.raidiam.trustframework.mockinsurance.domain;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePersonClaim;
-import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePersonClaimCoverage;
 import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePersonClaimV2;
 
 import jakarta.persistence.*;
@@ -15,6 +14,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,6 +34,42 @@ public class PersonPolicyClaimEntity extends BaseEntity {
     @Column(name = "person_policy_id")
     private UUID personPolicyId;
 
+    @Column(name = "identification")
+    private String identification;
+
+    @Column(name = "documentation_delivery_date")
+    private LocalDate documentationDeliveryDate;
+
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "status_alteration_date")
+    private LocalDate statusAlterationDate;
+
+    @Column(name = "occurrence_date")
+    private LocalDate occurrenceDate;
+
+    @Column(name = "warning_date")
+    private LocalDate warningDate;
+
+    @Column(name = "warning_register_date")
+    private LocalDate warningRegisterDate;
+
+    @Column(name = "third_party_claim_date")
+    private LocalDate thirdPartyClaimDate;
+
+    @Column(name = "amount")
+    private String amount;
+
+    @Column(name = "amount_unit_type")
+    private String amountUnitType;
+
+    @Column(name = "denial_justification")
+    private String denialJustification;
+
+    @Column(name = "denial_justification_description")
+    private String denialJustificationDescription;
+
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
@@ -41,55 +77,46 @@ public class PersonPolicyClaimEntity extends BaseEntity {
     @NotAudited
     private PersonPolicyEntity personPolicy;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "personPolicyClaim")
+    private List<PersonPolicyClaimCoverageEntity> coverages = new ArrayList<>();
+
     public InsurancePersonClaim mapDTO() {
         return new InsurancePersonClaim()
-                .identification("string")
-                .documentationDeliveryDate(LocalDate.of(2023, 10, 1))
-                .status(InsurancePersonClaim.StatusEnum.ABERTO)
-                .statusAlterationDate(LocalDate.of(2023, 10, 1))
-                .occurrenceDate(LocalDate.of(2023, 10, 1))
-                .warningDate(LocalDate.of(2023, 10, 1))
-                .warningRegisterDate(LocalDate.of(2023, 10, 1))
-                .thirdPartyClaimDate(LocalDate.of(2022, 10, 1))
+                .identification(this.getIdentification())
+                .documentationDeliveryDate(this.getDocumentationDeliveryDate())
+                .status(InsurancePersonClaim.StatusEnum.valueOf(this.getStatus()))
+                .statusAlterationDate(this.getStatusAlterationDate())
+                .occurrenceDate(this.getOccurrenceDate())
+                .warningDate(this.getWarningDate())
+                .warningRegisterDate(this.getWarningRegisterDate())
+                .thirdPartyClaimDate(this.getThirdPartyClaimDate())
                 .amount(new AmountDetails()
-                        .amount("16")
-                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
+                        .amount(this.getAmount())
+                        .unitType(AmountDetails.UnitTypeEnum.valueOf(this.getAmountUnitType()))
                 )
-                .denialJustification(InsurancePersonClaim.DenialJustificationEnum.PRESCRICAO)
-                .denialJustificationDescription("string")
-                .coverages(List.of(new InsurancePersonClaimCoverage()
-                        .insuredObjectId("string")
-                        .branch("0111")
-                        .code(InsurancePersonClaimCoverage.CodeEnum.CIRURGIA)
-                        .description("string")
-                        .warningDate(LocalDate.of(2023, 10, 1))
-                        .thirdPartyClaimDate(LocalDate.of(2023, 10, 1))
-                ));
+                .denialJustification(InsurancePersonClaim.DenialJustificationEnum.valueOf(this.getDenialJustification()))
+                .denialJustificationDescription(this.getDenialJustificationDescription())
+                .coverages(this.getCoverages().stream().map(PersonPolicyClaimCoverageEntity::mapDTO).toList());
     }
 
     public InsurancePersonClaimV2 mapDTOV2() {
         return new InsurancePersonClaimV2()
-                .identification("string")
-                .documentationDeliveryDate(LocalDate.of(2023, 10, 1))
-                .status(InsurancePersonClaimV2.StatusEnum.ABERTO)
-                .statusAlterationDate(LocalDate.of(2023, 10, 1))
-                .occurrenceDate(LocalDate.of(2023, 10, 1))
-                .warningDate(LocalDate.of(2023, 10, 1))
-                .warningRegisterDate(LocalDate.of(2023, 10, 1))
-                .thirdPartyClaimDate(LocalDate.of(2022, 10, 1))
+                .identification(this.getIdentification())
+                .documentationDeliveryDate(this.getDocumentationDeliveryDate())
+                .status(InsurancePersonClaimV2.StatusEnum.valueOf(this.getStatus()))
+                .statusAlterationDate(this.getStatusAlterationDate())
+                .occurrenceDate(this.getOccurrenceDate())
+                .warningDate(this.getWarningDate())
+                .warningRegisterDate(this.getWarningRegisterDate())
+                .thirdPartyClaimDate(this.getThirdPartyClaimDate())
                 .amount(new AmountDetails()
-                        .amount("16")
-                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
+                        .amount(this.getAmount())
+                        .unitType(AmountDetails.UnitTypeEnum.valueOf(this.getAmountUnitType()))
                 )
-                .denialJustification(InsurancePersonClaimV2.DenialJustificationEnum.PRESCRICAO)
-                .denialJustificationDescription("string")
-                .coverages(List.of(new InsurancePersonClaimCoverage()
-                        .insuredObjectId("string")
-                        .branch("0111")
-                        .code(InsurancePersonClaimCoverage.CodeEnum.CIRURGIA)
-                        .description("string")
-                        .warningDate(LocalDate.of(2023, 10, 1))
-                        .thirdPartyClaimDate(LocalDate.of(2023, 10, 1))
-                ));
+                .denialJustification(InsurancePersonClaimV2.DenialJustificationEnum.valueOf(this.getDenialJustification()))
+                .denialJustificationDescription(this.getDenialJustificationDescription())
+                .coverages(this.getCoverages().stream().map(PersonPolicyClaimCoverageEntity::mapDTO).toList());
     }
 }

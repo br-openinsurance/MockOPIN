@@ -5,6 +5,7 @@ import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
 import com.raidiam.trustframework.mockinsurance.models.generated.*
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.exceptions.HttpStatusException
+import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
 import spock.lang.Stepwise
@@ -15,6 +16,11 @@ class QuoteLifePensionServiceSpec extends CleanupSpecification {
 
     @Inject
     QuoteLifePensionService quoteLifePensionService
+
+    @MockBean(WebhookService)
+    WebhookService webhookService() {
+        Mock(WebhookService)
+    }
 
     def "We can create a quote"() {
         given:

@@ -67,13 +67,13 @@ public class PersonalIdentificationEntity extends BaseEntity {
                                 .address(new Address()
                                         .flagPostCode(Address.FlagPostCodeEnum.NACIONAL)
                                         .address((AllOfAddressAddress) new AllOfAddressAddress()
+                                                .allOfAddressAddressName("Naburo Ykesaki")
+                                                .allOfAddressAddressNumber("1270")
+                                                .allOfAddressAddressTownName("Sao Paulo")
+                                                .allOfAddressAddressCountrySubDivision("SP")
+                                                .allOfAddressAddressPostCode("10000000")
                                                 .type(NationalAddress.TypeEnum.AVENIDA)
-                                                .name("Naburo Ykesaki")
-                                                .number("1270")
                                                 .districtName("Liberdade")
-                                                .townName("Sao Paulo")
-                                                .ibgeTownCode("5002704")
-                                                .countrySubDivision(EnumCountrySubDivision.SP)
-                                                .postCode("10000000"))))));
+                                                .ibgeTownCode("5002704"))))));
     }
 }

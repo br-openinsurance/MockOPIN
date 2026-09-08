@@ -38,6 +38,24 @@ public class FinancialRiskService extends BaseInsuranceService {
                                         .policies(policies.stream().map(FinancialRiskPolicyEntity::mapPolicyDTO).toList())))));
     }
 
+    public BaseInsuranceResponseV2 getPoliciesV2(Pageable pageable, String consentId) {
+        LOG.info("Getting Personal Customers Identification response for consent id {}", consentId);
+
+        var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
+
+        InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
+        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_READ);
+
+        var policies = financialRiskPolicyRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable).getContent();
+        return new BaseInsuranceResponseV2()
+                .data(List.of(new BaseBrandAndCompanyDataV2()
+                        .brand("Mock")
+                        .companies(List.of(new BaseBrandAndCompanyDataV2Companies()
+                                .companyName("Mock Insurer")
+                                .cnpjNumber("12345678901234")
+                                .policies(policies.stream().map(FinancialRiskPolicyEntity::mapPolicyDTO).toList())))));
+    }
+
     private FinancialRiskPolicyEntity getPolicy(UUID policyId, String consentId, EnumConsentPermission permission, EnumConsentV3Permission permissionV3) {
         LOG.info("Getting financial risk policy for policy id {} and consent id {}", policyId, consentId);
 
@@ -81,6 +99,34 @@ public class FinancialRiskService extends BaseInsuranceService {
         return response;
     }
 
+    public ResponseInsuranceFinancialRiskPolicyInfoV2 getPolicyInfoV2(UUID policyId, String consentId) {
+        LOG.info("Getting financial risk policy info response for consent id {}", consentId);
+        var policy = getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_POLICYINFO_READ);
+        var response = policy.mapPolicyInfoDTOV2();
+
+        policy.getBeneficiaryIds().forEach(beneficiaryId -> response.getData().addBeneficiariesItem(beneficiaryInfoRepository.findById(beneficiaryId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Beneficiary not found for UUID %s", beneficiaryId)))
+                .mapDTO()));
+
+        policy.getInsuredIds().forEach(insuredIds -> response.getData().addInsuredsItem(personalInfoRepository.findById(insuredIds)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Personal info not found for UUID %s", insuredIds)))
+                .mapDTOV2()));
+
+        policy.getIntermediaryIds().forEach(intermediaryId -> response.getData().addIntermediariesItem(intermediaryRepository.findById(intermediaryId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Intermediary not found for UUID %s", intermediaryId)))
+                .mapDTOV2()));
+
+        policy.getPrincipalIds().forEach(principalId -> response.getData().addPrincipalsItem(principalInfoRepository.findById(principalId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Principal not found for UUID %s", principalId)))
+                .mapDTOV2()));
+
+        policy.getCoinsurerIds().forEach(coinsurerId -> response.getData().addCoinsurersItem(coinsurerRepository.findById(coinsurerId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Coinsurer not found for UUID %s", coinsurerId)))
+                .mapDTO()));
+
+        return response;
+    }
+
     public ResponseInsuranceFinancialRiskClaims getPolicyClaims(UUID policyId, String consentId, Pageable pageable) {
         LOG.info("Getting financial risk policy claims response for consent id {}", consentId);
         getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_CLAIM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_CLAIM_READ);
@@ -88,6 +134,17 @@ public class FinancialRiskService extends BaseInsuranceService {
         var claims = financialRiskPolicyClaimRepository.findByFinancialRiskPolicyId(policyId, pageable);
         var resp = new ResponseInsuranceFinancialRiskClaims()
                 .data(claims.getContent().stream().map(FinancialRiskPolicyClaimEntity::mapDTO).toList());
+        resp.setMeta(InsuranceLambdaUtils.getMeta(claims, false));
+        return resp;
+    }
+
+    public ResponseInsuranceFinancialRiskClaimsV2 getPolicyClaimsV2(UUID policyId, String consentId, Pageable pageable) {
+        LOG.info("Getting financial risk policy claims response for consent id {}", consentId);
+        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_CLAIM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_CLAIM_READ);
+
+        var claims = financialRiskPolicyClaimRepository.findByFinancialRiskPolicyId(policyId, pageable);
+        var resp = new ResponseInsuranceFinancialRiskClaimsV2()
+                .data(claims.getContent().stream().map(FinancialRiskPolicyClaimEntity::mapDTOV2).toList());
         resp.setMeta(InsuranceLambdaUtils.getMeta(claims, false));
         return resp;
     }
@@ -104,6 +161,21 @@ public class FinancialRiskService extends BaseInsuranceService {
         premium.getPaymentIds().forEach(paymentId -> response.getData().addPaymentsItem(paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Payment not found for UUID %s", paymentId)))
                 .mapDTO()));
+        return response;
+    }
+
+    public ResponseInsuranceFinancialRiskPremiumV2 getPolicyPremiumV2(UUID policyId, String consentId) {
+        LOG.info("Getting financial risk policy premium response for consent id {}", consentId);
+        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_PREMIUM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_PREMIUM_READ);
+
+        var premium = financialRiskPolicyPremiumRepository.findByFinancialRiskPolicyId(policyId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Policy id " + policyId + " not found"));
+
+        var response = new ResponseInsuranceFinancialRiskPremiumV2().data(premium.mapDTOV2());
+
+        premium.getPaymentIds().forEach(paymentId -> response.getData().addPaymentsItem(paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Payment not found for UUID %s", paymentId)))
+                .mapDTOV2()));
         return response;
     }
 

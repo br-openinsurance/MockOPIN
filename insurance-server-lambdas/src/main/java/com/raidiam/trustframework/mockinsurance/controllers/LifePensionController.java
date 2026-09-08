@@ -42,7 +42,7 @@ public class LifePensionController extends BaseInsuranceController {
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
         LOG.info("Getting contracts for consent id {} v1", consentId);
         ResponseInsuranceLifePension response = service.getContracts(adjustedPageable, consentId);
-        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
+        InsuranceLambdaUtils.decorateResponse(response::setLinks, adjustedPageable.getSize(), appBaseUrl + request.getPath(), adjustedPageable.getNumber(), response.getMeta().getTotalPages());
         LOG.info("Retrieved contracts for consent id {}", consentId);
         InsuranceLambdaUtils.logObject(mapper, response);
         return response;
@@ -57,7 +57,7 @@ public class LifePensionController extends BaseInsuranceController {
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
         LOG.info("Getting contracts for consent id {} v2", consentId);
         ResponseInsuranceLifePensionV2 response = service.getContractsV2(adjustedPageable, consentId);
-        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
+        InsuranceLambdaUtils.decorateResponse(response::setLinks, adjustedPageable.getSize(), appBaseUrl + request.getPath(), adjustedPageable.getNumber(), response.getMeta().getTotalPages());
         LOG.info("Retrieved contracts for consent id {}", consentId);
         InsuranceLambdaUtils.logObject(mapper, response);
         return response;

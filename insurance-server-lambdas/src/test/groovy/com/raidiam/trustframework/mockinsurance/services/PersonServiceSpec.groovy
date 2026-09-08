@@ -1,6 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.services
 
-import com.raidiam.trustframework.mockinsurance.cleanups.CleanupSpecification
+import com.raidiam.trustframework.mockinsurance.cleanups.CleanupPersonSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
 import com.raidiam.trustframework.mockinsurance.domain.*
 import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentPermission
@@ -13,7 +13,7 @@ import spock.lang.Stepwise
 
 @Stepwise
 @MicronautTest(transactional = false, environments = ["db"])
-class PersonServiceSpec extends CleanupSpecification {
+class PersonServiceSpec extends CleanupPersonSpecification {
 
     @Inject
     PersonService personService
@@ -28,13 +28,25 @@ class PersonServiceSpec extends CleanupSpecification {
     PersonPolicyPremiumEntity testPersonPolicyPremium
 
     @Shared
+    PersonPolicyInsuredObjectEntity testPersonInsuredObject
+
+    @Shared
+    PersonalInfoEntity testPersonInsured
+
+    @Shared
+    BeneficiaryInfoEntity testPersonBeneficiary
+
+    @Shared
+    IntermediaryEntity testPersonIntermediary
+
+    @Shared
+    PaymentEntity testPersonPremiumPayment
+
+    @Shared
     AccountHolderEntity testAccountHolder
 
     @Shared
     ConsentEntity testConsent
-
-    @Shared
-    ConsentPersonPolicyEntity testConsentPersonPolicy
 
     def setup() {
         if (runSetup) {
@@ -47,10 +59,27 @@ class PersonServiceSpec extends CleanupSpecification {
             )
             testConsent.setStatus(EnumConsentStatus.AUTHORISED.toString())
             testConsent = consentRepository.save(testConsent)
-            testPersonPolicy = personPolicyRepository.save(TestEntityDataFactory.aPersonPolicy(testAccountHolder.getAccountHolderId()))
+
+            testPersonInsured = personalInfoRepository.save(TestEntityDataFactory.aPolicyInsured())
+            testPersonBeneficiary = beneficiaryInfoRepository.save(TestEntityDataFactory.aPolicyBeneficiary())
+            testPersonIntermediary = intermediaryRepository.save(TestEntityDataFactory.aPolicyIntermediary())
+
+            testPersonPolicy = personPolicyRepository.save(TestEntityDataFactory.aPersonPolicy(
+                    testAccountHolder.getAccountHolderId(),
+                    List.of(testPersonInsured.getReferenceId()),
+                    List.of(testPersonBeneficiary.getReferenceId()),
+                    List.of(testPersonIntermediary.getReferenceId())))
             consentPersonPolicyRepository.save(new ConsentPersonPolicyEntity(testConsent, testPersonPolicy))
+
+            testPersonInsuredObject = personPolicyInsuredObjectRepository.save(TestEntityDataFactory.aPersonPolicyInsuredObject(testPersonPolicy.getPersonPolicyId()))
+            personPolicyInsuredObjectCoverageRepository.save(TestEntityDataFactory.aPersonPolicyInsuredObjectCoverage(testPersonInsuredObject.getPersonInsuredObjectId()))
+
             testPersonPolicyClaim = personPolicyClaimRepository.save(TestEntityDataFactory.aPersonPolicyClaim(testPersonPolicy.getPersonPolicyId()))
-            testPersonPolicyPremium = personPolicyPremiumRepository.save(TestEntityDataFactory.aPersonPolicyPremium(testPersonPolicy.getPersonPolicyId()))
+            personPolicyClaimCoverageRepository.save(TestEntityDataFactory.aPersonPolicyClaimCoverage(testPersonPolicyClaim.getClaimId()))
+
+            testPersonPremiumPayment = paymentRepository.save(TestEntityDataFactory.aPolicyPremiumPayment())
+            testPersonPolicyPremium = personPolicyPremiumRepository.save(TestEntityDataFactory.aPersonPolicyPremium(testPersonPolicy.getPersonPolicyId(), List.of(testPersonPremiumPayment.getPaymentId())))
+            personPolicyPremiumCoverageRepository.save(TestEntityDataFactory.aPersonPolicyPremiumCoverage(testPersonPolicyPremium.getPremiumId()))
             runSetup = false
         }
     }
@@ -62,7 +91,7 @@ class PersonServiceSpec extends CleanupSpecification {
         then:
         response.getData()
         response.getData().size() == 1
-        response.getData().first()
+        response.getData().first().getBrand().getCompanies().first().getPolicies().first().getProductName() == "Mock Insurer Person Policy"
     }
 
     def "we can get policies V2" () {
@@ -81,6 +110,13 @@ class PersonServiceSpec extends CleanupSpecification {
 
         then:
         response.getData() != null
+        response.getData().getDocumentType().toString() == "APOLICE_INDIVIDUAL"
+        response.getData().getInsureds().size() == 1
+        response.getData().getBeneficiaries().size() == 1
+        response.getData().getIntermediaries().size() == 1
+        response.getData().getInsuredObjects().size() == 1
+        response.getData().getInsuredObjects().first().getCoverages().size() == 1
+        response.getData().getPmBaC() != null
     }
 
     def "we can get a policy info V2" () {
@@ -89,6 +125,11 @@ class PersonServiceSpec extends CleanupSpecification {
 
         then:
         response.getData() != null
+        response.getData().getInsureds().size() == 1
+        response.getData().getBeneficiaries().size() == 1
+        response.getData().getIntermediaries().size() == 1
+        response.getData().getInsuredObjects().size() == 1
+        response.getData().getInsuredObjects().first().getCoverages().size() == 1
     }
 
     def "we can get a policy's claims" () {
@@ -97,6 +138,8 @@ class PersonServiceSpec extends CleanupSpecification {
 
         then:
         response.getData() != null
+        response.getData().size() == 1
+        response.getData().first().getCoverages().size() == 1
     }
 
     def "we can get a policy's claims V2" () {
@@ -105,6 +148,8 @@ class PersonServiceSpec extends CleanupSpecification {
 
         then:
         response.getData() != null
+        response.getData().size() == 1
+        response.getData().first().getCoverages().size() == 1
     }
 
     def "we can get a policy's premium" () {
@@ -113,6 +158,9 @@ class PersonServiceSpec extends CleanupSpecification {
 
         then:
         response.getData() != null
+        response.getData().getPaymentsQuantity() == 4
+        response.getData().getCoverages().size() == 1
+        response.getData().getPayments().size() == 1
     }
 
     def "enable cleanup"() {

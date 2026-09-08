@@ -29,6 +29,72 @@ public class LifePensionContractClaimEntity extends BaseEntity {
     @Column(name = "life_pension_contract_id")
     private UUID lifePensionContractId;
 
+    @Column(name = "event_status")
+    private String eventStatus;
+
+    @Column(name = "event_alert_date")
+    private LocalDate eventAlertDate;
+
+    @Column(name = "event_register_date")
+    private LocalDate eventRegisterDate;
+
+    @Column(name = "beneficiary_document")
+    private String beneficiaryDocument;
+
+    @Column(name = "beneficiary_document_type")
+    private String beneficiaryDocumentType;
+
+    @Column(name = "beneficiary_name")
+    private String beneficiaryName;
+
+    @Column(name = "beneficiary_category")
+    private String beneficiaryCategory;
+
+    @Column(name = "beneficiary_birth_date")
+    private LocalDate beneficiaryBirthDate;
+
+    @Column(name = "income_type")
+    private String incomeType;
+
+    @Column(name = "reversed_income")
+    private Boolean reversedIncome;
+
+    @Column(name = "income_amount")
+    private String incomeAmount;
+
+    @Column(name = "income_unit_type")
+    private String incomeUnitType;
+
+    @Column(name = "income_unit_type_others")
+    private String incomeUnitTypeOthers;
+
+    @Column(name = "income_unit_code")
+    private String incomeUnitCode;
+
+    @Column(name = "income_unit_description")
+    private String incomeUnitDescription;
+
+    @Column(name = "income_currency")
+    private String incomeCurrency;
+
+    @Column(name = "payment_terms")
+    private String paymentTerms;
+
+    @Column(name = "benefit_amount")
+    private Integer benefitAmount;
+
+    @Column(name = "granted_date")
+    private LocalDate grantedDate;
+
+    @Column(name = "monetary_update_index")
+    private String monetaryUpdateIndex;
+
+    @Column(name = "last_update_date")
+    private LocalDate lastUpdateDate;
+
+    @Column(name = "deferment_due_date")
+    private LocalDate defermentDueDate;
+
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
@@ -39,64 +105,64 @@ public class LifePensionContractClaimEntity extends BaseEntity {
     public InsuranceLifePensionClaim mapDTO() {
         return new InsuranceLifePensionClaim()
                 .eventInfo(new EventInfo()
-                        .eventStatus(EventInfo.EventStatusEnum.ABERTO)
-                        .eventAlertDate(LocalDate.of(2021, 5, 1))
-                        .eventRegisterDate(LocalDate.of(2021, 5, 1))
+                        .eventStatus(EventInfo.EventStatusEnum.fromValue(this.getEventStatus()))
+                        .eventAlertDate(this.getEventAlertDate())
+                        .eventRegisterDate(this.getEventRegisterDate())
                 )
                 .incomeInfo(new InsuranceLifePensionClaimIncomeInfo()
-                        .beneficiaryDocument("12345678910")
-                        .beneficiaryDocumentType(InsuranceLifePensionClaimIncomeInfo.BeneficiaryDocumentTypeEnum.CPF)
-                        .beneficiaryName("NOME BENEFICIARIO")
-                        .beneficiaryCategory(InsuranceLifePensionClaimIncomeInfo.BeneficiaryCategoryEnum.SEGURADO)
-                        .beneficiaryBirthDate(LocalDate.of(1990, 1, 1))
-                        .incomeType(InsuranceLifePensionClaimIncomeInfo.IncomeTypeEnum.PAGAMENTO_UNICO)
-                        .reversedIncome(false)
+                        .beneficiaryDocument(this.getBeneficiaryDocument())
+                        .beneficiaryDocumentType(InsuranceLifePensionClaimIncomeInfo.BeneficiaryDocumentTypeEnum.fromValue(this.getBeneficiaryDocumentType()))
+                        .beneficiaryName(this.getBeneficiaryName())
+                        .beneficiaryCategory(InsuranceLifePensionClaimIncomeInfo.BeneficiaryCategoryEnum.fromValue(this.getBeneficiaryCategory()))
+                        .beneficiaryBirthDate(this.getBeneficiaryBirthDate())
+                        .incomeType(InsuranceLifePensionClaimIncomeInfo.IncomeTypeEnum.fromValue(this.getIncomeType()))
+                        .reversedIncome(this.getReversedIncome())
                         .incomeAmount(new AmountDetails()
-                                .amount("10000.00")
-                                .unitType(AmountDetails.UnitTypeEnum.MONETARIO)
+                                .amount(this.getIncomeAmount())
+                                .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getIncomeUnitType()))
                                 .unit(new AmountDetailsUnit()
-                                        .code("Br")
-                                        .description(AmountDetailsUnit.DescriptionEnum.BRL)
+                                        .code(this.getIncomeUnitCode())
+                                        .description(AmountDetailsUnit.DescriptionEnum.fromValue(this.getIncomeUnitDescription()))
                                 )
                         )
-                        .paymentTerms("PRAZO")
-                        .benefitAmount(1000)
-                        .grantedDate(LocalDate.of(2021, 5, 1))
-                        .monetaryUpdateIndex(InsuranceLifePensionClaimIncomeInfo.MonetaryUpdateIndexEnum.IPC_FGV)
-                        .lastUpdateDate(LocalDate.of(2021, 5, 1))
-                        .defermentDueDate(LocalDate.of(2025, 5, 1))
+                        .paymentTerms(this.getPaymentTerms())
+                        .benefitAmount(this.getBenefitAmount())
+                        .grantedDate(this.getGrantedDate())
+                        .monetaryUpdateIndex(InsuranceLifePensionClaimIncomeInfo.MonetaryUpdateIndexEnum.fromValue(this.getMonetaryUpdateIndex()))
+                        .lastUpdateDate(this.getLastUpdateDate())
+                        .defermentDueDate(this.getDefermentDueDate())
                 );
     }
 
     public InsuranceLifePensionClaimV2 mapDTOV2() {
         return new InsuranceLifePensionClaimV2()
                 .eventInfo(new EventInfo()
-                        .eventStatus(EventInfo.EventStatusEnum.ABERTO)
-                        .eventAlertDate(LocalDate.of(2021, 5, 1))
-                        .eventRegisterDate(LocalDate.of(2021, 5, 1))
+                        .eventStatus(EventInfo.EventStatusEnum.fromValue(this.getEventStatus()))
+                        .eventAlertDate(this.getEventAlertDate())
+                        .eventRegisterDate(this.getEventRegisterDate())
                 )
                 .incomeInfo(new InsuranceLifePensionClaimV2IncomeInfo()
-                        .beneficiaryDocument("12345678910")
-                        .beneficiaryDocumentType(InsuranceLifePensionClaimV2IncomeInfo.BeneficiaryDocumentTypeEnum.CPF)
-                        .beneficiaryName("NOME BENEFICIARIO")
-                        .beneficiaryCategory(InsuranceLifePensionClaimV2IncomeInfo.BeneficiaryCategoryEnum.SEGURADO)
-                        .beneficiaryBirthDate(LocalDate.of(1990, 1, 1))
-                        .incomeType(InsuranceLifePensionClaimV2IncomeInfo.IncomeTypeEnum.PAGAMENTO_UNICO)
-                        .reversedIncome(false)
+                        .beneficiaryDocument(this.getBeneficiaryDocument())
+                        .beneficiaryDocumentType(InsuranceLifePensionClaimV2IncomeInfo.BeneficiaryDocumentTypeEnum.fromValue(this.getBeneficiaryDocumentType()))
+                        .beneficiaryName(this.getBeneficiaryName())
+                        .beneficiaryCategory(InsuranceLifePensionClaimV2IncomeInfo.BeneficiaryCategoryEnum.fromValue(this.getBeneficiaryCategory()))
+                        .beneficiaryBirthDate(this.getBeneficiaryBirthDate())
+                        .incomeType(InsuranceLifePensionClaimV2IncomeInfo.IncomeTypeEnum.fromValue(this.getIncomeType()))
+                        .reversedIncome(this.getReversedIncome())
                         .incomeAmount(new AmountDetails()
-                                .amount("10000.00")
-                                .unitType(AmountDetails.UnitTypeEnum.MONETARIO)
+                                .amount(this.getIncomeAmount())
+                                .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getIncomeUnitType()))
                                 .unit(new AmountDetailsUnit()
-                                        .code("Br")
-                                        .description(AmountDetailsUnit.DescriptionEnum.BRL)
+                                        .code(this.getIncomeUnitCode())
+                                        .description(AmountDetailsUnit.DescriptionEnum.fromValue(this.getIncomeUnitDescription()))
                                 )
                         )
-                        .paymentTerms("PRAZO")
-                        .benefitAmount(1000)
-                        .grantedDate(LocalDate.of(2021, 5, 1))
-                        .monetaryUpdateIndex(InsuranceLifePensionClaimV2IncomeInfo.MonetaryUpdateIndexEnum.IPC_FGV)
-                        .lastUpdateDate(LocalDate.of(2021, 5, 1))
-                        .defermentDueDate(LocalDate.of(2025, 5, 1))
+                        .paymentTerms(this.getPaymentTerms())
+                        .benefitAmount(this.getBenefitAmount())
+                        .grantedDate(this.getGrantedDate())
+                        .monetaryUpdateIndex(InsuranceLifePensionClaimV2IncomeInfo.MonetaryUpdateIndexEnum.fromValue(this.getMonetaryUpdateIndex()))
+                        .lastUpdateDate(this.getLastUpdateDate())
+                        .defermentDueDate(this.getDefermentDueDate())
                 );
     }
 }

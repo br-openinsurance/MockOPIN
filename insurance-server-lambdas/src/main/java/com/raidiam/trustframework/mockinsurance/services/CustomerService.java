@@ -5,11 +5,10 @@ import com.raidiam.trustframework.mockinsurance.models.generated.*;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
-
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 @Singleton
 @Transactional
@@ -17,7 +16,7 @@ public class CustomerService extends BaseInsuranceService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CustomerService.class);
 
-    private List<PersonalIdentificationEntity> getPersonalIdentificationEntities(String consentId){
+    public List<PersonalIdentificationEntity> getPersonalIdentificationEntities(String consentId){
         LOG.info("Getting Personal Customers Identification response for consent id {}", consentId);
     
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
@@ -40,7 +39,7 @@ public class CustomerService extends BaseInsuranceService {
         return new ResponsePersonalCustomersIdentificationV2().data(data);
     }
 
-    public ResponsePersonalCustomersQualification getPersonalQualifications(String consentId) {
+    public List<PersonalQualificationEntity> getPersonalQualificationEntities(String consentId) {
         LOG.info("Getting Personal Customers Qualification response for consent id {}", consentId);
 
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
@@ -48,12 +47,16 @@ public class CustomerService extends BaseInsuranceService {
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
         InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.CUSTOMERS_PERSONAL_QUALIFICATION_READ, EnumConsentV3Permission.CUSTOMERS_PERSONAL_QUALIFICATION_READ);
 
-        var personalQualifications = personalQualificationRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId());
+        return personalQualificationRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId());
+    }
+
+    public ResponsePersonalCustomersQualification getPersonalQualifications(String consentId) {
+        var personalQualifications = getPersonalQualificationEntities(consentId);
         var data = personalQualifications.stream().map(PersonalQualificationEntity::mapDto).toList();
         return new ResponsePersonalCustomersQualification().data(data);
     }
 
-    public ResponsePersonalCustomersComplimentaryInformation getPersonalComplimentaryInfo(String consentId) {
+    public List<PersonalComplimentaryInformationEntity> getPersonalComplimentaryInfoEntities(String consentId) {
         LOG.info("Getting Personal Customers Complimentary Information response for consent id {}", consentId);
 
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
@@ -61,12 +64,16 @@ public class CustomerService extends BaseInsuranceService {
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
         InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.CUSTOMERS_PERSONAL_ADDITIONALINFO_READ, EnumConsentV3Permission.CUSTOMERS_PERSONAL_ADDITIONALINFO_READ);
 
-        var personalInfo = personalComplimentaryInformationRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId());
+        return personalComplimentaryInformationRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId());
+    }
+
+    public ResponsePersonalCustomersComplimentaryInformation getPersonalComplimentaryInfo(String consentId) {
+        var personalInfo = getPersonalComplimentaryInfoEntities(consentId);
         var data = personalInfo.stream().map(PersonalComplimentaryInformationEntity::mapDto).toList();
         return new ResponsePersonalCustomersComplimentaryInformation().data(data);
     }
 
-    private List<BusinessIdentificationEntity> getBusinessIdentificationEntities(String consentId) {
+    public List<BusinessIdentificationEntity> getBusinessIdentificationEntities(String consentId) {
         LOG.info("Getting Business Customers Identification response for consent id {}", consentId);
     
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
@@ -89,7 +96,7 @@ public class CustomerService extends BaseInsuranceService {
         return new ResponseBusinessCustomersIdentificationV2().data(data);
     }
 
-    public ResponseBusinessCustomersQualification getBusinessQualifications(String consentId) {
+    public List<BusinessQualificationEntity> getBusinessQualificationEntities(String consentId) {
         LOG.info("Getting Business Customers Qualification response for consent id {}", consentId);
 
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
@@ -97,12 +104,16 @@ public class CustomerService extends BaseInsuranceService {
         InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
         InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.CUSTOMERS_BUSINESS_QUALIFICATION_READ, EnumConsentV3Permission.CUSTOMERS_BUSINESS_QUALIFICATION_READ);
 
-        var businessIdentifications = businessQualificationRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId());
-        var data = businessIdentifications.stream().map(BusinessQualificationEntity::mapDto).toList();
+        return businessQualificationRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId());
+    }
+
+    public ResponseBusinessCustomersQualification getBusinessQualifications(String consentId) {
+        var businessQualifications = getBusinessQualificationEntities(consentId);
+        var data = businessQualifications.stream().map(BusinessQualificationEntity::mapDto).toList();
         return new ResponseBusinessCustomersQualification().data(data);
     }
 
-    private List<BusinessComplimentaryInformationEntity> getBusinessComplimentaryInfoEntities(String consentId) {
+    public List<BusinessComplimentaryInformationEntity> getBusinessComplimentaryInfoEntities(String consentId) {
         LOG.info("Getting Business Customers Complimentary Information response for consent id {}", consentId);
     
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);

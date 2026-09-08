@@ -779,6 +779,304 @@ class ConsentServiceSpec extends CleanupSpecification {
         entityOp.get().rejectionCode == EnumReasonCode.CUSTOMER_MANUALLY_REVOKED.name()
     }
 
+    def "We can't create a consent with withdrawal permissions without withdrawalLifePensionInformation"() {
+        given:
+        def clientId = "random_client_id"
+        def req = TestRequestDataFactory.createConsentRequest(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                PermissionGroup.PENSION_WITHDRAWAL.getPermissions().toList()
+        )
+
+        when:
+        consentService.createConsent(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.getMessage() == "NAO_INFORMADO: withdrawalLifePensionInformation is required when requesting withdrawal permissions"
+    }
+
+    def "We can't create a consent V3 with withdrawal permissions without withdrawalLifePensionInformation"() {
+        given:
+        def clientId = "random_client_id"
+        def req = TestRequestDataFactory.createConsentV3Request(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                PermissionV3Group.PENSION_WITHDRAWAL.getPermissions().toList()
+        )
+
+        when:
+        consentService.createConsentV3(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.getMessage() == "NAO_INFORMADO: withdrawalLifePensionInformation is required when requesting withdrawal permissions"
+    }
+
+    def "We can't create a consent with withdrawalType 1_TOTAL and desiredTotalAmount present"() {
+        given:
+        def clientId = "random_client_id"
+        def withdrawalInfo = new CreateConsentDataWithdrawalLifePensionInformation()
+                .certificateId("cert_123")
+                .productName("product_name")
+                .withdrawalType(CreateConsentDataWithdrawalLifePensionInformation.WithdrawalTypeEnum._1_TOTAL)
+                .withdrawalReason(CreateConsentDataWithdrawalLifePensionInformation.WithdrawalReasonEnum._1_EMERGENCIAS_DE_SAUDE)
+                .pmbacAmount(new AmountDetails().amount("2000.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
+                .desiredTotalAmount(new AmountDetails().amount("1000.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
+        def req = TestRequestDataFactory.createConsentRequest(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                PermissionGroup.PENSION_WITHDRAWAL.getPermissions().toList(),
+                withdrawalInfo
+        )
+
+        when:
+        consentService.createConsent(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.getMessage().contains("NAO_INFORMADO: desiredTotalAmount must not be present when withdrawalType is")
+        e.getMessage().contains("TOTAL")
+    }
+
+    def "We can't create a consent V3 with withdrawalType 1_TOTAL and desiredTotalAmount present"() {
+        given:
+        def clientId = "random_client_id"
+        def withdrawalInfo = new CreateConsentV3DataWithdrawalLifePensionInformation()
+                .certificateId("cert_123")
+                .productName("product_name")
+                .withdrawalType(CreateConsentV3DataWithdrawalLifePensionInformation.WithdrawalTypeEnum.TOTAL)
+                .withdrawalReason(CreateConsentV3DataWithdrawalLifePensionInformation.WithdrawalReasonEnum.EMERGENCIAS_DE_SAUDE)
+                .pmbacAmount(new AmountDetails().amount("2000.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
+                .desiredTotalAmount(new AmountDetails().amount("1000.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
+        def req = TestRequestDataFactory.createConsentV3Request(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                PermissionV3Group.PENSION_WITHDRAWAL.getPermissions().toList(),
+                withdrawalInfo
+        )
+
+        when:
+        consentService.createConsentV3(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.getMessage().contains("NAO_INFORMADO: desiredTotalAmount must not be present when withdrawalType is")
+        e.getMessage().contains("TOTAL")
+    }
+
+    def "We can't create a consent with withdrawalType 2_PARCIAL and desiredTotalAmount exceeding pmbacAmount"() {
+        given:
+        def clientId = "random_client_id"
+        def withdrawalInfo = new CreateConsentDataWithdrawalLifePensionInformation()
+                .certificateId("cert_123")
+                .productName("product_name")
+                .withdrawalType(CreateConsentDataWithdrawalLifePensionInformation.WithdrawalTypeEnum._2_PARCIAL)
+                .withdrawalReason(CreateConsentDataWithdrawalLifePensionInformation.WithdrawalReasonEnum._1_EMERGENCIAS_DE_SAUDE)
+                .pmbacAmount(new AmountDetails().amount("2000.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
+                .desiredTotalAmount(new AmountDetails().amount("3000.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
+        def req = TestRequestDataFactory.createConsentRequest(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                PermissionGroup.PENSION_WITHDRAWAL.getPermissions().toList(),
+                withdrawalInfo
+        )
+
+        when:
+        consentService.createConsent(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.getMessage() == "NAO_INFORMADO: desiredTotalAmount must not be greater than pmbacAmount"
+    }
+
+    def "We can't create a consent V3 with withdrawalType 2_PARCIAL and desiredTotalAmount exceeding pmbacAmount"() {
+        given:
+        def clientId = "random_client_id"
+        def withdrawalInfo = new CreateConsentV3DataWithdrawalLifePensionInformation()
+                .certificateId("cert_123")
+                .productName("product_name")
+                .withdrawalType(CreateConsentV3DataWithdrawalLifePensionInformation.WithdrawalTypeEnum.PARCIAL)
+                .withdrawalReason(CreateConsentV3DataWithdrawalLifePensionInformation.WithdrawalReasonEnum.EMERGENCIAS_DE_SAUDE)
+                .pmbacAmount(new AmountDetails().amount("2000.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
+                .desiredTotalAmount(new AmountDetails().amount("3000.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
+        def req = TestRequestDataFactory.createConsentV3Request(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                PermissionV3Group.PENSION_WITHDRAWAL.getPermissions().toList(),
+                withdrawalInfo
+        )
+
+        when:
+        consentService.createConsentV3(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.getMessage() == "NAO_INFORMADO: desiredTotalAmount must not be greater than pmbacAmount"
+    }
+
+    def "We can't create a consent with phase 2 and CAPITALIZATION_TITLE_WITHDRAWAL_CREATE permissions"() {
+        given:
+        def clientId = "random_client_id"
+        def permissions = new ArrayList<>(PermissionGroup.PERSONAL_REGISTRATION.getPermissions())
+        permissions.addAll(PermissionGroup.CAPITALIZATION_TITLE_WITHDRAWAL.getPermissions())
+        def withdrawalCapInfo = new CreateConsentDataWithdrawalCaptalizationInformation()
+                .capitalizationTitleName("title_name")
+                .planId("plan_123")
+                .titleId("title_123")
+                .seriesId("series_123")
+                .termEndDate(java.time.LocalDate.of(2025, 12, 31))
+        def req = TestRequestDataFactory.createConsentRequest(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                permissions.toList(),
+                withdrawalCapInfo
+        )
+
+        when:
+        consentService.createConsent(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.getMessage() == "NAO_INFORMADO: Cannot request permissions from phase 2 and 3 at the same time"
+    }
+
+    def "We can't create a consent V3 with phase 2 and CAPITALIZATION_TITLE_WITHDRAWAL_CREATE permissions"() {
+        given:
+        def clientId = "random_client_id"
+        def permissions = new ArrayList<>(PermissionV3Group.PERSONAL_REGISTRATION.getPermissions())
+        permissions.addAll(PermissionV3Group.CAPITALIZATION_TITLE_WITHDRAWAL.getPermissions())
+        def withdrawalCapInfo = new CreateConsentDataWithdrawalCaptalizationInformation()
+                .capitalizationTitleName("title_name")
+                .planId("plan_123")
+                .titleId("title_123")
+                .seriesId("series_123")
+                .termEndDate(java.time.LocalDate.of(2025, 12, 31))
+        def req = TestRequestDataFactory.createConsentV3Request(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                permissions.toList(),
+                withdrawalCapInfo
+        )
+
+        when:
+        consentService.createConsentV3(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.getMessage() == "NAO_INFORMADO: Cannot request permissions from phase 2 and 3 at the same time"
+    }
+
+    def "We can't create a consent with CAPITALIZATION_TITLE_WITHDRAWAL_CREATE without withdrawalCaptalizationInformation"() {
+        given:
+        def clientId = "random_client_id"
+        def req = TestRequestDataFactory.createConsentRequest(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                PermissionGroup.CAPITALIZATION_TITLE_WITHDRAWAL.getPermissions().toList()
+        )
+
+        when:
+        consentService.createConsent(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.getMessage() == "NAO_INFORMADO: withdrawalCaptalizationInformation is required when requesting capitalization title withdrawal permissions"
+    }
+
+    def "We can't create a consent V3 with CAPITALIZATION_TITLE_WITHDRAWAL_CREATE without withdrawalCaptalizationInformation"() {
+        given:
+        def clientId = "random_client_id"
+        def req = TestRequestDataFactory.createConsentV3Request(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                PermissionV3Group.CAPITALIZATION_TITLE_WITHDRAWAL.getPermissions().toList()
+        )
+
+        when:
+        consentService.createConsentV3(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.getMessage() == "NAO_INFORMADO: withdrawalCaptalizationInformation is required when requesting capitalization title withdrawal permissions"
+    }
+
+    def "We can't create a consent with PENSION_WITHDRAWAL_CREATE and CAPITALIZATION_TITLE_WITHDRAWAL_CREATE"() {
+        given:
+        def clientId = "random_client_id"
+        def permissions = new ArrayList(PermissionGroup.PENSION_WITHDRAWAL.getPermissions())
+        permissions.addAll(PermissionGroup.CAPITALIZATION_TITLE_WITHDRAWAL.getPermissions())
+        def withdrawalCapInfo = new CreateConsentDataWithdrawalCaptalizationInformation()
+                .capitalizationTitleName("title_name")
+                .planId("plan_123")
+                .titleId("title_123")
+                .seriesId("series_123")
+                .termEndDate(java.time.LocalDate.of(2025, 12, 31))
+        def req = TestRequestDataFactory.createConsentRequest(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                permissions.toList(),
+                withdrawalCapInfo
+        )
+
+        when:
+        consentService.createConsent(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.getMessage() == "NAO_INFORMADO: The permissions of different phase 3 categories were requested"
+    }
+
+    def "We can't create a consent V3 with PENSION_WITHDRAWAL_CREATE and CAPITALIZATION_TITLE_WITHDRAWAL_CREATE"() {
+        given:
+        def clientId = "random_client_id"
+        def permissions = new ArrayList(PermissionV3Group.PENSION_WITHDRAWAL.getPermissions())
+        permissions.addAll(PermissionV3Group.CAPITALIZATION_TITLE_WITHDRAWAL.getPermissions())
+        def withdrawalCapInfo = new CreateConsentDataWithdrawalCaptalizationInformation()
+                .capitalizationTitleName("title_name")
+                .planId("plan_123")
+                .titleId("title_123")
+                .seriesId("series_123")
+                .termEndDate(java.time.LocalDate.of(2025, 12, 31))
+        def req = TestRequestDataFactory.createConsentV3Request(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                permissions.toList(),
+                withdrawalCapInfo
+        )
+
+        when:
+        consentService.createConsentV3(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.getMessage() == "NAO_INFORMADO: The permissions of different phase 3 categories were requested"
+    }
+
     def "enable cleanup"() {
         //This must be the final test
         when:

@@ -1,9 +1,13 @@
 package com.raidiam.trustframework.mockinsurance.domain;
 
 import com.raidiam.trustframework.mockinsurance.models.generated.*;
+import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.envers.Audited;
+
+import static com.raidiam.trustframework.mockinsurance.utils.AddressParser.parseNationalAddressNameAndNumber;
+import static com.raidiam.trustframework.mockinsurance.utils.AddressParser.parseNationalAddressType;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -67,20 +71,22 @@ public class IntermediaryEntity extends BaseIdEntity {
     }
 
     public IntermediaryV2 mapDTOV2() {
+        String[] addressNameAndNumber = parseNationalAddressNameAndNumber(this.getAddress());
+        NationalAddress.TypeEnum addressType = parseNationalAddressType(this.getAddress());
         return new IntermediaryV2()
                 .identificationType(IntermediaryV2.IdentificationTypeEnum.fromValue(this.getIdentificationType()))
                 .address(new Address()
                     .flagPostCode(Address.FlagPostCodeEnum.valueOf(this.getFlagPostCode()))
                     .address((AllOfAddressAddress) new AllOfAddressAddress()
-                        .allOfAddressAddressName(this.getAddress().split(" ", 2)[1].split(",")[0])
-                        .allOfAddressAddressNumber(this.getAddress().split(" ", 2)[1].split(",")[1].trim())
+                        .allOfAddressAddressName(addressNameAndNumber[0])
+                        .allOfAddressAddressNumber(addressNameAndNumber[1])
                         .allOfAddressAddressAddressComplementaryInfo(this.getAddressAdditionalInfo())
                         .allOfAddressAddressTownName(this.getCity())
                         .allOfAddressAddressCountrySubDivision(this.getState())
                         .allOfAddressAddressPostCode(this.getPostCode())
-                        .type(NationalAddress.TypeEnum.valueOf(this.getAddress().split(" ")[0].toUpperCase()))
-                        .name(this.getAddress().split(" ", 2)[1].split(",")[0])
-                        .number(this.getAddress().split(" ", 2)[1].split(",")[1].trim())
+                        .type(addressType)
+                        .name(addressNameAndNumber[0])
+                        .number(addressNameAndNumber[1])
                         .addressComplementaryInfo(this.getAddressAdditionalInfo())
                         .districtName(this.getDistrictName())
                         .townName(this.getCity())

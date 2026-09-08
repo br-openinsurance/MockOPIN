@@ -150,10 +150,9 @@ public class InsuranceLambdaUtils {
 
     public static class RequestMeta {
 
-        RequestMeta(List<String> roles, String consentId, String enrollmentId, String clientId, String jti, String jwtPayload) {
+        RequestMeta(List<String> roles, String consentId, String clientId, String jti, String jwtPayload) {
             this.roles = roles;
             this.consentId = consentId;
-            this.enrollmentId = enrollmentId;
             this.clientId = clientId;
             this.jti = jti;
             this.jwtPayload = jwtPayload;
@@ -163,8 +162,6 @@ public class InsuranceLambdaUtils {
         private final List<String> roles;
         @Getter
         private final String consentId;
-        @Getter
-        private final String enrollmentId;
         @Getter
         private final String clientId;
         @Getter
@@ -190,20 +187,18 @@ public class InsuranceLambdaUtils {
                 }
                 String clientId = clientIdOpt.get().toString();
                 String consentId = request.getAttribute("consentId").map(Object::toString).orElse(null);
-                String enrollmentId = request.getAttribute("enrollmentId").map(Object::toString).orElse(null);
                 LOG.info("Roles: {}", String.join(",", roles));
                 LOG.info("Request made by client id: {}", clientId);
                 LOG.info("Request made with consent Id: {}", consentId);
-                LOG.info("Request made with enrollment Id: {}", enrollmentId);
                 LOG.info("Request made with JTI: {}", jti);
                 LOG.info("Request made with JWT payload: {}", jwtPayload);
-                return new RequestMeta(roles, consentId, enrollmentId, clientId, jti, jwtPayload);
+                return new RequestMeta(roles, consentId, clientId, jti, jwtPayload);
             }
         } catch (Exception e) {
             LOG.error("Exception  getting caller info. Error: ", e);
         }
         LOG.info("No authentication present");
-        return new RequestMeta(Collections.emptyList(), null, null, null, jti, jwtPayload);
+        return new RequestMeta(Collections.emptyList(), null, null, jti, jwtPayload);
     }
 
     public static String getIdempotencyKey(HttpRequest<?> request) {

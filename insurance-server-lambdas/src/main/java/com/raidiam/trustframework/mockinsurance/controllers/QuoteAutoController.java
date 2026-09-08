@@ -9,6 +9,7 @@ import com.raidiam.trustframework.mockinsurance.auth.RequiredAuthenticationGrant
 import com.raidiam.trustframework.mockinsurance.domain.QuoteAutoEntity;
 import com.raidiam.trustframework.mockinsurance.domain.QuoteAutoLeadEntity;
 import com.raidiam.trustframework.mockinsurance.fapi.Idempotent;
+import com.raidiam.trustframework.mockinsurance.fapi.ResponseErrorWithRequestDateTime;
 import com.raidiam.trustframework.mockinsurance.fapi.XFapiInteractionIdRequired;
 import com.raidiam.trustframework.mockinsurance.services.QuoteAutoLeadService;
 import com.raidiam.trustframework.mockinsurance.services.QuoteAutoService;
@@ -128,6 +129,7 @@ public class QuoteAutoController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @ResponseErrorWithRequestDateTime
     public ResponseQuote createLeadQuoteV2(@Body QuoteRequestAutoLeadV2 body, @NotNull HttpRequest<?> request) {
 
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
@@ -159,6 +161,7 @@ public class QuoteAutoController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     @Idempotent
+    @ResponseErrorWithRequestDateTime
     public ResponseQuoteAutoV2 createQuoteV2(@Body QuoteRequestAutoV2 body, HttpRequest<?> request) {
 
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);

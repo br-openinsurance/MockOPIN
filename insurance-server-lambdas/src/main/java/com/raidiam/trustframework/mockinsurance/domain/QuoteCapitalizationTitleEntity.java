@@ -156,7 +156,7 @@ public class QuoteCapitalizationTitleEntity extends QuoteEntity {
 
         @JsonIgnore
         public QuoteDataCapitalizationTitle getQuoteData() {
-            if (this.getV1().getQuoteData() != null) {
+            if (this.getV1() != null) {
                 return this.getV1().getQuoteData();
             }
             return this.getV2().getQuoteData();

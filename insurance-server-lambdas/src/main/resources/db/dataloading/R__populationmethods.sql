@@ -24,20 +24,20 @@ CREATE OR REPLACE FUNCTION addAccountWithId(docId varchar, accountId uuid, statu
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addPersonalIdentification(docId varchar) RETURNS uuid AS $$
-    INSERT INTO personal_identifications (account_holder_id, created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    INSERT INTO personal_identifications (personal_identification_id, account_holder_id, created_at, created_by, updated_at, updated_by)
+    VALUES (uuid_generate_v5(uuid_ns_url(), 'personal-identification:' || docId), getAccountHolderId(docId), NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING personal_identification_id
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addPersonalQualification(docId varchar) RETURNS uuid AS $$
-    INSERT INTO personal_qualifications (account_holder_id, created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    INSERT INTO personal_qualifications (personal_qualification_id, account_holder_id, created_at, created_by, updated_at, updated_by)
+    VALUES (uuid_generate_v5(uuid_ns_url(), 'personal-qualification:' || docId), getAccountHolderId(docId), NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING personal_qualification_id
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addPersonalComplimentaryInfo(docId varchar) RETURNS uuid AS $$
-    INSERT INTO personal_complimentary_information (account_holder_id, created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    INSERT INTO personal_complimentary_information (personal_complimentary_information_id, account_holder_id, created_at, created_by, updated_at, updated_by)
+    VALUES (uuid_generate_v5(uuid_ns_url(), 'personal-complimentary-information:' || docId), getAccountHolderId(docId), NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING personal_complimentary_information_id
 $$ LANGUAGE SQL;
 
@@ -61,9 +61,9 @@ $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addCapitalizationTitlePlan(docId varchar, titleId varchar, status varchar,
 productName varchar) RETURNS uuid AS $$
-    INSERT INTO capitalization_title_plans (account_holder_id, capitalization_title_id, status, product_name,
+    INSERT INTO capitalization_title_plans (capitalization_title_plan_id, account_holder_id, capitalization_title_id, status, product_name,
     created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), titleId, status, productName, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    VALUES (uuid_generate_v5(uuid_ns_url(), 'capitalization:' || docId || ':' || titleId), getAccountHolderId(docId), titleId, status, productName, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING capitalization_title_plan_id
 $$ LANGUAGE SQL;
 
@@ -205,12 +205,12 @@ termStartDate date, termEndDate date, leadInsurerCode varchar, leadInsurerPolicy
 maxLMGUnitType varchar, maxLMGUnitTypeOthers varchar, maxLMGUnitCode varchar, maxLMGUnitDescription varchar,
 proposalId varchar, coinsuranceRetainedPercentage varchar, branchInfoIdentification varchar,
 branchInfoUserGroup varchar, branchInfoTechnicalSurplus varchar) RETURNS uuid AS $$
-    INSERT INTO financial_risk_policies (account_holder_id, financial_risk_id, status, product_name, document_type,
+    INSERT INTO financial_risk_policies (financial_risk_policy_id, account_holder_id, financial_risk_id, status, product_name, document_type,
     susep_process_number, group_certificate_id, issuance_type, issuance_date, term_start_date, term_end_date,
     lead_insurer_code, lead_insurer_policy_id, max_lmg_amount, max_lmg_unit_type, max_lmg_unit_type_others, max_lmg_unit_code,
     max_lmg_unit_description, proposal_id, coinsurance_retained_percentage, identification,
     user_group, technical_surplus, created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), titleId, status, productName, documentType, susepProcessNumber, groupCertificateId,
+    VALUES (uuid_generate_v5(uuid_ns_url(), 'financialrisk:' || docId), getAccountHolderId(docId), titleId, status, productName, documentType, susepProcessNumber, groupCertificateId,
     issuanceType, issuanceDate, termStartDate, termEndDate, leadInsurerCode, leadInsurerPolicyId, maxLMGAmount,
     maxLMGUnitType, maxLMGUnitTypeOthers, maxLMGUnitCode, maxLMGUnitDescription, proposalId,
     coinsuranceRetainedPercentage, branchInfoIdentification, branchInfoUserGroup, branchInfoTechnicalSurplus,
@@ -453,11 +453,11 @@ CREATE OR REPLACE FUNCTION addHousingPolicy(docId varchar, titleId varchar, s va
 policyId VARCHAR, susepProcessNumber VARCHAR, groupCertificateId VARCHAR, issuanceType VARCHAR, issuanceDate DATE, termStartDate DATE,
 termEndDate DATE, leadInsurerCode VARCHAR, leadInsurerPolicyId VARCHAR, maxLmgAmount VARCHAR, maxLmgUnitType VARCHAR, maxLmgUnitCode VARCHAR,
 maxLmgUnitDescription VARCHAR, proposalId VARCHAR) RETURNS uuid AS $$
-    INSERT INTO housing_policies (account_holder_id, housing_id, status, product_name, document_type, policy_id, susep_process_number,
+    INSERT INTO housing_policies (housing_policy_id, account_holder_id, housing_id, status, product_name, document_type, policy_id, susep_process_number,
     group_certificate_id, issuance_type, issuance_date, term_start_date, term_end_date, lead_insurer_code, lead_insurer_policy_id,
     max_lmg_amount, max_lmg_unit_type, max_lmg_unit_code, max_lmg_unit_description, proposal_id,
     created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), titleId, s, productName, documentType, policyId, susepProcessNumber, groupCertificateId, issuanceType,
+    VALUES (uuid_generate_v5(uuid_ns_url(), 'housing:' || docId), getAccountHolderId(docId), titleId, s, productName, documentType, policyId, susepProcessNumber, groupCertificateId, issuanceType,
     issuanceDate, termStartDate, termEndDate, leadInsurerCode, leadInsurerPolicyId, maxLmgAmount, maxLmgUnitType, maxLmgUnitCode, maxLmgUnitDescription,
     proposalId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING housing_policy_id
@@ -536,8 +536,8 @@ CREATE OR REPLACE FUNCTION addHousingPolicyPremiumCoverage(premiumId uuid, branc
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addResponsibilityPolicy(docId varchar, titleId varchar, s varchar) RETURNS uuid AS $$
-    INSERT INTO responsibility_policies (account_holder_id, responsibility_id, status, created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), titleId, s, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    INSERT INTO responsibility_policies (responsibility_policy_id, account_holder_id, responsibility_id, status, created_at, created_by, updated_at, updated_by)
+    VALUES (uuid_generate_v5(uuid_ns_url(), 'responsibility:' || docId), getAccountHolderId(docId), titleId, s, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING responsibility_policy_id
 $$ LANGUAGE SQL;
 
@@ -553,99 +553,492 @@ CREATE OR REPLACE FUNCTION addResponsibilityPolicyPremium(planId uuid) RETURNS u
     RETURNING responsibility_policy_premium_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addPersonPolicy(docId varchar, titleId varchar, s varchar) RETURNS uuid AS $$
-    INSERT INTO person_policies (account_holder_id, person_id, status, created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), titleId, s, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+DROP FUNCTION IF EXISTS addPersonPolicy(varchar, varchar, varchar);
+CREATE OR REPLACE FUNCTION addPersonPolicy(
+    docId varchar,
+    titleId varchar,
+    s varchar,
+    productName varchar DEFAULT 'Mock Insurer Person Policy',
+    documentType varchar DEFAULT 'APOLICE_INDIVIDUAL',
+    susepProcessNumber varchar DEFAULT 'string',
+    groupCertificateId varchar DEFAULT 'string',
+    issuanceType varchar DEFAULT 'EMISSAO_PROPRIA',
+    issuanceDate date DEFAULT '2022-12-31',
+    termStartDate date DEFAULT '2022-12-31',
+    termEndDate date DEFAULT '2023-12-31',
+    leadInsurerCode varchar DEFAULT 'string',
+    leadInsurerPolicyId varchar DEFAULT 'string',
+    proposalId varchar DEFAULT 'string',
+    pmbacAmount varchar DEFAULT '9871667727569.12',
+    pmbacUnitType varchar DEFAULT 'MONETARIO',
+    pmbacUnitCode varchar DEFAULT 'Br',
+    pmbacUnitDescription varchar DEFAULT 'BRL',
+    occurrenceWithdrawal boolean DEFAULT false,
+    occurrencePortability boolean DEFAULT false
+) RETURNS uuid AS $$
+    INSERT INTO person_policies (person_policy_id, account_holder_id, person_id, status, product_name, document_type, susep_process_number, group_certificate_id, issuance_type, issuance_date, term_start_date, term_end_date, lead_insurer_code, lead_insurer_policy_id, proposal_id, pmbac_amount, pmbac_unit_type, pmbac_unit_code, pmbac_unit_description, occurrence_withdrawal, occurrence_portability, created_at, created_by, updated_at, updated_by)
+    VALUES (uuid_generate_v5(uuid_ns_url(), 'person:' || docId || ':' || titleId), getAccountHolderId(docId), titleId, s, productName, documentType, susepProcessNumber, groupCertificateId, issuanceType, issuanceDate, termStartDate, termEndDate, leadInsurerCode, leadInsurerPolicyId, proposalId, pmbacAmount, pmbacUnitType, pmbacUnitCode, pmbacUnitDescription, occurrenceWithdrawal, occurrencePortability, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING person_policy_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addPersonPolicyClaim(planId uuid) RETURNS uuid AS $$
-    INSERT INTO person_policy_claims(person_policy_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+DROP FUNCTION IF EXISTS addPersonPolicyClaim(uuid);
+CREATE OR REPLACE FUNCTION addPersonPolicyClaim(
+    planId uuid,
+    identification varchar DEFAULT 'string',
+    documentationDeliveryDate date DEFAULT '2023-10-01',
+    status varchar DEFAULT 'ABERTO',
+    statusAlterationDate date DEFAULT '2023-10-01',
+    occurrenceDate date DEFAULT '2023-10-01',
+    warningDate date DEFAULT '2023-10-01',
+    warningRegisterDate date DEFAULT '2023-10-01',
+    thirdPartyClaimDate date DEFAULT '2022-10-01',
+    amount varchar DEFAULT '16',
+    amountUnitType varchar DEFAULT 'PORCENTAGEM',
+    denialJustification varchar DEFAULT 'PRESCRICAO',
+    denialJustificationDescription varchar DEFAULT 'string'
+) RETURNS uuid AS $$
+    INSERT INTO person_policy_claims(person_policy_id, identification, documentation_delivery_date, status, status_alteration_date, occurrence_date, warning_date, warning_register_date, third_party_claim_date, amount, amount_unit_type, denial_justification, denial_justification_description, created_at, created_by, updated_at, updated_by)
+    VALUES (planId, identification, documentationDeliveryDate, status, statusAlterationDate, occurrenceDate, warningDate, warningRegisterDate, thirdPartyClaimDate, amount, amountUnitType, denialJustification, denialJustificationDescription, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING person_policy_claim_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addPersonPolicyPremium(planId uuid) RETURNS uuid AS $$
-    INSERT INTO person_policy_premiums(person_policy_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+DROP FUNCTION IF EXISTS addPersonPolicyPremium(uuid);
+CREATE OR REPLACE FUNCTION addPersonPolicyPremium(
+    planId uuid,
+    paymentsQuantity integer DEFAULT 4,
+    amount varchar DEFAULT '16',
+    unitType varchar DEFAULT 'PORCENTAGEM'
+) RETURNS uuid AS $$
+    INSERT INTO person_policy_premiums(person_policy_id, payments_quantity, amount, unit_type, created_at, created_by, updated_at, updated_by)
+    VALUES (planId, paymentsQuantity, amount, unitType, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING person_policy_premium_id
 $$ LANGUAGE SQL;
 
+CREATE OR REPLACE FUNCTION addPersonPolicyInsuredObject(
+    personPolicyId uuid,
+    type varchar DEFAULT 'PESSOA',
+    description varchar DEFAULT 'string',
+    amount varchar DEFAULT '9871667727569.12',
+    unitType varchar DEFAULT 'MONETARIO',
+    unitCode varchar DEFAULT 'Br',
+    unitDescription varchar DEFAULT 'BRL'
+) RETURNS uuid AS $$
+    INSERT INTO person_insured_objects(person_policy_id, type, description, amount, unit_type, unit_code, unit_description, created_at, created_by, updated_at, updated_by)
+    VALUES (personPolicyId, type, description, amount, unitType, unitCode, unitDescription, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING person_insured_object_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addPersonPolicyInsuredObjectCoverage(
+    insuredObjectId uuid,
+    type varchar DEFAULT 'PARAMETRICO',
+    feature varchar DEFAULT 'MASSIFICADOS',
+    branch varchar DEFAULT '0761',
+    code varchar DEFAULT 'CIRURGIA',
+    description varchar DEFAULT 'string',
+    internalCode varchar DEFAULT 'string',
+    susepProcessNumber varchar DEFAULT 'string',
+    lmiAmount varchar DEFAULT '100',
+    lmiUnitType varchar DEFAULT 'PORCENTAGEM',
+    lmiSublimit boolean DEFAULT true,
+    termStartDate date DEFAULT '2022-12-31',
+    termEndDate date DEFAULT '2023-12-31',
+    mainCoverage boolean DEFAULT true,
+    triggerEvent varchar DEFAULT 'INVALIDEZ',
+    financialType varchar DEFAULT 'CAPITALIZACAO',
+    benefitPaymentModality varchar DEFAULT 'RENDA'
+) RETURNS uuid AS $$
+    INSERT INTO person_insured_object_coverages(person_insured_object_id, type, feature, branch, code, description, internal_code, susep_process_number, lmi_amount, lmi_unit_type, lmi_sublimit, term_start_date, term_end_date, main_coverage, trigger_event, financial_type, benefit_payment_modality, created_at, created_by, updated_at, updated_by)
+    VALUES (insuredObjectId, type, feature, branch, code, description, internalCode, susepProcessNumber, lmiAmount, lmiUnitType, lmiSublimit, termStartDate, termEndDate, mainCoverage, triggerEvent, financialType, benefitPaymentModality, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING person_insured_object_coverage_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addPersonPolicyPremiumCoverage(
+    premiumId uuid,
+    branch varchar DEFAULT '0111',
+    code varchar DEFAULT 'CIRURGIA',
+    premiumAmount varchar DEFAULT '1680.71',
+    premiumUnitType varchar DEFAULT 'PORCENTAGEM'
+) RETURNS uuid AS $$
+    INSERT INTO person_premium_coverages(person_policy_premium_id, branch, code, premium_amount, premium_unit_type, created_at, created_by, updated_at, updated_by)
+    VALUES (premiumId, branch, code, premiumAmount, premiumUnitType, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING person_premium_coverage_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addPersonPolicyClaimCoverage(
+    claimId uuid,
+    insuredObjectId varchar DEFAULT 'string',
+    branch varchar DEFAULT '0111',
+    code varchar DEFAULT 'CIRURGIA',
+    description varchar DEFAULT 'string',
+    warningDate date DEFAULT '2023-10-01',
+    thirdPartyClaimDate date DEFAULT '2023-10-01'
+) RETURNS uuid AS $$
+    INSERT INTO person_claim_coverages(person_policy_claim_id, insured_object_id, branch, code, description, warning_date, third_party_claim_date, created_at, created_by, updated_at, updated_by)
+    VALUES (claimId, insuredObjectId, branch, code, description, warningDate, thirdPartyClaimDate, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING person_claim_coverage_id
+$$ LANGUAGE SQL;
+
 CREATE OR REPLACE FUNCTION addLifePensionContract(docId varchar, titleId varchar, s varchar) RETURNS uuid AS $$
-    INSERT INTO life_pension_contracts (account_holder_id, life_pension_id, status, created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), titleId, s, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
-    RETURNING life_pension_contract_id
+    WITH ins_contract AS (
+        INSERT INTO life_pension_contracts (
+            life_pension_contract_id,
+            account_holder_id, life_pension_id, status,
+            product_name, product_code, conjugated_plan, proposal_id, certificate_active,
+            contracting_type, contract_id, plan_type, effective_date_start, effective_date_end,
+            periodicity, tax_regime,
+            insured_document_type, insured_document_number, insured_name, insured_birth_date, insured_gender,
+            insured_post_code, insured_town_name, insured_country_sub_division, insured_country_code, insured_address,
+            insured_district_name, insured_ibge_town_code, insured_address_name, insured_address_number,
+            insured_address_complementary_info, insured_address_type, insured_address_flag_post_code,
+            created_at, created_by, updated_at, updated_by)
+        VALUES (uuid_generate_v5(uuid_ns_url(), 'lifepension:' || docId || ':' || titleId), getAccountHolderId(docId), titleId, s,
+            'Mock Insurer Life Pension Contract', '1234', true, '987', true,
+            'INDIVIDUAL', '681', 'AVERBADO', '2021-05-21', '2023-05-21',
+            'MENSAL', 'PROGRESSIVO',
+            'CPF', '12345678910', 'JOAO DA SILVA', '2021-05-01', 'FEMININO',
+            '10000000', 'Sao Paulo', 'SP', 'BRA', 'Av Naburo Ykesaki, 1270',
+            'Liberdade', '5002704', 'Naburo Ykesaki', '1270',
+            'Fundos', 'AVENIDA', 'NACIONAL',
+            NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+        RETURNING life_pension_contract_id
+    ), ins_susep AS (
+        INSERT INTO life_pension_contract_suseps (
+            life_pension_contract_id, coverage_code, susep_process_number, structure_modality, type,
+            locked_plan, qualified_proposer, benefit_payment_method, financial_result_reversal, calculation_basis,
+            created_at, created_by, updated_at, updated_by)
+        SELECT life_pension_contract_id, '1999', '12345', 'BENEFICIO_DEFINIDO', 'PGBL',
+            false, false, 'RENDA', false, 'MENSAL',
+            NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE'
+        FROM ins_contract
+        RETURNING life_pension_contract_susep_id
+    ), ins_susep_fie AS (
+        INSERT INTO life_pension_contract_susep_fies (
+            life_pension_contract_susep_id, fie_cnpj, fie_name, fie_trade_name,
+            pmbac_amount, pmbac_unit_type, provision_surplus_amount, provision_surplus_unit_type,
+            created_at, created_by, updated_at, updated_by)
+        SELECT life_pension_contract_susep_id, '12345678901234', 'RAZÃO SOCIAL', 'NOME FANTASIA',
+            '90.85', 'PORCENTAGEM', '90.85', 'PORCENTAGEM',
+            NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE'
+        FROM ins_susep
+    )
+    SELECT life_pension_contract_id FROM ins_contract
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addLifePensionContractClaim(planId uuid) RETURNS uuid AS $$
-    INSERT INTO life_pension_contract_claims(life_pension_contract_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    INSERT INTO life_pension_contract_claims(
+        life_pension_contract_id, event_status, event_alert_date, event_register_date,
+        beneficiary_document, beneficiary_document_type, beneficiary_name, beneficiary_category,
+        beneficiary_birth_date, income_type, reversed_income,
+        income_amount, income_unit_type, income_unit_code, income_unit_description,
+        payment_terms, benefit_amount, granted_date, monetary_update_index,
+        last_update_date, deferment_due_date,
+        created_at, created_by, updated_at, updated_by)
+    VALUES (planId, 'ABERTO', '2021-05-01', '2021-05-01',
+        '12345678910', 'CPF', 'NOME BENEFICIARIO', 'SEGURADO',
+        '1990-01-01', 'PAGAMENTO_UNICO', false,
+        '10000.00', 'MONETARIO', 'Br', 'BRL',
+        'PRAZO', 1000, '2021-05-01', 'IPC-FGV',
+        '2021-05-01', '2025-05-01',
+        NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING life_pension_contract_claim_id
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addLifePensionContractWithdrawal(planId uuid) RETURNS uuid AS $$
-    INSERT INTO life_pension_contract_withdrawals(life_pension_contract_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
-    RETURNING life_pension_contract_withdrawal_id
+    WITH ins_withdrawal AS (
+        INSERT INTO life_pension_contract_withdrawals(
+            life_pension_contract_id, withdrawal_occurence, type, nature,
+            request_date, liquidation_date,
+            amount, amount_unit_type, posted_charged_amount, posted_charged_unit_type,
+            created_at, created_by, updated_at, updated_by)
+        VALUES (planId, true, 'PARCIAL', 'RESGATE_REGULAR',
+            '2022-05-20T08:30:00Z', '2022-05-20T08:30:00Z',
+            '90.85', 'PORCENTAGEM', '90.85', 'PORCENTAGEM',
+            NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+        RETURNING life_pension_contract_withdrawal_id
+    ), ins_fie AS (
+        INSERT INTO life_pension_contract_withdrawal_fies(
+            life_pension_contract_withdrawal_id, fie_cnpj, fie_name, fie_trade_name,
+            created_at, created_by, updated_at, updated_by)
+        SELECT life_pension_contract_withdrawal_id, '12345678901234', 'RAZÃO SOCIAL', 'NOME FANTASIA',
+            NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE'
+        FROM ins_withdrawal
+    )
+    SELECT life_pension_contract_withdrawal_id FROM ins_withdrawal
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addLifePensionContractPortability(planId uuid) RETURNS uuid AS $$
-    INSERT INTO life_pension_contract_portabilities(life_pension_contract_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
-    RETURNING life_pension_contract_portability_id
+    WITH ins_portability AS (
+        INSERT INTO life_pension_contract_portabilities(
+            life_pension_contract_id, direction, type,
+            amount, amount_unit_type, request_date, liquidation_date,
+            posted_charged_amount, posted_charged_unit_type,
+            source_entity, target_entity, susep_process, tax_regime,
+            created_at, created_by, updated_at, updated_by)
+        VALUES (planId, 'ENTRADA', 'PARCIAL',
+            '90.85', 'PORCENTAGEM', '2022-05-20T08:30:00Z', '2022-05-20T08:30:00Z',
+            '90.85', 'PORCENTAGEM',
+            '12345678901234', '12345678901234', '12345', 'PROGRESSIVO',
+            NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+        RETURNING life_pension_contract_portability_id
+    ), ins_fie AS (
+        INSERT INTO life_pension_contract_portability_fies(
+            life_pension_contract_portability_id, fie_cnpj, fie_name, fie_trade_name, ported_type,
+            created_at, created_by, updated_at, updated_by)
+        SELECT life_pension_contract_portability_id, '12345678901234', 'RAZÃO SOCIAL', 'NOME FANTASIA', 'ORIGEM',
+            NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE'
+        FROM ins_portability
+    )
+    SELECT life_pension_contract_portability_id FROM ins_portability
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addLifePensionContractMovementBenefit(planId uuid) RETURNS uuid AS $$
-    INSERT INTO life_pension_contract_movement_benefits(life_pension_contract_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    INSERT INTO life_pension_contract_movement_benefits(
+        life_pension_contract_id, benefit_amount, benefit_unit_type, benefit_payment_date,
+        created_at, created_by, updated_at, updated_by)
+    VALUES (planId, '95.90', 'PORCENTAGEM', '2023-10-01',
+        NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING life_pension_contract_movement_benefit_id
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addLifePensionContractMovementContribution(planId uuid) RETURNS uuid AS $$
-    INSERT INTO life_pension_contract_movement_contributions(life_pension_contract_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    INSERT INTO life_pension_contract_movement_contributions(
+        life_pension_contract_id, contribution_amount, contribution_unit_type,
+        charged_in_advance_amount, charged_in_advance_unit_type, periodicity,
+        contribution_expiration_date, contribution_payment_date,
+        created_at, created_by, updated_at, updated_by)
+    VALUES (planId, '95.90', 'PORCENTAGEM',
+        '95.90', 'PORCENTAGEM', 'MENSAL',
+        '2022-05-01', '2022-05-01',
+        NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING life_pension_contract_movement_contribution_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addPensionPlanContract(planId varchar, docId varchar, s varchar) RETURNS varchar AS $$
-    INSERT INTO pension_plan_contracts (pension_plan_contract_id, account_holder_id, status, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, getAccountHolderId(docId), s, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+DROP FUNCTION IF EXISTS addPensionPlanContract(varchar, varchar, varchar);
+CREATE OR REPLACE FUNCTION addPensionPlanContract(planId varchar, docId varchar, s varchar, contractingType varchar DEFAULT 'INDIVIDUAL') RETURNS varchar AS $$
+    INSERT INTO pension_plan_contracts (pension_plan_contract_id, account_holder_id, status, contracting_type, created_at, created_by, updated_at, updated_by)
+    VALUES (planId, getAccountHolderId(docId), s, contractingType, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING pension_plan_contract_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addPensionPlanContractClaim(planId varchar) RETURNS uuid AS $$
-    INSERT INTO pension_plan_contract_claims(pension_plan_contract_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+CREATE OR REPLACE FUNCTION addPensionPlanContractDocument(
+    contractId varchar,
+    certificateId varchar DEFAULT '67',
+    effectiveDateStart date DEFAULT '2021-05-21',
+    effectiveDateEnd date DEFAULT '2023-05-21',
+    proposalId varchar DEFAULT '987'
+) RETURNS uuid AS $$
+    INSERT INTO pension_plan_contract_documents(
+        pension_plan_contract_id, certificate_id, effective_date_start, effective_date_end, proposal_id,
+        created_at, created_by, updated_at, updated_by)
+    VALUES (contractId, certificateId, effectiveDateStart, effectiveDateEnd, proposalId,
+        NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING pension_plan_contract_document_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addPensionPlanContractDocumentInsured(
+    documentId uuid,
+    documentType varchar DEFAULT 'CPF',
+    documentNumber varchar DEFAULT '12345678910',
+    insuredName varchar DEFAULT 'JOAO DA SILVA',
+    birthDate date DEFAULT '2021-05-01',
+    insuredGender varchar DEFAULT 'FEMININO',
+    postCode varchar DEFAULT '10000000',
+    townName varchar DEFAULT 'Sao Paulo',
+    countrySubDivision varchar DEFAULT 'SP',
+    countryCode varchar DEFAULT 'BRA',
+    insuredAddress varchar DEFAULT 'Av Naburo Ykesaki, 1270',
+    districtName varchar DEFAULT 'Liberdade',
+    ibgeTownCode varchar DEFAULT '5002704',
+    addressName varchar DEFAULT 'Naburo Ykesaki',
+    addressNumber varchar DEFAULT '1270',
+    addressComplementaryInfo varchar DEFAULT 'Fundos',
+    addressType varchar DEFAULT 'AVENIDA',
+    flagPostCode varchar DEFAULT 'NACIONAL'
+) RETURNS uuid AS $$
+    INSERT INTO pension_plan_contract_document_insureds(
+        pension_plan_contract_document_id, document_type, document_number, name, birth_date, gender,
+        post_code, town_name, country_sub_division, country_code, address,
+        district_name, ibge_town_code, address_name, address_number, address_complementary_info, address_type, flag_post_code,
+        created_at, created_by, updated_at, updated_by)
+    VALUES (documentId, documentType, documentNumber, insuredName, birthDate, insuredGender,
+        postCode, townName, countrySubDivision, countryCode, insuredAddress,
+        districtName, ibgeTownCode, addressName, addressNumber, addressComplementaryInfo, addressType, flagPostCode,
+        NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING pension_plan_contract_document_insured_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addPensionPlanContractDocumentCoverage(
+    documentId uuid,
+    coverageCode varchar DEFAULT '1999',
+    susepProcessNumber varchar DEFAULT '12345',
+    structureModality varchar DEFAULT 'BENEFICIO_DEFINIDO',
+    benefitAmount varchar DEFAULT '100.00',
+    benefitAmountUnitType varchar DEFAULT 'PORCENTAGEM',
+    coveragePeriodicity varchar DEFAULT 'MENSAL',
+    coverageName varchar DEFAULT 'coverage',
+    lockedPlan boolean DEFAULT false,
+    termStartDate date DEFAULT '2021-05-21',
+    termEndDate date DEFAULT '2023-05-21',
+    financialRegime varchar DEFAULT 'CAPITALIZACAO',
+    pricingMethod varchar DEFAULT 'POR_IDADE',
+    updateIndex varchar DEFAULT 'IGPM-FGV',
+    updateIndexLagging integer DEFAULT 1,
+    contributionAmount varchar DEFAULT '100.00',
+    contributionAmountUnitType varchar DEFAULT 'PORCENTAGEM',
+    benefitPaymentAmount varchar DEFAULT '100.00',
+    benefitPaymentAmountUnitType varchar DEFAULT 'PORCENTAGEM',
+    benefitPaymentMethod varchar DEFAULT 'UNICO',
+    chargedAmount varchar DEFAULT '100.00',
+    chargedAmountUnitType varchar DEFAULT 'PORCENTAGEM'
+) RETURNS uuid AS $$
+    INSERT INTO pension_plan_contract_document_coverages(
+        pension_plan_contract_document_id, coverage_code, susep_process_number, structure_modality,
+        benefit_amount, benefit_amount_unit_type, periodicity, coverage_name, locked_plan,
+        term_start_date, term_end_date, financial_regime, pricing_method, update_index, update_index_lagging,
+        contribution_amount, contribution_amount_unit_type, benefit_payment_amount, benefit_payment_amount_unit_type,
+        benefit_payment_method, charged_amount, charged_amount_unit_type,
+        created_at, created_by, updated_at, updated_by)
+    VALUES (documentId, coverageCode, susepProcessNumber, structureModality,
+        benefitAmount, benefitAmountUnitType, coveragePeriodicity, coverageName, lockedPlan,
+        termStartDate, termEndDate, financialRegime, pricingMethod, updateIndex, updateIndexLagging,
+        contributionAmount, contributionAmountUnitType, benefitPaymentAmount, benefitPaymentAmountUnitType,
+        benefitPaymentMethod, chargedAmount, chargedAmountUnitType,
+        NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING pension_plan_contract_document_coverage_id
+$$ LANGUAGE SQL;
+
+DROP FUNCTION IF EXISTS addPensionPlanContractClaim(varchar);
+CREATE OR REPLACE FUNCTION addPensionPlanContractClaim(
+    planId varchar,
+    eventStatus varchar DEFAULT 'ABERTO',
+    eventAlertDate date DEFAULT '2021-05-01',
+    eventRegisterDate date DEFAULT '2021-05-01',
+    beneficiaryDocument varchar DEFAULT '12345678910',
+    beneficiaryDocumentType varchar DEFAULT 'CPF',
+    beneficiaryName varchar DEFAULT 'NOME BENEFICIARIO',
+    beneficiaryCategory varchar DEFAULT 'SEGURADO',
+    beneficiaryBirthDate date DEFAULT '1990-01-01',
+    incomeType varchar DEFAULT 'PAGAMENTO_UNICO',
+    reversedIncome boolean DEFAULT false,
+    incomeAmount varchar DEFAULT '10000.00',
+    incomeUnitType varchar DEFAULT 'MONETARIO',
+    incomeUnitCode varchar DEFAULT 'Br',
+    incomeUnitDescription varchar DEFAULT 'BRL',
+    paymentTerms varchar DEFAULT 'PRAZO',
+    benefitAmount integer DEFAULT 1000,
+    grantedDate date DEFAULT '2021-05-01',
+    monetaryUpdateIndex varchar DEFAULT 'IPC-FGV',
+    lastUpdateDate date DEFAULT '2021-05-01'
+) RETURNS uuid AS $$
+    INSERT INTO pension_plan_contract_claims(
+        pension_plan_contract_id, event_status, event_alert_date, event_register_date,
+        beneficiary_document, beneficiary_document_type, beneficiary_name, beneficiary_category,
+        beneficiary_birth_date, income_type, reversed_income,
+        income_amount, income_unit_type, income_unit_code, income_unit_description,
+        payment_terms, benefit_amount, granted_date, monetary_update_index, last_update_date,
+        created_at, created_by, updated_at, updated_by)
+    VALUES (planId, eventStatus, eventAlertDate, eventRegisterDate,
+        beneficiaryDocument, beneficiaryDocumentType, beneficiaryName, beneficiaryCategory,
+        beneficiaryBirthDate, incomeType, reversedIncome,
+        incomeAmount, incomeUnitType, incomeUnitCode, incomeUnitDescription,
+        paymentTerms, benefitAmount, grantedDate, monetaryUpdateIndex, lastUpdateDate,
+        NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING pension_plan_contract_claim_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addPensionPlanContractWithdrawal(planId varchar) RETURNS uuid AS $$
-    INSERT INTO pension_plan_contract_withdrawals(pension_plan_contract_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+DROP FUNCTION IF EXISTS addPensionPlanContractWithdrawal(varchar);
+CREATE OR REPLACE FUNCTION addPensionPlanContractWithdrawal(
+    planId varchar,
+    withdrawalOccurence boolean DEFAULT true,
+    withdrawalType varchar DEFAULT 'PARCIAL',
+    withdrawalNature varchar DEFAULT 'RESGATE_REGULAR',
+    requestDate varchar DEFAULT '2022-05-20T08:30:00Z',
+    liquidationDate varchar DEFAULT '2022-05-20T08:30:00Z',
+    withdrawalAmount varchar DEFAULT '90.85',
+    amountUnitType varchar DEFAULT 'PORCENTAGEM',
+    postedChargedAmount varchar DEFAULT '90.85',
+    postedChargedUnitType varchar DEFAULT 'PORCENTAGEM'
+) RETURNS uuid AS $$
+    INSERT INTO pension_plan_contract_withdrawals(
+        pension_plan_contract_id, withdrawal_occurence, type, nature,
+        request_date, liquidation_date, amount, amount_unit_type,
+        posted_charged_amount, posted_charged_unit_type,
+        created_at, created_by, updated_at, updated_by)
+    VALUES (planId, withdrawalOccurence, withdrawalType, withdrawalNature,
+        requestDate, liquidationDate, withdrawalAmount, amountUnitType,
+        postedChargedAmount, postedChargedUnitType,
+        NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING pension_plan_contract_withdrawal_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addPensionPlanContractPortability(planId varchar) RETURNS uuid AS $$
-    INSERT INTO pension_plan_contract_portabilities(pension_plan_contract_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+DROP FUNCTION IF EXISTS addPensionPlanContractPortability(varchar);
+CREATE OR REPLACE FUNCTION addPensionPlanContractPortability(
+    planId varchar,
+    portabilityDirection varchar DEFAULT 'ENTRADA',
+    portabilityType varchar DEFAULT 'PARCIAL',
+    portabilityAmount varchar DEFAULT '90.85',
+    amountUnitType varchar DEFAULT 'PORCENTAGEM',
+    requestDate varchar DEFAULT '2022-05-20T08:30:00Z',
+    liquidationDate varchar DEFAULT '2022-05-20T08:30:00Z',
+    chargingValue varchar DEFAULT '90.85',
+    chargingValueUnitType varchar DEFAULT 'PORCENTAGEM',
+    sourceEntity varchar DEFAULT '12345678901234',
+    targetEntity varchar DEFAULT '12345678901234',
+    susepProcess varchar DEFAULT '12345'
+) RETURNS uuid AS $$
+    INSERT INTO pension_plan_contract_portabilities(
+        pension_plan_contract_id, direction, type, amount, amount_unit_type,
+        request_date, liquidation_date, charging_value, charging_value_unit_type,
+        source_entity, target_entity, susep_process,
+        created_at, created_by, updated_at, updated_by)
+    VALUES (planId, portabilityDirection, portabilityType, portabilityAmount, amountUnitType,
+        requestDate, liquidationDate, chargingValue, chargingValueUnitType,
+        sourceEntity, targetEntity, susepProcess,
+        NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING pension_plan_contract_portability_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addPensionPlanContractMovementBenefit(planId varchar) RETURNS uuid AS $$
-    INSERT INTO pension_plan_contract_movement_benefits(pension_plan_contract_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+DROP FUNCTION IF EXISTS addPensionPlanContractMovementBenefit(varchar);
+CREATE OR REPLACE FUNCTION addPensionPlanContractMovementBenefit(
+    planId varchar,
+    benefitAmount varchar DEFAULT '95.90',
+    benefitUnitType varchar DEFAULT 'PORCENTAGEM',
+    benefitPaymentDate date DEFAULT '2023-10-01'
+) RETURNS uuid AS $$
+    INSERT INTO pension_plan_contract_movement_benefits(
+        pension_plan_contract_id, benefit_amount, benefit_unit_type, benefit_payment_date,
+        created_at, created_by, updated_at, updated_by)
+    VALUES (planId, benefitAmount, benefitUnitType, benefitPaymentDate,
+        NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING pension_plan_contract_movement_benefit_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addPensionPlanContractMovementContribution(planId varchar) RETURNS uuid AS $$
-    INSERT INTO pension_plan_contract_movement_contributions(pension_plan_contract_id, created_at, created_by, updated_at, updated_by)
-    VALUES (planId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+DROP FUNCTION IF EXISTS addPensionPlanContractMovementContribution(varchar);
+CREATE OR REPLACE FUNCTION addPensionPlanContractMovementContribution(
+    planId varchar,
+    contributionAmount varchar DEFAULT '95.90',
+    contributionUnitType varchar DEFAULT 'PORCENTAGEM',
+    chargedInAdvanceAmount varchar DEFAULT '95.90',
+    chargedInAdvanceUnitType varchar DEFAULT 'PORCENTAGEM',
+    contributionPeriodicity varchar DEFAULT 'MENSAL',
+    contributionExpirationDate date DEFAULT '2022-05-01',
+    contributionPaymentDate date DEFAULT '2022-05-01'
+) RETURNS uuid AS $$
+    INSERT INTO pension_plan_contract_movement_contributions(
+        pension_plan_contract_id, contribution_amount, contribution_unit_type,
+        charged_in_advance_amount, charged_in_advance_unit_type, periodicity,
+        contribution_expiration_date, contribution_payment_date,
+        created_at, created_by, updated_at, updated_by)
+    VALUES (planId, contributionAmount, contributionUnitType,
+        chargedInAdvanceAmount, chargedInAdvanceUnitType, contributionPeriodicity,
+        contributionExpirationDate, contributionPaymentDate,
+        NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING pension_plan_contract_movement_contribution_id
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addAcceptanceAndBranchesAbroadPolicy(docId varchar, insuranceId varchar, s varchar) RETURNS uuid AS $$
-    INSERT INTO acceptance_and_branches_abroad_policies (account_holder_id, insurance_id, status, created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), insuranceId, s, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    INSERT INTO acceptance_and_branches_abroad_policies (policy_id, account_holder_id, insurance_id, status, created_at, created_by, updated_at, updated_by)
+    VALUES (uuid_generate_v5(uuid_ns_url(), 'acceptance:' || docId), getAccountHolderId(docId), insuranceId, s, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING policy_id
 $$ LANGUAGE SQL;
 
@@ -655,9 +1048,26 @@ CREATE OR REPLACE FUNCTION addAcceptanceAndBranchesAbroadClaim(policyId uuid, id
     RETURNING claim_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addPatrimonialPolicy(docId varchar, insuranceId varchar, s varchar, branch varchar) RETURNS uuid AS $$
-    INSERT INTO patrimonial_policies (account_holder_id, insurance_id, status, branch, created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), insuranceId, s, branch, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+DROP FUNCTION IF EXISTS addPatrimonialPolicy(varchar, varchar, varchar, varchar);
+CREATE OR REPLACE FUNCTION addPatrimonialPolicy(
+    docId varchar,
+    insuranceId varchar,
+    s varchar,
+    branch varchar,
+    documentType varchar DEFAULT 'APOLICE_INDIVIDUAL',
+    issuanceType varchar DEFAULT 'EMISSAO_PROPRIA',
+    issuanceDate date DEFAULT '2022-12-31',
+    termStartDate date DEFAULT '2022-12-31',
+    termEndDate date DEFAULT '2023-12-31',
+    proposalId varchar DEFAULT '123456',
+    maxLmgAmount varchar DEFAULT '2000.00',
+    maxLmgUnitType varchar DEFAULT 'MONETARIO',
+    maxLmgUnitTypeOthers varchar DEFAULT NULL,
+    maxLmgUnitCode varchar DEFAULT 'R$',
+    maxLmgUnitDescription varchar DEFAULT 'BRL'
+) RETURNS uuid AS $$
+    INSERT INTO patrimonial_policies (policy_id, account_holder_id, insurance_id, status, branch, document_type, issuance_type, issuance_date, term_start_date, term_end_date, proposal_id, max_lmg_amount, max_lmg_unit_type, max_lmg_unit_type_others, max_lmg_unit_code, max_lmg_unit_description, created_at, created_by, updated_at, updated_by)
+    VALUES (uuid_generate_v5(uuid_ns_url(), 'patrimonial:' || docId || ':' || branch), getAccountHolderId(docId), insuranceId, s, branch, documentType, issuanceType, issuanceDate, termStartDate, termEndDate, proposalId, maxLmgAmount, maxLmgUnitType, maxLmgUnitTypeOthers, maxLmgUnitCode, maxLmgUnitDescription, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING policy_id
 $$ LANGUAGE SQL;
 
@@ -667,9 +1077,74 @@ CREATE OR REPLACE FUNCTION addPatrimonialClaim(policyId uuid, identification var
     RETURNING claim_id
 $$ LANGUAGE SQL;
 
+CREATE OR REPLACE FUNCTION addPatrimonialInsuredObject(
+    policyId uuid,
+    identification varchar DEFAULT '123456789',
+    type varchar DEFAULT 'CONTRATO',
+    description varchar DEFAULT 'string'
+) RETURNS uuid AS $$
+    INSERT INTO patrimonial_insured_objects(policy_id, identification, type, description, created_at, created_by, updated_at, updated_by)
+    VALUES (policyId, identification, type, description, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING patrimonial_insured_object_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addPatrimonialInsuredObjectCoverage(
+    insuredObjectId uuid,
+    branch varchar DEFAULT '0114',
+    code varchar DEFAULT 'IMOVEL_BASICA',
+    susepProcessNumber varchar DEFAULT 'string',
+    lmiAmount varchar DEFAULT '2000.00',
+    lmiUnitType varchar DEFAULT 'MONETARIO',
+    lmiUnitCode varchar DEFAULT 'R$',
+    lmiUnitDescription varchar DEFAULT 'BRL',
+    lmiSublimit boolean DEFAULT true,
+    termStartDate date DEFAULT '2022-12-31',
+    termEndDate date DEFAULT '2023-12-31',
+    mainCoverage boolean DEFAULT true,
+    feature varchar DEFAULT 'MASSIFICADOS',
+    type varchar DEFAULT 'PARAMETRICO',
+    gracePeriod integer DEFAULT 0,
+    gracePeriodicity varchar DEFAULT 'DIA',
+    gracePeriodCountingMethod varchar DEFAULT 'DIAS_UTEIS',
+    gracePeriodStartDate date DEFAULT '2022-12-31',
+    gracePeriodEndDate date DEFAULT '2023-12-31',
+    premiumPeriodicity varchar DEFAULT 'MENSAL'
+) RETURNS uuid AS $$
+    INSERT INTO patrimonial_insured_object_coverages(patrimonial_insured_object_id, branch, code, susep_process_number, lmi_amount, lmi_unit_type, lmi_unit_code, lmi_unit_description, lmi_sublimit, term_start_date, term_end_date, main_coverage, feature, type, grace_period, grace_periodicity, grace_period_counting_method, grace_period_start_date, grace_period_end_date, premium_periodicity, created_at, created_by, updated_at, updated_by)
+    VALUES (insuredObjectId, branch, code, susepProcessNumber, lmiAmount, lmiUnitType, lmiUnitCode, lmiUnitDescription, lmiSublimit, termStartDate, termEndDate, mainCoverage, feature, type, gracePeriod, gracePeriodicity, gracePeriodCountingMethod, gracePeriodStartDate, gracePeriodEndDate, premiumPeriodicity, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING patrimonial_insured_object_coverage_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addPatrimonialPremium(
+    policyId uuid,
+    paymentsQuantity integer DEFAULT 4,
+    amount varchar DEFAULT '2000.00',
+    unitType varchar DEFAULT 'MONETARIO',
+    unitCode varchar DEFAULT 'R$',
+    unitDescription varchar DEFAULT 'BRL'
+) RETURNS uuid AS $$
+    INSERT INTO patrimonial_premiums(policy_id, payments_quantity, amount, unit_type, unit_code, unit_description, created_at, created_by, updated_at, updated_by)
+    VALUES (policyId, paymentsQuantity, amount, unitType, unitCode, unitDescription, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING patrimonial_premium_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addPatrimonialPremiumCoverage(
+    premiumId uuid,
+    branch varchar DEFAULT '0114',
+    code varchar DEFAULT 'IMOVEL_BASICA',
+    amount varchar DEFAULT '2000.00',
+    unitType varchar DEFAULT 'MONETARIO',
+    unitCode varchar DEFAULT 'R$',
+    unitDescription varchar DEFAULT 'BRL'
+) RETURNS uuid AS $$
+    INSERT INTO patrimonial_premium_coverages(patrimonial_premium_id, branch, code, amount, unit_type, unit_code, unit_description, created_at, created_by, updated_at, updated_by)
+    VALUES (premiumId, branch, code, amount, unitType, unitCode, unitDescription, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING patrimonial_premium_coverage_id
+$$ LANGUAGE SQL;
+
 CREATE OR REPLACE FUNCTION addRuralPolicy(docId VARCHAR, insuranceId VARCHAR, s VARCHAR, productName VARCHAR, documentType VARCHAR, policyId VARCHAR, susepProcessNumber VARCHAR, groupCertificateId VARCHAR, issuanceType VARCHAR, issuanceDate DATE, termStartDate DATE, termEndDate DATE, leadInsurerCode VARCHAR, leadInsurerPolicyId VARCHAR, maxLmgAmount VARCHAR, maxLmgUnitType VARCHAR, maxLmgUnitTypeOthers VARCHAR, maxLmgUnitCode VARCHAR, maxLmgUnitDescription VARCHAR, proposalId VARCHAR, coinsuranceRetainedPercentage VARCHAR ) RETURNS UUID AS $$
-    INSERT INTO rural_policies (account_holder_id, insurance_id, status, product_name, document_type, policy_id, susep_process_number, group_certificate_id, issuance_type, issuance_date, term_start_date, term_end_date, lead_insurer_code, lead_insurer_policy_id, max_lmg_amount, max_lmg_unit_type, max_lmg_unit_type_others, max_lmg_unit_code, max_lmg_unit_description, proposal_id, coinsurance_retained_percentage, created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), insuranceId, s, productName, documentType, policyId, susepProcessNumber, groupCertificateId, issuanceType, issuanceDate, termStartDate, termEndDate, leadInsurerCode, leadInsurerPolicyId, maxLmgAmount, maxLmgUnitType, maxLmgUnitTypeOthers, maxLmgUnitCode, maxLmgUnitDescription, proposalId, coinsuranceRetainedPercentage, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    INSERT INTO rural_policies (rural_policy_id, account_holder_id, insurance_id, status, product_name, document_type, policy_id, susep_process_number, group_certificate_id, issuance_type, issuance_date, term_start_date, term_end_date, lead_insurer_code, lead_insurer_policy_id, max_lmg_amount, max_lmg_unit_type, max_lmg_unit_type_others, max_lmg_unit_code, max_lmg_unit_description, proposal_id, coinsurance_retained_percentage, created_at, created_by, updated_at, updated_by)
+    VALUES (uuid_generate_v5(uuid_ns_url(), 'rural:' || docId), getAccountHolderId(docId), insuranceId, s, productName, documentType, policyId, susepProcessNumber, groupCertificateId, issuanceType, issuanceDate, termStartDate, termEndDate, leadInsurerCode, leadInsurerPolicyId, maxLmgAmount, maxLmgUnitType, maxLmgUnitTypeOthers, maxLmgUnitCode, maxLmgUnitDescription, proposalId, coinsuranceRetainedPercentage, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING rural_policy_id
 $$ LANGUAGE SQL;
 

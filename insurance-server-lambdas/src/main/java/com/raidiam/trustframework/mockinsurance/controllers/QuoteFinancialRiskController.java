@@ -4,6 +4,7 @@ import com.raidiam.trustframework.mockinsurance.auth.AuthenticationGrant;
 import com.raidiam.trustframework.mockinsurance.auth.RequiredAuthenticationGrant;
 import com.raidiam.trustframework.mockinsurance.domain.QuoteFinancialRiskLeadEntity;
 import com.raidiam.trustframework.mockinsurance.fapi.Idempotent;
+import com.raidiam.trustframework.mockinsurance.fapi.ResponseErrorWithRequestDateTime;
 import com.raidiam.trustframework.mockinsurance.fapi.XFapiInteractionIdRequired;
 import com.raidiam.trustframework.mockinsurance.models.generated.*;
 import com.raidiam.trustframework.mockinsurance.services.QuoteFinancialRiskLeadService;
@@ -63,6 +64,7 @@ public class QuoteFinancialRiskController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @ResponseErrorWithRequestDateTime
     public ResponseQuote createLeadQuoteV2(
             @Body QuoteRequestFinancialRiskLeadV2 body,
             @NotNull HttpRequest<?> request) {

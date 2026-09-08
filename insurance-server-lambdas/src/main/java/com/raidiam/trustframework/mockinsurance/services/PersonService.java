@@ -80,12 +80,42 @@ public class PersonService extends BaseInsuranceService {
 
     public ResponseInsurancePersonPolicyInfo getPolicyInfo(UUID policyId, String consentId) {
         LOG.info("Getting person policy info response for consent id {}", consentId);
-        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_PERSON_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PERSON_POLICYINFO_READ).mapPolicyInfoDTO();
+        var policy = getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_PERSON_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PERSON_POLICYINFO_READ);
+        var response = policy.mapPolicyInfoDTO();
+
+        policy.getInsuredIds().forEach(insuredId -> response.getData().addInsuredsItem(personalInfoRepository.findById(insuredId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Personal info not found for UUID %s", insuredId)))
+                .mapDTO()));
+
+        policy.getBeneficiaryIds().forEach(beneficiaryId -> response.getData().addBeneficiariesItem(beneficiaryInfoRepository.findById(beneficiaryId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Beneficiary not found for UUID %s", beneficiaryId)))
+                .mapDTO()));
+
+        policy.getIntermediaryIds().forEach(intermediaryId -> response.getData().addIntermediariesItem(intermediaryRepository.findById(intermediaryId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Intermediary not found for UUID %s", intermediaryId)))
+                .mapDTO()));
+
+        return response;
     }
 
     public ResponseInsurancePersonPolicyInfoV2 getPolicyInfoV2(UUID policyId, String consentId) {
         LOG.info("Getting person policy info response for consent id {}", consentId);
-        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_PERSON_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PERSON_POLICYINFO_READ).mapPolicyInfoDTOV2();
+        var policy = getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_PERSON_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PERSON_POLICYINFO_READ);
+        var response = policy.mapPolicyInfoDTOV2();
+
+        policy.getInsuredIds().forEach(insuredId -> response.getData().addInsuredsItem(personalInfoRepository.findById(insuredId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Personal info not found for UUID %s", insuredId)))
+                .mapDTOV2()));
+
+        policy.getBeneficiaryIds().forEach(beneficiaryId -> response.getData().addBeneficiariesItem(beneficiaryInfoRepository.findById(beneficiaryId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Beneficiary not found for UUID %s", beneficiaryId)))
+                .mapDTO()));
+
+        policy.getIntermediaryIds().forEach(intermediaryId -> response.getData().addIntermediariesItem(intermediaryRepository.findById(intermediaryId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Intermediary not found for UUID %s", intermediaryId)))
+                .mapDTOV2()));
+
+        return response;
     }
 
     public ResponseInsurancePersonClaims getPolicyClaims(UUID policyId, String consentId, Pageable pageable) {
@@ -116,7 +146,12 @@ public class PersonService extends BaseInsuranceService {
 
         var premium = personPolicyPremiumRepository.findByPersonPolicyId(policyId)
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Policy id " + policyId + " not found"));
-        return new ResponseInsurancePersonPremium().data(premium.mapDTO());
+        var response = new ResponseInsurancePersonPremium().data(premium.mapDTO());
+
+        premium.getPaymentIds().forEach(paymentId -> response.getData().addPaymentsItem(paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Payment not found for UUID %s", paymentId)))
+                .mapDTO()));
+        return response;
     }
 
     public void checkConsentCoversPolicy(ConsentEntity consentEntity, PersonPolicyEntity policy) {

@@ -27,7 +27,7 @@ class TestEntityDataFactory extends CleanupSpecification {
     }
 
     static String aConsentId() {
-        return "urn:mockin:" + UUID.randomUUID().toString()
+        return "urn:raidiaminsurance:" + UUID.randomUUID().toString()
     }
 
     static aConsent(UUID accountHolderId, EnumConsentPermission... permissions) {
@@ -573,6 +573,18 @@ class TestEntityDataFactory extends CleanupSpecification {
 
     static PersonalQualificationEntity aPersonalQualification(UUID accountHolderId) {
         PersonalQualificationEntity entity = new PersonalQualificationEntity()
+        entity.setAccountHolderId(accountHolderId)
+        entity
+    }
+
+    static PersonalComplimentaryInformationEntity aPersonalComplimentaryInfo(UUID accountHolderId) {
+        PersonalComplimentaryInformationEntity entity = new PersonalComplimentaryInformationEntity()
+        entity.setAccountHolderId(accountHolderId)
+        entity
+    }
+
+    static BusinessComplimentaryInformationEntity aBusinessComplimentaryInfo(UUID accountHolderId) {
+        BusinessComplimentaryInformationEntity entity = new BusinessComplimentaryInformationEntity()
         entity.setAccountHolderId(accountHolderId)
         entity
     }
@@ -1202,58 +1214,238 @@ static aHousingPolicy(UUID accountHolderId) {
     }
 
     static aPersonPolicy(UUID accountHolderId) {
+        aPersonPolicy(accountHolderId, null, null, null)
+    }
+
+    static aPersonPolicy(UUID accountHolderId, List<UUID> insuredIds, List<UUID> beneficiaryIds, List<UUID> intermediaryIds) {
         def contract = new PersonPolicyEntity()
         contract.setAccountHolderId(accountHolderId)
         contract.setPersonId("random_person")
+        contract.setProductName("Mock Insurer Person Policy")
+        contract.setDocumentType("APOLICE_INDIVIDUAL")
+        contract.setSusepProcessNumber("string")
+        contract.setGroupCertificateId("string")
+        contract.setIssuanceType("EMISSAO_PROPRIA")
+        contract.setIssuanceDate(LocalDate.of(2022, 12, 31))
+        contract.setTermStartDate(LocalDate.of(2022, 12, 31))
+        contract.setTermEndDate(LocalDate.of(2023, 12, 31))
+        contract.setLeadInsurerCode("string")
+        contract.setLeadInsurerPolicyId("string")
+        contract.setProposalId("string")
+        contract.setPmbacAmount("9871667727569.12")
+        contract.setPmbacUnitType("MONETARIO")
+        contract.setPmbacUnitCode("Br")
+        contract.setPmbacUnitDescription("BRL")
+        contract.setOccurrenceWithdrawal(false)
+        contract.setOccurrencePortability(false)
+        contract.setInsuredIds(insuredIds)
+        contract.setBeneficiaryIds(beneficiaryIds)
+        contract.setIntermediaryIds(intermediaryIds)
         contract
+    }
+
+    static aPersonPolicyInsuredObject(UUID planId) {
+        def insuredObject = new PersonPolicyInsuredObjectEntity()
+        insuredObject.setPersonPolicyId(planId)
+        insuredObject.setType("PESSOA")
+        insuredObject.setDescription("string")
+        insuredObject.setAmount("9871667727569.12")
+        insuredObject.setUnitType("MONETARIO")
+        insuredObject.setUnitCode("Br")
+        insuredObject.setUnitDescription("BRL")
+        insuredObject
+    }
+
+    static aPersonPolicyInsuredObjectCoverage(UUID insuredObjectId) {
+        def coverage = new PersonPolicyInsuredObjectCoverageEntity()
+        coverage.setPersonInsuredObjectId(insuredObjectId)
+        coverage.setType("PARAMETRICO")
+        coverage.setFeature("MASSIFICADOS")
+        coverage.setBranch("0761")
+        coverage.setCode("CIRURGIA")
+        coverage.setDescription("string")
+        coverage.setInternalCode("string")
+        coverage.setSusepProcessNumber("string")
+        coverage.setLmiAmount("100")
+        coverage.setLmiUnitType("PORCENTAGEM")
+        coverage.setIsLMISublimit(true)
+        coverage.setTermStartDate(LocalDate.of(2022, 12, 31))
+        coverage.setTermEndDate(LocalDate.of(2023, 12, 31))
+        coverage.setIsMainCoverage(true)
+        coverage.setTriggerEvent("INVALIDEZ")
+        coverage.setFinancialType("CAPITALIZACAO")
+        coverage.setBenefitPaymentModality("RENDA")
+        coverage
     }
 
     static aPersonPolicyClaim(UUID planId) {
         def claim = new PersonPolicyClaimEntity()
         claim.setPersonPolicyId(planId)
+        claim.setIdentification("string")
+        claim.setDocumentationDeliveryDate(LocalDate.of(2023, 10, 1))
+        claim.setStatus("ABERTO")
+        claim.setStatusAlterationDate(LocalDate.of(2023, 10, 1))
+        claim.setOccurrenceDate(LocalDate.of(2023, 10, 1))
+        claim.setWarningDate(LocalDate.of(2023, 10, 1))
+        claim.setWarningRegisterDate(LocalDate.of(2023, 10, 1))
+        claim.setThirdPartyClaimDate(LocalDate.of(2022, 10, 1))
+        claim.setAmount("16")
+        claim.setAmountUnitType("PORCENTAGEM")
+        claim.setDenialJustification("PRESCRICAO")
+        claim.setDenialJustificationDescription("string")
         claim
     }
 
+    static aPersonPolicyClaimCoverage(UUID claimId) {
+        def coverage = new PersonPolicyClaimCoverageEntity()
+        coverage.setPersonPolicyClaimId(claimId)
+        coverage.setInsuredObjectId("string")
+        coverage.setBranch("0111")
+        coverage.setCode("CIRURGIA")
+        coverage.setDescription("string")
+        coverage.setWarningDate(LocalDate.of(2023, 10, 1))
+        coverage.setThirdPartyClaimDate(LocalDate.of(2023, 10, 1))
+        coverage
+    }
+
     static aPersonPolicyPremium(UUID planId) {
+        aPersonPolicyPremium(planId, null)
+    }
+
+    static aPersonPolicyPremium(UUID planId, List<UUID> paymentIds) {
         def premium = new PersonPolicyPremiumEntity()
         premium.setPersonPolicyId(planId)
+        premium.setPaymentsQuantity(4)
+        premium.setAmount("16")
+        premium.setUnitType("PORCENTAGEM")
+        premium.setPaymentIds(paymentIds)
         premium
+    }
+
+    static aPersonPolicyPremiumCoverage(UUID premiumId) {
+        def coverage = new PersonPolicyPremiumCoverageEntity()
+        coverage.setPersonPolicyPremiumId(premiumId)
+        coverage.setBranch("0111")
+        coverage.setCode("CIRURGIA")
+        coverage.setPremiumAmount("1680.71")
+        coverage.setPremiumUnitType("PORCENTAGEM")
+        coverage
     }
 
     static aLifePensionContract(UUID accountHolderId) {
         def contract = new LifePensionContractEntity()
         contract.setAccountHolderId(accountHolderId)
         contract.setLifePensionId("random_life_pension")
+        contract.setProductName("Mock Insurer Life Pension Contract")
+        contract.setProductCode("1234")
+        contract.setConjugatedPlan(true)
+        contract.setProposalId("987")
+        contract.setCertificateActive(true)
+        contract.setContractingType("INDIVIDUAL")
+        contract.setContractId("681")
+        contract.setPlanType("AVERBADO")
+        contract.setEffectiveDateStart(java.time.LocalDate.of(2021, 5, 21))
+        contract.setEffectiveDateEnd(java.time.LocalDate.of(2023, 5, 21))
+        contract.setPeriodicity("MENSAL")
+        contract.setTaxRegime("PROGRESSIVO")
+        contract.setInsuredDocumentType("CPF")
+        contract.setInsuredDocumentNumber("12345678910")
+        contract.setInsuredName("JOAO DA SILVA")
+        contract.setInsuredBirthDate(java.time.LocalDate.of(2021, 5, 1))
+        contract.setInsuredGender("FEMININO")
+        contract.setInsuredPostCode("10000000")
+        contract.setInsuredTownName("Sao Paulo")
+        contract.setInsuredCountrySubDivision("SP")
+        contract.setInsuredCountryCode("BRA")
+        contract.setInsuredAddress("Av Naburo Ykesaki, 1270")
+        contract.setInsuredDistrictName("Liberdade")
+        contract.setInsuredIbgeTownCode("5002704")
+        contract.setInsuredAddressName("Naburo Ykesaki")
+        contract.setInsuredAddressNumber("1270")
+        contract.setInsuredAddressComplementaryInfo("Fundos")
+        contract.setInsuredAddressType("AVENIDA")
+        contract.setInsuredAddressFlagPostCode("NACIONAL")
         contract
     }
 
     static aLifePensionContractClaim(UUID planId) {
         def claim = new LifePensionContractClaimEntity()
         claim.setLifePensionContractId(planId)
+        claim.setEventStatus("ABERTO")
+        claim.setEventAlertDate(java.time.LocalDate.of(2021, 5, 1))
+        claim.setEventRegisterDate(java.time.LocalDate.of(2021, 5, 1))
+        claim.setBeneficiaryDocument("12345678910")
+        claim.setBeneficiaryDocumentType("CPF")
+        claim.setBeneficiaryName("NOME BENEFICIARIO")
+        claim.setBeneficiaryCategory("SEGURADO")
+        claim.setBeneficiaryBirthDate(java.time.LocalDate.of(1990, 1, 1))
+        claim.setIncomeType("PAGAMENTO_UNICO")
+        claim.setReversedIncome(false)
+        claim.setIncomeAmount("10000.00")
+        claim.setIncomeUnitType("MONETARIO")
+        claim.setIncomeUnitCode("Br")
+        claim.setIncomeUnitDescription("BRL")
+        claim.setPaymentTerms("PRAZO")
+        claim.setBenefitAmount(1000)
+        claim.setGrantedDate(java.time.LocalDate.of(2021, 5, 1))
+        claim.setMonetaryUpdateIndex("IPC-FGV")
+        claim.setLastUpdateDate(java.time.LocalDate.of(2021, 5, 1))
+        claim.setDefermentDueDate(java.time.LocalDate.of(2025, 5, 1))
         claim
     }
 
     static aLifePensionContractWithdrawal(UUID planId) {
         def withdrawal = new LifePensionContractWithdrawalEntity()
         withdrawal.setLifePensionContractId(planId)
+        withdrawal.setWithdrawalOccurence(true)
+        withdrawal.setType("PARCIAL")
+        withdrawal.setNature("RESGATE_REGULAR")
+        withdrawal.setRequestDate("2022-05-20T08:30:00Z")
+        withdrawal.setLiquidationDate("2022-05-20T08:30:00Z")
+        withdrawal.setAmount("90.85")
+        withdrawal.setAmountUnitType("PORCENTAGEM")
+        withdrawal.setPostedChargedAmount("90.85")
+        withdrawal.setPostedChargedUnitType("PORCENTAGEM")
         withdrawal
     }
 
     static aLifePensionContractPortability(UUID planId) {
         def portability = new LifePensionContractPortabilityInfoEntity()
         portability.setLifePensionContractId(planId)
+        portability.setDirection("ENTRADA")
+        portability.setType("PARCIAL")
+        portability.setAmount("90.85")
+        portability.setAmountUnitType("PORCENTAGEM")
+        portability.setRequestDate("2022-05-20T08:30:00Z")
+        portability.setLiquidationDate("2022-05-20T08:30:00Z")
+        portability.setPostedChargedAmount("90.85")
+        portability.setPostedChargedUnitType("PORCENTAGEM")
+        portability.setSourceEntity("12345678901234")
+        portability.setTargetEntity("12345678901234")
+        portability.setSusepProcess("12345")
+        portability.setTaxRegime("PROGRESSIVO")
         portability
     }
 
     static aLifePensionContractMovementContribution(UUID planId) {
         def contribution = new LifePensionContractMovementContributionEntity()
         contribution.setLifePensionContractId(planId)
+        contribution.setContributionAmount("95.90")
+        contribution.setContributionUnitType("PORCENTAGEM")
+        contribution.setChargedInAdvanceAmount("95.90")
+        contribution.setChargedInAdvanceUnitType("PORCENTAGEM")
+        contribution.setPeriodicity("MENSAL")
+        contribution.setContributionExpirationDate(java.time.LocalDate.of(2022, 5, 1))
+        contribution.setContributionPaymentDate(java.time.LocalDate.of(2022, 5, 1))
         contribution
     }
 
     static aLifePensionContractMovementBenefit(UUID planId) {
         def benefit = new LifePensionContractMovementBenefitEntity()
         benefit.setLifePensionContractId(planId)
+        benefit.setBenefitAmount("95.90")
+        benefit.setBenefitUnitType("PORCENTAGEM")
+        benefit.setBenefitPaymentDate(java.time.LocalDate.of(2023, 10, 1))
         benefit
     }
 
@@ -1261,36 +1453,146 @@ static aHousingPolicy(UUID accountHolderId) {
         def contract = new PensionPlanContractEntity()
         contract.setAccountHolderId(accountHolderId)
         contract.setPensionPlanContractId(planId)
+        contract.setContractingType("INDIVIDUAL")
         contract
+    }
+
+    static aPensionPlanContractDocument(String contractId) {
+        def document = new PensionPlanContractDocumentEntity()
+        document.setPensionPlanContractId(contractId)
+        document.setCertificateId("67")
+        document.setEffectiveDateStart(java.time.LocalDate.of(2021, 5, 21))
+        document.setEffectiveDateEnd(java.time.LocalDate.of(2023, 5, 21))
+        document.setProposalId("987")
+        document
+    }
+
+    static aPensionPlanContractDocumentInsured(UUID documentId) {
+        def insured = new PensionPlanContractDocumentInsuredEntity()
+        insured.setPensionPlanContractDocumentId(documentId)
+        insured.setDocumentType("CPF")
+        insured.setDocumentNumber("12345678910")
+        insured.setName("JOAO DA SILVA")
+        insured.setBirthDate(java.time.LocalDate.of(2021, 5, 1))
+        insured.setGender("FEMININO")
+        insured.setPostCode("10000000")
+        insured.setTownName("Sao Paulo")
+        insured.setCountrySubDivision("SP")
+        insured.setCountryCode("BRA")
+        insured.setAddress("Av Naburo Ykesaki, 1270")
+        insured.setDistrictName("Liberdade")
+        insured.setIbgeTownCode("5002704")
+        insured.setAddressName("Naburo Ykesaki")
+        insured.setAddressNumber("1270")
+        insured.setAddressComplementaryInfo("Fundos")
+        insured.setAddressType("AVENIDA")
+        insured.setFlagPostCode("NACIONAL")
+        insured
+    }
+
+    static aPensionPlanContractDocumentCoverage(UUID documentId) {
+        def coverage = new PensionPlanContractDocumentCoverageEntity()
+        coverage.setPensionPlanContractDocumentId(documentId)
+        coverage.setCoverageCode("1999")
+        coverage.setSusepProcessNumber("12345")
+        coverage.setStructureModality("BENEFICIO_DEFINIDO")
+        coverage.setBenefitAmount("100.00")
+        coverage.setBenefitAmountUnitType("PORCENTAGEM")
+        coverage.setPeriodicity("MENSAL")
+        coverage.setCoverageName("coverage")
+        coverage.setLockedPlan(false)
+        coverage.setTermStartDate(java.time.LocalDate.of(2021, 5, 21))
+        coverage.setTermEndDate(java.time.LocalDate.of(2023, 5, 21))
+        coverage.setFinancialRegime("CAPITALIZACAO")
+        coverage.setPricingMethod("POR_IDADE")
+        coverage.setUpdateIndex("IGPM-FGV")
+        coverage.setUpdateIndexLagging(1)
+        coverage.setContributionAmount("100.00")
+        coverage.setContributionAmountUnitType("PORCENTAGEM")
+        coverage.setBenefitPaymentAmount("100.00")
+        coverage.setBenefitPaymentAmountUnitType("PORCENTAGEM")
+        coverage.setBenefitPaymentMethod("UNICO")
+        coverage.setChargedAmount("100.00")
+        coverage.setChargedAmountUnitType("PORCENTAGEM")
+        coverage
     }
 
     static aPensionPlanContractClaim(String planId) {
         def claim = new PensionPlanContractClaimEntity()
         claim.setPensionPlanContractId(planId)
+        claim.setEventStatus("ABERTO")
+        claim.setEventAlertDate(java.time.LocalDate.of(2021, 5, 1))
+        claim.setEventRegisterDate(java.time.LocalDate.of(2021, 5, 1))
+        claim.setBeneficiaryDocument("12345678910")
+        claim.setBeneficiaryDocumentType("CPF")
+        claim.setBeneficiaryName("NOME BENEFICIARIO")
+        claim.setBeneficiaryCategory("SEGURADO")
+        claim.setBeneficiaryBirthDate(java.time.LocalDate.of(1990, 1, 1))
+        claim.setIncomeType("PAGAMENTO_UNICO")
+        claim.setReversedIncome(false)
+        claim.setIncomeAmount("10000.00")
+        claim.setIncomeUnitType("MONETARIO")
+        claim.setIncomeUnitCode("Br")
+        claim.setIncomeUnitDescription("BRL")
+        claim.setPaymentTerms("PRAZO")
+        claim.setBenefitAmount(1000)
+        claim.setGrantedDate(java.time.LocalDate.of(2021, 5, 1))
+        claim.setMonetaryUpdateIndex("IPC-FGV")
+        claim.setLastUpdateDate(java.time.LocalDate.of(2021, 5, 1))
         claim
     }
 
     static aPensionPlanContractWithdrawal(String planId) {
         def withdrawal = new PensionPlanContractWithdrawalEntity()
         withdrawal.setPensionPlanContractId(planId)
+        withdrawal.setWithdrawalOccurence(true)
+        withdrawal.setType("PARCIAL")
+        withdrawal.setNature("RESGATE_REGULAR")
+        withdrawal.setRequestDate("2022-05-20T08:30:00Z")
+        withdrawal.setLiquidationDate("2022-05-20T08:30:00Z")
+        withdrawal.setAmount("90.85")
+        withdrawal.setAmountUnitType("PORCENTAGEM")
+        withdrawal.setPostedChargedAmount("90.85")
+        withdrawal.setPostedChargedUnitType("PORCENTAGEM")
         withdrawal
     }
 
     static aPensionPlanContractPortability(String planId) {
         def portability = new PensionPlanContractPortabilityInfoEntity()
         portability.setPensionPlanContractId(planId)
+        portability.setDirection("ENTRADA")
+        portability.setType("PARCIAL")
+        portability.setAmount("90.85")
+        portability.setAmountUnitType("PORCENTAGEM")
+        portability.setRequestDate("2022-05-20T08:30:00Z")
+        portability.setLiquidationDate("2022-05-20T08:30:00Z")
+        portability.setChargingValue("90.85")
+        portability.setChargingValueUnitType("PORCENTAGEM")
+        portability.setSourceEntity("12345678901234")
+        portability.setTargetEntity("12345678901234")
+        portability.setSusepProcess("12345")
         portability
     }
 
     static aPensionPlanContractMovementContribution(String planId) {
         def contribution = new PensionPlanContractMovementContributionEntity()
         contribution.setPensionPlanContractId(planId)
+        contribution.setContributionAmount("95.90")
+        contribution.setContributionUnitType("PORCENTAGEM")
+        contribution.setChargedInAdvanceAmount("95.90")
+        contribution.setChargedInAdvanceUnitType("PORCENTAGEM")
+        contribution.setPeriodicity("MENSAL")
+        contribution.setContributionExpirationDate(java.time.LocalDate.of(2022, 5, 1))
+        contribution.setContributionPaymentDate(java.time.LocalDate.of(2022, 5, 1))
         contribution
     }
 
     static aPensionPlanContractMovementBenefit(String planId) {
         def benefit = new PensionPlanContractMovementBenefitEntity()
         benefit.setPensionPlanContractId(planId)
+        benefit.setBenefitAmount("95.90")
+        benefit.setBenefitUnitType("PORCENTAGEM")
+        benefit.setBenefitPaymentDate(java.time.LocalDate.of(2023, 10, 1))
         benefit
     }
 
@@ -1437,6 +1739,16 @@ static aHousingPolicy(UUID accountHolderId) {
         policy.setAccountHolderId(accountHolderId)
         policy.setInsuranceId("random_patrimonial")
         policy.setBranch(branch)
+        policy.setDocumentType(InsurancePatrimonialPolicyInfo.DocumentTypeEnum.APOLICE_INDIVIDUAL.toString())
+        policy.setIssuanceType(InsurancePatrimonialPolicyInfo.IssuanceTypeEnum.EMISSAO_PROPRIA.toString())
+        policy.setIssuanceDate(LocalDate.of(2022, 12, 31))
+        policy.setTermStartDate(LocalDate.of(2022, 12, 31))
+        policy.setTermEndDate(LocalDate.of(2023, 12, 31))
+        policy.setProposalId("123456")
+        policy.setMaxLMGAmount("2000.00")
+        policy.setMaxLMGUnitType(AmountDetails.UnitTypeEnum.MONETARIO.toString())
+        policy.setMaxLMGUnitCode("R\$")
+        policy.setMaxLMGUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
         policy
     }
 
@@ -1445,6 +1757,64 @@ static aHousingPolicy(UUID accountHolderId) {
         claim.setPolicyId(policyId)
         claim.setIdentification(identification)
         claim
+    }
+
+    static aPatrimonialInsuredObject(UUID policyId) {
+        def insuredObject = new PatrimonialInsuredObjectEntity()
+        insuredObject.setPolicyId(policyId)
+        insuredObject.setIdentification("123456789")
+        insuredObject.setType(InsurancePatrimonialInsuredObject.TypeEnum.CONTRATO.toString())
+        insuredObject.setDescription("string")
+        insuredObject
+    }
+
+    static aPatrimonialInsuredObjectCoverage(UUID insuredObjectId) {
+        def coverage = new PatrimonialInsuredObjectCoverageEntity()
+        coverage.setPatrimonialInsuredObjectId(insuredObjectId)
+        coverage.setBranch("0114")
+        coverage.setCode(InsurancePatrimonialCoverageCode.IMOVEL_BASICA.toString())
+        coverage.setSusepProcessNumber("string")
+        coverage.setLmiAmount("2000.00")
+        coverage.setLmiUnitType(AmountDetails.UnitTypeEnum.MONETARIO.toString())
+        coverage.setLmiUnitCode("R\$")
+        coverage.setLmiUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        coverage.setIsLMISublimit(true)
+        coverage.setTermStartDate(LocalDate.of(2022, 12, 31))
+        coverage.setTermEndDate(LocalDate.of(2023, 12, 31))
+        coverage.setIsMainCoverage(true)
+        coverage.setFeature(InsurancePatrimonialInsuredObjectCoverage.FeatureEnum.MASSIFICADOS.toString())
+        coverage.setType(InsurancePatrimonialInsuredObjectCoverage.TypeEnum.PARAMETRICO.toString())
+        coverage.setGracePeriod(0)
+        coverage.setGracePeriodicity(InsurancePatrimonialInsuredObjectCoverage.GracePeriodicityEnum.DIA.toString())
+        coverage.setGracePeriodCountingMethod(InsurancePatrimonialInsuredObjectCoverage.GracePeriodCountingMethodEnum.UTEIS.name())
+        coverage.setGracePeriodStartDate(LocalDate.of(2022, 12, 31))
+        coverage.setGracePeriodEndDate(LocalDate.of(2023, 12, 31))
+        coverage.setPremiumPeriodicity(InsurancePatrimonialInsuredObjectCoverage.PremiumPeriodicityEnum.MENSAL.toString())
+        coverage
+    }
+
+    static aPatrimonialPremium(UUID policyId, List<UUID> paymentIds) {
+        def premium = new PatrimonialPremiumEntity()
+        premium.setPolicyId(policyId)
+        premium.setPaymentsQuantity(4)
+        premium.setAmount("2000.00")
+        premium.setUnitType(AmountDetails.UnitTypeEnum.MONETARIO.toString())
+        premium.setUnitCode("R\$")
+        premium.setUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        premium.setPaymentIds(paymentIds)
+        premium
+    }
+
+    static aPatrimonialPremiumCoverage(UUID premiumId) {
+        def coverage = new PatrimonialPremiumCoverageEntity()
+        coverage.setPatrimonialPremiumId(premiumId)
+        coverage.setBranch("0114")
+        coverage.setCode(InsurancePatrimonialCoverageCode.IMOVEL_BASICA.toString())
+        coverage.setAmount("2000.00")
+        coverage.setUnitType(AmountDetails.UnitTypeEnum.MONETARIO.toString())
+        coverage.setUnitCode("R\$")
+        coverage.setUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        coverage
     }
 
     static aRuralPolicy(UUID accountHolderId) {
@@ -1662,5 +2032,97 @@ static aHousingPolicy(UUID accountHolderId) {
         def claim = new TransportPolicyClaimEntity()
         claim.setTransportPolicyClaimId(policyId)
         claim
+    }
+
+    static WithdrawalPensionEntity aWithdrawalPension(String clientId, String consentId) {
+        def entity = new WithdrawalPensionEntity()
+        entity.setConsentId(consentId)
+        entity.setClientId(clientId)
+        def data = new RequestPensionWithdrawalData()
+        data.setGeneralInfo(new GeneralInfoPensionWithdrawal()
+                .certificateId("certificate_123")
+                .productName("product_name"))
+        data.setWithdrawalInfo(new WithdrawalInfoPensionWithdrawal()
+                .withdrawalType(WithdrawalInfoPensionWithdrawal.WithdrawalTypeEnum._1_TOTAL)
+                .withdrawalReason(WithdrawalInfoPensionWithdrawal.WithdrawalReasonEnum._1_EMERGENCIAS_DE_SAUDE))
+        data.setWithdrawalCustomData(new WithdrawalCustomDataPension())
+        def withdrawalData = new WithdrawalPensionEntity.WithdrawalData()
+        withdrawalData.setV1(data)
+        entity.setData(withdrawalData)
+        entity
+    }
+
+    static WithdrawalPensionEntity aWithdrawalPensionV2(String clientId, String consentId) {
+        def entity = new WithdrawalPensionEntity()
+        entity.setConsentId(consentId)
+        entity.setClientId(clientId)
+        def data = new RequestPensionWithdrawalV2Data()
+        data.setGeneralInfo(new GeneralInfoPensionWithdrawal()
+                .certificateId("certificate_123")
+                .productName("product_name"))
+        data.setWithdrawalInfo(new WithdrawalInfoPensionWithdrawalV2()
+                .withdrawalType(WithdrawalInfoPensionWithdrawalV2.WithdrawalTypeEnum.TOTAL)
+                .withdrawalReason(WithdrawalInfoPensionWithdrawalV2.WithdrawalReasonEnum.EMERGENCIAS_DE_SAUDE))
+        data.setWithdrawalCustomData(new WithdrawalCustomDataPension())
+        def withdrawalData = new WithdrawalPensionEntity.WithdrawalData()
+        withdrawalData.setV2(data)
+        entity.setData(withdrawalData)
+        entity
+    }
+
+    static WithdrawalPensionLeadEntity aWithdrawalPensionLead(String clientId, String consentId) {
+        def entity = new WithdrawalPensionLeadEntity()
+        entity.setConsentId(consentId)
+        entity.setClientId(clientId)
+        def data = new RequestPensionWithdrawalData()
+        data.setGeneralInfo(new GeneralInfoPensionWithdrawal()
+                .certificateId("certificate_123")
+                .productName("product_name"))
+        data.setWithdrawalCustomData(new WithdrawalCustomDataPension())
+        def withdrawalData = new WithdrawalPensionLeadEntity.WithdrawalData()
+        withdrawalData.setV1(data)
+        entity.setData(withdrawalData)
+        entity
+    }
+
+    static WithdrawalPensionLeadEntity aWithdrawalPensionLeadV2(String clientId, String consentId) {
+        def entity = new WithdrawalPensionLeadEntity()
+        entity.setConsentId(consentId)
+        entity.setClientId(clientId)
+        def data = new RequestPensionWithdrawalV2Data()
+        data.setGeneralInfo(new GeneralInfoPensionWithdrawal()
+                .certificateId("certificate_123")
+                .productName("product_name"))
+        data.setWithdrawalInfo(new WithdrawalInfoPensionWithdrawalV2()
+                .withdrawalType(WithdrawalInfoPensionWithdrawalV2.WithdrawalTypeEnum.TOTAL)
+                .withdrawalReason(WithdrawalInfoPensionWithdrawalV2.WithdrawalReasonEnum.EMERGENCIAS_DE_SAUDE))
+        data.setWithdrawalCustomData(new WithdrawalCustomDataPension())
+        def withdrawalData = new WithdrawalPensionLeadEntity.WithdrawalData()
+        withdrawalData.setV2(data)
+        entity.setData(withdrawalData)
+        entity
+    }
+
+    static WithdrawalCapitalizationTitleEntity aWithdrawalCapitalizationTitle(String clientId, String consentId) {
+        def entity = new WithdrawalCapitalizationTitleEntity()
+        entity.setConsentId(consentId)
+        entity.setClientId(clientId)
+        def data = new RequestCapitalizationTitleWithdrawalData()
+        data.setModality(RequestCapitalizationTitleWithdrawalData.ModalityEnum.TRADICIONAL)
+        data.setSusepProcessNumber("random_process_number")
+        data.setProductInformation(new ProductInformationCapitalizationTitleWithdrawal()
+                .capitalizationTitleName("title_name")
+                .planId("plan_123")
+                .titleId("title_123")
+                .seriesId("series_123")
+                .termEndDate(LocalDate.of(2025, 12, 31)))
+        data.setWithdrawalInformation(new WithdrawalInformationCapitalizationTitleWithdrawal()
+                .withdrawalReason(WithdrawalInformationCapitalizationTitleWithdrawal.WithdrawalReasonEnum.COMPROMISSOS_PESSOAIS_EMERGENCIAIS)
+                .withdrawalTotalAmount(new AmountDetails().amount("1000.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO)))
+        data.setWithdrawalCustomData(new WithdrawalCustomDataCapitalization())
+        def withdrawalData = new WithdrawalCapitalizationTitleEntity.WithdrawalData()
+        withdrawalData.setV1(data)
+        entity.setData(withdrawalData)
+        entity
     }
 }

@@ -592,13 +592,13 @@ components:
                   maxLength: 100
                 withdrawalType:
                   type: string
-                  enum: [1_TOTAL, 2_PARCIAL]
+                  enum: [TOTAL, PARCIAL]
                 withdrawalReason:
                   type: string
-                  enum: [1_EMERGENCIAS_DE_SAUDE, 2_APLICACAO_EM_OUTROS_INVESTIMENTOS,
-                         3_INSATISFACAO_COM_A_ENTIDADE, 4_INSATISFACAO_COM_A_RENTABILIDADE_DO_PRODUTO,
-                         5_INSATISFACAO_COM_O_PRODUTO, 6_AQUISICAO_DE_BENS, 7_LIQUIDEZ_FINANCEIRA,
-                         8_REALIZACAO_DO_OBJETIVO_DO_INVESTIMENTO, 9_OUTROS]
+                  enum: [EMERGENCIAS_DE_SAUDE, APLICACAO_EM_OUTROS_INVESTIMENTOS,
+                         INSATISFACAO_COM_A_ENTIDADE, INSATISFACAO_COM_A_RENTABILIDADE_DO_PRODUTO,
+                         INSATISFACAO_COM_O_PRODUTO, AQUISICAO_DE_BENS, LIQUIDEZ_FINANCEIRA,
+                         REALIZACAO_DO_OBJETIVO_DO_INVESTIMENTO, OUTROS]
                 withdrawalReasonOthers:
                   type: string
                   maxLength: 100
@@ -1080,13 +1080,13 @@ components:
                   maxLength: 100
                 withdrawalType:
                   type: string
-                  enum: [1_TOTAL, 2_PARCIAL]
+                  enum: [TOTAL, PARCIAL]
                 withdrawalReason:
                   type: string
-                  enum: [1_EMERGENCIAS_DE_SAUDE, 2_APLICACAO_EM_OUTROS_INVESTIMENTOS,
-                         3_INSATISFACAO_COM_A_ENTIDADE, 4_INSATISFACAO_COM_A_RENTABILIDADE_DO_PRODUTO,
-                         5_INSATISFACAO_COM_O_PRODUTO, 6_AQUISICAO_DE_BENS, 7_LIQUIDEZ_FINANCEIRA,
-                         8_REALIZACAO_DO_OBJETIVO_DO_INVESTIMENTO, 9_OUTROS]
+                  enum: [EMERGENCIAS_DE_SAUDE, APLICACAO_EM_OUTROS_INVESTIMENTOS,
+                         INSATISFACAO_COM_A_ENTIDADE, INSATISFACAO_COM_A_RENTABILIDADE_DO_PRODUTO,
+                         INSATISFACAO_COM_O_PRODUTO, AQUISICAO_DE_BENS, LIQUIDEZ_FINANCEIRA,
+                         REALIZACAO_DO_OBJETIVO_DO_INVESTIMENTO, OUTROS]
                 withdrawalReasonOthers:
                   type: string
                   maxLength: 100
@@ -1954,8 +1954,6 @@ components:
         minValue:
           $ref: '#/components/schemas/AmountDetails'
         maxValue:
-          $ref: '#/components/schemas/AmountDetails'
-        percentage:
           $ref: '#/components/schemas/AmountDetails'
         valueOthers:
           $ref: '#/components/schemas/AmountDetails'
@@ -6882,6 +6880,71 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InsuranceFinancialRiskClaimCoverage'
+    InsuranceFinancialRiskClaimV2:
+      type: object
+      required:
+        - identification
+        - status
+        - statusAlterationDate
+        - occurrenceDate
+        - warningDate
+        - amount
+        - coverages
+      properties:
+        identification:
+          type: string
+          maxLength: 50
+        documentationDeliveryDate:
+          type: string
+          format: date
+          pattern: '^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])$'
+          maxLength: 10
+        status:  
+          type: string
+          enum: [ABERTO,
+                ENCERRADO_COM_INDENIZACAO,
+                ENCERRADO_SEM_INDENIZACAO,
+                REABERTO,
+                CANCELADO_POR_ERRO_OPERACIONAL,
+                AVALIACAO_INICIAL]
+        statusAlterationDate:
+          type: string
+          format: date
+          pattern: '^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])$'
+          maxLength: 10
+        occurrenceDate:
+          type: string
+          format: date
+          pattern: '^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])$'
+          maxLength: 10
+        warningDate:
+          type: string
+          format: date
+          pattern: '^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])$'
+          maxLength: 10
+        thirdPartyClaimDate:
+          type: string
+          format: date
+          pattern: '^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])$'
+          maxLength: 10
+        amount:
+          $ref: '#/components/schemas/AmountDetails'
+        denialJustification:
+          type: string
+          enum: [RISCO_EXCLUIDO,
+            RISCO_AGRAVADO,
+            SEM_DOCUMENTACAO,
+            DOCUMENTACAO_INCOMPLETA,
+            PRESCRICAO,
+            FORA_COBERTURA,
+            OUTROS]
+        denialJustificationDescription:
+          type: string
+          maxLength: 500  
+        coverages:
+          type: array
+          items:
+            $ref: '#/components/schemas/InsuranceFinancialRiskClaimCoverage'
     InsuranceFinancialRiskClaimCoverage:
       type: object
       required:
@@ -6926,7 +6989,6 @@ components:
         - proposalId
         - insureds
         - insuredObjects
-        - branchInfo
       properties:
         documentType:
           type: string
@@ -7043,6 +7105,38 @@ components:
           $ref: '#/components/schemas/Deductible'
         POS:
           $ref: '#/components/schemas/POS'
+    InsuranceFinancialRiskCoverageV2:
+      type: object
+      required:
+        - branch
+        - code
+      minProperties: 3
+      properties:
+        branch:
+          type: string
+          maxLength: 4
+        code:
+            type: string
+            enum: [
+              PROTECAO_DE_BENS,
+              PROTECAO_DE_DADOS_ONLINE,  
+              SAQUE_OU_COMPRA_SOB_COACAO,
+              GAP_TOTAL,
+              GAP_SALDO_DEVEDOR,
+              GAP_DESPESAS_ACESSORIAS,   
+              STOP_LOSS,
+              NAO_PAGAMENTO_DA_CARTEIRA_DE_CLIENTES_DO_SEGURADO,
+              NAO_PAGAMENTO_DA_CARTEIRA_DE_CLIENTES_DO_SEGURADO_INADIMPLENCIA_POR_QUESTAO_COMERCIAL,
+              NAO_PAGAMENTO_DA_CARTEIRA_DE_CLIENTES_DO_SEGURADO_INADIMPLENCIA_POR_QUESTAO_POLITICA_EXTRAORDINARIO,
+              OUTRAS
+            ]
+        description:
+          type: string
+          maxLength: 500
+        deductible:
+          $ref: '#/components/schemas/DeductibleV2'
+        POS:
+          $ref: '#/components/schemas/POSV2'
     QuoteRequestHousingLead:
       type: object
       required:
@@ -7607,16 +7701,14 @@ components:
                         type: string
                         maxLength: 500
     PolicyDataResponsibilityLead:
-      type: array
-      items:
-        type: object
-        properties:
-          policyInfo:
-            $ref: '#/components/schemas/InsuranceResponsibilityPolicyInfo'
-          premium:
-            $ref: '#/components/schemas/InsurancePremium'
-          claim:
-            $ref: '#/components/schemas/InsuranceResponsibilityClaim'
+      type: object
+      properties:
+        policyInfo:
+          $ref: '#/components/schemas/InsuranceResponsibilityPolicyInfo'
+        premium:
+          $ref: '#/components/schemas/InsurancePremium'
+        claim:
+          $ref: '#/components/schemas/InsuranceResponsibilityClaim'
     InsuranceResponsibilityPolicyInfo:
       type: object
       required:
@@ -17546,6 +17638,19 @@ components:
           $ref: '#/components/schemas/Links'
         meta:
           $ref: '#/components/schemas/Meta'
+    ResponseInsuranceFinancialRiskPolicyInfoV2:
+      type: object
+      required:
+        - data
+        - links
+        - meta
+      properties:
+        data:
+          $ref: '#/components/schemas/InsuranceFinancialRiskPolicyInfoDataV2'
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'
     ResponseInsuranceFinancialRiskPremium:
       type: object
       required:
@@ -17555,6 +17660,19 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/InsuranceFinancialRiskPremium'
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    ResponseInsuranceFinancialRiskPremiumV2:
+      type: object
+      required:
+        - data
+        - links
+        - meta
+      properties:
+        data:
+          $ref: '#/components/schemas/InsuranceFinancialRiskPremiumV2'
         links:
           $ref: '#/components/schemas/Links'
         meta:
@@ -17580,6 +17698,27 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Payment'
+    InsuranceFinancialRiskPremiumV2:
+      type: object
+      required:
+        - amount
+        - paymentsQuantity
+        - coverages
+        - payments
+      properties:
+        paymentsQuantity:
+          type: integer
+          maxLength: 3
+        amount:
+          $ref: '#/components/schemas/AmountDetails'
+        coverages:
+          type: array
+          items:
+            $ref: '#/components/schemas/InsuranceFinancialRiskPremiumCoverage'
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentV2'
     InsuranceFinancialRiskPremiumCoverage:
       type: object
       required:
@@ -17691,6 +17830,99 @@ components:
             $ref: '#/components/schemas/Coinsurer'
         branchInfo:
           $ref: '#/components/schemas/InsuranceStopLossSpecificPolicyInfo'
+    InsuranceFinancialRiskPolicyInfoDataV2:    
+      type: object                                            
+      required:
+        - documentType 
+        - policyId
+        - issuanceType
+        - issuanceDate
+        - termStartDate
+        - termEndDate
+        - proposalId
+        - insureds
+        - insuredObjects
+      properties:
+        documentType:
+          type: string
+          enum: [APOLICE_INDIVIDUAL,
+                BILHETE,
+                CERTIFICADO,
+                APOLICE_INDIVIDUAL_AUTOMOVEL,
+                APOLICE_FROTA_AUTOMOVEL,
+                CERTIFICADO_AUTOMOVEL]
+        policyId:
+          type: string
+          maxLength: 60
+        susepProcessNumber: 
+          type: string
+          maxLength: 60
+        groupCertificateId: 
+          type: string
+          maxLength: 60
+        issuanceType: 
+          type: string
+          enum: [EMISSAO_PROPRIA,
+                COSSEGURO_ACEITO]
+        issuanceDate:
+          type: string
+          format: date
+          maxLength: 10
+          pattern: '^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])$'
+        termStartDate: 
+          type: string
+          format: date
+          maxLength: 10
+          pattern: '^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])$'
+        termEndDate:
+          type: string
+          format: date
+          maxLength: 10
+          pattern: '^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])$'
+        leadInsurerCode:
+          type: string
+          maxLength: 1024
+        leadInsurerPolicyId:
+          type: string
+          maxLength: 1024
+        maxLMG:
+          $ref: '#/components/schemas/AmountDetails'
+        proposalId:
+          type: string
+          maxLength: 60
+        insureds:
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonalInfoV2'  
+        beneficiaries: 
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryInfo'
+        principals:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrincipalsV2'
+        intermediaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntermediaryV2'
+        insuredObjects:
+          type: array
+          items:
+            $ref: '#/components/schemas/InsuranceFinancialRiskInsuredObjectV2'
+        coverages:    
+          type: array                   
+          items:
+            $ref: '#/components/schemas/InsuranceFinancialRiskCoverageV2'
+        coinsuranceRetainedPercentage:
+          type: string                                                               
+          pattern: '^100\.0{1,9}$|^\d{1,2}\.\d{1,9}$'
+        coinsurers:
+          type: array                  
+          items:
+            $ref: '#/components/schemas/Coinsurer'
+        branchInfo:
+          $ref: '#/components/schemas/InsuranceStopLossSpecificPolicyInfo'
     InsuranceFinancialRiskInsuredObject:
       type: object
       required:
@@ -17709,6 +17941,38 @@ components:
           type: string
           maxLength: 100
         description:
+          type: string
+          maxLength: 1024
+        amount:
+          $ref: '#/components/schemas/AmountDetails'
+        coverages:
+          type: array
+          items:
+            $ref: '#/components/schemas/InsuranceFinancialRiskInsuredObjectCoverage'
+    InsuranceFinancialRiskInsuredObjectV2:
+      type: object
+      required:
+        - type
+        - description
+        - coverages
+      properties:
+        identification:
+          type: string
+          maxLength: 100
+        type:
+          type: string
+          enum: [CONTRATO,
+                PROCESSO_ADMINISTRATIVO,
+                PROCESSO_JUDICIAL,
+                AUTOMOVEL,
+                CONDUTOR,
+                FROTA,
+                PESSOA,
+                OUTROS]
+        typeAdditionalInfo:
+          type: string
+          maxLength: 500
+        description: 
           type: string
           maxLength: 1024
         amount:
@@ -17808,6 +18072,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InsuranceFinancialRiskClaim'
+          minItems: 0
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    ResponseInsuranceFinancialRiskClaimsV2:
+      type: object
+      required:
+        - data
+        - links
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/InsuranceFinancialRiskClaimV2'
           minItems: 0
         links:
           $ref: '#/components/schemas/Links'
@@ -26055,4 +26335,442 @@ components:
               - value
             properties:
               value:
-                type: string  
+                type: string
+    RequestPensionWithdrawal:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - generalInfo
+            - withdrawalInfo
+          properties:
+            generalInfo:
+              $ref: '#/components/schemas/GeneralInfoPensionWithdrawal'
+            withdrawalInfo:
+              $ref: '#/components/schemas/WithdrawalInfoPensionWithdrawal'
+            withdrawalCustomData:
+              $ref: '#/components/schemas/WithdrawalCustomDataPension'
+    GeneralInfoPensionWithdrawal:
+      type: object
+      required:
+        - certificateId
+        - productName
+      properties:
+        certificateId:
+          type: string
+          maxLength: 60
+        productName:
+          type: string
+          maxLength: 100
+    WithdrawalInfoPensionWithdrawal:
+      type: object
+      required:
+        - withdrawalType
+        - withdrawalReason
+        - pmbacAmount
+      properties:
+        withdrawalType:
+          type: string
+          enum:
+            - 1_TOTAL
+            - 2_PARCIAL
+        withdrawalReason:
+          type: string
+          enum:
+            - 1_EMERGENCIAS_DE_SAUDE
+            - 2_APLICACAO_EM_OUTROS_INVESTIMENTOS
+            - 3_INSATISFACAO_COM_A_ENTIDADE
+            - 4_INSATISFACAO_COM_A_RENTABILIDADE_DO_PRODUTO
+            - 5_INSATISFACAO_COM_O_PRODUTO
+            - 6_AQUISICAO_DE_BENS
+            - 7_LIQUIDEZ_FINANCEIRA
+            - 8_REALIZACAO_DO_OBJETIVO_DO_INVESTIMENTO
+            - 9_OUTROS
+        withdrawalReasonOthers:
+          type: string
+          maxLength: 100
+        desiredTotalAmount:
+          $ref: '#/components/schemas/AmountDetails'
+        pmbacAmount:
+          $ref: '#/components/schemas/AmountDetails'
+    ResponsePensionWithdrawal:
+      type: object
+      required:
+        - data
+        - links
+        - meta
+      properties:
+        data:
+          type: object
+          required:
+            - protocolNumber
+            - protocolDateTime
+            - generalInfo
+            - withdrawalInfo
+            - redirectLink
+          properties:
+            protocolNumber:
+              type: string
+              maxLength: 60
+            protocolDateTime:
+              type: string
+              format: date-time
+            generalInfo:
+              $ref: '#/components/schemas/GeneralInfoPensionWithdrawal'
+            withdrawalInfo:
+              $ref: '#/components/schemas/WithdrawalInfoPensionWithdrawal'
+            contactChannel:
+              type: string
+            redirectLink:
+              $ref: '#/components/schemas/LinkInfo'
+            withdrawalCustomData:
+              $ref: '#/components/schemas/WithdrawalCustomDataPension'
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    ResponseWithdrawalLead:
+      type: object
+      required:
+        - data
+        - links
+        - meta
+      properties:
+        data:
+          type: object
+          required:
+            - generalInfo
+            - withdrawalInfo
+          properties:
+            generalInfo:
+              $ref: '#/components/schemas/GeneralInfoPensionWithdrawal'
+            withdrawalInfo:
+              $ref: '#/components/schemas/WithdrawalInfoPensionWithdrawal'
+            withdrawalCustomData:
+              $ref: '#/components/schemas/WithdrawalCustomDataPension'
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    RequestCapitalizationTitleWithdrawal:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - modality
+            - susepProcessNumber
+            - productInformation
+            - withdrawalInformation
+          properties:
+            modality:
+              type: string
+              enum:
+                - TRADICIONAL
+                - INSTRUMENTO_GARANTIA
+                - COMPRA_PROGRAMADA
+                - POPULAR
+                - INCENTIVO
+                - FILANTROPIA_PREMIAVEL
+            susepProcessNumber:
+              type: string
+              maxLength: 70
+            productInformation:
+              $ref: '#/components/schemas/ProductInformationCapitalizationTitleWithdrawal'
+            withdrawalInformation:
+              $ref: '#/components/schemas/WithdrawalInformationCapitalizationTitleWithdrawal'
+            withdrawalCustomData:
+              $ref: '#/components/schemas/WithdrawalCustomDataCapitalization'
+    ProductInformationCapitalizationTitleWithdrawal:
+      type: object
+      required:
+        - capitalizationTitleName
+        - planId
+        - titleId
+        - seriesId
+        - termEndDate
+      properties:
+        capitalizationTitleName:
+          type: string
+          maxLength: 100
+        planId:
+          type: string
+          maxLength: 60
+        titleId:
+          type: string
+          maxLength: 60
+        seriesId:
+          type: string
+          maxLength: 60
+        termEndDate:
+          type: string
+          format: date
+          maxLength: 10
+          pattern: '^(\d{4})-(1[0-2]|0?[1-9])-(3[01]|[12][0-9]|0?[1-9])$'
+    WithdrawalInformationCapitalizationTitleWithdrawal:
+      type: object
+      required:
+        - withdrawalReason
+        - withdrawalTotalAmount
+      properties:
+        withdrawalReason:
+          type: string
+          enum:
+            - IMPOSSIBILIDADE_DE_PAGAMENTO_DAS_PARCELAS
+            - COMPROMISSOS_PESSOAIS_EMERGENCIAIS
+            - INSATISFACAO_COM_CARACTERISTICAS_DO_PRODUTO
+            - INSATISFACAO_NO_RELACIONAMENTO_COM_SOCIEDADE_CAPITALIZACAO
+            - AQUISICAO_DE_OUTROS_BENS_OU_PRODUTOS
+            - PERDA_DE_INTERESSE
+            - PREFIRO_NAO_RESPONDER
+            - OUTROS
+        withdrawalReasonOthers:
+          type: string
+          maxLength: 500
+        withdrawalTotalAmount:
+          $ref: '#/components/schemas/AmountDetails'
+    ResponseCapitalizationTitleWithdrawal:
+      type: object
+      required:
+        - data
+        - links
+      properties:
+        data:
+          type: object
+          required:
+            - protocolNumber
+            - protocolDateTime
+            - modality
+            - susepProcessNumber
+            - productInformation
+            - withdrawalInformation
+            - redirectLink
+          properties:
+            protocolNumber:
+              type: string
+              maxLength: 60
+            protocolDateTime:
+              type: string
+              format: date-time
+            modality:
+              type: string
+              enum:
+                - TRADICIONAL
+                - INSTRUMENTO_GARANTIA
+                - COMPRA_PROGRAMADA
+                - POPULAR
+                - INCENTIVO
+                - FILANTROPIA_PREMIAVEL
+            susepProcessNumber:
+              type: string
+              maxLength: 70
+            productInformation:
+              $ref: '#/components/schemas/ProductInformationCapitalizationTitleWithdrawal'
+            withdrawalInformation:
+              $ref: '#/components/schemas/WithdrawalInformationCapitalizationTitleWithdrawal'
+            redirectLink:
+              $ref: '#/components/schemas/LinkInfo'
+            withdrawalCustomData:
+              $ref: '#/components/schemas/WithdrawalCustomDataCapitalization'
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    WithdrawalCustomDataPension:
+      type: object
+      properties:
+        generalInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomInfoData'
+        withdrawalInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomInfoData'
+    WithdrawalCustomDataCapitalization:
+      type: object
+      properties:
+        customerIdentification:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomInfoData'
+        customerQualification:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomInfoData'
+        relationshipInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomInfoData'
+        productInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomInfoData'
+        withdrawalInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomInfoData'
+        generalSeriesInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomInfoData'
+    RequestPensionWithdrawalV2:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - generalInfo
+            - withdrawalInfo
+          properties:
+            generalInfo:
+              $ref: '#/components/schemas/GeneralInfoPensionWithdrawal'
+            withdrawalInfo:
+              $ref: '#/components/schemas/WithdrawalInfoPensionWithdrawalV2'
+            withdrawalCustomData:
+              $ref: '#/components/schemas/WithdrawalCustomDataPension'
+    WithdrawalInfoPensionWithdrawalV2:
+      type: object
+      required:
+        - withdrawalType
+        - withdrawalReason
+        - pmbacAmount
+      properties:
+        withdrawalType:
+          type: string
+          enum:
+            - TOTAL
+            - PARCIAL
+        withdrawalReason:
+          type: string
+          enum:
+            - EMERGENCIAS_DE_SAUDE
+            - APLICACAO_EM_OUTROS_INVESTIMENTOS
+            - INSATISFACAO_COM_A_ENTIDADE
+            - INSATISFACAO_COM_A_RENTABILIDADE_DO_PRODUTO
+            - INSATISFACAO_COM_O_PRODUTO
+            - AQUISICAO_DE_BENS
+            - LIQUIDEZ_FINANCEIRA
+            - REALIZACAO_DO_OBJETIVO_DO_INVESTIMENTO
+            - OUTROS
+        withdrawalReasonOthers:
+          type: string
+          maxLength: 100
+        desiredTotalAmount:
+          $ref: '#/components/schemas/AmountDetails'
+        pmbacAmount:
+          $ref: '#/components/schemas/AmountDetails'
+    ResponsePensionWithdrawalV2:
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: object
+          required:
+            - protocolNumber
+            - protocolDateTime
+            - generalInfo
+            - withdrawalInfo
+            - redirectLink
+          properties:
+            protocolNumber:
+              type: string
+              maxLength: 60
+            protocolDateTime:
+              type: string
+              format: date-time
+            generalInfo:
+              $ref: '#/components/schemas/GeneralInfoPensionWithdrawal'
+            withdrawalInfo:
+              $ref: '#/components/schemas/WithdrawalInfoPensionWithdrawalV2'
+            contactChannel:
+              type: string
+            redirectLink:
+              $ref: '#/components/schemas/LinkInfo'
+            withdrawalCustomData:
+              $ref: '#/components/schemas/WithdrawalCustomDataPension'
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    ResponseWithdrawalLeadV2:
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: object
+          required:
+            - generalInfo
+            - withdrawalInfo
+          properties:
+            generalInfo:
+              $ref: '#/components/schemas/GeneralInfoPensionWithdrawal'
+            withdrawalInfo:
+              $ref: '#/components/schemas/WithdrawalInfoPensionWithdrawalV2'
+            withdrawalCustomData:
+              $ref: '#/components/schemas/WithdrawalCustomDataPension'
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    RequestCapitalizationTitleWithdrawalV2:
+      allOf:
+        - $ref: '#/components/schemas/RequestCapitalizationTitleWithdrawal'
+    ResponseCapitalizationTitleWithdrawalV2:
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: object
+          required:
+            - protocolNumber
+            - protocolDateTime
+            - modality
+            - susepProcessNumber
+            - productInformation
+            - withdrawalInformation
+            - redirectLink
+          properties:
+            protocolNumber:
+              type: string
+              maxLength: 60
+            protocolDateTime:
+              type: string
+              format: date-time
+            modality:
+              type: string
+              enum:
+                - TRADICIONAL
+                - INSTRUMENTO_GARANTIA
+                - COMPRA_PROGRAMADA
+                - POPULAR
+                - INCENTIVO
+                - FILANTROPIA_PREMIAVEL
+            susepProcessNumber:
+              type: string
+              maxLength: 70
+            productInformation:
+              $ref: '#/components/schemas/ProductInformationCapitalizationTitleWithdrawal'
+            withdrawalInformation:
+              $ref: '#/components/schemas/WithdrawalInformationCapitalizationTitleWithdrawal'
+            redirectLink:
+              $ref: '#/components/schemas/LinkInfo'
+            withdrawalCustomData:
+              $ref: '#/components/schemas/WithdrawalCustomDataCapitalization'
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'

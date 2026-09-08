@@ -109,4 +109,26 @@ public class FinancialRiskPolicyClaimEntity extends BaseEntity {
                 .denialJustificationDescription(this.getDenialJustificationDescription())
                 .coverages(this.getCoverages().stream().map(FinancialRiskPolicyClaimCoverageEntity::mapDTO).toList());
     }
+
+    public InsuranceFinancialRiskClaimV2 mapDTOV2() {
+        return new InsuranceFinancialRiskClaimV2()
+                .identification(this.getIdentification())
+                .documentationDeliveryDate(this.getDocumentationDeliveryDate())
+                .status(InsuranceFinancialRiskClaimV2.StatusEnum.fromValue(this.getStatus()))
+                .statusAlterationDate(this.getStatusAlterationDate())
+                .occurrenceDate(this.getOccurrenceDate())
+                .warningDate(this.getWarningDate())
+                .thirdPartyClaimDate(this.getThirdPartyClaimDate())
+                .amount(new AmountDetails()
+                        .amount(this.getAmount())
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getUnitType()))
+                        .unitTypeOthers(this.getUnitTypeOthers())
+                        .unit(new AmountDetailsUnit()
+                                .code(this.getUnitCode())
+                                .description(AmountDetailsUnit.DescriptionEnum.fromValue(this.getUnitDescription())))
+                        .currency(AmountDetails.CurrencyEnum.fromValue(this.getCurrency())))
+                .denialJustification(InsuranceFinancialRiskClaimV2.DenialJustificationEnum.fromValue(this.getDenialJustification()))
+                .denialJustificationDescription(this.getDenialJustificationDescription())
+                .coverages(this.getCoverages().stream().map(FinancialRiskPolicyClaimCoverageEntity::mapDTO).toList());
+    }
 }

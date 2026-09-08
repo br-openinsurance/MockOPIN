@@ -6,7 +6,9 @@ import com.raidiam.trustframework.mockinsurance.domain.*
 import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentPermission
 import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentV3Permission
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseResourceList
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseResourceListData
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseResourceListV3
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseResourceListV3Data
 import io.micronaut.data.model.Pageable
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.exceptions.HttpStatusException
@@ -187,24 +189,20 @@ class ResourceServiceSpec extends CleanupSpecification {
         }
     }
 
-    def "we can not get resources without permissions"() {
+    def "we get an empty list without specific resource permissions"() {
         when:
-        resourcesService.getResourceList(Pageable.unpaged(), testConsent.consentId)
+        ResponseResourceList response = resourcesService.getResourceList(Pageable.unpaged(), testConsent.consentId)
 
         then:
-        HttpStatusException e = thrown()
-        e.status == HttpStatus.NOT_FOUND
-        e.getMessage() == "Resource not found, no appropriate permissions attached to consent"
+        response.getData().isEmpty()
     }
 
-    def "we can not get resources V3 without permissions"() {
+    def "we get an empty list without specific resource permissions in V3"() {
         when:
-        resourcesService.getResourceListV3(Pageable.unpaged(), testConsent.consentId)
+        ResponseResourceListV3 response = resourcesService.getResourceListV3(Pageable.unpaged(), testConsent.consentId)
 
         then:
-        HttpStatusException e = thrown()
-        e.status == HttpStatus.NOT_FOUND
-        e.getMessage() == "Resource not found, no appropriate permissions attached to consent"
+        response.getData().isEmpty()
     }
 
     def "we can get pages"() {
@@ -351,7 +349,7 @@ class ResourceServiceSpec extends CleanupSpecification {
         e.getLocalizedMessage() == "Consent Id " + consentId + " not found"
     }
 
-    def "we get an empty list when only customers permissions are granted"() {
+    def "we get an empty list when only customers permissions are granted but no customer data exists"() {
         when:
         testConsent.setPermissions(List.of(
                 EnumConsentPermission.RESOURCES_READ.toString(),
@@ -379,7 +377,7 @@ class ResourceServiceSpec extends CleanupSpecification {
         response2.getData().isEmpty()
     }
 
-    def "we get an empty list when only customers permissions are granted in V3"() {
+    def "we get an empty list when only customers permissions are granted but no customer data exists in V3"() {
         when:
         testConsent.setPermissions(List.of(
                 EnumConsentV3Permission.RESOURCES_READ.toString(),
@@ -405,6 +403,154 @@ class ResourceServiceSpec extends CleanupSpecification {
 
         then:
         response2.getData().isEmpty()
+    }
+
+    def "we get personal customer resources when customer data exists"() {
+        given:
+        personalIdentificationRepository.save(TestEntityDataFactory.aPersonalIdentification(testAccountHolder.getAccountHolderId()))
+        personalQualificationRepository.save(TestEntityDataFactory.aPersonalQualification(testAccountHolder.getAccountHolderId()))
+        personalComplimentaryInformationRepository.save(TestEntityDataFactory.aPersonalComplimentaryInfo(testAccountHolder.getAccountHolderId()))
+
+        testConsent.setPermissions(List.of(
+                EnumConsentPermission.RESOURCES_READ.toString(),
+                EnumConsentPermission.CUSTOMERS_PERSONAL_IDENTIFICATIONS_READ.toString(),
+                EnumConsentPermission.CUSTOMERS_PERSONAL_QUALIFICATION_READ.toString(),
+                EnumConsentPermission.CUSTOMERS_PERSONAL_ADDITIONALINFO_READ.toString()
+        ))
+        consentRepository.update(testConsent)
+
+        when:
+        ResponseResourceList response = resourcesService.getResourceList(Pageable.unpaged(), testConsent.getConsentId())
+
+        then:
+        response.getData().size() == 3
+        response.getData().any { it.type == ResponseResourceListData.TypeEnum.CUSTOMERS_PERSONAL_IDENTIFICATIONS }
+        response.getData().any { it.type == ResponseResourceListData.TypeEnum.CUSTOMERS_PERSONAL_QUALIFICATION }
+        response.getData().any { it.type == ResponseResourceListData.TypeEnum.CUSTOMERS_PERSONAL_ADDITIONALINFO }
+        response.getData().every { it.status == ResponseResourceListData.StatusEnum.AVAILABLE }
+    }
+
+    def "we get personal customer resources when customer data exists in V3"() {
+        given:
+        testConsent.setPermissions(List.of(
+                EnumConsentV3Permission.RESOURCES_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_PERSONAL_IDENTIFICATIONS_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_PERSONAL_QUALIFICATION_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_PERSONAL_ADDITIONALINFO_READ.toString()
+        ))
+        consentRepository.update(testConsent)
+
+        when:
+        ResponseResourceListV3 response = resourcesService.getResourceListV3(Pageable.unpaged(), testConsent.getConsentId())
+
+        then:
+        response.getData().size() == 3
+        response.getData().any { it.type == ResponseResourceListV3Data.TypeEnum.CUSTOMERS_PERSONAL_IDENTIFICATIONS }
+        response.getData().any { it.type == ResponseResourceListV3Data.TypeEnum.CUSTOMERS_PERSONAL_QUALIFICATION }
+        response.getData().any { it.type == ResponseResourceListV3Data.TypeEnum.CUSTOMERS_PERSONAL_ADDITIONALINFO }
+        response.getData().every { it.status == ResponseResourceListV3Data.StatusEnum.AVAILABLE }
+    }
+
+    def "we get business customer resources when customer data exists"() {
+        given:
+        businessIdentificationRepository.save(TestEntityDataFactory.aBusinessIdentification(testAccountHolder.getAccountHolderId(), "12345678000100"))
+        businessQualificationRepository.save(TestEntityDataFactory.aBusinessQualification(testAccountHolder.getAccountHolderId()))
+        businessComplimentaryInformationRepository.save(TestEntityDataFactory.aBusinessComplimentaryInfo(testAccountHolder.getAccountHolderId()))
+
+        testConsent.setPermissions(List.of(
+                EnumConsentPermission.RESOURCES_READ.toString(),
+                EnumConsentPermission.CUSTOMERS_BUSINESS_IDENTIFICATIONS_READ.toString(),
+                EnumConsentPermission.CUSTOMERS_BUSINESS_QUALIFICATION_READ.toString(),
+                EnumConsentPermission.CUSTOMERS_BUSINESS_ADDITIONALINFO_READ.toString()
+        ))
+        consentRepository.update(testConsent)
+
+        when:
+        ResponseResourceList response = resourcesService.getResourceList(Pageable.unpaged(), testConsent.getConsentId())
+
+        then:
+        response.getData().size() == 3
+        response.getData().any { it.type == ResponseResourceListData.TypeEnum.CUSTOMERS_BUSINESS_IDENTIFICATIONS }
+        response.getData().any { it.type == ResponseResourceListData.TypeEnum.CUSTOMERS_BUSINESS_QUALIFICATION }
+        response.getData().any { it.type == ResponseResourceListData.TypeEnum.CUSTOMERS_BUSINESS_ADDITIONALINFO }
+        response.getData().every { it.status == ResponseResourceListData.StatusEnum.AVAILABLE }
+    }
+
+    def "we get business customer resources when customer data exists in V3"() {
+        given:
+        testConsent.setPermissions(List.of(
+                EnumConsentV3Permission.RESOURCES_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_BUSINESS_IDENTIFICATIONS_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_BUSINESS_QUALIFICATION_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_BUSINESS_ADDITIONALINFO_READ.toString()
+        ))
+        consentRepository.update(testConsent)
+
+        when:
+        ResponseResourceListV3 response = resourcesService.getResourceListV3(Pageable.unpaged(), testConsent.getConsentId())
+
+        then:
+        response.getData().size() == 3
+        response.getData().any { it.type == ResponseResourceListV3Data.TypeEnum.CUSTOMERS_BUSINESS_IDENTIFICATIONS }
+        response.getData().any { it.type == ResponseResourceListV3Data.TypeEnum.CUSTOMERS_BUSINESS_QUALIFICATION }
+        response.getData().any { it.type == ResponseResourceListV3Data.TypeEnum.CUSTOMERS_BUSINESS_ADDITIONALINFO }
+        response.getData().every { it.status == ResponseResourceListV3Data.StatusEnum.AVAILABLE }
+    }
+
+    def "customer resources appear alongside insurance product resources"() {
+        given:
+        testConsent.setPermissions(List.of(
+                EnumConsentPermission.RESOURCES_READ.toString(),
+                EnumConsentPermission.CAPITALIZATION_TITLE_READ.toString(),
+                EnumConsentPermission.CUSTOMERS_PERSONAL_IDENTIFICATIONS_READ.toString(),
+                EnumConsentPermission.CUSTOMERS_PERSONAL_QUALIFICATION_READ.toString(),
+                EnumConsentPermission.CUSTOMERS_PERSONAL_ADDITIONALINFO_READ.toString(),
+                EnumConsentPermission.CUSTOMERS_BUSINESS_IDENTIFICATIONS_READ.toString(),
+                EnumConsentPermission.CUSTOMERS_BUSINESS_QUALIFICATION_READ.toString(),
+                EnumConsentPermission.CUSTOMERS_BUSINESS_ADDITIONALINFO_READ.toString()
+        ))
+        consentRepository.update(testConsent)
+
+        when:
+        ResponseResourceList response = resourcesService.getResourceList(Pageable.unpaged(), testConsent.getConsentId())
+
+        then:
+        response.getData().size() == 7
+        response.getData().any { it.type == ResponseResourceListData.TypeEnum.CAPITALIZATION_TITLES }
+        response.getData().any { it.type == ResponseResourceListData.TypeEnum.CUSTOMERS_PERSONAL_IDENTIFICATIONS }
+        response.getData().any { it.type == ResponseResourceListData.TypeEnum.CUSTOMERS_PERSONAL_QUALIFICATION }
+        response.getData().any { it.type == ResponseResourceListData.TypeEnum.CUSTOMERS_PERSONAL_ADDITIONALINFO }
+        response.getData().any { it.type == ResponseResourceListData.TypeEnum.CUSTOMERS_BUSINESS_IDENTIFICATIONS }
+        response.getData().any { it.type == ResponseResourceListData.TypeEnum.CUSTOMERS_BUSINESS_QUALIFICATION }
+        response.getData().any { it.type == ResponseResourceListData.TypeEnum.CUSTOMERS_BUSINESS_ADDITIONALINFO }
+    }
+
+    def "customer resources appear alongside insurance product resources in V3"() {
+        given:
+        testConsent.setPermissions(List.of(
+                EnumConsentV3Permission.RESOURCES_READ.toString(),
+                EnumConsentV3Permission.CAPITALIZATION_TITLE_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_PERSONAL_IDENTIFICATIONS_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_PERSONAL_QUALIFICATION_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_PERSONAL_ADDITIONALINFO_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_BUSINESS_IDENTIFICATIONS_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_BUSINESS_QUALIFICATION_READ.toString(),
+                EnumConsentV3Permission.CUSTOMERS_BUSINESS_ADDITIONALINFO_READ.toString()
+        ))
+        consentRepository.update(testConsent)
+
+        when:
+        ResponseResourceListV3 response = resourcesService.getResourceListV3(Pageable.unpaged(), testConsent.getConsentId())
+
+        then:
+        response.getData().size() == 7
+        response.getData().any { it.type == ResponseResourceListV3Data.TypeEnum.CAPITALIZATION_TITLES }
+        response.getData().any { it.type == ResponseResourceListV3Data.TypeEnum.CUSTOMERS_PERSONAL_IDENTIFICATIONS }
+        response.getData().any { it.type == ResponseResourceListV3Data.TypeEnum.CUSTOMERS_PERSONAL_QUALIFICATION }
+        response.getData().any { it.type == ResponseResourceListV3Data.TypeEnum.CUSTOMERS_PERSONAL_ADDITIONALINFO }
+        response.getData().any { it.type == ResponseResourceListV3Data.TypeEnum.CUSTOMERS_BUSINESS_IDENTIFICATIONS }
+        response.getData().any { it.type == ResponseResourceListV3Data.TypeEnum.CUSTOMERS_BUSINESS_QUALIFICATION }
+        response.getData().any { it.type == ResponseResourceListV3Data.TypeEnum.CUSTOMERS_BUSINESS_ADDITIONALINFO }
     }
 
     def "we get an 403 on wrong permissions"() {

@@ -1,1 +1,53 @@
 @import "tailwindcss";
+
+@layer components {
+  #cancel-button {
+    width: 100%;
+    height: 50px;
+    margin-top: 1rem;
+    border-radius: 0.5rem;
+    font-size: 14px;
+    font-weight: 500;
+    background-color: transparent;
+    border: 1px solid #E24B4A;
+    color: #A32D2D;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+  }
+  #cancel-button:hover {
+    background-color: #FCEBEB;
+  }
+  #cancel-button:active {
+    background-color: #F7C1C1;
+  }
+  #cancel-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  #continue-button {
+    width: 100%;
+    height: 50px;
+    margin-top: 1rem;
+    border-radius: 0.5rem;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: var(--btn-color, #A7ADAD);
+    border: 1px solid var(--btn-color, #A7ADAD);
+    color: #233133;
+    cursor: not-allowed;
+    transition: background-color 150ms ease;
+  }
+  #continue-button:not(:disabled) {
+    color: white;
+    cursor: pointer;
+  }
+  #continue-button:not(:disabled):hover {
+    background-color: var(--btn-hover-color, #1e2a3b);
+    border-color: var(--btn-hover-color, #1e2a3b);
+  }
+}

@@ -98,6 +98,9 @@ public enum PermissionV3Group {
             EnumConsentV3Permission.CONTRACT_LIFE_PENSION_LEAD_CREATE,
             EnumConsentV3Permission.CONTRACT_LIFE_PENSION_LEAD_UPDATE
     )),
+    PENSION_WITHDRAWAL_LEAD(EnumSet.of(
+            EnumConsentV3Permission.PENSION_WITHDRAWAL_LEAD_CREATE
+    )),
     PENSION_WITHDRAWAL(EnumSet.of(
             EnumConsentV3Permission.PENSION_WITHDRAWAL_CREATE
     )),

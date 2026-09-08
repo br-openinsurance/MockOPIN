@@ -86,4 +86,21 @@ public class FinancialRiskPolicyInsuredObjectEntity extends BaseEntity {
                         .currency(AmountDetails.CurrencyEnum.fromValue(this.getCurrency())))
                 .coverages(this.getCoverages().stream().map(FinancialRiskPolicyInsuredObjectCoverageEntity::mapDTO).toList());
     }
+
+    public InsuranceFinancialRiskInsuredObjectV2 mapDTOV2() {
+        return new InsuranceFinancialRiskInsuredObjectV2()
+                .identification(this.getIdentification())
+                .type(InsuranceFinancialRiskInsuredObjectV2.TypeEnum.fromValue(this.getType()))
+                .typeAdditionalInfo(this.getTypeAdditionalInfo())
+                .description(this.getDescription())
+                .amount(new AmountDetails()
+                        .amount(this.getAmount())
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getUnitType()))
+                        .unitTypeOthers(this.getUnitTypeOthers())
+                        .unit(new AmountDetailsUnit()
+                                .code(this.getUnitCode())
+                                .description(AmountDetailsUnit.DescriptionEnum.fromValue(this.getUnitDescription())))
+                        .currency(AmountDetails.CurrencyEnum.fromValue(this.getCurrency())))
+                .coverages(this.getCoverages().stream().map(FinancialRiskPolicyInsuredObjectCoverageEntity::mapDTO).toList());
+    }
 }

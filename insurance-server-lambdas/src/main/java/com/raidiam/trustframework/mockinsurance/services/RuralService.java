@@ -115,10 +115,14 @@ public class RuralService extends BaseInsuranceService {
             .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Beneficiary not found for UUID %s", beneficiaryId)))
             .mapDTO()));
         
-        policy.getInsuredIds().forEach(insuredIds -> response.getData().addInsuredsItem(personalInfoRepository.findById(insuredIds)
-            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Personal info not found for UUID %s", insuredIds)))
-            .mapDTO()));
-        
+        policy.getInsuredIds().forEach(insuredIds -> {
+            var insured = personalInfoRepository.findById(insuredIds)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Personal info not found for UUID %s", insuredIds)))
+                .mapDTO();
+            insured.setAddressAdditionalInfo(null);
+            response.getData().addInsuredsItem(insured);
+        });
+
         policy.getIntermediaryIds().forEach(intermediaryId -> response.getData().addIntermediariesItem(intermediaryRepository.findById(intermediaryId)
             .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Intermediary not found for UUID %s", intermediaryId)))
             .mapDTO()));
@@ -170,9 +174,13 @@ public class RuralService extends BaseInsuranceService {
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Policy id " + policyId + " not found"));
         var response = new ResponseInsuranceRuralPremium().data(premium.mapDto());
 
-        premium.getPaymentIds().forEach(paymentId -> response.getData().addPaymentsItem(paymentRepository.findById(paymentId)
-            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Payment not found for UUID %s", paymentId)))
-            .mapDTO()));
+        premium.getPaymentIds().forEach(paymentId -> {
+            var payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Payment not found for UUID %s", paymentId)))
+                .mapDTO();
+            payment.setTellerIdTypeOthers(null);
+            response.getData().addPaymentsItem(payment);
+        });
         return response;
     }
 

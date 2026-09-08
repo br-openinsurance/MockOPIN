@@ -10,8 +10,7 @@ import org.hibernate.annotations.GenerationTime;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,6 +30,15 @@ public class PersonPolicyPremiumEntity extends BaseEntity {
     @Column(name = "person_policy_id")
     private UUID personPolicyId;
 
+    @Column(name = "payments_quantity")
+    private Integer paymentsQuantity;
+
+    @Column(name = "amount")
+    private String amount;
+
+    @Column(name = "unit_type")
+    private String unitType;
+
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
@@ -38,41 +46,23 @@ public class PersonPolicyPremiumEntity extends BaseEntity {
     @NotAudited
     private PersonPolicyEntity personPolicy;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "personPolicyPremium")
+    private List<PersonPolicyPremiumCoverageEntity> coverages = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "payment_ids", joinColumns = @JoinColumn(name = "reference_id"))
+    @Column(name = "payment_id")
+    private List<UUID> paymentIds;
+
     public InsurancePersonPremium mapDTO() {
         return new InsurancePersonPremium()
-                .paymentsQuantity(4)
+                .paymentsQuantity(this.getPaymentsQuantity())
                 .amount(new AmountDetails()
-                        .amount("16")
-                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
+                        .amount(this.getAmount())
+                        .unitType(AmountDetails.UnitTypeEnum.valueOf(this.getUnitType()))
                 )
-                .coverages(List.of(new InsurancePersonPremiumCoverage()
-                        .branch("0111")
-                        .code(InsurancePersonPremiumCoverage.CodeEnum.CIRURGIA)
-                        .premiumAmount(new AmountDetails()
-                                .amount("1680.71")
-                                .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
-                        )
-                ))
-                .payments(List.of(new Payment()
-                        .movementDate(LocalDate.of(2023, 10, 1))
-                        .movementType(Payment.MovementTypeEnum.COMPENSACAO_FINANCEIRA)
-                        .movementOrigin(Payment.MovementOriginEnum.DIRETA)
-                        .movementPaymentsNumber(BigDecimal.valueOf(1))
-                        .amount(new AmountDetails()
-                                .amount("680.71")
-                                .unitType(AmountDetails.UnitTypeEnum.MONETARIO)
-                                .unit(new AmountDetailsUnit()
-                                        .code("Br")
-                                        .description(AmountDetailsUnit.DescriptionEnum.BRL)
-                                )
-                        )
-                        .maturityDate(LocalDate.of(2023, 10, 1))
-                        .tellerId("string")
-                        .tellerIdType(Payment.TellerIdTypeEnum.CPF)
-                        .tellerIdTypeOthers("RNE")
-                        .tellerName("string")
-                        .financialInstitutionCode("string")
-                        .paymentType(Payment.PaymentTypeEnum.BOLETO)
-                ));
+                .coverages(this.getCoverages().stream().map(PersonPolicyPremiumCoverageEntity::mapDTO).toList());
     }
 }

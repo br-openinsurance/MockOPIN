@@ -4,6 +4,7 @@ import com.raidiam.trustframework.mockinsurance.auth.AuthenticationGrant;
 import com.raidiam.trustframework.mockinsurance.auth.RequiredAuthenticationGrant;
 import com.raidiam.trustframework.mockinsurance.domain.QuoteResponsibilityLeadEntity;
 import com.raidiam.trustframework.mockinsurance.fapi.Idempotent;
+import com.raidiam.trustframework.mockinsurance.fapi.ResponseErrorWithRequestDateTime;
 import com.raidiam.trustframework.mockinsurance.fapi.XFapiInteractionIdRequired;
 import com.raidiam.trustframework.mockinsurance.models.generated.*;
 import com.raidiam.trustframework.mockinsurance.services.QuoteResponsibilityLeadService;
@@ -64,6 +65,7 @@ public class QuoteResponsibilityController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @ResponseErrorWithRequestDateTime
     public ResponseQuote createLeadQuoteV2(
             @Body QuoteRequestResponsibilityLeadV2 body,
             @NotNull HttpRequest<?> request) {

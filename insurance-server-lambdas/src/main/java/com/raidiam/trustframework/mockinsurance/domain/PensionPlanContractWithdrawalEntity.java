@@ -34,6 +34,57 @@ public class PensionPlanContractWithdrawalEntity extends BaseEntity {
     @Column(name = "pension_plan_contract_id")
     private String pensionPlanContractId;
 
+    @Column(name = "withdrawal_occurence")
+    private Boolean withdrawalOccurence;
+
+    @Column(name = "type")
+    private String type;
+
+    @Column(name = "nature")
+    private String nature;
+
+    @Column(name = "request_date")
+    private String requestDate;
+
+    @Column(name = "liquidation_date")
+    private String liquidationDate;
+
+    @Column(name = "amount")
+    private String amount;
+
+    @Column(name = "amount_unit_type")
+    private String amountUnitType;
+
+    @Column(name = "amount_unit_type_others")
+    private String amountUnitTypeOthers;
+
+    @Column(name = "amount_unit_code")
+    private String amountUnitCode;
+
+    @Column(name = "amount_unit_description")
+    private String amountUnitDescription;
+
+    @Column(name = "amount_currency")
+    private String amountCurrency;
+
+    @Column(name = "posted_charged_amount")
+    private String postedChargedAmount;
+
+    @Column(name = "posted_charged_unit_type")
+    private String postedChargedUnitType;
+
+    @Column(name = "posted_charged_unit_type_others")
+    private String postedChargedUnitTypeOthers;
+
+    @Column(name = "posted_charged_unit_code")
+    private String postedChargedUnitCode;
+
+    @Column(name = "posted_charged_unit_description")
+    private String postedChargedUnitDescription;
+
+    @Column(name = "posted_charged_currency")
+    private String postedChargedCurrency;
+
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,25 +94,33 @@ public class PensionPlanContractWithdrawalEntity extends BaseEntity {
 
     public InsurancePensionPlanWithdrawal mapDTO() {
         return new InsurancePensionPlanWithdrawal()
-                .withdrawalOccurence(true)
-                .type(InsurancePensionPlanWithdrawal.TypeEnum.PARCIAL)
-                .requestDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
-                .liquidationDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
-                .nature(InsurancePensionPlanWithdrawal.NatureEnum.RESGATE_REGULAR)
-                .amount(new AmountDetails().unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM).amount("90.85"))
-                .postedChargedAmount(new AmountDetails().unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM).amount("90.85"));
+                .withdrawalOccurence(this.getWithdrawalOccurence())
+                .type(InsurancePensionPlanWithdrawal.TypeEnum.fromValue(this.getType()))
+                .requestDate(OffsetDateTime.parse(this.getRequestDate()))
+                .liquidationDate(OffsetDateTime.parse(this.getLiquidationDate()))
+                .nature(InsurancePensionPlanWithdrawal.NatureEnum.fromValue(this.getNature()))
+                .amount(new AmountDetails()
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getAmountUnitType()))
+                        .amount(this.getAmount()))
+                .postedChargedAmount(new AmountDetails()
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getPostedChargedUnitType()))
+                        .amount(this.getPostedChargedAmount()));
     }
 
     public InsurancePensionPlanWithdrawalV2 mapDTOV2() {
         return new InsurancePensionPlanWithdrawalV2()
-                .withdrawalOccurence(true)
+                .withdrawalOccurence(this.getWithdrawalOccurence())
                 .withdrawalInfo(List.of(new InsurancePensionPlanWithdrawalV2WithdrawalInfo()
-                    .type(InsurancePensionPlanWithdrawalV2WithdrawalInfo.TypeEnum.PARCIAL)
-                    .requestDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
-                    .liquidationDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
-                    .nature(InsurancePensionPlanWithdrawalV2WithdrawalInfo.NatureEnum.RESGATE_REGULAR)
-                    .amount(new AmountDetails().unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM).amount("90.85"))
-                    .postedChargedAmount(new AmountDetails().unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM).amount("90.85"))
+                    .type(InsurancePensionPlanWithdrawalV2WithdrawalInfo.TypeEnum.fromValue(this.getType()))
+                    .requestDate(OffsetDateTime.parse(this.getRequestDate()))
+                    .liquidationDate(OffsetDateTime.parse(this.getLiquidationDate()))
+                    .nature(InsurancePensionPlanWithdrawalV2WithdrawalInfo.NatureEnum.fromValue(this.getNature()))
+                    .amount(new AmountDetails()
+                            .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getAmountUnitType()))
+                            .amount(this.getAmount()))
+                    .postedChargedAmount(new AmountDetails()
+                            .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getPostedChargedUnitType()))
+                            .amount(this.getPostedChargedAmount()))
                 ));
     }
 }
