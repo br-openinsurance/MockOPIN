@@ -30,8 +30,8 @@ plugins {
     id 'maven-publish'
     id "org.sonarqube" version "5.1.0.4882"
     id "org.owasp.dependencycheck" version "8.4.0"
-    id "io.micronaut.application" version "4.4.4"
-    id "io.micronaut.aot" version "4.4.4"
+    id "io.micronaut.application" version "4.6.2"
+    id "io.micronaut.aot" version "4.6.2"
 }
 
 def props = new Properties()
@@ -67,7 +67,7 @@ configurations.configureEach {
 }
 
 micronaut {
-    version "4.6.1"
+    version "4.10.12"
     runtime MicronautRuntime.LAMBDA_JAVA
     runtime MicronautRuntime.NETTY
     runtime MicronautRuntime.LAMBDA_PROVIDED
