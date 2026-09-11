@@ -30,6 +30,51 @@ public class PensionPlanContractMovementContributionEntity extends BaseEntity {
     @Column(name = "pension_plan_contract_id")
     private String pensionPlanContractId;
 
+    @Column(name = "contribution_amount")
+    private String contributionAmount;
+
+    @Column(name = "contribution_unit_type")
+    private String contributionUnitType;
+
+    @Column(name = "contribution_unit_type_others")
+    private String contributionUnitTypeOthers;
+
+    @Column(name = "contribution_unit_code")
+    private String contributionUnitCode;
+
+    @Column(name = "contribution_unit_description")
+    private String contributionUnitDescription;
+
+    @Column(name = "contribution_currency")
+    private String contributionCurrency;
+
+    @Column(name = "charged_in_advance_amount")
+    private String chargedInAdvanceAmount;
+
+    @Column(name = "charged_in_advance_unit_type")
+    private String chargedInAdvanceUnitType;
+
+    @Column(name = "charged_in_advance_unit_type_others")
+    private String chargedInAdvanceUnitTypeOthers;
+
+    @Column(name = "charged_in_advance_unit_code")
+    private String chargedInAdvanceUnitCode;
+
+    @Column(name = "charged_in_advance_unit_description")
+    private String chargedInAdvanceUnitDescription;
+
+    @Column(name = "charged_in_advance_currency")
+    private String chargedInAdvanceCurrency;
+
+    @Column(name = "periodicity")
+    private String periodicity;
+
+    @Column(name = "contribution_expiration_date")
+    private LocalDate contributionExpirationDate;
+
+    @Column(name = "contribution_payment_date")
+    private LocalDate contributionPaymentDate;
+
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,14 +85,14 @@ public class PensionPlanContractMovementContributionEntity extends BaseEntity {
     public MovementContributions mapDTO() {
         return new MovementContributions()
                 .contributionAmount(new AmountDetails()
-                        .amount("95.90")
-                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
+                        .amount(this.getContributionAmount())
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getContributionUnitType()))
                 )
-                .contributionExpirationDate(LocalDate.of(2022, 5, 1))
+                .contributionExpirationDate(this.getContributionExpirationDate())
                 .chargedInAdvanceAmount(new AmountDetails()
-                        .amount("95.90")
-                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM))
-                .periodicity(MovementContributions.PeriodicityEnum.MENSAL)
-                .contributionPaymentDate(LocalDate.of(2022, 5, 1));
+                        .amount(this.getChargedInAdvanceAmount())
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getChargedInAdvanceUnitType())))
+                .periodicity(MovementContributions.PeriodicityEnum.fromValue(this.getPeriodicity()))
+                .contributionPaymentDate(this.getContributionPaymentDate());
     }
 }

@@ -32,8 +32,10 @@ public class EndorsementService extends BaseInsuranceService {
     public EndorsementEntity createEndorsement(EndorsementEntity endorsement){
         validate(endorsement);
 
-        LOG.info("Creating endorsement");
+        LOG.info("Consuming consent");
+        consentService.consumeConsent(endorsement.getConsentId());
 
+        LOG.info("Creating endorsement");
         return endorsementRepository.save(endorsement);
     }
 
@@ -54,7 +56,7 @@ public class EndorsementService extends BaseInsuranceService {
 
         // Consent Status
         if (!consent.getStatus().equals(EnumConsentStatus.AUTHORISED.toString())) {
-            throw new HttpStatusException(HttpStatus.FORBIDDEN, "NAO_INFORMADO: consent is not authorised");
+            throw new HttpStatusException(HttpStatus.UNAUTHORIZED, "NAO_INFORMADO: consent is not authorised");
         }
         
         CreateConsentDataEndorsementInformation consentEndorsementInfo = consent.getEndorsementInformation();

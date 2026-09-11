@@ -86,8 +86,8 @@ class ClaimNotificationPersonServiceSpec extends CleanupSpecification {
 
         then:
         def e2 = thrown(HttpStatusException)
-        e2.status == HttpStatus.FORBIDDEN
-        e2.message == "NAO_INFORMADO: consent is not authorised"
+        e2.status == HttpStatus.UNAUTHORIZED
+        e2.message == "consent is not authorised"
     }
 
     def "We can't create a claim notification with a mismatched policyId" () {
@@ -121,8 +121,8 @@ class ClaimNotificationPersonServiceSpec extends CleanupSpecification {
 
         then:
         def e2 = thrown(HttpStatusException)
-        e2.status == HttpStatus.FORBIDDEN
-        e2.message == "NAO_INFORMADO: consent is not authorised"
+        e2.status == HttpStatus.UNAUTHORIZED
+        e2.message == "consent is not authorised"
     }
 
     def "We can't create a claim notification with a mismatched occurrence date" () {
@@ -155,8 +155,8 @@ class ClaimNotificationPersonServiceSpec extends CleanupSpecification {
 
         then:
         def e2 = thrown(HttpStatusException)
-        e2.status == HttpStatus.FORBIDDEN
-        e2.message == "NAO_INFORMADO: consent is not authorised"
+        e2.status == HttpStatus.UNAUTHORIZED
+        e2.message == "consent is not authorised"
     }
 
     def "We can't create a claim notification with null policyId if documentType is APOLICE_INDIVIDUAL" () {
@@ -177,11 +177,20 @@ class ClaimNotificationPersonServiceSpec extends CleanupSpecification {
         consent = consentRepository.save(consent)
 
         when:
-        def newClaim = claimNotificationPersonService.createClaimNotification(claim)
+        claimNotificationPersonService.createClaimNotification(claim)
 
         then:
         def e = thrown(HttpStatusException)
         e.status == HttpStatus.UNPROCESSABLE_ENTITY
+
+        when: "A new claim is created, the consent should not be valid"
+        claim.data.setPolicyId(UUID.randomUUID().toString())
+        claimNotificationPersonService.createClaimNotification(claim)
+
+        then:
+        def e2 = thrown(HttpStatusException)
+        e2.status == HttpStatus.UNAUTHORIZED
+        e2.message == "consent is not authorised"
     }
 
     def "We can't create a claim notification with invalid policyId"() {
@@ -201,11 +210,20 @@ class ClaimNotificationPersonServiceSpec extends CleanupSpecification {
         consent = consentRepository.save(consent)
 
         when:
-        def newClaim = claimNotificationPersonService.createClaimNotification(claim)
+        claimNotificationPersonService.createClaimNotification(claim)
 
         then:
         def e = thrown(HttpStatusException)
         e.status == HttpStatus.UNPROCESSABLE_ENTITY
+
+        when: "A new claim is created, the consent should not be valid"
+        claim.data.setPolicyId("other_policy_id")
+        claimNotificationPersonService.createClaimNotification(claim)
+
+        then:
+        def e2 = thrown(HttpStatusException)
+        e2.status == HttpStatus.UNAUTHORIZED
+        e2.message == "consent is not authorised"
     }
 
     def "We can't create a claim notification with null groupCertificateId if documentType is CERTIFICADO" () {
@@ -226,11 +244,20 @@ class ClaimNotificationPersonServiceSpec extends CleanupSpecification {
         consent = consentRepository.save(consent)
 
         when:
-        def newClaim = claimNotificationPersonService.createClaimNotification(claim)
+        claimNotificationPersonService.createClaimNotification(claim)
 
         then:
         def e = thrown(HttpStatusException)
         e.status == HttpStatus.UNPROCESSABLE_ENTITY
+
+        when: "A new claim is created, the consent should not be valid"
+        claim.data.setGroupCertificateId(UUID.randomUUID().toString())
+        claimNotificationPersonService.createClaimNotification(claim)
+
+        then:
+        def e2 = thrown(HttpStatusException)
+        e2.status == HttpStatus.UNAUTHORIZED
+        e2.message == "consent is not authorised"
     }
 
     def "We can't create a claim notification with invalid groupCertificateId"() {
@@ -250,11 +277,20 @@ class ClaimNotificationPersonServiceSpec extends CleanupSpecification {
         consent = consentRepository.save(consent)
 
         when:
-        def newClaim = claimNotificationPersonService.createClaimNotification(claim)
+        claimNotificationPersonService.createClaimNotification(claim)
 
         then:
         def e = thrown(HttpStatusException)
         e.status == HttpStatus.UNPROCESSABLE_ENTITY
+
+        when: "A new claim is created, the consent should not be valid"
+        claim.data.setGroupCertificateId("other_group_certificate_id")
+        claimNotificationPersonService.createClaimNotification(claim)
+
+        then:
+        def e2 = thrown(HttpStatusException)
+        e2.status == HttpStatus.UNAUTHORIZED
+        e2.message == "consent is not authorised"
     }
 
     def "We can't create a claim notification with invalid insuredObjectId"() {
@@ -273,11 +309,20 @@ class ClaimNotificationPersonServiceSpec extends CleanupSpecification {
         consent = consentRepository.save(consent)
 
         when:
-        def newClaim = claimNotificationPersonService.createClaimNotification(claim)
+        claimNotificationPersonService.createClaimNotification(claim)
 
         then:
         def e = thrown(HttpStatusException)
         e.status == HttpStatus.UNPROCESSABLE_ENTITY
+
+        when: "A new claim is created, the consent should not be valid"
+        claim.data.setInsuredObjectId(List.of("other_insured_object_id"))
+        claimNotificationPersonService.createClaimNotification(claim)
+
+        then:
+        def e2 = thrown(HttpStatusException)
+        e2.status == HttpStatus.UNAUTHORIZED
+        e2.message == "consent is not authorised"
     }
 
     def "We can't create a claim notification with invalid occurrenceDate"() {
@@ -336,7 +381,7 @@ class ClaimNotificationPersonServiceSpec extends CleanupSpecification {
 
         then:
         def e = thrown(HttpStatusException)
-        e.status == HttpStatus.FORBIDDEN
+        e.status == HttpStatus.UNAUTHORIZED
     }
 
     def "We can't create a claim notification with a consent that's awaiting authorisation"() {
@@ -359,7 +404,7 @@ class ClaimNotificationPersonServiceSpec extends CleanupSpecification {
 
         then:
         def e = thrown(HttpStatusException)
-        e.status == HttpStatus.FORBIDDEN
+        e.status == HttpStatus.UNAUTHORIZED
     }
 
     def "We can't create a claim notification with a wrong clientId" () {

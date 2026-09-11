@@ -6,20 +6,22 @@
   "type": "module",
   "scripts": {
     "dev": "echo 'Starting in Dev Mode...' && PORT=3000 LOCAL_STACK_ENDPOINT=http://localstack:4566 AWS_XRAY_CONTEXT_MISSING=IGNORE_ERROR AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_REGION=us-east-1 AWS_LOCAL=true DEBUG=raidiam:server:*,oidc-provider:* MONGODB_URI=mongodb://mongo:30001?replicaSet=my-replica-set TRUSTFRAMEWORK_SSA_KEYSET=http://localstack:4566/keystore/jwks.json node lambda.js",
+    "test": "vitest run",
+    "test:unit": "vitest run --exclude **/*.integration.test.js",
+    "test:integration": "vitest run integration",
+    "test:coverage": "vitest run --coverage",
     "format": "eslint --fix",
-    "frontend": "echo 'Starting in Frontend Dev Mode...' && node frontend.js",
     "build:css": "postcss public/css/tailwind.css -o public/css/styles.css"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.731.1",
+    "@aws-sdk/client-ssm": "^3.1049.0",
     "@vendia/serverless-express": "4.10.4",
     "aws4": "1.12.0",
     "aws4-axios": "^3.3.4",
-    "axios": "^1.12.2",
-    "body-parser": "^2.2.0",
-    "crypto": "^1.0.1",
+    "axios": "^1.16.1",
+    "body-parser": "^2.2.1",
     "desm": "^1.3.1",
     "dotenv": "16.1.0",
     "ejs": "^3.1.10",
@@ -28,20 +30,24 @@
     "helmet": "^7.1.0",
     "jose": "^2.0.7",
     "js-base64": "3.7.7",
-    "lodash": "^4.17.21",
+    "lodash": "^4.18.1",
     "mongodb": "^4.3.0",
     "node-cache": "^5.1.2",
     "oidc-provider": "^9.5.1",
-    "openid-client": "^5.1.9",
     "pino": "8.15.1",
     "pino-debug": "2.0.0",
-    "pino-lambda": "4.2.1"
+    "pino-lambda": "4.2.1",
+    "undici": "^7.28.0"
   },
   "devDependencies": {
+    "@babel/parser": "^7.29.7",
     "@tailwindcss/postcss": "^4.0.9",
+    "@vitest/coverage-v8": "^4.1.10",
     "autoprefixer": "^10.4.20",
+    "jsdom": "^29.1.1",
     "postcss": "^8.5.3",
     "postcss-cli": "^11.0.0",
-    "tailwindcss": "^4.0.9"
+    "tailwindcss": "^4.0.9",
+    "vitest": "^4.1.10"
   }
 }

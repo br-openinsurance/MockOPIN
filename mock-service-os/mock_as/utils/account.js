@@ -1,6 +1,6 @@
-import { MongoClient } from 'mongodb'; // eslint-disable-line import/no-unresolved
 import Debug from 'debug';
-import Credential from "./credential.js";
+import Credential from './credential.js';
+import { connect as connectMongo } from './mongoConnection.js';
 const log = Debug('raidiam:server:info');
 
 let DB;
@@ -8,20 +8,22 @@ let DB;
 class Account {
   constructor(result) {
     this._id = result._id;
-    this.sub =  result.sub;
-    this.accountId =  result.sub;
-    this.given_name =  result.given_name;
-    this.family_name =  result.family_name;
-    this.national_id_signing_device_present =  result.national_id_signing_device_present;
-    this.national_id_verified =  result.national_id_verified;
-    this.email =  result.email;
-    this.email_verified =  result.email_verified;
-    this.birthdate =  result.birthdate;
-    this.createdAt =  result.createdAt;
+    this.sub = result.sub;
+    this.accountId = result.sub;
+    this.given_name = result.given_name;
+    this.family_name = result.family_name;
+    this.national_id = result.national_id;
+    this.national_id_signing_device_present = result.national_id_signing_device_present;
+    this.national_id_verified = result.national_id_verified;
+    this.email = result.email;
+    this.email_verified = result.email_verified;
+    this.birthdate = result.birthdate;
+    this.createdAt = result.createdAt;
     this.updatedAt = result.updatedAt;
   }
 
-  async claims(use, scope) { // eslint-disable-line no-unused-vars
+  async claims(use, scope) {
+    // eslint-disable-line no-unused-vars
     if (this.profile) {
       return {
         sub: this.accountId, // it is essential to always return a sub claim
@@ -68,21 +70,36 @@ class Account {
 
   static async initialiseAdapter(collection) {
     log(`Initializing mongo Account connection`);
-    const connection = await MongoClient.connect(process.env.MONGODB_URI);
+    const connection = await connectMongo();
     DB = connection.db(collection);
   }
 
   static coll() {
-    return DB.collection("accounts");
+    return DB.collection('accounts');
   }
 
   static async findByLogin(login) {
-    const result = await Account.coll().find(
-      { 'sub': login },
-    ).limit(1).next();
+    const result = await Account.coll().find({ sub: login }).limit(1).next();
 
     if (!result) {
-      log("account not found in collection")
+      log('account not found in collection');
+      return undefined;
+    }
+
+    return new Account(result);
+  }
+
+  // Used by the CIBA login_hint resolution: the data consent carries the
+  // customer's CPF (loggedUser.document.identification), which we map back to
+  // the seeded account so the backchannel request is bound to the right sub.
+  static async findByNationalId(nationalId) {
+    if (!nationalId) {
+      return undefined;
+    }
+    const result = await Account.coll().find({ national_id: nationalId }).limit(1).next();
+
+    if (!result) {
+      log(`account not found for national_id ${nationalId}`);
       return undefined;
     }
 
@@ -100,15 +117,14 @@ class Account {
     return account;
   }
 
-  static async findAccount(ctx, id, token) { // eslint-disable-line no-unused-vars
+  static async findAccount(ctx, id, token) {
+    // eslint-disable-line no-unused-vars
     // token is a reference to the token used for which a given account is being loaded,
     //   it is undefined in scenarios where account claims are returned from authorization endpoint
     // ctx is the koa request context
-    const result = await Account.coll().find(
-      { 'sub': id },
-    ).limit(1).next();
+    const result = await Account.coll().find({ sub: id }).limit(1).next();
     if (!result) {
-      log("account not found in collection")
+      log('account not found in collection');
       return undefined;
     }
 

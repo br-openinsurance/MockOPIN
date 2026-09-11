@@ -1,3 +1,8 @@
+<%
+  // authBase lets the decoupled CIBA approval flow reuse this view: it defaults
+  // to the redirect interaction path but can be overridden (e.g. /ciba/authorize/<id>).
+  const authBase = locals.authBase || ('/interaction/' + uid);
+%>
 <div>
   <h1 class="text-[20px] text-gray-800 mt-10 mb-6 text-left">
     Sign in to Connect.
@@ -6,7 +11,7 @@
   <% if (locals.google) { %>
   <form
     autocomplete="off"
-    action="/interaction/<%= uid %>/federated"
+    action="<%= authBase %>/federated"
     method="post"
   >
     <input type="hidden" name="upstream" value="google" />
@@ -42,7 +47,7 @@
 
   <form
     autocomplete="off"
-    action="/interaction/<%= uid %>/login"
+    action="<%= authBase %>/login"
     method="post"
     class="mt-6 lg:mt-10"
   >

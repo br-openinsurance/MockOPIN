@@ -125,7 +125,7 @@ class CustomerServiceSpec extends CleanupSpecification {
         response.getData().get(0).getPersonalId() == testPersonalIdentification.getPersonalIdentificationsId().toString()
     }
 
-    def "we can get personal identifications" () {
+    def "we can get personal identifications V2 with all required NATIONAL address fields" () {
         when:
         def response = customerService.getPersonalIdentificationsV2(consent.getConsentId())
 
@@ -133,6 +133,17 @@ class CustomerServiceSpec extends CleanupSpecification {
         response.getData()
         response.getData().size() == 1
         response.getData().get(0).getPersonalId() == testPersonalIdentification.getPersonalIdentificationsId().toString()
+
+        when:
+        def address = response.getData().get(0).getContact().getPostalAddresses().get(0).getAddress().getAddress()
+
+        then: "all OPIN v2 required NATIONAL address fields populated on the AllOfAddressAddress subclass (the fields Jackson actually serializes)"
+        address.getType() != null
+        address.getAllOfAddressAddressName() == "Naburo Ykesaki"
+        address.getAllOfAddressAddressNumber() == "1270"
+        address.getAllOfAddressAddressTownName() == "Sao Paulo"
+        address.getAllOfAddressAddressCountrySubDivision() == "SP"
+        address.getAllOfAddressAddressPostCode() == "10000000"
     }
 
     def "we can get personal financial-relations" () {

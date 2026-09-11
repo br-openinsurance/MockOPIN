@@ -30,6 +30,63 @@ public class PensionPlanContractPortabilityInfoEntity extends BaseEntity {
     @Column(name = "pension_plan_contract_id")
     private String pensionPlanContractId;
 
+    @Column(name = "direction")
+    private String direction;
+
+    @Column(name = "type")
+    private String type;
+
+    @Column(name = "amount")
+    private String amount;
+
+    @Column(name = "amount_unit_type")
+    private String amountUnitType;
+
+    @Column(name = "amount_unit_type_others")
+    private String amountUnitTypeOthers;
+
+    @Column(name = "amount_unit_code")
+    private String amountUnitCode;
+
+    @Column(name = "amount_unit_description")
+    private String amountUnitDescription;
+
+    @Column(name = "amount_currency")
+    private String amountCurrency;
+
+    @Column(name = "request_date")
+    private String requestDate;
+
+    @Column(name = "liquidation_date")
+    private String liquidationDate;
+
+    @Column(name = "charging_value")
+    private String chargingValue;
+
+    @Column(name = "charging_value_unit_type")
+    private String chargingValueUnitType;
+
+    @Column(name = "charging_value_unit_type_others")
+    private String chargingValueUnitTypeOthers;
+
+    @Column(name = "charging_value_unit_code")
+    private String chargingValueUnitCode;
+
+    @Column(name = "charging_value_unit_description")
+    private String chargingValueUnitDescription;
+
+    @Column(name = "charging_value_currency")
+    private String chargingValueCurrency;
+
+    @Column(name = "source_entity")
+    private String sourceEntity;
+
+    @Column(name = "target_entity")
+    private String targetEntity;
+
+    @Column(name = "susep_process")
+    private String susepProcess;
+
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
@@ -39,14 +96,18 @@ public class PensionPlanContractPortabilityInfoEntity extends BaseEntity {
 
     public InsurancePensionPlanPortabilityPortabilityInfo mapDTO() {
         return new InsurancePensionPlanPortabilityPortabilityInfo()
-                .direction(InsurancePensionPlanPortabilityPortabilityInfo.DirectionEnum.ENTRADA)
-                .type(InsurancePensionPlanPortabilityPortabilityInfo.TypeEnum.PARCIAL)
-                .amount(new AmountDetails().unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM).amount("90.85"))
-                .requestDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
-                .liquidationDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
-                .chargingValue(new AmountDetails().unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM).amount("90.85"))
-                .sourceEntity("12345678901234")
-                .targetEntity("12345678901234")
-                .susepProcess("12345");
+                .direction(InsurancePensionPlanPortabilityPortabilityInfo.DirectionEnum.fromValue(this.getDirection()))
+                .type(InsurancePensionPlanPortabilityPortabilityInfo.TypeEnum.fromValue(this.getType()))
+                .amount(new AmountDetails()
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getAmountUnitType()))
+                        .amount(this.getAmount()))
+                .requestDate(OffsetDateTime.parse(this.getRequestDate()))
+                .liquidationDate(OffsetDateTime.parse(this.getLiquidationDate()))
+                .chargingValue(new AmountDetails()
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getChargingValueUnitType()))
+                        .amount(this.getChargingValue()))
+                .sourceEntity(this.getSourceEntity())
+                .targetEntity(this.getTargetEntity())
+                .susepProcess(this.getSusepProcess());
     }
 }

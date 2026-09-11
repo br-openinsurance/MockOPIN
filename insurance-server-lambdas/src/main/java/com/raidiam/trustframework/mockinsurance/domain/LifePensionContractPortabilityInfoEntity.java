@@ -29,6 +29,72 @@ public class LifePensionContractPortabilityInfoEntity extends BaseEntity {
     @Column(name = "life_pension_contract_id")
     private UUID lifePensionContractId;
 
+    @Column(name = "direction")
+    private String direction;
+
+    @Column(name = "type")
+    private String type;
+
+    @Column(name = "amount")
+    private String amount;
+
+    @Column(name = "amount_unit_type")
+    private String amountUnitType;
+
+    @Column(name = "amount_unit_type_others")
+    private String amountUnitTypeOthers;
+
+    @Column(name = "amount_unit_code")
+    private String amountUnitCode;
+
+    @Column(name = "amount_unit_description")
+    private String amountUnitDescription;
+
+    @Column(name = "amount_currency")
+    private String amountCurrency;
+
+    @Column(name = "request_date")
+    private String requestDate;
+
+    @Column(name = "liquidation_date")
+    private String liquidationDate;
+
+    @Column(name = "posted_charged_amount")
+    private String postedChargedAmount;
+
+    @Column(name = "posted_charged_unit_type")
+    private String postedChargedUnitType;
+
+    @Column(name = "posted_charged_unit_type_others")
+    private String postedChargedUnitTypeOthers;
+
+    @Column(name = "posted_charged_unit_code")
+    private String postedChargedUnitCode;
+
+    @Column(name = "posted_charged_unit_description")
+    private String postedChargedUnitDescription;
+
+    @Column(name = "posted_charged_currency")
+    private String postedChargedCurrency;
+
+    @Column(name = "source_entity")
+    private String sourceEntity;
+
+    @Column(name = "target_entity")
+    private String targetEntity;
+
+    @Column(name = "susep_process")
+    private String susepProcess;
+
+    @Column(name = "tax_regime")
+    private String taxRegime;
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @NotAudited
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "lifePensionContractPortability")
+    private List<LifePensionContractPortabilityFIEEntity> fies = new ArrayList<>();
+
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
@@ -38,55 +104,43 @@ public class LifePensionContractPortabilityInfoEntity extends BaseEntity {
 
     public InsuranceLifePensionPortabilityPortabilityInfo mapDTO() {
         return new InsuranceLifePensionPortabilityPortabilityInfo()
-                .direction(InsuranceLifePensionPortabilityPortabilityInfo.DirectionEnum.ENTRADA)
-                .type(InsuranceLifePensionPortabilityPortabilityInfo.TypeEnum.PARCIAL)
+                .direction(InsuranceLifePensionPortabilityPortabilityInfo.DirectionEnum.fromValue(this.getDirection()))
+                .type(InsuranceLifePensionPortabilityPortabilityInfo.TypeEnum.fromValue(this.getType()))
                 .amount(new AmountDetails()
-                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
-                        .amount("90.85")
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getAmountUnitType()))
+                        .amount(this.getAmount())
                 )
-                .requestDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
-                .liquidationDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
+                .requestDate(OffsetDateTime.parse(this.getRequestDate()))
+                .liquidationDate(OffsetDateTime.parse(this.getLiquidationDate()))
                 .postedChargedAmount(new AmountDetails()
-                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
-                        .amount("90.85")
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getPostedChargedUnitType()))
+                        .amount(this.getPostedChargedAmount())
                 )
-                .sourceEntity("12345678901234")
-                .targetEntity("12345678901234")
-                .susepProcess("12345")
-                .taxRegime(InsuranceLifePensionPortabilityPortabilityInfo.TaxRegimeEnum.PROGRESSIVO)
-                .FIE(List.of(new InsuranceLifePensionPortabilityFIE()
-                        .FIECNPJ("12345678901234")
-                        .fiEName("RAZÃO SOCIAL")
-                        .fiETradeName("NOME FANTASIA")
-                        .portedType(InsuranceLifePensionPortabilityFIE.PortedTypeEnum.ORIGEM)
-                )
-        );
+                .sourceEntity(this.getSourceEntity())
+                .targetEntity(this.getTargetEntity())
+                .susepProcess(this.getSusepProcess())
+                .taxRegime(InsuranceLifePensionPortabilityPortabilityInfo.TaxRegimeEnum.fromValue(this.getTaxRegime()))
+                .FIE(this.getFies().stream().map(LifePensionContractPortabilityFIEEntity::getDTO).toList());
     }
 
     public InsuranceLifePensionPortabilityV2PortabilityInfo mapDTOV2() {
         return new InsuranceLifePensionPortabilityV2PortabilityInfo()
-                .direction(InsuranceLifePensionPortabilityV2PortabilityInfo.DirectionEnum.ENTRADA)
-                .type(InsuranceLifePensionPortabilityV2PortabilityInfo.TypeEnum.PARCIAL)
+                .direction(InsuranceLifePensionPortabilityV2PortabilityInfo.DirectionEnum.fromValue(this.getDirection()))
+                .type(InsuranceLifePensionPortabilityV2PortabilityInfo.TypeEnum.fromValue(this.getType()))
                 .amount(new AmountDetails()
-                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
-                        .amount("90.85")
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getAmountUnitType()))
+                        .amount(this.getAmount())
                 )
-                .requestDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
-                .liquidationDate(OffsetDateTime.parse("2022-05-20T08:30:00Z"))
+                .requestDate(OffsetDateTime.parse(this.getRequestDate()))
+                .liquidationDate(OffsetDateTime.parse(this.getLiquidationDate()))
                 .postedChargedAmount(new AmountDetails()
-                        .unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM)
-                        .amount("90.85")
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getPostedChargedUnitType()))
+                        .amount(this.getPostedChargedAmount())
                 )
-                .sourceEntity("12345678901234")
-                .targetEntity("12345678901234")
-                .susepProcess("12345")
-                .taxRegime(InsuranceLifePensionPortabilityV2PortabilityInfo.TaxRegimeEnum.PROGRESSIVO)
-                .FIE(List.of(new InsuranceLifePensionPortabilityV2FIE()
-                        .FIECNPJ("12345678901234")
-                        .fiEName("RAZÃO SOCIAL")
-                        .fiETradeName("NOME FANTASIA")
-                        .portedType(InsuranceLifePensionPortabilityV2FIE.PortedTypeEnum.ORIGEM)
-                )
-        );
+                .sourceEntity(this.getSourceEntity())
+                .targetEntity(this.getTargetEntity())
+                .susepProcess(this.getSusepProcess())
+                .taxRegime(InsuranceLifePensionPortabilityV2PortabilityInfo.TaxRegimeEnum.fromValue(this.getTaxRegime()))
+                .FIE(this.getFies().stream().map(LifePensionContractPortabilityFIEEntity::getDTOV2).toList());
     }
 }

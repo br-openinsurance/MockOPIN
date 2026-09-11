@@ -182,6 +182,36 @@ public class FinancialRiskPolicyEntity extends BaseEntity implements HasStatusIn
                 );
     }
 
+    public ResponseInsuranceFinancialRiskPolicyInfoV2 mapPolicyInfoDTOV2() {
+        return new ResponseInsuranceFinancialRiskPolicyInfoV2()
+                .data(new InsuranceFinancialRiskPolicyInfoDataV2()
+                        .documentType(InsuranceFinancialRiskPolicyInfoDataV2.DocumentTypeEnum.fromValue(this.getDocumentType()))
+                        .policyId(this.getFinancialRiskPolicyId().toString())
+                        .susepProcessNumber(this.getSusepProcessNumber())
+                        .groupCertificateId(this.getGroupCertificateId())
+                        .issuanceType(InsuranceFinancialRiskPolicyInfoDataV2.IssuanceTypeEnum.fromValue(this.getIssuanceType()))
+                        .issuanceDate(this.getIssuanceDate())
+                        .termStartDate(this.getTermStartDate())
+                        .termEndDate(this.getTermEndDate())
+                        .leadInsurerCode(this.getLeadInsurerCode())
+                        .leadInsurerPolicyId(this.getLeadInsurerPolicyId())
+                        .maxLMG(new AmountDetails()
+                                .amount(this.getMaxLMGAmount())
+                                .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getMaxLMGUnitType()))
+                                .unitTypeOthers(this.getMaxLMGUnitTypeOthers())
+                                .unit(new AmountDetailsUnit()
+                                        .code(this.getMaxLMGUnitCode())
+                                        .description(AmountDetailsUnit.DescriptionEnum.fromValue(this.getMaxLMGUnitDescription())))
+                                .currency(AmountDetails.CurrencyEnum.fromValue(this.getMaxLMGCurrency())))
+                        .proposalId(this.getProposalId())
+                        .insuredObjects(this.getInsuredObjects().stream().map(FinancialRiskPolicyInsuredObjectEntity::mapDTOV2).toList())
+                        .branchInfo(new InsuranceStopLossSpecificPolicyInfo()
+                                .identification(this.getBranchInfoIdentification())
+                                .userGroup(this.getBranchInfoUserGroup())
+                                .technicalSurplus(this.getBranchInfoTechnicalSurplus()))
+                );
+    }
+
     public ResponseResourceListData mapResourceDTO() {
         return new ResponseResourceListData()
                 .resourceId(this.getFinancialRiskPolicyId().toString());

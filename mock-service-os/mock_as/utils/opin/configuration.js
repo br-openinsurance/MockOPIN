@@ -78,6 +78,9 @@ export default function (mtlsIssuer, ssaJwks) {
       'insurance-pension-plan',
       'insurance-financial-assistance',
       'dynamic-fields',
+      'withdrawal-pension-lead',
+      'withdrawal-pension',
+      'withdrawal-capitalization-title',
       'op:admin',
       'override',
     ],
@@ -300,6 +303,7 @@ export default function (mtlsIssuer, ssaJwks) {
         'org_name',
         'org_number',
         'webhook_uris',
+        'software_origin_uris',
       ],
       validator(ctx, key, value, metadata) {
         if (key === 'software_statement') {
@@ -434,6 +438,9 @@ export default function (mtlsIssuer, ssaJwks) {
               'insurance-pension-plan',
               'insurance-financial-assistance',
               'dynamic-fields',
+              'withdrawal-pension-lead',
+              'withdrawal-pension',
+              'withdrawal-capitalization-title',
             );
 
             let requestedArray;
@@ -453,12 +460,14 @@ export default function (mtlsIssuer, ssaJwks) {
               software_client_description,
               org_name,
               org_number,
+              software_origin_uris,
             } = payload;
             Object.assign(metadata, {
               software_id,
               org_id,
               org_name,
               org_number,
+              software_origin_uris,
               client_description: software_client_description,
               jwks_uri: software_jwks_uri,
               application_type: 'web',
@@ -507,6 +516,8 @@ export default function (mtlsIssuer, ssaJwks) {
         org_name: token.client.org_name,
         org_number: token.client.org_number,
         software_id: token.client.software_id,
+        software_client_name: token.client.clientName,
+        software_origin_uris: token.client.software_origin_uris,
       };
 
       let oidcProvider = ctx?.oidc?.provider;

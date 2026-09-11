@@ -87,7 +87,7 @@ public class AcceptanceAndBranchesAbroadPolicyEntity extends BaseEntity  impleme
                     .type(InsuranceAcceptanceAndBranchesAbroadInsuredObject.TypeEnum.CONTRATO)
                     .description("string")
                     .coverages(List.of(new InsuranceAcceptanceAndBranchesAbroadInsuredObjectCoverage()
-                        .branch("0111")
+                        .branch("0993")
                         .code(InsuranceAcceptanceAndBranchesAbroadInsuredObjectCoverage.CodeEnum.OUTRAS)
                         .susepProcessNumber("string")
                         .LMI(new AmountDetails()
@@ -114,7 +114,7 @@ public class AcceptanceAndBranchesAbroadPolicyEntity extends BaseEntity  impleme
                     .hasForum(true)
                     .transferorId("12345678912")
                     .transferorName("Nome Sobrenome")
-                    .groupBranches(List.of("0111"))
+                    .groupBranches(List.of("0993"))
                 )
             );
     }
@@ -163,7 +163,7 @@ public class AcceptanceAndBranchesAbroadPolicyEntity extends BaseEntity  impleme
                     .type(InsuranceAcceptanceAndBranchesAbroadInsuredObjectV2.TypeEnum.CONTRATO)
                     .description("string")
                     .coverages(List.of(new InsuranceAcceptanceAndBranchesAbroadInsuredObjectCoverage()
-                        .branch("0111")
+                        .branch("0993")
                         .code(InsuranceAcceptanceAndBranchesAbroadInsuredObjectCoverage.CodeEnum.OUTRAS)
                         .description("string")
                         .susepProcessNumber("string")
@@ -191,7 +191,7 @@ public class AcceptanceAndBranchesAbroadPolicyEntity extends BaseEntity  impleme
                     .hasForum(true)
                     .transferorId("12345678912")
                     .transferorName("Nome Sobrenome")
-                    .groupBranches(List.of("0111"))
+                    .groupBranches(List.of("0993"))
                 )
             );
     }
@@ -206,7 +206,7 @@ public class AcceptanceAndBranchesAbroadPolicyEntity extends BaseEntity  impleme
                     .unit(new AmountDetailsUnit().code("R$").description(AmountDetailsUnit.DescriptionEnum.BRL))
                 )
                 .coverages(List.of(new InsuranceAcceptanceAndBranchesAbroadPremiumCoverage()
-                    .branch("0111")
+                    .branch("0993")
                     .code(InsuranceAcceptanceAndBranchesAbroadPremiumCoverage.CodeEnum.OUTRAS)
                     .premiumAmount(new AmountDetails()
                         .amount("8")
@@ -238,7 +238,7 @@ public class AcceptanceAndBranchesAbroadPolicyEntity extends BaseEntity  impleme
                     .unit(new AmountDetailsUnit().code("R$").description(AmountDetailsUnit.DescriptionEnum.BRL))
                 )
                 .coverages(List.of(new InsuranceAcceptanceAndBranchesAbroadPremiumCoverage()
-                    .branch("0111")
+                    .branch("0993")
                     .code(InsuranceAcceptanceAndBranchesAbroadPremiumCoverage.CodeEnum.OUTRAS)
                     .description("string")
                     .premiumAmount(new AmountDetails()

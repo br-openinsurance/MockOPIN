@@ -24,7 +24,7 @@ const logger = pino.default(
         'req.headers.authorization',
         'req.body.password',
         'req.body["password-confirm"]',
-        'ctx.request.header.authorization'
+        'ctx.request.header.authorization',
       ],
       censor: '**REDACTED**',
     },
@@ -61,8 +61,8 @@ const withRequest = lambdaRequestTracker();
 import Debug from 'debug';
 const log = Debug('raidiam:server:info');
 
-import pkg from 'lodash';
-const { forEach, get } = pkg;
+import forEach from 'lodash/forEach.js';
+import get from 'lodash/get.js';
 import serverlessExpress from '@vendia/serverless-express';
 
 import { Base64 } from 'js-base64';
@@ -115,22 +115,13 @@ export async function handler(event, context) {
   // then the body will have been urlencoded which AWS will be double encoding
 
   if (get(event, 'requestContext.elb') && get(event, 'path') === '/.well-known/openid-configuration') {
-    log(
-      'Received request from ALB to the openid-configuration endpoint',
-      ['event', event],
-    );
+    log('Received request from ALB to the openid-configuration endpoint', ['event', event]);
   }
 
   if (get(event, 'requestContext.elb') && get(event, 'path') === '/auth') {
-    log(
-      'Request from ALB to the authorize endpoint, removing double url encoding',
-      ['event', event],
-    );
+    log('Request from ALB to the authorize endpoint, removing double url encoding', ['event', event]);
     forEach(event.queryStringParameters, (value, key) => {
-      event.queryStringParameters[key] = decodeURIComponent(value).replace(
-        '+',
-        ' ',
-      );
+      event.queryStringParameters[key] = decodeURIComponent(value).replace('+', ' ');
     });
   }
   if (get(event, 'requestContext.elb') && get(event, 'path') === '/token') {

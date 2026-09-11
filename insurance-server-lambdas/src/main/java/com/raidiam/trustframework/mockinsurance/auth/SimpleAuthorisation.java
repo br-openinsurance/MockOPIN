@@ -79,6 +79,9 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
             entry("insurance-auto", "AUTO_MANAGE"),
             entry("insurance-pension-plan", "PENSION_PLAN_MANAGE"),
             entry("insurance-transport", "TRANSPORT_MANAGE"),
+            entry("withdrawal-pension-lead", "PENSION_WITHDRAWAL_LEAD_CREATE"),
+            entry("withdrawal-pension", "PENSION_WITHDRAWAL_CREATE"),
+            entry("withdrawal-capitalization-title", "CAPITALIZATION_TITLE_WITHDRAWAL_CREATE"),
             entry("dynamic-fields", "DYNAMIC_FIELDS_READ"),
             // op-related scopes, are these real? They govern the PUT endpoints needed for administration.
             entry("op:consent", "CONSENTS_FULL_MANAGE"),
@@ -231,28 +234,15 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
     }
 
     private void setRequestCallerInfo(HttpRequest<?> request, String[] scopes, String clientId, String subject, String orgId, String ssId){
-        final String dynamicScopePrefix = request.getPath().contains("automatic-payments") ? "recurring-consent:" : "consent:";
         String consentId = Arrays.stream(scopes)
                 .filter(Objects::nonNull)
                 .filter(a -> !a.isEmpty())
-                .filter(a -> a.startsWith(dynamicScopePrefix + "urn:raidiaminsurance:"))
+                .filter(a -> a.startsWith("consent:urn:raidiaminsurance:"))
                 .findFirst().orElse(null);
-        LOG.info("Consent Id inferred: {}", consentId);
+        LOG.info("Consent id inferred: {}", consentId);
         if(consentId != null) {
-            consentId = consentId.replace(dynamicScopePrefix,"");
+            consentId = consentId.replace("consent:", "");
             request.setAttribute("consentId", consentId);
-        }
-
-        final String enrollmentScopePrefix = "enrollment:";
-        String enrollmentId = Arrays.stream(scopes)
-                .filter(Objects::nonNull)
-                .filter(a -> !a.isEmpty())
-                .filter(a -> a.startsWith(enrollmentScopePrefix + "urn:raidiaminsurance:"))
-                .findFirst().orElse(null);
-        LOG.info("Enrollment Id inferred: {}", enrollmentId);
-        if(enrollmentId != null) {
-            enrollmentId = enrollmentId.replace(enrollmentScopePrefix,"");
-            request.setAttribute("enrollmentId", enrollmentId);
         }
 
         LOG.info("Setting clientId: {}", clientId);

@@ -44,6 +44,7 @@ datasources:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driverClassName: ${DB_DRIVER}
+    data-source-properties: { }
     jdbc-interceptors: com.amazonaws.xray.sql.postgres.TracingInterceptor
     initialSize: 2
     minIdle: 2

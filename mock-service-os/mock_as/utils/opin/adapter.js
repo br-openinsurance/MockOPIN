@@ -363,7 +363,7 @@ export class InsurerAdapter {
 
   async deleteWebhook(clientId) {
     log(`Deleting client ${clientId} webhook URI`);
-    this.updateWebhook(clientId, null);
+    await this.updateWebhook(clientId, null);
   }
 
   async getRequestConfig(scopes) {

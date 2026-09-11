@@ -78,4 +78,18 @@ public class FinancialRiskPolicyPremiumEntity extends BaseEntity {
                         .unitTypeOthers(this.getUnitTypeOthers()))
                 .coverages(this.getCoverages().stream().map(FinancialRiskPolicyPremiumCoverageEntity::mapDTO).toList());
     }
+
+    public InsuranceFinancialRiskPremiumV2 mapDTOV2() {
+        return new InsuranceFinancialRiskPremiumV2()
+                .paymentsQuantity(this.getPaymentsQuantity())
+                .amount(new AmountDetails()
+                        .amount(this.getAmount())
+                        .unit(new AmountDetailsUnit()
+                                .code(this.getUnitCode())
+                                .description(AmountDetailsUnit.DescriptionEnum.fromValue(this.getUnitDescription())))
+                        .currency(AmountDetails.CurrencyEnum.fromValue(this.getCurrency()))
+                        .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getUnitType()))
+                        .unitTypeOthers(this.getUnitTypeOthers()))
+                .coverages(this.getCoverages().stream().map(FinancialRiskPolicyPremiumCoverageEntity::mapDTO).toList());
+    }
 }

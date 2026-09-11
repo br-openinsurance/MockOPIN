@@ -16,6 +16,8 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +31,13 @@ public class ConsentService extends BaseInsuranceService {
     private static final Logger LOG = LoggerFactory.getLogger(ConsentService.class);
 
     private static final String OP_CLIENT_ID = "op";
+
+    public void consumeConsent(String consentId) {
+        var consent = this.getConsentEntity(consentId);
+        consent.setStatus(EnumConsentStatus.CONSUMED.toString());
+        consent.setStatusUpdateDateTime(Date.from(Instant.now()));
+        consentRepository.save(consent);
+    }
 
     public ConsentEntity createConsent(CreateConsent req, String clientId) {
         this.validateRequest(req);
@@ -372,6 +381,13 @@ public class ConsentService extends BaseInsuranceService {
         if (isPhase3) {
             validatePhase3Permissions(permissions);
         }
+
+        boolean hasWithdrawalPermission = permissions.contains(EnumConsentPermission.PENSION_WITHDRAWAL_CREATE)
+                || permissions.contains(EnumConsentPermission.PENSION_WITHDRAWAL_LEAD_CREATE);
+        validateWithdrawalInformation(hasWithdrawalPermission, req.getData().getWithdrawalLifePensionInformation());
+
+        boolean hasCapitalizationWithdrawalPermission = permissions.contains(EnumConsentPermission.CAPITALIZATION_TITLE_WITHDRAWAL_CREATE);
+        validateCapitalizationWithdrawalInformation(hasCapitalizationWithdrawalPermission, req.getData().getWithdrawalCaptalizationInformation());
     }
 
     private void validatePermissions(CreateConsentV3 req) {
@@ -391,6 +407,64 @@ public class ConsentService extends BaseInsuranceService {
 
         if (isPhase3) {
             validatePhase3PermissionsV3(permissions);
+        }
+
+        boolean hasWithdrawalPermission = permissions.contains(EnumConsentV3Permission.PENSION_WITHDRAWAL_CREATE)
+                || permissions.contains(EnumConsentV3Permission.PENSION_WITHDRAWAL_LEAD_CREATE);
+        validateWithdrawalInformation(hasWithdrawalPermission, req.getData().getWithdrawalLifePensionInformation());
+
+        boolean hasCapitalizationWithdrawalPermission = permissions.contains(EnumConsentV3Permission.CAPITALIZATION_TITLE_WITHDRAWAL_CREATE);
+        validateCapitalizationWithdrawalInformation(hasCapitalizationWithdrawalPermission, req.getData().getWithdrawalCapitalizationInformation());
+    }
+
+    private void validateWithdrawalInformation(boolean hasWithdrawalPermission,
+                                               CreateConsentDataWithdrawalLifePensionInformation info) {
+        String withdrawalType = info != null && info.getWithdrawalType() != null ? info.getWithdrawalType().toString() : null;
+        AmountDetails desiredTotalAmount = info != null ? info.getDesiredTotalAmount() : null;
+        AmountDetails pmbacAmount = info != null ? info.getPmbacAmount() : null;
+        validateWithdrawalAmounts(hasWithdrawalPermission, info == null, withdrawalType, desiredTotalAmount, pmbacAmount);
+    }
+
+    private void validateWithdrawalInformation(boolean hasWithdrawalPermission,
+                                               CreateConsentV3DataWithdrawalLifePensionInformation info) {
+        String withdrawalType = info != null && info.getWithdrawalType() != null ? info.getWithdrawalType().toString() : null;
+        AmountDetails desiredTotalAmount = info != null ? info.getDesiredTotalAmount() : null;
+        AmountDetails pmbacAmount = info != null ? info.getPmbacAmount() : null;
+        validateWithdrawalAmounts(hasWithdrawalPermission, info == null, withdrawalType, desiredTotalAmount, pmbacAmount);
+    }
+
+    private void validateWithdrawalAmounts(boolean hasWithdrawalPermission, boolean isNull,
+                                            String withdrawalType, AmountDetails desiredTotalAmount,
+                                            AmountDetails pmbacAmount) {
+        if (hasWithdrawalPermission && isNull) {
+            throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "NAO_INFORMADO: withdrawalLifePensionInformation is required when requesting withdrawal permissions");
+        }
+
+        if (isNull) {
+            return;
+        }
+
+        if (withdrawalType != null && withdrawalType.endsWith("TOTAL") && desiredTotalAmount != null) {
+            throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "NAO_INFORMADO: desiredTotalAmount must not be present when withdrawalType is " + withdrawalType);
+        }
+
+        if (withdrawalType != null && withdrawalType.endsWith("PARCIAL") && desiredTotalAmount != null && pmbacAmount != null) {
+            BigDecimal desired = new BigDecimal(desiredTotalAmount.getAmount());
+            BigDecimal pmbac = new BigDecimal(pmbacAmount.getAmount());
+            if (desired.compareTo(pmbac) > 0) {
+                throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                        "NAO_INFORMADO: desiredTotalAmount must not be greater than pmbacAmount");
+            }
+        }
+    }
+
+    private void validateCapitalizationWithdrawalInformation(boolean hasCapitalizationWithdrawalPermission,
+                                                              CreateConsentDataWithdrawalCaptalizationInformation info) {
+        if (hasCapitalizationWithdrawalPermission && info == null) {
+            throw new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "NAO_INFORMADO: withdrawalCaptalizationInformation is required when requesting capitalization title withdrawal permissions");
         }
     }
 

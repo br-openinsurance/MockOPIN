@@ -5,6 +5,7 @@ import com.raidiam.trustframework.mockinsurance.auth.RequiredAuthenticationGrant
 import com.raidiam.trustframework.mockinsurance.domain.QuoteLifePensionLeadEntity;
 import com.raidiam.trustframework.mockinsurance.domain.QuoteLifePensionEntity;
 import com.raidiam.trustframework.mockinsurance.fapi.Idempotent;
+import com.raidiam.trustframework.mockinsurance.fapi.ResponseErrorWithRequestDateTime;
 import com.raidiam.trustframework.mockinsurance.fapi.XFapiInteractionIdRequired;
 import com.raidiam.trustframework.mockinsurance.models.generated.*;
 import com.raidiam.trustframework.mockinsurance.services.QuoteLifePensionLeadService;
@@ -120,6 +121,7 @@ public class QuoteLifePensionController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @ResponseErrorWithRequestDateTime
     public ResponseQuote createLeadQuoteV2(
             @Body QuoteRequestLifePensionLeadV2 body,
             @NotNull HttpRequest<?> request) {
@@ -149,6 +151,7 @@ public class QuoteLifePensionController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     @Idempotent
+    @ResponseErrorWithRequestDateTime
     public QuoteStatusLifePensionV2 createBusinessQuoteV2(@Body RequestContractLifePensionV2 body, HttpRequest<?> request) {
         var clientId = InsuranceLambdaUtils.getRequestMeta(request).getClientId();
         LOG.info("Creating new quote life pension for client {}", clientId);

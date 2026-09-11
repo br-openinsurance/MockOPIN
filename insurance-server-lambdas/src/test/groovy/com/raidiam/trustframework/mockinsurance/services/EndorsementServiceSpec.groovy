@@ -55,6 +55,7 @@ class EndorsementServiceSpec extends CleanupSpecification {
         entity.getData().getProposalId() != null
         entity.getData().getRequestDate() != null
         entity.getData().getEndorsementType().toString() == consent.getEndorsementInformation().getEndorsementType().toString()
+        EnumConsentStatus.CONSUMED.name() == consentRepository.findByConsentId(consent.getConsentId()).get().getStatus()
     }
 
     def "We can't create an endorsement without a consent id"() {
@@ -199,7 +200,7 @@ class EndorsementServiceSpec extends CleanupSpecification {
 
         then:
         def e2 = thrown(HttpStatusException)
-        e2.status == HttpStatus.FORBIDDEN
+        e2.status == HttpStatus.UNAUTHORIZED
         e2.getMessage() == "NAO_INFORMADO: consent is not authorised"
     }
 
@@ -275,7 +276,7 @@ class EndorsementServiceSpec extends CleanupSpecification {
 
         then:
         def e2 = thrown(HttpStatusException)
-        e2.status == HttpStatus.FORBIDDEN
+        e2.status == HttpStatus.UNAUTHORIZED
         e2.getMessage() == "NAO_INFORMADO: consent is not authorised"
     }
 
@@ -418,7 +419,7 @@ class EndorsementServiceSpec extends CleanupSpecification {
 
         then:
         def e2 = thrown(HttpStatusException)
-        e2.status == HttpStatus.FORBIDDEN
+        e2.status == HttpStatus.UNAUTHORIZED
         e2.getMessage() == "NAO_INFORMADO: consent is not authorised"
     }
 
@@ -586,7 +587,7 @@ class EndorsementServiceSpec extends CleanupSpecification {
 
         then:
         def e = thrown(HttpStatusException)
-        e.status == HttpStatus.FORBIDDEN
+        e.status == HttpStatus.UNAUTHORIZED
         e.getMessage() == "NAO_INFORMADO: consent is not authorised"
     }
 
@@ -621,7 +622,7 @@ class EndorsementServiceSpec extends CleanupSpecification {
 
         then:
         def e = thrown(HttpStatusException)
-        e.status == HttpStatus.FORBIDDEN
+        e.status == HttpStatus.UNAUTHORIZED
         e.getMessage() == "NAO_INFORMADO: consent is not authorised"
     }
 

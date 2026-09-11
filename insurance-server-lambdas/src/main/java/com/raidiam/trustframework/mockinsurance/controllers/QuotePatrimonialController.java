@@ -264,7 +264,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
         String clientId = (String) request.getAttribute("clientId").orElse("");
         LOG.info("Creating new quote patrimonial business for client {}", clientId);
         var resp = quotePatrimonialBusinessService.createQuote(QuotePatrimonialBusinessEntity.fromRequestV2(body, clientId)).toResponseV2();
-        var selfLink = String.format("%s/open-insurance/quote-patrimonial/v1/business/request/%s/quote-status", appBaseUrl, body.getData().getConsentId());
+        var selfLink = String.format("%s/open-insurance/quote-patrimonial/v2/business/request/%s/quote-status", appBaseUrl, body.getData().getConsentId());
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, selfLink);
         return resp;
     }
@@ -305,7 +305,7 @@ public class QuotePatrimonialController extends BaseInsuranceController {
         String clientId = (String) request.getAttribute("clientId").orElse("");
         LOG.info("Creating new quote patrimonial home for client {}", clientId);
         var resp = quotePatrimonialHomeService.createQuote(QuotePatrimonialHomeEntity.fromRequestV2(body, clientId)).toResponseV2();
-        var selfLink = String.format("%s/open-insurance/quote-patrimonial/v1/home/request/%s/quote-status", appBaseUrl, body.getData().getConsentId());
+        var selfLink = String.format("%s/open-insurance/quote-patrimonial/v2/home/request/%s/quote-status", appBaseUrl, body.getData().getConsentId());
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, selfLink);
         return resp;
     }

@@ -108,7 +108,7 @@ public class HousingPolicyInsuredObjectCoverageEntity extends BaseEntity {
             .type(InsuranceHousingInsuredObjectCoverage.TypeEnum.valueOf(this.getType()))
             .gracePeriod(this.getGracePeriod())
             .gracePeriodicity(InsuranceHousingInsuredObjectCoverage.GracePeriodicityEnum.valueOf(this.getGracePeriodicity()))
-            .gracePeriodCountingMethod(InsuranceHousingInsuredObjectCoverage.GracePeriodCountingMethodEnum.valueOf(this.getGracePeriodCountingMethod()))
+            .gracePeriodCountingMethod(InsuranceHousingInsuredObjectCoverage.GracePeriodCountingMethodEnum.fromValue(this.getGracePeriodCountingMethod()))
             .premiumPeriodicity(InsuranceHousingInsuredObjectCoverage.PremiumPeriodicityEnum.valueOf(this.getPremiumPeriodicity()));
     }
 }

@@ -36,7 +36,13 @@ public class ResourcesService extends BaseInsuranceService {
             Map.entry(ResourceType.DAMAGES_AND_PEOPLE_AUTO, ResponseResourceListData.TypeEnum.DAMAGES_AND_PEOPLE_AUTO),
             Map.entry(ResourceType.DAMAGES_AND_PEOPLE_HOUSING, ResponseResourceListData.TypeEnum.DAMAGES_AND_PEOPLE_HOUSING),
             Map.entry(ResourceType.DAMAGES_AND_PEOPLE_PERSON, ResponseResourceListData.TypeEnum.DAMAGES_AND_PEOPLE_PERSON),
-            Map.entry(ResourceType.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD, ResponseResourceListData.TypeEnum.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD)
+            Map.entry(ResourceType.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD, ResponseResourceListData.TypeEnum.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD),
+            Map.entry(ResourceType.CUSTOMERS_PERSONAL_IDENTIFICATIONS, ResponseResourceListData.TypeEnum.CUSTOMERS_PERSONAL_IDENTIFICATIONS),
+            Map.entry(ResourceType.CUSTOMERS_PERSONAL_QUALIFICATION, ResponseResourceListData.TypeEnum.CUSTOMERS_PERSONAL_QUALIFICATION),
+            Map.entry(ResourceType.CUSTOMERS_PERSONAL_ADDITIONALINFO, ResponseResourceListData.TypeEnum.CUSTOMERS_PERSONAL_ADDITIONALINFO),
+            Map.entry(ResourceType.CUSTOMERS_BUSINESS_IDENTIFICATIONS, ResponseResourceListData.TypeEnum.CUSTOMERS_BUSINESS_IDENTIFICATIONS),
+            Map.entry(ResourceType.CUSTOMERS_BUSINESS_QUALIFICATION, ResponseResourceListData.TypeEnum.CUSTOMERS_BUSINESS_QUALIFICATION),
+            Map.entry(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO, ResponseResourceListData.TypeEnum.CUSTOMERS_BUSINESS_ADDITIONALINFO)
     );
 
     private static final Map<ResourceType, ResponseResourceListV3Data.TypeEnum> TYPE_MAP_V3 = Map.ofEntries(
@@ -52,7 +58,13 @@ public class ResourcesService extends BaseInsuranceService {
             Map.entry(ResourceType.DAMAGES_AND_PEOPLE_AUTO, ResponseResourceListV3Data.TypeEnum.DAMAGES_AND_PEOPLE_AUTO),
             Map.entry(ResourceType.DAMAGES_AND_PEOPLE_HOUSING, ResponseResourceListV3Data.TypeEnum.DAMAGES_AND_PEOPLE_HOUSING),
             Map.entry(ResourceType.DAMAGES_AND_PEOPLE_PERSON, ResponseResourceListV3Data.TypeEnum.DAMAGES_AND_PEOPLE_PERSON),
-            Map.entry(ResourceType.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD, ResponseResourceListV3Data.TypeEnum.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD)
+            Map.entry(ResourceType.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD, ResponseResourceListV3Data.TypeEnum.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD),
+            Map.entry(ResourceType.CUSTOMERS_PERSONAL_IDENTIFICATIONS, ResponseResourceListV3Data.TypeEnum.CUSTOMERS_PERSONAL_IDENTIFICATIONS),
+            Map.entry(ResourceType.CUSTOMERS_PERSONAL_QUALIFICATION, ResponseResourceListV3Data.TypeEnum.CUSTOMERS_PERSONAL_QUALIFICATION),
+            Map.entry(ResourceType.CUSTOMERS_PERSONAL_ADDITIONALINFO, ResponseResourceListV3Data.TypeEnum.CUSTOMERS_PERSONAL_ADDITIONALINFO),
+            Map.entry(ResourceType.CUSTOMERS_BUSINESS_IDENTIFICATIONS, ResponseResourceListV3Data.TypeEnum.CUSTOMERS_BUSINESS_IDENTIFICATIONS),
+            Map.entry(ResourceType.CUSTOMERS_BUSINESS_QUALIFICATION, ResponseResourceListV3Data.TypeEnum.CUSTOMERS_BUSINESS_QUALIFICATION),
+            Map.entry(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO, ResponseResourceListV3Data.TypeEnum.CUSTOMERS_BUSINESS_ADDITIONALINFO)
     );
 
     private static final Map<ResourceType, EnumConsentPermission> PERMISSION_MAP = Map.ofEntries(
@@ -68,7 +80,13 @@ public class ResourcesService extends BaseInsuranceService {
             Map.entry(ResourceType.DAMAGES_AND_PEOPLE_AUTO, EnumConsentPermission.DAMAGES_AND_PEOPLE_AUTO_READ),
             Map.entry(ResourceType.DAMAGES_AND_PEOPLE_HOUSING, EnumConsentPermission.DAMAGES_AND_PEOPLE_HOUSING_READ),
             Map.entry(ResourceType.DAMAGES_AND_PEOPLE_PERSON, EnumConsentPermission.DAMAGES_AND_PEOPLE_PERSON_READ),
-            Map.entry(ResourceType.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD, EnumConsentPermission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_READ)
+            Map.entry(ResourceType.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD, EnumConsentPermission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_READ),
+            Map.entry(ResourceType.CUSTOMERS_PERSONAL_IDENTIFICATIONS, EnumConsentPermission.CUSTOMERS_PERSONAL_IDENTIFICATIONS_READ),
+            Map.entry(ResourceType.CUSTOMERS_PERSONAL_QUALIFICATION, EnumConsentPermission.CUSTOMERS_PERSONAL_QUALIFICATION_READ),
+            Map.entry(ResourceType.CUSTOMERS_PERSONAL_ADDITIONALINFO, EnumConsentPermission.CUSTOMERS_PERSONAL_ADDITIONALINFO_READ),
+            Map.entry(ResourceType.CUSTOMERS_BUSINESS_IDENTIFICATIONS, EnumConsentPermission.CUSTOMERS_BUSINESS_IDENTIFICATIONS_READ),
+            Map.entry(ResourceType.CUSTOMERS_BUSINESS_QUALIFICATION, EnumConsentPermission.CUSTOMERS_BUSINESS_QUALIFICATION_READ),
+            Map.entry(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO, EnumConsentPermission.CUSTOMERS_BUSINESS_ADDITIONALINFO_READ)
     );
 
     private static final Map<ResourceType, EnumConsentV3Permission> PERMISSION_MAP_V3 = Map.ofEntries(
@@ -84,7 +102,13 @@ public class ResourcesService extends BaseInsuranceService {
             Map.entry(ResourceType.DAMAGES_AND_PEOPLE_AUTO, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_AUTO_READ),
             Map.entry(ResourceType.DAMAGES_AND_PEOPLE_HOUSING, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_HOUSING_READ),
             Map.entry(ResourceType.DAMAGES_AND_PEOPLE_PERSON, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PERSON_READ),
-            Map.entry(ResourceType.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_READ)
+            Map.entry(ResourceType.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_READ),
+            Map.entry(ResourceType.CUSTOMERS_PERSONAL_IDENTIFICATIONS, EnumConsentV3Permission.CUSTOMERS_PERSONAL_IDENTIFICATIONS_READ),
+            Map.entry(ResourceType.CUSTOMERS_PERSONAL_QUALIFICATION, EnumConsentV3Permission.CUSTOMERS_PERSONAL_QUALIFICATION_READ),
+            Map.entry(ResourceType.CUSTOMERS_PERSONAL_ADDITIONALINFO, EnumConsentV3Permission.CUSTOMERS_PERSONAL_ADDITIONALINFO_READ),
+            Map.entry(ResourceType.CUSTOMERS_BUSINESS_IDENTIFICATIONS, EnumConsentV3Permission.CUSTOMERS_BUSINESS_IDENTIFICATIONS_READ),
+            Map.entry(ResourceType.CUSTOMERS_BUSINESS_QUALIFICATION, EnumConsentV3Permission.CUSTOMERS_BUSINESS_QUALIFICATION_READ),
+            Map.entry(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO, EnumConsentV3Permission.CUSTOMERS_BUSINESS_ADDITIONALINFO_READ)
     );
 
     public ResponseResourceList getResourceList(Pageable pageable, @NotNull String consentId) {
@@ -97,12 +121,6 @@ public class ResourcesService extends BaseInsuranceService {
 
         var permissions = InsuranceLambdaUtils.getConsentPermissions(consentEntity);
         var permissionsV3 = InsuranceLambdaUtils.getConsentV3Permissions(consentEntity);
-
-        if (checkIfOnlyCustomersGroup(permissions, permissionsV3)) {
-            return new ResponseResourceList()
-                    .data(new ArrayList<>())
-                    .meta(InsuranceLambdaUtils.getMeta(null, false));
-        }
 
         LOG.info("Adding resources to response");
         Map<ResponseResourceListData, String> responseMap = new HashMap<>();
@@ -159,6 +177,24 @@ public class ResourcesService extends BaseInsuranceService {
         LOG.info("Found {} transport policies to include in resource response", transportPolicies.size());
         addTransportPoliciesToResources(transportPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_TRANSPORT)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_TRANSPORT))));
 
+        LOG.info("Including customer personal identifications in resource response");
+        addCustomerPersonalIdentificationsToResources(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_PERSONAL_IDENTIFICATIONS)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_PERSONAL_IDENTIFICATIONS))));
+
+        LOG.info("Including customer personal qualifications in resource response");
+        addCustomerPersonalQualificationsToResources(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_PERSONAL_QUALIFICATION)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_PERSONAL_QUALIFICATION))));
+
+        LOG.info("Including customer personal additional info in resource response");
+        addCustomerPersonalAdditionalInfoToResources(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_PERSONAL_ADDITIONALINFO)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_PERSONAL_ADDITIONALINFO))));
+
+        LOG.info("Including customer business identifications in resource response");
+        addCustomerBusinessIdentificationsToResources(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_BUSINESS_IDENTIFICATIONS)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_BUSINESS_IDENTIFICATIONS))));
+
+        LOG.info("Including customer business qualifications in resource response");
+        addCustomerBusinessQualificationsToResources(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_BUSINESS_QUALIFICATION)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_BUSINESS_QUALIFICATION))));
+
+        LOG.info("Including customer business additional info in resource response");
+        addCustomerBusinessAdditionalInfoToResources(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO))));
+
         var resourcePage = getPage(responseMap, pageable);
         LOG.info("Building response with resources");
         var response = new ResponseResourceList().data(resourcePage.getContent());
@@ -176,12 +212,6 @@ public class ResourcesService extends BaseInsuranceService {
 
         var permissions = InsuranceLambdaUtils.getConsentPermissions(consentEntity);
         var permissionsV3 = InsuranceLambdaUtils.getConsentV3Permissions(consentEntity);
-
-        if (checkIfOnlyCustomersGroup(permissions, permissionsV3)) {
-            return new ResponseResourceListV3()
-                    .data(new ArrayList<>())
-                    .meta(InsuranceLambdaUtils.getMeta(null, false));
-        }
 
         LOG.info("Adding resources to response");
         Map<ResponseResourceListV3Data, String> responseMap = new HashMap<>();
@@ -237,6 +267,24 @@ public class ResourcesService extends BaseInsuranceService {
         var transportPolicies = consentEntity.getTransportPolicies();
         LOG.info("Found {} transport policies to include in resource response", transportPolicies.size());
         addTransportPoliciesToResourcesV3(transportPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_TRANSPORT)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_TRANSPORT))));
+
+        LOG.info("Including customer personal identifications in resource response");
+        addCustomerPersonalIdentificationsToResourcesV3(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_PERSONAL_IDENTIFICATIONS)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_PERSONAL_IDENTIFICATIONS))));
+
+        LOG.info("Including customer personal qualifications in resource response");
+        addCustomerPersonalQualificationsToResourcesV3(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_PERSONAL_QUALIFICATION)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_PERSONAL_QUALIFICATION))));
+
+        LOG.info("Including customer personal additional info in resource response");
+        addCustomerPersonalAdditionalInfoToResourcesV3(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_PERSONAL_ADDITIONALINFO)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_PERSONAL_ADDITIONALINFO))));
+
+        LOG.info("Including customer business identifications in resource response");
+        addCustomerBusinessIdentificationsToResourcesV3(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_BUSINESS_IDENTIFICATIONS)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_BUSINESS_IDENTIFICATIONS))));
+
+        LOG.info("Including customer business qualifications in resource response");
+        addCustomerBusinessQualificationsToResourcesV3(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_BUSINESS_QUALIFICATION)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_BUSINESS_QUALIFICATION))));
+
+        LOG.info("Including customer business additional info in resource response");
+        addCustomerBusinessAdditionalInfoToResourcesV3(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO))));
 
         var resourcePage = getPage(responseMap, pageable);
         LOG.info("Building response with resources");
@@ -712,6 +760,210 @@ public class ResourcesService extends BaseInsuranceService {
         }
     }
 
+    private void addCustomerPersonalIdentificationsToResources(ConsentEntity consent, Map<ResponseResourceListData, String> responseMap, boolean permitted) {
+        if (!permitted) {
+            LOG.info("Customer personal identification permission not found in consent id {}", consent.getConsentId());
+            return;
+        }
+        LOG.info("Customer personal identification permission found in consent id {}", consent.getConsentId());
+        var personalIdentifications = personalIdentificationRepository.findByAccountHolderAccountHolderId(consent.getAccountHolderId());
+        for (var personalIdentification : personalIdentifications) {
+            var resourceId = personalIdentification.getPersonalIdentificationsId().toString();
+            var data = new ResponseResourceListData()
+                    .resourceId(resourceId)
+                    .status(ResponseResourceListData.StatusEnum.AVAILABLE)
+                    .type(TYPE_MAP.get(ResourceType.CUSTOMERS_PERSONAL_IDENTIFICATIONS));
+            responseMap.put(data, resourceId);
+        }
+    }
+
+    private void addCustomerPersonalIdentificationsToResourcesV3(ConsentEntity consent, Map<ResponseResourceListV3Data, String> responseMap, boolean permitted) {
+        if (!permitted) {
+            LOG.info("Customer personal identification permission not found in consent id {}", consent.getConsentId());
+            return;
+        }
+        LOG.info("Customer personal identification permission found in consent id {}", consent.getConsentId());
+        var personalIdentifications = personalIdentificationRepository.findByAccountHolderAccountHolderId(consent.getAccountHolderId());
+        for (var personalIdentification : personalIdentifications) {
+            var resourceId = personalIdentification.getPersonalIdentificationsId().toString();
+            var data = new ResponseResourceListV3Data()
+                    .resourceId(personalIdentification.getPersonalIdentificationsId().toString())
+                    .status(ResponseResourceListV3Data.StatusEnum.AVAILABLE)
+                    .type(TYPE_MAP_V3.get(ResourceType.CUSTOMERS_PERSONAL_IDENTIFICATIONS));
+            responseMap.put(data, resourceId);
+        }
+    }
+
+    private void addCustomerPersonalQualificationsToResources(ConsentEntity consent, Map<ResponseResourceListData, String> responseMap, boolean permitted) {
+        if (!permitted) {
+            LOG.info("Customer personal qualification permission not found in consent id {}", consent.getConsentId());
+            return;
+        }
+        LOG.info("Customer personal qualification permission found in consent id {}", consent.getConsentId());
+        var personalQualifications = personalQualificationRepository.findByAccountHolderAccountHolderId(consent.getAccountHolderId());
+        for (var personalQualification : personalQualifications) {
+            var resourceId = personalQualification.getPersonalQualificationId().toString();
+            var data = new ResponseResourceListData()
+                    .resourceId(resourceId)
+                    .status(ResponseResourceListData.StatusEnum.AVAILABLE)
+                    .type(TYPE_MAP.get(ResourceType.CUSTOMERS_PERSONAL_QUALIFICATION));
+            responseMap.put(data, resourceId);
+        }
+    }
+
+    private void addCustomerPersonalQualificationsToResourcesV3(ConsentEntity consent, Map<ResponseResourceListV3Data, String> responseMap, boolean permitted) {
+        if (!permitted) {
+            LOG.info("Customer personal qualification permission not found in consent id {}", consent.getConsentId());
+            return;
+        }
+        LOG.info("Customer personal qualification permission found in consent id {}", consent.getConsentId());
+        var personalQualifications = personalQualificationRepository.findByAccountHolderAccountHolderId(consent.getAccountHolderId());
+        for (var personalQualification : personalQualifications) {
+            var resourceId = personalQualification.getPersonalQualificationId().toString();
+            var data = new ResponseResourceListV3Data()
+                    .resourceId(resourceId)
+                    .status(ResponseResourceListV3Data.StatusEnum.AVAILABLE)
+                    .type(TYPE_MAP_V3.get(ResourceType.CUSTOMERS_PERSONAL_QUALIFICATION));
+            responseMap.put(data, resourceId);
+        }
+    }
+
+    private void addCustomerPersonalAdditionalInfoToResources(ConsentEntity consent, Map<ResponseResourceListData, String> responseMap, boolean permitted) {
+        if (!permitted) {
+            LOG.info("Customer personal additional info permission not found in consent id {}", consent.getConsentId());
+            return;
+        }
+        LOG.info("Customer personal additional info permission found in consent id {}", consent.getConsentId());
+        var personalComplimentaryInfos = personalComplimentaryInformationRepository.findByAccountHolderAccountHolderId(consent.getAccountHolderId());
+        for (var personalComplimentaryInfo : personalComplimentaryInfos) {
+            var resourceId = personalComplimentaryInfo.getPersonalComplimentaryInfoId().toString();
+            var data = new ResponseResourceListData()
+                    .resourceId(resourceId)
+                    .status(ResponseResourceListData.StatusEnum.AVAILABLE)
+                    .type(TYPE_MAP.get(ResourceType.CUSTOMERS_PERSONAL_ADDITIONALINFO));
+            responseMap.put(data, resourceId);
+        }
+    }
+
+    private void addCustomerPersonalAdditionalInfoToResourcesV3(ConsentEntity consent, Map<ResponseResourceListV3Data, String> responseMap, boolean permitted) {
+        if (!permitted) {
+            LOG.info("Customer personal additional info permission not found in consent id {}", consent.getConsentId());
+            return;
+        }
+        LOG.info("Customer personal additional info permission found in consent id {}", consent.getConsentId());
+        var personalComplimentaryInfos = personalComplimentaryInformationRepository.findByAccountHolderAccountHolderId(consent.getAccountHolderId());
+        for (var personalComplimentaryInfo : personalComplimentaryInfos) {
+            var resourceId = personalComplimentaryInfo.getPersonalComplimentaryInfoId().toString();
+            var data = new ResponseResourceListV3Data()
+                    .resourceId(resourceId)
+                    .status(ResponseResourceListV3Data.StatusEnum.AVAILABLE)
+                    .type(TYPE_MAP_V3.get(ResourceType.CUSTOMERS_PERSONAL_ADDITIONALINFO));
+            responseMap.put(data, resourceId);
+        }
+    }
+
+    private void addCustomerBusinessIdentificationsToResources(ConsentEntity consent, Map<ResponseResourceListData, String> responseMap, boolean permitted) {
+        if (!permitted) {
+            LOG.info("Customer business identification permission not found in consent id {}", consent.getConsentId());
+            return;
+        }
+        LOG.info("Customer business identification permission found in consent id {}", consent.getConsentId());
+        var businessIdentifications = businessIdentificationRepository.findByAccountHolderAccountHolderId(consent.getAccountHolderId());
+        for (var businessIdentification : businessIdentifications) {
+            var resourceId = businessIdentification.getBusinessIdentificationId().toString();
+            var data = new ResponseResourceListData()
+                    .resourceId(resourceId)
+                    .status(ResponseResourceListData.StatusEnum.AVAILABLE)
+                    .type(TYPE_MAP.get(ResourceType.CUSTOMERS_BUSINESS_IDENTIFICATIONS));
+            responseMap.put(data, resourceId);
+        }
+    }
+
+    private void addCustomerBusinessIdentificationsToResourcesV3(ConsentEntity consent, Map<ResponseResourceListV3Data, String> responseMap, boolean permitted) {
+        if (!permitted) {
+            LOG.info("Customer business identification permission not found in consent id {}", consent.getConsentId());
+            return;
+        }
+        LOG.info("Customer business identification permission found in consent id {}", consent.getConsentId());
+        var businessIdentifications = businessIdentificationRepository.findByAccountHolderAccountHolderId(consent.getAccountHolderId());
+        for (var businessIdentification : businessIdentifications) {
+            var resourceId = businessIdentification.getBusinessIdentificationId().toString();
+            var data = new ResponseResourceListV3Data()
+                    .resourceId(resourceId)
+                    .status(ResponseResourceListV3Data.StatusEnum.AVAILABLE)
+                    .type(TYPE_MAP_V3.get(ResourceType.CUSTOMERS_BUSINESS_IDENTIFICATIONS));
+            responseMap.put(data, resourceId);
+        }
+    }
+
+    private void addCustomerBusinessQualificationsToResources(ConsentEntity consent, Map<ResponseResourceListData, String> responseMap, boolean permitted) {
+        if (!permitted) {
+            LOG.info("Customer business qualification permission not found in consent id {}", consent.getConsentId());
+            return;
+        }
+        LOG.info("Customer business qualification permission found in consent id {}", consent.getConsentId());
+        var businessQualifications = businessQualificationRepository.findByAccountHolderAccountHolderId(consent.getAccountHolderId());
+        for (var businessQualification : businessQualifications) {
+            var resourceId = businessQualification.getBusinessQualificationId().toString();
+            var data = new ResponseResourceListData()
+                    .resourceId(resourceId)
+                    .status(ResponseResourceListData.StatusEnum.AVAILABLE)
+                    .type(TYPE_MAP.get(ResourceType.CUSTOMERS_BUSINESS_QUALIFICATION));
+            responseMap.put(data, resourceId);
+        }
+    }
+
+    private void addCustomerBusinessQualificationsToResourcesV3(ConsentEntity consent, Map<ResponseResourceListV3Data, String> responseMap, boolean permitted) {
+        if (!permitted) {
+            LOG.info("Customer business qualification permission not found in consent id {}", consent.getConsentId());
+            return;
+        }
+        LOG.info("Customer business qualification permission found in consent id {}", consent.getConsentId());
+        var businessQualifications = businessQualificationRepository.findByAccountHolderAccountHolderId(consent.getAccountHolderId());
+        for (var businessQualification : businessQualifications) {
+            var resourceId = businessQualification.getBusinessQualificationId().toString();
+            var data = new ResponseResourceListV3Data()
+                    .resourceId(resourceId)
+                    .status(ResponseResourceListV3Data.StatusEnum.AVAILABLE)
+                    .type(TYPE_MAP_V3.get(ResourceType.CUSTOMERS_BUSINESS_QUALIFICATION));
+            responseMap.put(data, resourceId);
+        }
+    }
+
+    private void addCustomerBusinessAdditionalInfoToResources(ConsentEntity consent, Map<ResponseResourceListData, String> responseMap, boolean permitted) {
+        if (!permitted) {
+            LOG.info("Customer business additional info permission not found in consent id {}", consent.getConsentId());
+            return;
+        }
+        LOG.info("Customer business additional info permission found in consent id {}", consent.getConsentId());
+        var businessComplimentaryInfos = businessComplimentaryInformationRepository.findByAccountHolderAccountHolderId(consent.getAccountHolderId());
+        for (var businessComplimentaryInfo : businessComplimentaryInfos) {
+            var resourceId = businessComplimentaryInfo.getBusinessComplimentaryInfoId().toString();
+            var data = new ResponseResourceListData()
+                    .resourceId(resourceId)
+                    .status(ResponseResourceListData.StatusEnum.AVAILABLE)
+                    .type(TYPE_MAP.get(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO));
+            responseMap.put(data, resourceId);
+        }
+    }
+
+    private void addCustomerBusinessAdditionalInfoToResourcesV3(ConsentEntity consent, Map<ResponseResourceListV3Data, String> responseMap, boolean permitted) {
+        if (!permitted) {
+            LOG.info("Customer business additional info permission not found in consent id {}", consent.getConsentId());
+            return;
+        }
+        LOG.info("Customer business additional info permission found in consent id {}", consent.getConsentId());
+        var businessComplimentaryInfos = businessComplimentaryInformationRepository.findByAccountHolderAccountHolderId(consent.getAccountHolderId());
+        for (var businessComplimentaryInfo : businessComplimentaryInfos) {
+            var resourceId = businessComplimentaryInfo.getBusinessComplimentaryInfoId().toString();
+            var data = new ResponseResourceListV3Data()
+                    .resourceId(resourceId)
+                    .status(ResponseResourceListV3Data.StatusEnum.AVAILABLE)
+                    .type(TYPE_MAP_V3.get(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO));
+            responseMap.put(data, resourceId);
+        }
+    }
+
     private static <T> Page<T> getPage(Map<T, String> responseMap, Pageable pageable) {
         //Sort by create date and convert to list
         List<T> list = responseMap.entrySet().stream()
@@ -738,49 +990,4 @@ public class ResourcesService extends BaseInsuranceService {
         return Page.of(slice, pageable, (long)list.size());
     }
 
-    private boolean checkIfOnlyCustomersGroup(Set<EnumConsentPermission> permissions, Set<EnumConsentV3Permission> permissionsV3) {
-        if (permissions.contains(EnumConsentPermission.CAPITALIZATION_TITLE_READ)
-                || permissions.contains(EnumConsentPermission.PENSION_PLAN_READ)
-                || permissions.contains(EnumConsentPermission.LIFE_PENSION_READ)
-                || permissions.contains(EnumConsentPermission.FINANCIAL_ASSISTANCE_READ)
-                || permissions.contains(EnumConsentPermission.DAMAGES_AND_PEOPLE_PATRIMONIAL_READ)
-                || permissions.contains(EnumConsentPermission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_READ)
-                || permissions.contains(EnumConsentPermission.DAMAGES_AND_PEOPLE_TRANSPORT_READ)
-                || permissions.contains(EnumConsentPermission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_READ)
-                || permissions.contains(EnumConsentPermission.DAMAGES_AND_PEOPLE_RURAL_READ)
-                || permissions.contains(EnumConsentPermission.DAMAGES_AND_PEOPLE_AUTO_READ)
-                || permissions.contains(EnumConsentPermission.DAMAGES_AND_PEOPLE_HOUSING_READ)
-                || permissions.contains(EnumConsentPermission.DAMAGES_AND_PEOPLE_PERSON_READ)
-                || permissions.contains(EnumConsentPermission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_READ)
-                || permissionsV3.contains(EnumConsentV3Permission.CAPITALIZATION_TITLE_READ)
-                || permissionsV3.contains(EnumConsentV3Permission.PENSION_PLAN_READ)
-                || permissionsV3.contains(EnumConsentV3Permission.LIFE_PENSION_READ)
-                || permissionsV3.contains(EnumConsentV3Permission.FINANCIAL_ASSISTANCE_READ)
-                || permissionsV3.contains(EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PATRIMONIAL_READ)
-                || permissionsV3.contains(EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RESPONSIBILITY_READ)
-                || permissionsV3.contains(EnumConsentV3Permission.DAMAGES_AND_PEOPLE_TRANSPORT_READ)
-                || permissionsV3.contains(EnumConsentV3Permission.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS_READ)
-                || permissionsV3.contains(EnumConsentV3Permission.DAMAGES_AND_PEOPLE_RURAL_READ)
-                || permissionsV3.contains(EnumConsentV3Permission.DAMAGES_AND_PEOPLE_AUTO_READ)
-                || permissionsV3.contains(EnumConsentV3Permission.DAMAGES_AND_PEOPLE_HOUSING_READ)
-                || permissionsV3.contains(EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PERSON_READ)
-                || permissionsV3.contains(EnumConsentV3Permission.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD_READ)
-        ) {
-            return false;
-        }
-
-        var containsPersonalIdentifications = permissions.contains(EnumConsentPermission.CUSTOMERS_PERSONAL_IDENTIFICATIONS_READ) || permissionsV3.contains(EnumConsentV3Permission.CUSTOMERS_PERSONAL_IDENTIFICATIONS_READ);
-        var containsPersonalAdditionalInfo = permissions.contains(EnumConsentPermission.CUSTOMERS_PERSONAL_ADDITIONALINFO_READ) || permissionsV3.contains(EnumConsentV3Permission.CUSTOMERS_PERSONAL_ADDITIONALINFO_READ);
-        var containsPersonalQualifications = permissions.contains(EnumConsentPermission.CUSTOMERS_PERSONAL_QUALIFICATION_READ) || permissionsV3.contains(EnumConsentV3Permission.CUSTOMERS_PERSONAL_QUALIFICATION_READ);
-        var containsBusinessIdentifications = permissions.contains(EnumConsentPermission.CUSTOMERS_BUSINESS_IDENTIFICATIONS_READ) || permissionsV3.contains(EnumConsentV3Permission.CUSTOMERS_BUSINESS_IDENTIFICATIONS_READ);
-        var containsBusinessAdditionalInfo = permissions.contains(EnumConsentPermission.CUSTOMERS_BUSINESS_ADDITIONALINFO_READ) || permissionsV3.contains(EnumConsentV3Permission.CUSTOMERS_BUSINESS_ADDITIONALINFO_READ);
-        var containsBusinessQualifications = permissions.contains(EnumConsentPermission.CUSTOMERS_BUSINESS_QUALIFICATION_READ) || permissionsV3.contains(EnumConsentV3Permission.CUSTOMERS_BUSINESS_QUALIFICATION_READ);
-
-        if ((containsPersonalIdentifications && containsPersonalAdditionalInfo && containsPersonalQualifications)
-                || (containsBusinessIdentifications && containsBusinessAdditionalInfo && containsBusinessQualifications)) {
-            return true;
-        }
-
-        throw new HttpStatusException(HttpStatus.NOT_FOUND, "Resource not found, no appropriate permissions attached to consent");
-    }
 }

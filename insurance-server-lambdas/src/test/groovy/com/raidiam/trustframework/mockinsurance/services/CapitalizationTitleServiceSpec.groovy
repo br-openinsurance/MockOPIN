@@ -147,6 +147,24 @@ class CapitalizationTitleServiceSpec extends CleanupCapitalizationTitleSpecifica
         response.getData().first().getSettlementFinancialAmount().getAmount() == testCapitalizationTitlePlanSettlement.getSettlementFinancialAmount()
     }
 
+    def "getPlansV2 returns at least two products with distinct planIds when the consent covers more than one plan"() {
+        given: "a second capitalization-title plan linked to the same consent"
+        def secondPlan = capitalizationTitlePlanRepository.save(TestEntityDataFactory.aCapitalizationTitlePlan(testAccountHolder.getAccountHolderId()))
+        consentCapitalizationTitlePlanRepository.save(new ConsentCapitalizationTitlePlanEntity(testConsent, secondPlan))
+
+        when:
+        def response = capitalizationTitleService.getPlansV2(testConsent.getConsentId().toString(), Pageable.from(0, 5))
+
+        then:
+        response.getData().size() == 1
+        def products = response.getData().first().getBrand().getCompanies().first().getProducts()
+        products.size() >= 2
+        def planIds = products*.getPlanId()
+        planIds.toSet().size() == planIds.size()
+        planIds.contains(testCapitalizationTitlePlan.getCapitalizationTitlePlanId().toString())
+        planIds.contains(secondPlan.getCapitalizationTitlePlanId().toString())
+    }
+
     def "enable cleanup"() {
         //This must be the final test
         when:

@@ -144,6 +144,18 @@ public class ConsentEntity extends BaseEntity {
     @Type(JsonType.class)
     private ClaimNotificationInformation claimNotificationInformation;
 
+    @Column(name = "withdrawal_captalization_information")
+    @Type(JsonType.class)
+    private CreateConsentDataWithdrawalCaptalizationInformation withdrawalCaptalizationInformation;
+
+    @Column(name = "withdrawal_life_pension_information")
+    @Type(JsonType.class)
+    private CreateConsentDataWithdrawalLifePensionInformation withdrawalLifePensionInformation;
+
+    @Column(name = "raffle_captalization_title_information")
+    @Type(JsonType.class)
+    private CreateConsentDataRaffleCaptalizationTitleInformation raffleCaptalizationTitleInformation;
+
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @NotAudited
@@ -234,6 +246,9 @@ public class ConsentEntity extends BaseEntity {
         entity.setEndorsementInformation(req.getData().getEndorsementInformation());
 
         entity.setClaimNotificationInformation(req.getData().getClaimNotificationInformation());
+        entity.setWithdrawalCaptalizationInformation(req.getData().getWithdrawalCaptalizationInformation());
+        entity.setWithdrawalLifePensionInformation(req.getData().getWithdrawalLifePensionInformation());
+        entity.setRaffleCaptalizationTitleInformation(req.getData().getRaffleCaptalizationTitleInformation());
 
         return entity;
     }
@@ -260,13 +275,79 @@ public class ConsentEntity extends BaseEntity {
                 .ifPresent(d -> entity.setBusinessDocumentIdentification(d.getIdentification()));
         entity.setPermissions(req.getData().getPermissions()
                 .stream()
-                .map(permission -> Optional.ofNullable(permission).map(EnumConsentV3Permission::toString).orElse(null))
+                .map(permission -> Optional.ofNullable(permission).map(p -> switch (p) {
+                        case PENSION_PLAN_CLAIM_READ -> "PENSION_PLAN_CLAIM";
+                        case LIFE_PENSION_CLAIM_READ -> "LIFE_PENSION_CLAIM";
+                        case CAPITALIZATION_TITLE_RAFFLE_CREATE -> "QUOTE_CAPITALIZATION_TITLE_RAFFLE_CREATE";
+                        default -> p.toString();
+                }).orElse(null))
                 .toList());
         entity.setEndorsementInformation(req.getData().getEndorsementInformation());
 
         entity.setClaimNotificationInformation(req.getData().getClaimNotificationInformation());
+        entity.setWithdrawalCaptalizationInformation(req.getData().getWithdrawalCapitalizationInformation());
+        entity.setWithdrawalLifePensionInformation(convertWithdrawalLifePensionV3toV2(req.getData().getWithdrawalLifePensionInformation()));
+        entity.setRaffleCaptalizationTitleInformation(req.getData().getRaffleCapitalizationTitleInformation());
 
         return entity;
+    }
+
+    private static CreateConsentDataWithdrawalLifePensionInformation convertWithdrawalLifePensionV3toV2(CreateConsentV3DataWithdrawalLifePensionInformation v3) {
+        if (v3 == null) return null;
+        return new CreateConsentDataWithdrawalLifePensionInformation()
+                .certificateId(v3.getCertificateId())
+                .productName(v3.getProductName())
+                .withdrawalType(Optional.ofNullable(v3.getWithdrawalType())
+                        .map(t -> switch (t) {
+                            case TOTAL -> CreateConsentDataWithdrawalLifePensionInformation.WithdrawalTypeEnum._1_TOTAL;
+                            case PARCIAL -> CreateConsentDataWithdrawalLifePensionInformation.WithdrawalTypeEnum._2_PARCIAL;
+                        })
+                        .orElse(null))
+                .withdrawalReason(Optional.ofNullable(v3.getWithdrawalReason())
+                        .map(r -> switch (r) {
+                            case EMERGENCIAS_DE_SAUDE -> CreateConsentDataWithdrawalLifePensionInformation.WithdrawalReasonEnum._1_EMERGENCIAS_DE_SAUDE;
+                            case APLICACAO_EM_OUTROS_INVESTIMENTOS -> CreateConsentDataWithdrawalLifePensionInformation.WithdrawalReasonEnum._2_APLICACAO_EM_OUTROS_INVESTIMENTOS;
+                            case INSATISFACAO_COM_A_ENTIDADE -> CreateConsentDataWithdrawalLifePensionInformation.WithdrawalReasonEnum._3_INSATISFACAO_COM_A_ENTIDADE;
+                            case INSATISFACAO_COM_A_RENTABILIDADE_DO_PRODUTO -> CreateConsentDataWithdrawalLifePensionInformation.WithdrawalReasonEnum._4_INSATISFACAO_COM_A_RENTABILIDADE_DO_PRODUTO;
+                            case INSATISFACAO_COM_O_PRODUTO -> CreateConsentDataWithdrawalLifePensionInformation.WithdrawalReasonEnum._5_INSATISFACAO_COM_O_PRODUTO;
+                            case AQUISICAO_DE_BENS -> CreateConsentDataWithdrawalLifePensionInformation.WithdrawalReasonEnum._6_AQUISICAO_DE_BENS;
+                            case LIQUIDEZ_FINANCEIRA -> CreateConsentDataWithdrawalLifePensionInformation.WithdrawalReasonEnum._7_LIQUIDEZ_FINANCEIRA;
+                            case REALIZACAO_DO_OBJETIVO_DO_INVESTIMENTO -> CreateConsentDataWithdrawalLifePensionInformation.WithdrawalReasonEnum._8_REALIZACAO_DO_OBJETIVO_DO_INVESTIMENTO;
+                            case OUTROS -> CreateConsentDataWithdrawalLifePensionInformation.WithdrawalReasonEnum._9_OUTROS;
+                        })
+                        .orElse(null))
+                .withdrawalReasonOthers(v3.getWithdrawalReasonOthers())
+                .desiredTotalAmount(v3.getDesiredTotalAmount())
+                .pmbacAmount(v3.getPmbacAmount());
+    }
+
+    private static CreateConsentV3DataWithdrawalLifePensionInformation convertWithdrawalLifePensionV2toV3(CreateConsentDataWithdrawalLifePensionInformation v2) {
+        if (v2 == null) return null;
+        return new CreateConsentV3DataWithdrawalLifePensionInformation()
+                .certificateId(v2.getCertificateId())
+                .productName(v2.getProductName())
+                .withdrawalType(Optional.ofNullable(v2.getWithdrawalType())
+                        .map(t -> switch (t) {
+                            case _1_TOTAL -> CreateConsentV3DataWithdrawalLifePensionInformation.WithdrawalTypeEnum.TOTAL;
+                            case _2_PARCIAL -> CreateConsentV3DataWithdrawalLifePensionInformation.WithdrawalTypeEnum.PARCIAL;
+                        })
+                        .orElse(null))
+                .withdrawalReason(Optional.ofNullable(v2.getWithdrawalReason())
+                        .map(r -> switch (r) {
+                            case _1_EMERGENCIAS_DE_SAUDE -> CreateConsentV3DataWithdrawalLifePensionInformation.WithdrawalReasonEnum.EMERGENCIAS_DE_SAUDE;
+                            case _2_APLICACAO_EM_OUTROS_INVESTIMENTOS -> CreateConsentV3DataWithdrawalLifePensionInformation.WithdrawalReasonEnum.APLICACAO_EM_OUTROS_INVESTIMENTOS;
+                            case _3_INSATISFACAO_COM_A_ENTIDADE -> CreateConsentV3DataWithdrawalLifePensionInformation.WithdrawalReasonEnum.INSATISFACAO_COM_A_ENTIDADE;
+                            case _4_INSATISFACAO_COM_A_RENTABILIDADE_DO_PRODUTO -> CreateConsentV3DataWithdrawalLifePensionInformation.WithdrawalReasonEnum.INSATISFACAO_COM_A_RENTABILIDADE_DO_PRODUTO;
+                            case _5_INSATISFACAO_COM_O_PRODUTO -> CreateConsentV3DataWithdrawalLifePensionInformation.WithdrawalReasonEnum.INSATISFACAO_COM_O_PRODUTO;
+                            case _6_AQUISICAO_DE_BENS -> CreateConsentV3DataWithdrawalLifePensionInformation.WithdrawalReasonEnum.AQUISICAO_DE_BENS;
+                            case _7_LIQUIDEZ_FINANCEIRA -> CreateConsentV3DataWithdrawalLifePensionInformation.WithdrawalReasonEnum.LIQUIDEZ_FINANCEIRA;
+                            case _8_REALIZACAO_DO_OBJETIVO_DO_INVESTIMENTO -> CreateConsentV3DataWithdrawalLifePensionInformation.WithdrawalReasonEnum.REALIZACAO_DO_OBJETIVO_DO_INVESTIMENTO;
+                            case _9_OUTROS -> CreateConsentV3DataWithdrawalLifePensionInformation.WithdrawalReasonEnum.OUTROS;
+                        })
+                        .orElse(null))
+                .withdrawalReasonOthers(v2.getWithdrawalReasonOthers())
+                .desiredTotalAmount(v2.getDesiredTotalAmount())
+                .pmbacAmount(v2.getPmbacAmount());
     }
 
     public ResponseConsent toFullResponse() {
@@ -439,6 +520,11 @@ public class ConsentEntity extends BaseEntity {
                 .expirationDateTime(InsuranceLambdaUtils.dateToOffsetDate(expirationDateTime))
                 .expirationDateTime(InsuranceLambdaUtils.dateToOffsetDate(expirationDateTime))
                 .consentId(consentId)
+                .endorsementInformation(this.endorsementInformation)
+                .claimNotificationInformation(this.claimNotificationInformation)
+                .withdrawalCaptalizationInformation(this.withdrawalCaptalizationInformation)
+                .withdrawalLifePensionInformation(this.withdrawalLifePensionInformation)
+                .raffleCaptalizationTitleInformation(this.raffleCaptalizationTitleInformation)
                 .permissions(this.getPermissions()
                 .stream()
                 .map(EnumConsentPermission::valueOf)
@@ -463,9 +549,17 @@ public class ConsentEntity extends BaseEntity {
                 .expirationDateTime(InsuranceLambdaUtils.dateToOffsetDate(expirationDateTime))
                 .expirationDateTime(InsuranceLambdaUtils.dateToOffsetDate(expirationDateTime))
                 .consentId(consentId)
-                .permissions(this.getPermissions()
-                .stream()
-                .map(EnumConsentV3Permission::valueOf)
+                .endorsementInformation(this.endorsementInformation)
+                .claimNotificationInformation(this.claimNotificationInformation)
+                .withdrawalCapitalizationInformation(this.withdrawalCaptalizationInformation)
+                .withdrawalLifePensionInformation(convertWithdrawalLifePensionV2toV3(this.withdrawalLifePensionInformation))
+                .raffleCapitalizationTitleInformation(this.raffleCaptalizationTitleInformation)
+                .permissions(this.getPermissions().stream().map(p -> switch (p) {
+                        case "PENSION_PLAN_CLAIM" -> EnumConsentV3Permission.PENSION_PLAN_CLAIM_READ;
+                        case "LIFE_PENSION_CLAIM" -> EnumConsentV3Permission.LIFE_PENSION_CLAIM_READ;
+                        case "QUOTE_CAPITALIZATION_TITLE_RAFFLE_CREATE" -> EnumConsentV3Permission.CAPITALIZATION_TITLE_RAFFLE_CREATE;
+                        default -> EnumConsentV3Permission.valueOf(p);
+                })
                 .toList());
 
         if (EnumConsentStatus.REJECTED.toString().equals(this.status)) {

@@ -2,20 +2,36 @@ package com.raidiam.trustframework.mockinsurance.services
 
 import com.raidiam.trustframework.mockinsurance.cleanups.CleanupSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
-import com.raidiam.trustframework.mockinsurance.models.generated.*
+import com.raidiam.trustframework.mockinsurance.models.generated.PatchPayload
+import com.raidiam.trustframework.mockinsurance.models.generated.PatchPayloadData
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteAutoData
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteDataAuto
+import com.raidiam.trustframework.mockinsurance.models.generated.RevokePatchPayloadDataAuthor
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.exceptions.HttpStatusException
+import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
 import spock.lang.Stepwise
 import java.time.LocalDate;
 
+import static com.raidiam.trustframework.mockinsurance.models.generated.QuoteStatusEnum.ACPT
+import static com.raidiam.trustframework.mockinsurance.models.generated.QuoteStatusEnum.RJCT
+import static com.raidiam.trustframework.mockinsurance.models.generated.QuoteStatusEnum.CANC
+import static com.raidiam.trustframework.mockinsurance.models.generated.QuoteStatusEnum.ACKN
+import static com.raidiam.trustframework.mockinsurance.models.generated.QuoteStatusEnum.EVAL
+
 @Stepwise
 @MicronautTest(transactional = false, environments = ["db"])
-public class QuoteAutoServiceSpec extends CleanupSpecification {
+class QuoteAutoServiceSpec extends CleanupSpecification {
 
     @Inject
     QuoteAutoService quoteAutoService
+
+    @MockBean(WebhookService)
+    WebhookService webhookService() {
+        Mock(WebhookService)
+    }
 
     def "We can create a quote"() {
         given:
@@ -44,7 +60,7 @@ public class QuoteAutoServiceSpec extends CleanupSpecification {
         noExceptionThrown()
         quoteFetched.quoteId == quote.quoteId
         quoteFetched.consentId == consentId
-        quoteFetched.status == QuoteStatusEnum.ACPT.toString()
+        quoteFetched.status == ACPT.toString()
     }
 
     def "We can fetch a quote that moves to RJCT"() {
@@ -66,14 +82,14 @@ public class QuoteAutoServiceSpec extends CleanupSpecification {
         noExceptionThrown()
         quoteFetched.quoteId == quote.quoteId
         quoteFetched.consentId == consentId
-        quoteFetched.status == QuoteStatusEnum.RJCT.toString()
+        quoteFetched.status == RJCT.toString()
     }
 
     def "We can acknowledge a quote that is ACPT"() {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuoteAuto(consentId)
-        quote.setStatus(QuoteStatusEnum.ACPT.toString())
+        quote.setStatus(ACPT.toString())
         quote = quoteAutoRepository.save(quote)
 
         def req = new PatchPayload()
@@ -91,14 +107,14 @@ public class QuoteAutoServiceSpec extends CleanupSpecification {
         noExceptionThrown()
         patchedQuote.quoteId == quote.quoteId
         patchedQuote.consentId == consentId
-        patchedQuote.status == QuoteStatusEnum.ACKN.toString()
+        patchedQuote.status == ACKN.toString()
     }
 
     def "We can't acknowledge a quote that is not accepted"() {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuoteAuto(consentId)
-        quote.setStatus(QuoteStatusEnum.EVAL.toString())
+        quote.setStatus(EVAL.toString())
         quote = quoteAutoService.createQuote(quote)
 
         def req = new PatchPayload()
@@ -122,7 +138,7 @@ public class QuoteAutoServiceSpec extends CleanupSpecification {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
         def quote = TestEntityDataFactory.aQuoteAuto(consentId)
-        quote.setStatus(QuoteStatusEnum.EVAL.toString())
+        quote.setStatus(EVAL.toString())
         quote = quoteAutoService.createQuote(quote)
 
         def req = new PatchPayload()
@@ -139,7 +155,7 @@ public class QuoteAutoServiceSpec extends CleanupSpecification {
         noExceptionThrown()
         patchedQuote.quoteId == quote.quoteId
         patchedQuote.consentId == consentId
-        patchedQuote.status == QuoteStatusEnum.CANC.toString()
+        patchedQuote.status == CANC.toString()
     }
 
     def "enable cleanup"() {

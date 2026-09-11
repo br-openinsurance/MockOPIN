@@ -6,6 +6,7 @@ import com.raidiam.trustframework.mockinsurance.domain.QuotePersonLifeEntity;
 import com.raidiam.trustframework.mockinsurance.domain.QuotePersonLeadEntity;
 import com.raidiam.trustframework.mockinsurance.domain.QuotePersonTravelEntity;
 import com.raidiam.trustframework.mockinsurance.fapi.Idempotent;
+import com.raidiam.trustframework.mockinsurance.fapi.ResponseErrorWithRequestDateTime;
 import com.raidiam.trustframework.mockinsurance.fapi.XFapiInteractionIdRequired;
 import com.raidiam.trustframework.mockinsurance.models.generated.*;
 import com.raidiam.trustframework.mockinsurance.services.QuotePersonLeadService;
@@ -150,6 +151,7 @@ public class QuotePersonController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @ResponseErrorWithRequestDateTime
     public ResponseQuote createLeadQuoteV2(
             @Body QuoteRequestPersonLeadV2 body,
             @NotNull HttpRequest<?> request) {
@@ -178,6 +180,7 @@ public class QuotePersonController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     @Idempotent
+    @ResponseErrorWithRequestDateTime
     public ResponseQuotePersonLifeV2 createQuoteV2(@Body QuoteRequestPersonLifeV2 body, HttpRequest<?> request) {
         var clientId = InsuranceLambdaUtils.getRequestMeta(request).getClientId();
         LOG.info("Creating new quote person life for client {}", clientId);
@@ -216,6 +219,7 @@ public class QuotePersonController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
     @Idempotent
+    @ResponseErrorWithRequestDateTime
     public ResponseQuotePersonTravelV2 createTravelQuoteV2(@Body QuoteRequestPersonTravelV2 body, HttpRequest<?> request) {
         var clientId = InsuranceLambdaUtils.getRequestMeta(request).getClientId();
         LOG.info("Creating new quote person travel for client {}", clientId);
