@@ -252,6 +252,26 @@
                value="<%= details.consent.expirationDateTime ?
                        new Date(details.consent.expirationDateTime).toISOString().slice(0,16) : '' %>" />
       </div>
+      <div class="mb-2">
+        <label class="block text-gray-600 text-sm font-medium mb-1" for="enrollment-transaction-limit">Transaction Limit (R$):</label>
+        <input type="text" id="enrollment-transaction-limit" name="transactionLimit"
+               class="text-sm border border-gray-300 rounded px-2 py-1 w-full bg-white"
+               placeholder="1000.00"
+               maxlength="19"
+               pattern="\d{1,16}\.\d{2}"
+               title="Format: 1000.00 - two decimal places are required"
+               value="<%= details.consent.transactionLimit || '' %>" />
+      </div>
+      <div class="mb-2">
+        <label class="block text-gray-600 text-sm font-medium mb-1" for="enrollment-daily-limit">Daily Limit (R$):</label>
+        <input type="text" id="enrollment-daily-limit" name="dailyLimit"
+               class="text-sm border border-gray-300 rounded px-2 py-1 w-full bg-white"
+               placeholder="1000.00"
+               maxlength="19"
+               pattern="\d{1,16}\.\d{2}"
+               title="Format: 1000.00 - two decimal places are required"
+               value="<%= details.consent.dailyLimit || '' %>" />
+      </div>
     </div>
   <% } %>
 

@@ -1,9 +1,30 @@
-import { insurerAdapter } from './adapter.js';
-import { getConsentId } from './helpers.js';
-
 import { errors } from 'oidc-provider';
-
 import Debug from 'debug';
+import { bankAdapter } from './adapter.js';
+import {
+  isRecurringPayment,
+  isPayment,
+  isEnrollment,
+  getConsentId,
+  getPaymentConsentId,
+  getRecurringConsentId,
+  getEnrollmentId,
+} from './helpers.js';
+import {
+  processLoginHint,
+  triggerAuthenticationDevice,
+  validateRequestContext,
+  validateBindingMessage,
+  verifyUserCode,
+  mtlsFetch,
+} from './ciba.js';
+
+// Fixed by OFB CIBA 2.1.0 and BrazilCIBA-5.2.2, not ours to vary.
+const CIBA_GRANT_TYPE = 'urn:openid:params:grant-type:ciba';
+const CIBA_DELIVERY_MODE = 'ping';
+const CIBA_APPROVAL_WINDOW_SECONDS = 600;
+const CIBA_ID_TOKEN_TTL_SECONDS = 200 * 24 * 60 * 60;
+
 const log = Debug('raidiam:server:info');
 const err = Debug('raidiam:server:error');
 
@@ -11,76 +32,102 @@ const err = Debug('raidiam:server:error');
 // issuing an access token.
 // If there's no consent ID in the request, the validation is skipped.
 async function validateConsent(token) {
-  let consentId = getConsentId(token.scope);
-  if (!consentId) {
+  if (!token.scope.includes('openid')) {
+    log('the token does not include the scope openid');
     return;
   }
 
-  console.log(`validating consent ${consentId}`);
-  let consent = await insurerAdapter.getConsent(consentId);
-  const status = consent.data?.status;
-  if (['REJECTED', 'REVOKED', 'CONSUMED'].includes(status)) {
-    throw new errors.InvalidGrant(`consent ${consentId} status is ${status}`);
+  let data;
+  if (isEnrollment(token.scope)) {
+    log('handling consent for enrollment');
+    let id = getEnrollmentId(token.scope);
+    if (!id) {
+      log('no enrollment in the request, skipping validation');
+      return;
+    }
+    log(`enrollment id: ${id}`);
+    let enrollment = await bankAdapter.getEnrollment(id);
+    data = enrollment.data;
+  } else if (isPayment(token.scope)) {
+    log('handling consent for payment');
+    let id = getPaymentConsentId(token.scope);
+    if (!id) {
+      log('no consent for payment in the request, skipping validation');
+      return;
+    }
+    log(`payment consent id: ${id}`);
+    let paymentConsent = await bankAdapter.getPaymentConsent(id);
+    data = paymentConsent.data;
+  } else if (isRecurringPayment(token.scope)) {
+    log('handling consent for recurring payment');
+    let id = getRecurringConsentId(token.scope);
+    if (!id) {
+      log('no consent for recurring payment in the request, skipping validation');
+      return;
+    }
+    log(`recurring payment consent id: ${id}`);
+    let recurringPaymentConsent = await bankAdapter.getRecurringPaymentConsent(id);
+    data = recurringPaymentConsent.data;
+  } else {
+    let id = getConsentId(token.scope);
+    if (!id) {
+      log('no consent in the request, skipping validation');
+      return;
+    }
+
+    log('handling simple consent');
+    log(`consent id: ${id}`);
+    let consent = await bankAdapter.getConsent(id);
+    data = consent.data;
   }
 
-  console.log('consent is authorised');
+  const status = data?.status;
+  if (['REJECTED', 'REVOKED', 'CONSUMED', 'AWAITING_AUTHORISATION'].includes(status)) {
+    throw new errors.InvalidGrant(`grant status is ${status}`);
+  }
+
+  log('consent is authorised');
 }
 
-export default function (mtlsIssuer, ssaJwks) {
+export default function (mtlsIssuer, ssaJwks, clientCert, clientCertKey, caCert) {
+  const cibaFetch = mtlsFetch(clientCert, clientCertKey, caCert);
   return {
+    ...(cibaFetch && { fetch: cibaFetch }),
     scopes: [
       'openid',
       'profile',
       'email',
       'address',
       'phone',
+      'consent',
+      'payments',
+      'user:account',
+      'user:consent',
+      'user:janitor',
+      'org:admin',
+      'accounts',
+      'credit-cards-accounts',
       'consents',
-      'claim-notification',
-      'resources',
       'customers',
-      'insurance-acceptance-and-branches-abroad',
-      'insurance-auto',
-      'insurance-financial-risk',
-      'insurance-housing',
-      'insurance-person',
-      'insurance-patrimonial',
-      'insurance-rural',
-      'insurance-responsibility',
-      'insurance-transport',
-      'claim-notification',
-      'endorsement',
-      'quote-patrimonial-lead',
-      'quote-patrimonial-home',
-      'quote-patrimonial-condominium',
-      'quote-patrimonial-business',
-      'quote-patrimonial-diverse-risks',
-      'contract-life-pension',
-      'contract-life-pension-lead',
-      'quote-financial-risk-lead',
-      'quote-acceptance-and-branches-abroad-lead',
-      'quote-housing-lead',
-      'quote-responsibility-lead',
-      'quote-transport-lead',
-      'quote-rural-lead',
-      'quote-auto-lead',
-      'quote-auto',
-      'quote-person-lead',
-      'quote-person-life',
-      'quote-person-travel',
-      'quote-capitalization-title-lead',
-      'quote-capitalization-title',
-      'quote-capitalization-title-raffle',
-      'capitalization-title-raffle',
-      'capitalization-title',
-      'insurance-life-pension',
-      'insurance-pension-plan',
-      'insurance-financial-assistance',
-      'dynamic-fields',
-      'withdrawal-pension-lead',
-      'withdrawal-pension',
-      'withdrawal-capitalization-title',
+      'invoice-financings',
+      'financings',
+      'resources',
+      'op:consent',
+      'op:payments',
+      'op:recurring-payments',
       'op:admin',
-      'override',
+      'unarranged-accounts-overdraft',
+      'loans',
+      'bank-fixed-incomes',
+      'credit-fixed-incomes',
+      'variable-incomes',
+      'treasure-titles',
+      'funds',
+      'recurring-payments',
+      'exchanges',
+      'nrp-consents',
+      'credit-portability',
+      'payroll-credit-portability',
     ],
     interactions: {
       url(ctx, interaction) {
@@ -143,6 +190,7 @@ export default function (mtlsIssuer, ssaJwks) {
         return 60 * 15; // 15 minutes in seconds
       },
       AuthorizationCode: 900 /* 15 minutes in seconds */,
+      BackchannelAuthenticationRequest: CIBA_APPROVAL_WINDOW_SECONDS,
       ClientCredentials: function ClientCredentialsTTL(ctx, token, client) {
         if (token.resourceServer) {
           return token.resourceServer.accessTokenTTL || 15 * 60; // 15 minutes in seconds
@@ -156,7 +204,11 @@ export default function (mtlsIssuer, ssaJwks) {
         }
         return 157680000; /* 5 years in seconds */
       },
-      IdToken: 3600 /* 1 hour in seconds */,
+      IdToken: function IdTokenTTL(ctx, token, client) {
+        return client?.backchannelTokenDeliveryMode === CIBA_DELIVERY_MODE
+          ? CIBA_ID_TOKEN_TTL_SECONDS
+          : 3600; /* 1 hour in seconds */
+      },
       Interaction: 600 /* 10 min in seconds */,
       RefreshToken: function RefreshTokenTTL(ctx, token, client) {
         if (
@@ -176,6 +228,15 @@ export default function (mtlsIssuer, ssaJwks) {
     },
     features: {
       devInteractions: { enabled: false }, // defaults to true
+      ciba: {
+        enabled: true,
+        deliveryModes: [CIBA_DELIVERY_MODE],
+        processLoginHint,
+        triggerAuthenticationDevice,
+        validateRequestContext,
+        validateBindingMessage,
+        verifyUserCode,
+      },
       fapi: {
         enabled: true,
         profile: '1.0 Final',
@@ -186,7 +247,6 @@ export default function (mtlsIssuer, ssaJwks) {
       pushedAuthorizationRequests: {
         allowUnregisteredRedirectUris: false,
         enabled: true,
-        requirePushedAuthorizationRequests: false,
       },
       introspection: { enabled: true }, // defaults to false
       jwtResponseModes: { enabled: true },
@@ -205,18 +265,20 @@ export default function (mtlsIssuer, ssaJwks) {
       revocation: { enabled: true }, // defaults to false
       mTLS: {
         enabled: true,
-        tlsClientAuth: true,
         certificateBoundAccessTokens: true,
         selfSignedTlsClientAuth: false,
+        tlsClientAuth: true,
         getCertificate(ctx) {
-          const cert = ctx.get('BANK-TLS-Certificate');
-          return cert;
+          console.log('Geting client cert');
+          console.log(ctx.get('BANK-TLS-Certificate'));
+          return ctx.get('BANK-TLS-Certificate');
         },
         certificateAuthorized(ctx) {
-          return ctx.get('X-BANK-Certificate-Verify') === 'SUCCESS' || ctx.get('x-forwarded-client-cert');
+          return ctx.get('BANK-TLS-Certificate');
         },
         certificateSubjectMatches(ctx, property, expected) {
           if (property !== 'tls_client_auth_subject_dn') {
+            log.error(`${property} is not supported by this deployment`);
             throw new Error(`${property} is not supported by this deployment`);
           }
           const subject = ctx.get('X-BANK-Certificate-DN');
@@ -226,33 +288,9 @@ export default function (mtlsIssuer, ssaJwks) {
           var decoded = decodeURI(subject);
           if (decoded === expected) {
             return true;
-          } else {
-            log(
-              'Certifcate Subject does not match the registered one, transforming. Expected: %O Actual: %O',
-              expected,
-              subject,
-            );
           }
-          // const transformedSubject = reformatDNforBRCAC(subject, expected);
-          // if (transformedSubject === expected) {
-          //   return true;
-          // } else {
-          //   log(
-          //     'Transformed Certifcate Subject does not match the registered one. Expected: %O Actual: %O',
-          //     expected,
-          //     transformedSubject,
-          //   );
-          // }
-
-          // const softwareId = ctx.oidc.client.software_id;
-          // const orgId = ctx.oidc.client.org_id;
-          // if (validateSubjectFields(subject, expected, softwareId, orgId)) {
-          //   log('Constituent parts of the DN Match the certificate presented');
-          //   return true;
-          // } else {
-          //   log('Could not match any part of a certificate validation process');
-          //   return false;
-          // }
+          // Else return false
+          return false;
         },
       },
     },
@@ -398,53 +436,29 @@ export default function (mtlsIssuer, ssaJwks) {
               }
             }
 
-            const scopes = ['openid'];
-            scopes.push(
+            const scopes = [
+              'openid',
+              'accounts',
+              'credit-cards-accounts',
               'consents',
-              'resources',
-              'claim-notification',
               'customers',
-              'insurance-acceptance-and-branches-abroad',
-              'insurance-auto',
-              'insurance-financial-risk',
-              'insurance-housing',
-              'insurance-person',
-              'insurance-patrimonial',
-              'insurance-rural',
-              'insurance-responsibility',
-              'insurance-transport',
-              'claim-notification',
-              'endorsement',
-              'quote-patrimonial-lead',
-              'quote-patrimonial-home',
-              'quote-patrimonial-condominium',
-              'quote-patrimonial-business',
-              'quote-patrimonial-diverse-risks',
-              'contract-life-pension',
-              'contract-life-pension-lead',
-              'quote-financial-risk-lead',
-              'quote-acceptance-and-branches-abroad-lead',
-              'quote-housing-lead',
-              'quote-responsibility-lead',
-              'quote-transport-lead',
-              'quote-rural-lead',
-              'quote-auto-lead',
-              'quote-auto',
-              'quote-person-lead',
-              'quote-person-life',
-              'quote-person-travel',
-              'quote-capitalization-title-lead',
-              'quote-capitalization-title',
-              'quote-capitalization-title-raffle',
-              'capitalization-title',
-              'insurance-life-pension',
-              'insurance-pension-plan',
-              'insurance-financial-assistance',
-              'dynamic-fields',
-              'withdrawal-pension-lead',
-              'withdrawal-pension',
-              'withdrawal-capitalization-title',
-            );
+              'invoice-financings',
+              'financings',
+              'resources',
+              'loans',
+              'unarranged-accounts-overdraft',
+              'bank-fixed-incomes',
+              'credit-fixed-incomes',
+              'variable-incomes',
+              'treasure-titles',
+              'funds',
+              'recurring-payments',
+              'exchanges',
+              'nrp-consents',
+              'credit-portability',
+              'payroll-credit-portability',
+              'payments',
+            ];
 
             let requestedArray;
             if (metadata.scope) {
@@ -465,6 +479,32 @@ export default function (mtlsIssuer, ssaJwks) {
               org_number,
               software_origin_uris,
             } = payload;
+
+            const requestedGrantTypes = Array.isArray(metadata.grant_types) ? metadata.grant_types : [];
+            const wantsCiba =
+              requestedGrantTypes.includes(CIBA_GRANT_TYPE) || metadata.backchannel_token_delivery_mode != null;
+
+            const rawNotificationEndpoint =
+              metadata.backchannel_client_notification_endpoint ||
+              payload.software_client_notification_endpoint ||
+              payload.backchannel_client_notification_endpoint;
+            const notificationEndpoint = Array.isArray(rawNotificationEndpoint)
+              ? rawNotificationEndpoint[0]
+              : rawNotificationEndpoint;
+
+            // OFB CIBA 2.1.0 6.2.2: refuse other delivery modes, do not coerce them.
+            if (
+              metadata.backchannel_token_delivery_mode != null &&
+              metadata.backchannel_token_delivery_mode !== CIBA_DELIVERY_MODE
+            ) {
+              throw new errors.InvalidClientMetadata(`backchannel_token_delivery_mode must be ${CIBA_DELIVERY_MODE}`);
+            }
+            if (wantsCiba && !notificationEndpoint) {
+              throw new errors.InvalidClientMetadata(
+                'backchannel_client_notification_endpoint is required for CIBA clients',
+              );
+            }
+
             Object.assign(metadata, {
               software_id,
               org_id,
@@ -489,9 +529,21 @@ export default function (mtlsIssuer, ssaJwks) {
               ...(requestedArray && { scope: requestedArray.join(' ') }),
               ...(!requestedArray && { scope: scopes.join(' ') }),
               response_types: ['code id_token', 'code'],
-              grant_types: ['client_credentials', 'authorization_code', 'refresh_token', 'implicit'],
+              grant_types: wantsCiba
+                ? ['client_credentials', 'authorization_code', 'refresh_token', 'implicit', CIBA_GRANT_TYPE]
+                : ['client_credentials', 'authorization_code', 'refresh_token', 'implicit'],
+              ...(wantsCiba && {
+                backchannel_token_delivery_mode: 'ping',
+                backchannel_client_notification_endpoint: notificationEndpoint,
+                backchannel_authentication_request_signing_alg: 'PS256',
+              }),
               client_uri: software_client_uri || metadata.client_uri || 'https://example.com',
               tls_client_certificate_bound_access_tokens: true,
+              ...(software_policy_uri === 'https://www.fapi.new' && {
+                id_token_encrypted_response_alg: 'RSA-OAEP',
+                id_token_encrypted_response_enc: 'A256GCM',
+                require_pushed_authorization_request: true,
+              }),
             });
 
             // software_statement is not stored, but used to convey client metadata
@@ -499,7 +551,7 @@ export default function (mtlsIssuer, ssaJwks) {
           } catch (error) {
             err(`${error.message}: ${JSON.stringify(metadata)}`);
             if (error.code === 'ERR_JWT_EXPIRED' || error.code === 'ERR_JWS_SIGNATURE_VERIFICATION_FAILED') {
-              console.log(error);
+              err(error);
               throw new errors.InvalidSoftwareStatement(`could not verify software_statement: ${error.message}`, error);
             } else if (error instanceof errors.InvalidClientMetadata) {
               throw error;
@@ -507,7 +559,7 @@ export default function (mtlsIssuer, ssaJwks) {
               throw error;
             } else if (error instanceof errors.UnapprovedSoftwareStatement) {
               throw error;
-            } else console.log(error);
+            } else err(error);
             throw new errors.InvalidClientMetadata(
               `unknown processing error, have you entered invalid client metadata: ${error.message}`,
             );
@@ -548,6 +600,7 @@ export default function (mtlsIssuer, ssaJwks) {
         registration_endpoint: `${mtlsIssuer}/reg`,
         userinfo_endpoint: `${mtlsIssuer}/me`,
         pushed_authorization_request_endpoint: `${mtlsIssuer}/request`,
+        backchannel_authentication_endpoint: `${mtlsIssuer}/backchannel`,
       },
     },
   };

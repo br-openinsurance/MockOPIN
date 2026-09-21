@@ -1,5 +1,6 @@
 FROM mongo
 
+COPY opf /mock_as/mongo-seed/opf
 COPY opin /mock_as/mongo-seed/opin
 
 COPY start.sh /start.sh

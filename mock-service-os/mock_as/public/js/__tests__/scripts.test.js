@@ -204,23 +204,23 @@ describe('consent screen — a customer cannot submit the form twice', () => {
   });
 });
 
-describe('consent screen — Confirm Consent button uses the configured product colour', () => {
-  it('applies the configured product colour to the enabled Confirm Consent button', () => {
-    // Given a customer is on the consent screen, which has a product colour configured
-    const document = renderInteractionPage({}, { brand: 'opin', buttonColor: '#2F3A4F' });
+describe('consent screen — Mock Bank always shows Raidiam colours on Confirm Consent', () => {
+  it("uses Raidiam's own colours instead of any configured product colour", () => {
+    // Given a customer is on the Mock Bank consent screen, which has its own product colour configured
+    const document = renderInteractionPage({}, { brand: 'opf', buttonColor: '#2F3A4F' });
     const continueButton = document.getElementById('continue-button');
 
     // When the customer switches on "I consent to the above data"
     turnConsentToggle(document, true);
 
-    // Then the button becomes clickable in the configured product colour
+    // Then the button becomes clickable in Raidiam's own colours, not the product's configured colour
     expect(continueButton.disabled).toBe(false);
-    expect(continueButton.style.getPropertyValue('--btn-color')).toBe('#2F3A4F');
+    expect(continueButton.style.getPropertyValue('--btn-color')).toBe('#3C7E93');
   });
 
   it('goes back to looking exactly as it did before, if the customer changes their mind', () => {
-    // Given a customer is on the consent screen, before agreeing to anything
-    const document = renderInteractionPage({}, { brand: 'opin', buttonColor: '#2F3A4F' });
+    // Given a customer is on the Mock Bank consent screen, before agreeing to anything
+    const document = renderInteractionPage({}, { brand: 'opf', buttonColor: '#2F3A4F' });
     const continueButton = document.getElementById('continue-button');
     const colorBeforeToggling = continueButton.style.getPropertyValue('--btn-color');
 

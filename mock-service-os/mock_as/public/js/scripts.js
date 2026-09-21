@@ -7,8 +7,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const continueLabel = document.getElementById('continue-label');
 
   if (consentToggle && continueButton) {
-    const color = layout.buttonColor;
-    const hoverColor = '#1e2a3b';
+    const color = layout.brand === 'opf' ? '#3C7E93' : layout.buttonColor;
+    const hoverColor = layout.brand === 'opf' ? '#233133' : '#1e2a3b';
     continueButton.style.setProperty('--btn-color', color);
     continueButton.style.setProperty('--btn-hover-color', hoverColor);
 

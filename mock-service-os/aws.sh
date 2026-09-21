@@ -28,6 +28,12 @@ awslocal ssm put-parameter \
     --overwrite \
     --region "${REGION}"
 awslocal ssm put-parameter \
+    --name "/local/op_fapi_client_config/certificate_authority" \
+    --value "$(cat /init/certs/ca.crt)" \
+    --type "SecureString" \
+    --overwrite \
+    --region "${REGION}"
+awslocal ssm put-parameter \
   --name "/mock/ready" \
   --type "SecureString" \
   --value "true" \

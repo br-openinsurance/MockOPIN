@@ -49,7 +49,7 @@ class CollectionSet extends Set {
             expireAfterSeconds: 0,
           },
         ])
-        .catch(console.error); // eslint-disable-line no-console
+        .catch((err) => console.error(`error creating indexes for collection "${name}":`, err)); // eslint-disable-line no-console
     }
   }
 }

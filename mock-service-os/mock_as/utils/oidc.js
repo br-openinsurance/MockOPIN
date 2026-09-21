@@ -1,4 +1,5 @@
 import Debug from 'debug';
+import { jwtVerify } from 'jose';
 
 const log = Debug('raidiam:server:info');
 
@@ -100,5 +101,54 @@ export function addWebhookMiddleware(oidcProvider, adapter) {
       log('Delete webhook URI');
       await adapter.deleteWebhook(clientId);
     }
+  });
+}
+
+async function readRawJsonBody(ctx) {
+  const chunks = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const chunk of ctx.req) {
+    chunks.push(chunk);
+  }
+  return JSON.parse(Buffer.concat(chunks).toString(ctx.charset || 'utf8'));
+}
+
+// jose's jwtVerify is async-only, but extraClientMetadata.validator (opf/opin
+// configuration.js) is called synchronously from inside the Client constructor, so it
+// can't await it directly. This middleware does the actual signature verification ahead
+// of time and stashes the outcome on ctx.state, where the sync validator picks it up.
+export function addSoftwareStatementVerificationMiddleware(oidcProvider, ssaJwks) {
+  oidcProvider.use(async (ctx, next) => {
+    if (!(ctx.path.startsWith('/reg') && ['PUT', 'POST'].includes(ctx.method))) {
+      await next();
+      return;
+    }
+
+    let body = ctx.req.body || ctx.request.body;
+    if (typeof body?.software_statement !== 'string' && ctx.req.readable) {
+      try {
+        body = await readRawJsonBody(ctx);
+        ctx.req.body = body;
+      } catch (error) {
+        log(`Failed to read raw /reg request body: ${error.message}`);
+      }
+    }
+    const softwareStatement = body?.software_statement;
+
+    if (typeof softwareStatement === 'string') {
+      try {
+        const { payload } = await jwtVerify(softwareStatement, ssaJwks, {
+          algorithms: ['PS256'],
+          issuer: process.env.TRUSTFRAMEWORK_SSA_ISS,
+          maxTokenAge: '5 days',
+          typ: 'JWT',
+        });
+        ctx.state.softwareStatementPayload = payload;
+      } catch (error) {
+        ctx.state.softwareStatementError = error;
+      }
+    }
+
+    await next();
   });
 }

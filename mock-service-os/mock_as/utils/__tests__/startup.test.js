@@ -14,12 +14,12 @@ vi.mock('@aws-sdk/client-ssm', () => ({
 
 vi.mock('got', () => ({ default: gotMock }));
 
-vi.mock('../opin/configuration.js', () => ({
+vi.mock('../opf/configuration.js', () => ({
   default: vi.fn((mtlsIssuer, ssaJwks) => ({ mtlsIssuer, ssaJwks })),
 }));
 
 import { GetParametersCommand } from '@aws-sdk/client-ssm';
-import configFuncMock from '../opin/configuration.js';
+import configFuncMock from '../opf/configuration.js';
 import { getSsmParameters, loadParameters, prepareOidcConfiguration } from '../startup.js';
 
 describe('getSsmParameters', () => {
@@ -76,12 +76,13 @@ describe('loadParameters', () => {
     vi.clearAllMocks();
   });
 
-  it('loads issuer/cert/key from a single SSM batch call', async () => {
+  it('loads issuer/cert/key/ca from a single SSM batch call', async () => {
     sendMock.mockResolvedValue({
       Parameters: [
         { Name: '/local/op_fapi_client_config/issuer', Value: 'auth.local' },
         { Name: '/local/op_fapi_client_config/transport_certificate', Value: 'cert-value' },
         { Name: '/local/op_fapi_client_config/transport_key', Value: 'key-value' },
+        { Name: '/local/op_fapi_client_config/certificate_authority', Value: 'ca-value' },
       ],
     });
 
@@ -93,6 +94,7 @@ describe('loadParameters', () => {
         '/local/op_fapi_client_config/issuer',
         '/local/op_fapi_client_config/transport_certificate',
         '/local/op_fapi_client_config/transport_key',
+        '/local/op_fapi_client_config/certificate_authority',
       ],
       WithDecryption: true,
     });
@@ -100,6 +102,7 @@ describe('loadParameters', () => {
       issuer: 'https://auth.local',
       clientCert: 'cert-value',
       clientCertKey: 'key-value',
+      caCert: 'ca-value',
     });
   });
 
@@ -109,6 +112,7 @@ describe('loadParameters', () => {
         { Name: '/local/op_fapi_client_config/issuer', Value: 'https://auth.local' },
         { Name: '/local/op_fapi_client_config/transport_certificate', Value: 'cert-value' },
         { Name: '/local/op_fapi_client_config/transport_key', Value: 'key-value' },
+        { Name: '/local/op_fapi_client_config/certificate_authority', Value: 'ca-value' },
       ],
     });
 
@@ -133,7 +137,7 @@ describe('prepareOidcConfiguration', () => {
       }),
     );
 
-    const factoryPromise = prepareOidcConfiguration('opin');
+    const factoryPromise = prepareOidcConfiguration('opf');
 
     // If got() were only called after awaiting the import, this call count would
     // still be 0 here — Promise.all() firing both synchronously proves otherwise.
@@ -146,30 +150,33 @@ describe('prepareOidcConfiguration', () => {
   it('returns a factory that builds the oidc config once mtlsIssuer is known', async () => {
     gotMock.mockResolvedValue({ statusCode: 200, body: validJwksBody });
 
-    const factory = await prepareOidcConfiguration('opin');
+    const factory = await prepareOidcConfiguration('opf');
     expect(configFuncMock).not.toHaveBeenCalled();
 
-    const configuration = factory('https://matls-auth.local');
+    const { configuration, ssaJwks } = factory('https://matls-auth.local');
 
     expect(configFuncMock).toHaveBeenCalledTimes(1);
     expect(configuration.mtlsIssuer).toBe('https://matls-auth.local');
     expect(configuration.findAccount).toBeDefined();
+    // addSoftwareStatementVerificationMiddleware needs this to verify software_statement
+    // JWTs ahead of the (necessarily synchronous) extraClientMetadata.validator.
+    expect(typeof ssaJwks).toBe('function');
   });
 
-  // Without these the brand config cannot build its mTLS fetch, and requests go
-  // out with no client certificate - silently.
-  it('passes the transport cert and key through to the brand config', async () => {
+  // Without these the OPF config cannot build its mTLS fetch, and the CIBA ping goes
+  // out with no client certificate (OFB CIBA 2.1.0 6.3.4) - silently.
+  it('passes the transport cert, key and CA through to the brand config', async () => {
     gotMock.mockResolvedValue({ statusCode: 200, body: validJwksBody });
 
-    const factory = await prepareOidcConfiguration('opin');
-    factory('https://matls-auth.local', 'CERT', 'KEY');
+    const factory = await prepareOidcConfiguration('opf');
+    factory('https://matls-auth.local', 'CERT', 'KEY', 'CA');
 
-    expect(configFuncMock).toHaveBeenCalledWith('https://matls-auth.local', expect.anything(), 'CERT', 'KEY');
+    expect(configFuncMock).toHaveBeenCalledWith('https://matls-auth.local', expect.anything(), 'CERT', 'KEY', 'CA');
   });
 
   it('throws when the JWKS endpoint does not return 200', async () => {
     gotMock.mockResolvedValue({ statusCode: 500, body: '' });
 
-    await expect(prepareOidcConfiguration('opin')).rejects.toThrow(/Failed to load JWKS/);
+    await expect(prepareOidcConfiguration('opf')).rejects.toThrow(/Failed to load JWKS/);
   });
 });
