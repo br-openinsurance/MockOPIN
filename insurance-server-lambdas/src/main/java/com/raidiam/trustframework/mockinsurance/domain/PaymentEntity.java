@@ -91,7 +91,7 @@ public class PaymentEntity extends BaseEntity {
                 .maturityDate(this.getMaturityDate())
                 .tellerId(this.getTellerId())
                 .tellerIdType(Payment.TellerIdTypeEnum.fromValue(this.getTellerIdType()))
-                .tellerIdTypeOthers(this.getTellerIdTypeOthers())
+                .tellerIdOthers(this.getTellerIdTypeOthers())
                 .tellerName(this.getTellerName())
                 .financialInstitutionCode(this.getFinancialInstitutionCode())
                 .paymentType(Payment.PaymentTypeEnum.fromValue(this.getPaymentType()));
@@ -114,7 +114,7 @@ public class PaymentEntity extends BaseEntity {
                 .maturityDate(this.getMaturityDate())
                 .tellerId(this.getTellerId())
                 .tellerIdType(PaymentV2.TellerIdTypeEnum.fromValue(this.getTellerIdType()))
-                .tellerIdTypeOthers(this.getTellerIdTypeOthers())
+                .tellerIdOthers(this.getTellerIdTypeOthers())
                 .tellerName(this.getTellerName())
                 .financialInstitutionCode(this.getFinancialInstitutionCode())
                 .paymentType(PaymentV2.PaymentTypeEnum.fromValue(this.getPaymentType()));

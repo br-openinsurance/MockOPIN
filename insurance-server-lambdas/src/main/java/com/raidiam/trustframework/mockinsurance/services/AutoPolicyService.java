@@ -27,35 +27,6 @@ public class AutoPolicyService extends BaseInsuranceService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AutoPolicyService.class);
 
-    public BaseInsuranceResponse getPolicies(String consentId, Pageable pageable) {
-        LOG.info("Getting auto policies response for consent id {}", consentId);
-
-        var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
-
-        InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
-        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.DAMAGES_AND_PEOPLE_AUTO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_AUTO_READ);
-
-        var consentPolicies = consentAutoPolicyRepository.findByConsentConsentIdOrderByCreatedAtAsc(consentId, pageable);
-        this.checkConsentOwnerIsPolicyOwner(consentPolicies, consentEntity);
-        
-        var response = new BaseInsuranceResponse()
-                .data(List.of(new BaseBrandAndCompanyData()
-                        .brand("Mock")
-                        .companies(List.of(new BaseBrandAndCompanyDataCompanies()
-                                .companyName("Mock Insurer")
-                                .cnpjNumber("12345678901234")
-                                .policies(consentPolicies.getContent()
-                                        .stream()
-                                        .map(consentAccountEntity -> {
-                                            resourcesService.checkStatusAvailable(consentAccountEntity.getAutoPolicy(), consentEntity);
-                                            return consentAccountEntity.getAutoPolicy();
-                                        })
-                                        .map(AutoPolicyEntity::mapPolicyDto)
-                                        .toList())))));
-        response.setMeta(InsuranceLambdaUtils.getMeta(consentPolicies, false));
-        return response;
-    }
-
     public BaseInsuranceResponseV2 getPoliciesV2(String consentId, Pageable pageable) {
         LOG.info("Getting auto policies response for consent id {}", consentId);
 
@@ -85,35 +56,14 @@ public class AutoPolicyService extends BaseInsuranceService {
         return response;
     }
 
-    public ResponseInsuranceAutoPolicyInfo getPolicyInfo(String policyId, String consentId) {
-        LOG.info("Getting auto policy info response for consent id {}", consentId);
-        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_AUTO_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_AUTO_POLICYINFO_READ).mapInfoDto();
-    }
-
     public ResponseInsuranceAutoPolicyInfoV2 getPolicyInfoV2(String policyId, String consentId) {
         LOG.info("Getting auto policy info response for consent id {}", consentId);
         return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_AUTO_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_AUTO_POLICYINFO_READ).mapInfoV2Dto();
     }
 
-    public ResponseInsuranceAutoPremium getPolicyPremium(String policyId, String consentId) {
-        LOG.info("Getting auto policy premium response for consent id {}", consentId);
-        return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_AUTO_PREMIUM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_AUTO_PREMIUM_READ).mapPremiumDto();
-    }
-
     public ResponseInsuranceAutoPremiumV2 getPolicyPremiumV2(String policyId, String consentId) {
         LOG.info("Getting auto policy premium response for consent id {}", consentId);
         return getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_AUTO_PREMIUM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_AUTO_PREMIUM_READ).mapPremiumV2Dto();
-    }
-
-    public ResponseInsuranceAutoClaims getPolicyClaims(String policyId, String consentId, Pageable pageable) {
-        LOG.info("Getting auto policy claims response for consent id {}", consentId);
-        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_AUTO_CLAIM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_AUTO_CLAIM_READ);
-
-        var claims = autoPolicyClaimRepository.findByAutoPolicyId(policyId, pageable);
-        var resp = new ResponseInsuranceAutoClaims()
-                .data(claims.getContent().stream().map(AutoPolicyClaimEntity::mapDto).toList());
-        resp.setMeta(InsuranceLambdaUtils.getMeta(claims, false));
-        return resp;
     }
 
     public ResponseInsuranceAutoClaimsV2 getPolicyClaimsV2(String policyId, String consentId, Pageable pageable) {

@@ -57,6 +57,23 @@ class PersonalInfoEntityMappingSpec extends Specification {
             result.getAddress() == "address"
     }
 
+    def "the v1 policy info still carries an insured's remaining details"() {
+        given: "a fully populated insured, including address complementary info on file"
+            def insured = anInsured("Avenida Naburo Ykesaki, 1270")
+
+        when: "the v1 policy info is built for that insured"
+            def result = insured.mapDTO()
+
+        then: "every detail the spec defines for an insured is carried over"
+            result.getAddress() == "Avenida Naburo Ykesaki, 1270"
+            result.getIdentification() == "12345678900"
+            result.getName() == "Nome Sobrenome"
+            result.getEmail() == "string"
+            result.getCity() == "Rio de Janeiro"
+            result.getPostCode() == "17500001"
+            result.getBirthDate() == LocalDate.of(1999, 6, 12)
+    }
+
     private static PersonalInfoEntity anInsured(String address) {
         def insured = new PersonalInfoEntity()
         insured.setIdentification("12345678900")

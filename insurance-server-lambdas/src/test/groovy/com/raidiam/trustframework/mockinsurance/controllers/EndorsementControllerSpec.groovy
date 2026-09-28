@@ -61,37 +61,6 @@ class EndorsementControllerSpec extends Specification {
         handler = new ApiGatewayProxyRequestEventFunction(applicationContext)
     }
 
-    def "We can create an endorsement" () {
-        given:
-        def consentId = TestEntityDataFactory.aConsentId()
-        def entity = TestEntityDataFactory.anEndorsement(consentId)
-        endorsementService.createEndorsement(_ as EndorsementEntity) >> entity
-        idempotencyRepository.findByIdempotencyId( _ as String) >> Optional.empty()
-        def req = TestRequestDataFactory.createEndorsementRequest()
-
-        String json = mapper.writeValueAsString(req)
-        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/endorsement/v1/request/'+consentId, HttpMethod.POST)
-                .withBody(json)
-                .withHeaders(Map.of("x-idempotency-key", UUID.randomUUID().toString(), "x-fapi-interaction-id", UUID.randomUUID().toString()))
-        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "endorsement", event)
-
-        when:
-        def response = handler.handleRequest(event, lambdaContext)
-
-        then:
-        response.statusCode == HttpStatus.CREATED.code
-        response.body != null
-        ResponseEndorsement resp = mapper.readValue(response.body, ResponseEndorsement)
-        resp.getData().getProtocolNumber() != null
-        resp.getData().getProtocolDateTime() != null
-        resp.getData().getEndorsementType().toString() == req.getData().getEndorsementType().toString()
-        resp.getLinks() != null
-        resp.getLinks().getRedirect() == "https://www.raidiam.com/"
-
-        and:
-        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
-    }
-
     def "We can't create an endorsement without an idempotency key" () {
         given:
         def consentId = TestEntityDataFactory.aConsentId()
@@ -101,7 +70,7 @@ class EndorsementControllerSpec extends Specification {
         def req = TestRequestDataFactory.createEndorsementRequest()
 
         String json = mapper.writeValueAsString(req)
-        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/endorsement/v1/request/'+consentId, HttpMethod.POST)
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/endorsement/v2/request/'+consentId, HttpMethod.POST)
                 .withBody(json)
                 .withHeaders(Map.of("x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "endorsement", event)
@@ -125,7 +94,7 @@ class EndorsementControllerSpec extends Specification {
         def req = TestRequestDataFactory.createEndorsementRequest()
 
         String json = mapper.writeValueAsString(req)
-        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/endorsement/v1/request/'+consentId, HttpMethod.POST)
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/endorsement/v2/request/'+consentId, HttpMethod.POST)
                 .withBody(json)
                 .withHeaders(Map.of("x-idempotency-key", "invalid_key", "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "endorsement", event)
@@ -155,7 +124,7 @@ class EndorsementControllerSpec extends Specification {
         def req = TestRequestDataFactory.createEndorsementRequest()
 
         String json = mapper.writeValueAsString(req)
-        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/endorsement/v1/request/'+consentId, HttpMethod.POST)
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/endorsement/v2/request/'+consentId, HttpMethod.POST)
                 .withBody(json)
                 .withHeaders(Map.of("x-idempotency-key", UUID.randomUUID().toString(), "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "endorsement", event)
@@ -183,7 +152,7 @@ class EndorsementControllerSpec extends Specification {
         def req = TestRequestDataFactory.createEndorsementRequest()
 
         String json = mapper.writeValueAsString(req)
-        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/endorsement/v1/request/'+consentId, HttpMethod.POST)
+        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/endorsement/v2/request/'+consentId, HttpMethod.POST)
                 .withBody(json)
                 .withHeaders(Map.of("x-idempotency-key", idempotencyKey, "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "endorsement", event)

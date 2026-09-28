@@ -13,6 +13,7 @@ import io.micronaut.function.aws.proxy.MockLambdaContext
 import io.micronaut.function.aws.proxy.payload1.ApiGatewayProxyRequestEventFunction
 import io.micronaut.http.HttpMethod
 import io.micronaut.http.HttpStatus
+import io.micronaut.http.client.HttpClient
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
@@ -26,7 +27,7 @@ class WebhookAdminControllerSpec extends Specification {
 
     @MockBean(WebhookService)
     WebhookService webhookService() {
-        Spy(WebhookService)
+        Spy(constructorArgs: [Mock(HttpClient)], WebhookService)
     }
 
     private static Context lambdaContext = new MockLambdaContext()
@@ -43,7 +44,7 @@ class WebhookAdminControllerSpec extends Specification {
     }
 
     def "We can create a webhook" () {
-        given:
+        given: "the operator client (mock-service-os) registers a webhook for an arbitrary target client"
         def entity = TestEntityDataFactory.aWebhook()
         webhookService.updateWebhook(_ as UpdateWebhook, _ as String) >> new ResponseWebhook().clientId(entity.getClientId()).webhookUri(entity.getWebhookUri())
         def req = new UpdateWebhook().webhookUri(entity.getWebhookUri())
@@ -53,7 +54,7 @@ class WebhookAdminControllerSpec extends Specification {
         def event = AwsProxyHelper.buildBasicEvent(path, HttpMethod.PUT)
                 .withBody(json)
                 .withHeaders(Map.of("x-fapi-interaction-id", UUID.randomUUID().toString()))
-        AuthHelper.authorize(scopes: "op:admin", event)
+        AuthHelper.authorize(scopes: "op:admin", client_id: "client1", event)
 
         when:
         def response = handler.handleRequest(event, lambdaContext)
@@ -67,6 +68,25 @@ class WebhookAdminControllerSpec extends Specification {
 
         and:
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
+    }
+
+    def "We reject a caller that isn't the operator client from updating a webhook" () {
+        given:
+        def entity = TestEntityDataFactory.aWebhook()
+        def req = new UpdateWebhook().webhookUri(entity.getWebhookUri())
+
+        String json = mapper.writeValueAsString(req)
+        String path = String.format('/admin/webhook/%s', entity.getClientId())
+        def event = AwsProxyHelper.buildBasicEvent(path, HttpMethod.PUT)
+                .withBody(json)
+        AuthHelper.authorize(scopes: "op:admin", client_id: "some-other-client", event)
+
+        when:
+        def response = handler.handleRequest(event, lambdaContext)
+
+        then:
+        response.statusCode == HttpStatus.FORBIDDEN.code
+        0 * webhookService.updateWebhook(_ as UpdateWebhook, _ as String)
     }
 
 }

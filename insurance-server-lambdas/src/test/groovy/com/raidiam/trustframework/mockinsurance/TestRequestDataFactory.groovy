@@ -180,18 +180,6 @@ class TestRequestDataFactory {
                 )
     }
 
-    static QuoteRequestPatrimonialBusiness createQuotePatrimonialBusinessRequest() {
-        QuoteRequestPatrimonialBusiness req = new QuoteRequestPatrimonialBusiness()
-                .data(new QuotePatrimonialBusinessData()
-                        .consentId(UUID.randomUUID().toString())
-                        .expirationDateTime(InsuranceLambdaUtils.getOffsetDateTimeUTC())
-                        .quoteCustomer(new QuoteCustomerData()
-                                .identificationData((QuoteCustomerIdentificationData) new QuoteCustomerIdentificationData()
-                                        .cpfNumber("123456789")))
-                        .quoteData(new QuoteDataPatrimonialBusiness()))
-        req
-    }
-
     static QuoteRequestPatrimonialBusinessV2 createQuotePatrimonialBusinessRequestV2() {
         QuoteRequestPatrimonialBusinessV2 req = new QuoteRequestPatrimonialBusinessV2()
                 .data(new QuotePatrimonialBusinessDataV2()
@@ -201,18 +189,6 @@ class TestRequestDataFactory {
                                 .identificationData((QuoteCustomerIdentificationDataV2) new QuoteCustomerIdentificationDataV2()
                                         .cpfNumber("123456789")))
                         .quoteData(new QuoteDataPatrimonialBusinessV2()))
-        req
-    }
-
-    static QuoteRequestPatrimonialHome createQuotePatrimonialHomeRequest() {
-        QuoteRequestPatrimonialHome req = new QuoteRequestPatrimonialHome()
-                .data(new QuotePatrimonialHomeData()
-                        .consentId(UUID.randomUUID().toString())
-                        .expirationDateTime(InsuranceLambdaUtils.getOffsetDateTimeUTC())
-                        .quoteCustomer(new QuoteCustomerData()
-                                .identificationData((QuoteCustomerIdentificationData) new QuoteCustomerIdentificationData()
-                                        .cpfNumber("123456789")))
-                        .quoteData(new QuoteDataPatrimonialHome()))
         req
     }
 
@@ -228,18 +204,6 @@ class TestRequestDataFactory {
         req
     }
 
-    static QuoteRequestPatrimonialCondominium createQuotePatrimonialCondominiumRequest() {
-        QuoteRequestPatrimonialCondominium req = new QuoteRequestPatrimonialCondominium()
-                .data(new QuotePatrimonialCondominiumData()
-                        .consentId(UUID.randomUUID().toString())
-                        .expirationDateTime(InsuranceLambdaUtils.getOffsetDateTimeUTC())
-                        .quoteCustomer(new QuoteCustomerData()
-                                .identificationData((QuoteCustomerIdentificationData) new QuoteCustomerIdentificationData()
-                                        .cpfNumber("123456789")))
-                        .quoteData(new QuoteDataPatrimonialCondominium()))
-        req
-    }
-
     static QuoteRequestPatrimonialCondominiumV2 createQuotePatrimonialCondominiumRequestV2() {
         QuoteRequestPatrimonialCondominiumV2 req = new QuoteRequestPatrimonialCondominiumV2()
                 .data(new QuotePatrimonialCondominiumDataV2()
@@ -249,18 +213,6 @@ class TestRequestDataFactory {
                                 .identificationData((QuoteCustomerIdentificationDataV2) new QuoteCustomerIdentificationDataV2()
                                         .cpfNumber("123456789")))
                         .quoteData(new QuoteDataPatrimonialCondominium()))
-        req
-    }
-
-    static QuoteRequestPatrimonialDiverseRisks createQuotePatrimonialDiverseRisksRequest() {
-        QuoteRequestPatrimonialDiverseRisks req = new QuoteRequestPatrimonialDiverseRisks()
-                .data(new QuotePatrimonialDiverseRisksData()
-                        .consentId(UUID.randomUUID().toString())
-                        .expirationDateTime(InsuranceLambdaUtils.getOffsetDateTimeUTC())
-                        .quoteCustomer(new QuoteCustomerData()
-                                .identificationData((QuoteCustomerIdentificationData) new QuoteCustomerIdentificationData()
-                                        .cpfNumber("123456789")))
-                        .quoteData(new QuoteDataPatrimonialDiverseRisks()))
         req
     }
 
@@ -300,18 +252,6 @@ class TestRequestDataFactory {
                 )
     }
 
-    static QuoteRequestLifePensionLead createQuoteLifePensionLeadRequest() {
-        return new QuoteRequestLifePensionLead()
-                .data(new QuoteRequestLifePensionLeadData()
-                        .consentId(UUID.randomUUID().toString())
-                        .expirationDateTime(InsuranceLambdaUtils.getOffsetDateTimeUTC())
-                        .quoteCustomer(new QuoteCustomerData()
-                                .identificationData((QuoteCustomerIdentificationData) new QuoteCustomerIdentificationData()
-                                        .cpfNumber("123456789")))
-                        .quoteData(new QuoteDataLifePension())
-                )
-    }
-
     static QuoteRequestLifePensionLeadV2 createQuoteLifePensionLeadRequestV2() {
         return new QuoteRequestLifePensionLeadV2()
                 .data(new QuoteRequestLifePensionLeadV2Data()
@@ -322,18 +262,6 @@ class TestRequestDataFactory {
                                         .cpfNumber("123456789")))
                         .quoteData(new QuoteDataLifePension())
                 )
-    }
-
-    static RequestContractLifePension createQuoteLifePensionRequest() {
-        RequestContractLifePension req = new RequestContractLifePension()
-                .data(new RequestContractLifePensionData()
-                        .consentId(UUID.randomUUID().toString())
-                        .expirationDateTime(InsuranceLambdaUtils.getOffsetDateTimeUTC())
-                        .quoteCustomer(new QuoteCustomerData()
-                                .identificationData((QuoteCustomerIdentificationData) new QuoteCustomerIdentificationData()
-                                        .cpfNumber("123456789")))
-                        .quoteData(new QuoteDataLifePension()))
-        req
     }
 
     static RequestContractLifePensionV2 createQuoteLifePensionRequestV2() {
@@ -348,18 +276,6 @@ class TestRequestDataFactory {
         req
     }
 
-    static QuoteRequestPersonLead createQuotePersonLeadRequest() {
-        return new QuoteRequestPersonLead()
-                .data(new QuoteRequestPersonLeadData()
-                        .consentId(UUID.randomUUID().toString())
-                        .expirationDateTime(InsuranceLambdaUtils.getOffsetDateTimeUTC())
-                        .quoteCustomer(new QuoteCustomerData()
-                                .identificationData((QuoteCustomerIdentificationData) new QuoteCustomerIdentificationData()
-                                        .cpfNumber("123456789")))
-                        .quoteData(new QuoteDataPersonLead())
-                )
-    }
-
     static QuoteRequestPersonLeadV2 createQuotePersonLeadRequestV2() {
         return new QuoteRequestPersonLeadV2()
                 .data(new QuoteRequestPersonLeadV2Data()
@@ -372,18 +288,6 @@ class TestRequestDataFactory {
                 )
     }
 
-    static QuoteRequestPersonLife createQuotePersonLifeRequest() {
-        QuoteRequestPersonLife req = new QuoteRequestPersonLife()
-                .data(new QuoteRequestPersonLifeData()
-                        .consentId(UUID.randomUUID().toString())
-                        .expirationDateTime(InsuranceLambdaUtils.getOffsetDateTimeUTC())
-                        .quoteCustomer(new QuoteCustomerData()
-                                .identificationData((QuoteCustomerIdentificationData) new QuoteCustomerIdentificationData()
-                                        .cpfNumber("123456789")))
-                        .quoteData(new QuoteDataPersonLife()))
-        req
-    }
-
     static QuoteRequestPersonLifeV2 createQuotePersonLifeRequestV2() {
         QuoteRequestPersonLifeV2 req = new QuoteRequestPersonLifeV2()
                 .data(new QuotePersonLifeDataV2()
@@ -393,18 +297,6 @@ class TestRequestDataFactory {
                                 .identificationData((QuoteCustomerIdentificationDataV2) new QuoteCustomerIdentificationDataV2()
                                         .cpfNumber("123456789")))
                         .quoteData(new QuoteDataPersonLifeV2()))
-        req
-    }
-
-    static QuoteRequestPersonTravel createQuotePersonTravelRequest() {
-        QuoteRequestPersonTravel req = new QuoteRequestPersonTravel()
-                .data(new QuoteRequestPersonTravelData()
-                        .consentId(UUID.randomUUID().toString())
-                        .expirationDateTime(InsuranceLambdaUtils.getOffsetDateTimeUTC())
-                        .quoteCustomer(new QuoteCustomerData()
-                                .identificationData((QuoteCustomerIdentificationData) new QuoteCustomerIdentificationData()
-                                        .cpfNumber("123456789")))
-                        .quoteData(new QuoteDataPersonTravel()))
         req
     }
 

@@ -35,26 +35,12 @@ public class QuoteAutoEntity extends QuoteEntity {
         return this.getData().getV2().getQuoteData().getTermStartDate().isAfter(this.getData().getV2().getQuoteData().getTermEndDate());
     }
 
-    public static QuoteAutoEntity fromRequest(QuoteRequestAuto req, String clientId) {
-        QuoteAutoEntity entity = new QuoteAutoEntity();
-        entity.setConsentId(req.getData().getConsentId());
-        entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
-        entity.setClientId(clientId);
-        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
-        entity.setCustomer(req.getData().getQuoteCustomer());
-        var data = new QuoteData();
-        data.setV1(req.getData());
-        entity.setData(data);
-
-        return entity;
-    }
-
     public static QuoteAutoEntity fromRequestV2(QuoteRequestAutoV2 req, String clientId) {
         QuoteAutoEntity entity = new QuoteAutoEntity();
         entity.setConsentId(req.getData().getConsentId());
         entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
         entity.setClientId(clientId);
-        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
+        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToInstant(req.getData().getExpirationDateTime()));
         entity.setCustomer(req.getData().getQuoteCustomer());
 
         var data = new QuoteData();
@@ -62,64 +48,6 @@ public class QuoteAutoEntity extends QuoteEntity {
         entity.setData(data);
 
         return entity;
-    }
-
-    public ResponseQuoteAuto toResponse() {
-        var quoteData = new ResponseQuoteAutoData();
-        quoteData.setStatus(StatusEnum.fromValue(this.getStatus()));
-        quoteData.setStatusUpdateDateTime(InsuranceLambdaUtils.dateToOffsetDate(this.getUpdatedAt()));
-
-        if (QuoteStatusEnum.ACPT.toString().equals(this.getStatus())) {
-            var customer = new QuoteCustomer();
-            customer.setIdentification(this.getData().getV1().getQuoteCustomer().getIdentificationData());
-            customer.setQualification(this.getData().getV1().getQuoteCustomer().getQualificationData());
-            customer.setComplimentaryInfo(this.getData().getV1().getQuoteCustomer().getComplimentaryInformationData());
-
-            var premium = new QuoteAutoResultPremium();
-            premium.setPaymentsQuantity("1");
-            premium.setTotalPremiumAmount(new AmountDetails()
-                    .amount("100.00")
-                    .unitType(AmountDetails.UnitTypeEnum.MONETARIO)
-                    .unit(new AmountDetailsUnit().code("R$").description(AmountDetailsUnit.DescriptionEnum.BRL)));
-            premium.setTotalNetAmount(new AmountDetails()
-                    .amount("50.00")
-                    .unitType(AmountDetails.UnitTypeEnum.MONETARIO)
-                    .unit(new AmountDetailsUnit().code("R$").description(AmountDetailsUnit.DescriptionEnum.BRL)));
-            premium.setIOF(new AmountDetails()
-                    .amount("20.00")
-                    .unitType(AmountDetails.UnitTypeEnum.MONETARIO)
-                    .unit(new AmountDetailsUnit().code("R$").description(AmountDetailsUnit.DescriptionEnum.BRL)));
-            premium.setCoverages(List.of());
-            premium.setPayments(List.of(new QuoteResultPayment()
-                    .amount(new AmountDetails()
-                            .amount("100.00")
-                            .unitType(AmountDetails.UnitTypeEnum.MONETARIO)
-                            .unit(new AmountDetailsUnit().code("R$").description(AmountDetailsUnit.DescriptionEnum.BRL)))
-                    .paymentType(QuoteResultPayment.PaymentTypeEnum.PIX)));
-
-            var quote = new QuoteStatusAutoQuotes();
-            quote.setInsurerQuoteId(this.getQuoteId().toString());
-            quote.setSusepProcessNumbers(List.of());
-            quote.setAssistances(List.of());
-            quote.setCoverages(List.of());
-            quote.setPremiumInfo(premium);
-
-            var quoteInfo = new QuoteStatusAuto();
-            quoteInfo.setQuoteCustomer(customer);
-            quoteInfo.setQuoteData(this.getData().getV1().getQuoteData());
-            quoteInfo.setQuoteCustomData(this.getData().getV1().getQuoteCustomData());
-            quoteInfo.setQuotes(List.of(quote));
-
-            quoteData.setQuoteInfo(quoteInfo);
-        }
-
-        if (QuoteStatusEnum.RJCT.toString().equals(this.getStatus())) {
-            quoteData.setRejectionReason("The quote was rejected");
-        }
-
-        var resp = new ResponseQuoteAuto();
-        resp.setData(quoteData);
-        return resp;
     }
 
     public ResponseQuoteAutoV2 toResponseV2() {

@@ -107,9 +107,11 @@ public enum PermissionV3Group {
     CAPITALIZATION_TITLE_WITHDRAWAL(EnumSet.of(
             EnumConsentV3Permission.CAPITALIZATION_TITLE_WITHDRAWAL_CREATE
     )),
-    QUOTE_CAPITALIZATION_TITLE(EnumSet.of(
+    QUOTE_CAPITALIZATION_TITLE_LEAD(EnumSet.of(
             EnumConsentV3Permission.QUOTE_CAPITALIZATION_TITLE_LEAD_CREATE,
-            EnumConsentV3Permission.QUOTE_CAPITALIZATION_TITLE_LEAD_UPDATE,
+            EnumConsentV3Permission.QUOTE_CAPITALIZATION_TITLE_LEAD_UPDATE
+    ), false),
+    QUOTE_CAPITALIZATION_TITLE(EnumSet.of(
             EnumConsentV3Permission.QUOTE_CAPITALIZATION_TITLE_READ,
             EnumConsentV3Permission.QUOTE_CAPITALIZATION_TITLE_CREATE,
             EnumConsentV3Permission.QUOTE_CAPITALIZATION_TITLE_UPDATE

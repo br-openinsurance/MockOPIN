@@ -44,6 +44,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static com.raidiam.trustframework.mockinsurance.utils.LogUtils.logIfPresent;
+
 @Singleton
 public class InsuranceLambdaUtils {
 
@@ -74,6 +76,10 @@ public class InsuranceLambdaUtils {
 
     public static Date offsetDateToDate(OffsetDateTime offset) {
         return Optional.ofNullable(offset).map(OffsetDateTime::toInstant).map(Date::from).orElse(null);
+    }
+
+    public static Instant offsetDateToInstant(OffsetDateTime offset) {
+        return Optional.ofNullable(offset).map(OffsetDateTime::toInstant).orElse(null);
     }
 
     public static OffsetDateTime dateToOffsetDateTimeInBrasil(Date date) {
@@ -171,34 +177,39 @@ public class InsuranceLambdaUtils {
     }
 
     public static RequestMeta getRequestMeta(HttpRequest<?> request) {
-        LOG.info("getCallerInfo() from the request");
+        LOG.info("Extracting request meta for {} {}", request.getMethod(), request.getPath());
         String jti = null;
         String jwtPayload = null;
         try {
             Optional<Object> attribute = request.getAttribute("micronaut.AUTHENTICATION");
             if (attribute.isPresent()) {
-                LOG.info("There is an authentication present on the request");
+                LOG.info("Authentication present on the request, extracting client and consent attributes");
                 Authentication authentication = (Authentication) attribute.get();
-                List<String> roles = (List<String>) authentication.getAttributes().get("roles");
 
-                Optional<Object> clientIdOpt = request.getAttribute("clientId");
-                if (clientIdOpt.isEmpty()) {
-                    throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Access token did not contain a client ID");
-                }
-                String clientId = clientIdOpt.get().toString();
-                String consentId = request.getAttribute("consentId").map(Object::toString).orElse(null);
-                LOG.info("Roles: {}", String.join(",", roles));
-                LOG.info("Request made by client id: {}", clientId);
-                LOG.info("Request made with consent Id: {}", consentId);
-                LOG.info("Request made with JTI: {}", jti);
-                LOG.info("Request made with JWT payload: {}", jwtPayload);
-                return new RequestMeta(roles, consentId, clientId, jti, jwtPayload);
+                var meta = new RequestMeta(
+                        castToStringList(authentication.getAttributes().get("roles")),
+                        request.getAttribute("consentId").map(Object::toString).orElse(null),
+                        request.getAttribute("clientId").map(Object::toString)
+                                .orElseThrow(() -> new HttpStatusException(HttpStatus.BAD_REQUEST, "Access token did not contain a client ID")),
+                        jti,
+                        jwtPayload);
+
+                logRequestAttributes(meta);
+                return meta;
             }
         } catch (Exception e) {
-            LOG.error("Exception  getting caller info. Error: ", e);
+            LOG.error("Exception getting request meta for {} {}. Error: ", request.getMethod(), request.getPath(), e);
         }
-        LOG.info("No authentication present");
+        LOG.info("No authentication present on the request");
         return new RequestMeta(Collections.emptyList(), null, null, jti, jwtPayload);
+    }
+
+    private static void logRequestAttributes(RequestMeta meta) {
+        logIfPresent("Roles: {}", String.join(",", meta.getRoles()), LOG);
+        logIfPresent("Request made by client id: {}", meta.getClientId(), LOG);
+        logIfPresent("Request made with consent Id: {}", meta.getConsentId(), LOG);
+        logIfPresent("Request made with JTI: {}", meta.getJti(), LOG);
+        logIfPresent("Request made with JWT payload: {}", meta.getJwtPayload(), LOG);
     }
 
     public static String getIdempotencyKey(HttpRequest<?> request) {
@@ -513,5 +524,10 @@ public class InsuranceLambdaUtils {
                 .map(EnumConsentV3Permission::fromValue)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<String> castToStringList(Object value) {
+        return value instanceof List ? (List<String>) value : null;
     }
 }

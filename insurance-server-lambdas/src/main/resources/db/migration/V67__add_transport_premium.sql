@@ -1,0 +1,81 @@
+CREATE TABLE transport_policy_premiums (
+    transport_policy_premium_id                                 UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+    transport_policy_id                                         VARCHAR,
+    payments_quantity                                           INTEGER,
+    amount                                                      VARCHAR,
+    unit_type                                                   VARCHAR,
+    unit_type_others                                            VARCHAR,
+    unit_code                                                   VARCHAR,
+    unit_description                                            VARCHAR,
+    currency                                                    VARCHAR,
+    created_at                                                  TIMESTAMP,
+    created_by                                                  VARCHAR,
+    updated_at                                                  TIMESTAMP,
+    updated_by                                                  VARCHAR,
+    hibernate_status                                            VARCHAR,
+    FOREIGN KEY (transport_policy_id) REFERENCES transport_policies (transport_policy_id) ON DELETE CASCADE
+);
+
+CREATE TABLE transport_policy_premiums_aud (
+    transport_policy_premium_id                                 UUID,
+    transport_policy_id                                         VARCHAR,
+    payments_quantity                                           INTEGER,
+    amount                                                      VARCHAR,
+    unit_type                                                   VARCHAR,
+    unit_type_others                                            VARCHAR,
+    unit_code                                                   VARCHAR,
+    unit_description                                            VARCHAR,
+    currency                                                    VARCHAR,
+    rev                                                         INTEGER NOT NULL,
+    revtype                                                     SMALLINT,
+    created_at                                                  TIMESTAMP,
+    created_by                                                  VARCHAR,
+    updated_at                                                  TIMESTAMP,
+    updated_by                                                  VARCHAR,
+    hibernate_status                                            VARCHAR,
+    PRIMARY KEY (transport_policy_premium_id, rev),
+    FOREIGN KEY (rev) REFERENCES revinfo (rev)
+);
+
+CREATE TABLE transport_policy_premium_coverages (
+    transport_policy_premium_coverage_id                        UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+    transport_policy_premium_id                                 UUID,
+    branch                                                      VARCHAR,
+    code                                                        VARCHAR,
+    description                                                 VARCHAR,
+    premium_amount                                              VARCHAR,
+    premium_unit_type                                           VARCHAR,
+    premium_unit_type_others                                    VARCHAR,
+    premium_unit_code                                           VARCHAR,
+    premium_unit_description                                    VARCHAR,
+    premium_currency                                            VARCHAR,
+    created_at                                                  TIMESTAMP,
+    created_by                                                  VARCHAR,
+    updated_at                                                  TIMESTAMP,
+    updated_by                                                  VARCHAR,
+    hibernate_status                                            VARCHAR,
+    FOREIGN KEY (transport_policy_premium_id) REFERENCES transport_policy_premiums (transport_policy_premium_id) ON DELETE CASCADE
+);
+
+CREATE TABLE transport_policy_premium_coverages_aud (
+    transport_policy_premium_coverage_id                        UUID,
+    transport_policy_premium_id                                 UUID,
+    branch                                                      VARCHAR,
+    code                                                        VARCHAR,
+    description                                                 VARCHAR,
+    premium_amount                                              VARCHAR,
+    premium_unit_type                                           VARCHAR,
+    premium_unit_type_others                                    VARCHAR,
+    premium_unit_code                                           VARCHAR,
+    premium_unit_description                                    VARCHAR,
+    premium_currency                                            VARCHAR,
+    rev                                                         INTEGER NOT NULL,
+    revtype                                                     SMALLINT,
+    created_at                                                  TIMESTAMP,
+    created_by                                                  VARCHAR,
+    updated_at                                                  TIMESTAMP,
+    updated_by                                                  VARCHAR,
+    hibernate_status                                            VARCHAR,
+    PRIMARY KEY (transport_policy_premium_coverage_id, rev),
+    FOREIGN KEY (rev) REFERENCES revinfo (rev)
+);

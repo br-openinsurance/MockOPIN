@@ -17,7 +17,17 @@ import com.raidiam.trustframework.mockinsurance.domain.RuralPolicyEntity
 import com.raidiam.trustframework.mockinsurance.domain.PersonPolicyEntity
 import com.raidiam.trustframework.mockinsurance.domain.ResponsibilityPolicyEntity
 import com.raidiam.trustframework.mockinsurance.domain.TransportPolicyEntity
-import com.raidiam.trustframework.mockinsurance.models.generated.*
+import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails
+import com.raidiam.trustframework.mockinsurance.models.generated.CreateConsentDataWithdrawalCaptalizationInformation
+import com.raidiam.trustframework.mockinsurance.models.generated.CreateConsentDataWithdrawalLifePensionInformation
+import com.raidiam.trustframework.mockinsurance.models.generated.CreateConsentV3DataWithdrawalLifePensionInformation
+import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentPermission
+import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentStatus
+import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentV3Permission
+import com.raidiam.trustframework.mockinsurance.models.generated.EnumReasonCode
+import com.raidiam.trustframework.mockinsurance.models.generated.EnumRejectedBy
+import com.raidiam.trustframework.mockinsurance.models.generated.UpdateConsent
+import com.raidiam.trustframework.mockinsurance.models.generated.UpdateConsentData
 import com.raidiam.trustframework.mockinsurance.utils.PermissionGroup
 import com.raidiam.trustframework.mockinsurance.utils.PermissionV3Group
 import io.micronaut.http.HttpStatus
@@ -404,6 +414,171 @@ class ConsentServiceSpec extends CleanupSpecification {
                 testAccountHolder.getDocumentRel(),
                 OffsetDateTime.now().plusDays(1),
                 List.of(EnumConsentV3Permission.CONTRACT_PENSION_PLAN_LEAD_CREATE)
+        )
+
+        when:
+        consentService.createConsentV3(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.BAD_REQUEST
+        e.getMessage() == "NAO_INFORMADO: All the permission from the group must be requested"
+    }
+
+    def "We can't create a consent with only the capitalization title lead group"() {
+        given:
+        def clientId = "random_client_id"
+        def req = TestRequestDataFactory.createConsentRequest(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                PermissionGroup.QUOTE_CAPITALIZATION_TITLE_LEAD.getPermissions().toList()
+        )
+
+        when:
+        consentService.createConsent(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.getMessage() == "NAO_INFORMADO: Permission not allowed"
+    }
+
+    def "We can't create a consent V3 with only the capitalization title lead group"() {
+        given:
+        def clientId = "random_client_id"
+        def req = TestRequestDataFactory.createConsentV3Request(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                PermissionV3Group.QUOTE_CAPITALIZATION_TITLE_LEAD.getPermissions().toList()
+        )
+
+        when:
+        consentService.createConsentV3(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.getMessage() == "NAO_INFORMADO: Permission not allowed"
+    }
+
+    // The lead and quotation groups are distinct phase 3 groupings, so requesting both must be
+    // rejected with 422. The lead group is reached first by validatePhase3Permissions, so the
+    // "not allowed" branch fires before the multi-group check - the status code is what matters.
+    def "We can't create a consent mixing the capitalization title lead and quotation groups"() {
+        given:
+        def clientId = "random_client_id"
+        def permissions = new ArrayList(PermissionGroup.QUOTE_CAPITALIZATION_TITLE_LEAD.getPermissions())
+        permissions.addAll(PermissionGroup.QUOTE_CAPITALIZATION_TITLE.getPermissions())
+        def req = TestRequestDataFactory.createConsentRequest(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                permissions
+        )
+
+        when:
+        consentService.createConsent(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.getMessage() == "NAO_INFORMADO: Permission not allowed"
+    }
+
+    def "We can't create a consent V3 mixing the capitalization title lead and quotation groups"() {
+        given:
+        def clientId = "random_client_id"
+        def permissions = new ArrayList(PermissionV3Group.QUOTE_CAPITALIZATION_TITLE_LEAD.getPermissions())
+        permissions.addAll(PermissionV3Group.QUOTE_CAPITALIZATION_TITLE.getPermissions())
+        def req = TestRequestDataFactory.createConsentV3Request(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                permissions
+        )
+
+        when:
+        consentService.createConsentV3(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.UNPROCESSABLE_ENTITY
+        e.getMessage() == "NAO_INFORMADO: Permission not allowed"
+    }
+
+    def "We can create a consent with the capitalization title quotation group"() {
+        given:
+        def clientId = "random_client_id"
+        def req = TestRequestDataFactory.createConsentRequest(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                PermissionGroup.QUOTE_CAPITALIZATION_TITLE.getPermissions().toList()
+        )
+
+        when:
+        def entity = consentService.createConsent(req, clientId)
+
+        then:
+        noExceptionThrown()
+        entity.consentId != null
+        entity.status == EnumConsentStatus.AWAITING_AUTHORISATION.name()
+    }
+
+    def "We can create a consent V3 with the capitalization title quotation group"() {
+        given:
+        def clientId = "random_client_id"
+        def req = TestRequestDataFactory.createConsentV3Request(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                PermissionV3Group.QUOTE_CAPITALIZATION_TITLE.getPermissions().toList()
+        )
+
+        when:
+        def entity = consentService.createConsentV3(req, clientId)
+
+        then:
+        noExceptionThrown()
+        entity.consentId != null
+        entity.status == EnumConsentStatus.AWAITING_AUTHORISATION.name()
+    }
+
+    def "We can't create a consent for an incomplete capitalization title quotation group"() {
+        given:
+        def clientId = "random_client_id"
+        def req = TestRequestDataFactory.createConsentRequest(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                List.of(
+                        EnumConsentPermission.QUOTE_CAPITALIZATION_TITLE_READ,
+                        EnumConsentPermission.QUOTE_CAPITALIZATION_TITLE_CREATE
+                )
+        )
+
+        when:
+        consentService.createConsent(req, clientId)
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.status == HttpStatus.BAD_REQUEST
+        e.getMessage() == "NAO_INFORMADO: All the permission from the group must be requested"
+    }
+
+    def "We can't create a consent V3 for an incomplete capitalization title quotation group"() {
+        given:
+        def clientId = "random_client_id"
+        def req = TestRequestDataFactory.createConsentV3Request(
+                testAccountHolder.getDocumentIdentification(),
+                testAccountHolder.getDocumentRel(),
+                OffsetDateTime.now().plusDays(1),
+                List.of(
+                        EnumConsentV3Permission.QUOTE_CAPITALIZATION_TITLE_READ,
+                        EnumConsentV3Permission.QUOTE_CAPITALIZATION_TITLE_CREATE
+                )
         )
 
         when:

@@ -1506,9 +1506,6 @@ components:
         address:
           type: string
           maxLength: 60
-        addressAdditionalInfo:
-          type: string
-          maxLength: 100
     PersonalInfoV2:
       type: object
       required:
@@ -2064,7 +2061,7 @@ components:
         tellerIdType:
           type: string
           enum: [CPF, CNPJ, OUTROS]
-        tellerIdTypeOthers:
+        tellerIdOthers:
           type: string
           maxLength: 100
         tellerName:
@@ -2114,7 +2111,7 @@ components:
         tellerIdType:
           type: string
           enum: [CPF, CNPJ, OUTROS]
-        tellerIdTypeOthers:
+        tellerIdOthers:
           type: string
           maxLength: 500
         tellerName:
@@ -11135,11 +11132,11 @@ components:
         monetaryUpdateIndex:
           type: string
           enum:
-            - IPC_FGV
-            - IGP_DI_FGV
-            - IPCA_IBGE
-            - IGPM_FGV
-            - INPC_IBGE
+            - IPC-FGV
+            - IGP-DI-FGV
+            - IPCA-IBGE
+            - IGPM-FGV
+            - INPC-IBGE
             - TR
             - OUTROS
         financialResultReversalPercentage:
@@ -11565,7 +11562,7 @@ components:
               type: string
             author:
               $ref: '#/components/schemas/IdentificationAuthorPatch'
-    ResponsePatchLifePension:
+    ResponsePatchRedirectLink:
       type: object
       required:
         - data

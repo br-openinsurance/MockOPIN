@@ -20,7 +20,7 @@ public class QuoteAcceptanceAndBranchesAbroadLeadEntity extends QuoteEntity {
         entity.setConsentId(req.getData().getConsentId());
         entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
         entity.setClientId(clientId);
-        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
+        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToInstant(req.getData().getExpirationDateTime()));
 
         entity.setCustomer(req.getData().getQuoteCustomer());
 
@@ -32,7 +32,7 @@ public class QuoteAcceptanceAndBranchesAbroadLeadEntity extends QuoteEntity {
         entity.setConsentId(req.getData().getConsentId());
         entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
         entity.setClientId(clientId);
-        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
+        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToInstant(req.getData().getExpirationDateTime()));
 
         entity.setCustomer(req.getData().getQuoteCustomer());
 

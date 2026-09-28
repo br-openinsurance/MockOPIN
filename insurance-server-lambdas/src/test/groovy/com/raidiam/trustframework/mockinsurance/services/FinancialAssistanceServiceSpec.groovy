@@ -53,19 +53,6 @@ class FinancialAssistanceServiceSpec extends CleanupFinancialAssistanceSpecifica
         }
     }
 
-    def "we can get contracts" () {
-        when:
-        def response = financialAssistanceService.getContracts(Pageable.from(0, 1), testConsent.getConsentId().toString())
-
-        then:
-        response.getData()
-        response.getData().size() == 1
-        response.getData().first()
-        response.getData().first().getBrand().getName() == "Mock"
-        response.getData().first().getBrand().getCompanies().first().getCnpjNumber() == "12345678901234"
-        response.getData().first().getBrand().getCompanies().first().getContracts().first().getContractId() == testFinancialAssistanceContract.getFinancialAssistanceContractId()
-    }
-
     def "we can get contracts V2" () {
         when:
         def response = financialAssistanceService.getContractsV2(Pageable.from(0, 1), testConsent.getConsentId().toString())
@@ -77,19 +64,6 @@ class FinancialAssistanceServiceSpec extends CleanupFinancialAssistanceSpecifica
         response.getData().first().getBrand().getName() == "Mock"
         response.getData().first().getBrand().getCompanies().first().getCnpjNumber() == "12345678901234"
         response.getData().first().getBrand().getCompanies().first().getContracts().first().getContractId() == testFinancialAssistanceContract.getFinancialAssistanceContractId()
-    }
-
-    def "we can get a contract info" () {
-        when:
-        def response = financialAssistanceService.getContractInfo(testFinancialAssistanceContract.getFinancialAssistanceContractId(), testConsent.getConsentId().toString())
-
-        then:
-        response.getData() != null
-        response.getData().getContractId() == testFinancialAssistanceContract.getFinancialAssistanceContractId()
-        response.getData().getCertificateId() == testFinancialAssistanceContract.getCertificateId()
-        response.getData().getInterestRate().getAmount() == testFinancialAssistanceContract.getInterestRateAmount()
-        response.getData().getCounterInstallments().getPeriodicity().toString() == testFinancialAssistanceContract.getCounterInstallmentPeriodicity()
-        response.getData().getInsureds().first().getName() == testFinancialAssistanceContractInsured.getName()
     }
 
     def "we can get a contract info V2" () {

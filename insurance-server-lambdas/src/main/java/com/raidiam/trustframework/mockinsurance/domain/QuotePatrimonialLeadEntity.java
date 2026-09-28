@@ -14,23 +14,12 @@ import org.hibernate.envers.Audited;
 @Table(name = "quote_patrimonial_leads")
 public class QuotePatrimonialLeadEntity extends QuoteEntity {
 
-    public static QuotePatrimonialLeadEntity fromRequest(QuoteRequestPatrimonialLead req, String clientId) {
-        QuotePatrimonialLeadEntity entity = new QuotePatrimonialLeadEntity();
-        entity.setConsentId(req.getData().getConsentId());
-        entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
-        entity.setClientId(clientId);
-        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
-        entity.setCustomer(req.getData().getQuoteCustomer());
-
-        return entity;
-    }
-
     public static QuotePatrimonialLeadEntity fromRequestV2(QuoteRequestPatrimonialLeadV2 req, String clientId) {
         QuotePatrimonialLeadEntity entity = new QuotePatrimonialLeadEntity();
         entity.setConsentId(req.getData().getConsentId());
         entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
         entity.setClientId(clientId);
-        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
+        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToInstant(req.getData().getExpirationDateTime()));
         entity.setCustomer(req.getData().getQuoteCustomer());
 
         return entity;

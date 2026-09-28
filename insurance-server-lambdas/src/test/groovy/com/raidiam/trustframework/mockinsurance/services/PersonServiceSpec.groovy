@@ -84,16 +84,6 @@ class PersonServiceSpec extends CleanupPersonSpecification {
         }
     }
 
-    def "we can get policies" () {
-        when:
-        def response = personService.getPolicies(Pageable.from(0, 1), testConsent.getConsentId().toString())
-
-        then:
-        response.getData()
-        response.getData().size() == 1
-        response.getData().first().getBrand().getCompanies().first().getPolicies().first().getProductName() == "Mock Insurer Person Policy"
-    }
-
     def "we can get policies V2" () {
         when:
         def response = personService.getPoliciesV2(Pageable.from(0, 1), testConsent.getConsentId().toString())
@@ -102,21 +92,6 @@ class PersonServiceSpec extends CleanupPersonSpecification {
         response.getData()
         response.getData().size() == 1
         response.getData().first()
-    }
-
-    def "we can get a policy info" () {
-        when:
-        def response = personService.getPolicyInfo(testPersonPolicy.getPersonPolicyId(), testConsent.getConsentId().toString())
-
-        then:
-        response.getData() != null
-        response.getData().getDocumentType().toString() == "APOLICE_INDIVIDUAL"
-        response.getData().getInsureds().size() == 1
-        response.getData().getBeneficiaries().size() == 1
-        response.getData().getIntermediaries().size() == 1
-        response.getData().getInsuredObjects().size() == 1
-        response.getData().getInsuredObjects().first().getCoverages().size() == 1
-        response.getData().getPmBaC() != null
     }
 
     def "we can get a policy info V2" () {
@@ -130,16 +105,6 @@ class PersonServiceSpec extends CleanupPersonSpecification {
         response.getData().getIntermediaries().size() == 1
         response.getData().getInsuredObjects().size() == 1
         response.getData().getInsuredObjects().first().getCoverages().size() == 1
-    }
-
-    def "we can get a policy's claims" () {
-        when:
-        def response = personService.getPolicyClaims(testPersonPolicy.getPersonPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
-
-        then:
-        response.getData() != null
-        response.getData().size() == 1
-        response.getData().first().getCoverages().size() == 1
     }
 
     def "we can get a policy's claims V2" () {

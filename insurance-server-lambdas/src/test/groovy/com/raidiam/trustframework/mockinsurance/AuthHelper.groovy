@@ -21,7 +21,7 @@ class AuthHelper {
                 active: true,
                 token_type: "Bearer",
                 exp: 1571660599,
-                client_id: "client1",
+                client_id: params['client_id'] ?: "client1",
                 org_id: params['org_id'],
                 software_id: params['software_id'],
         ]

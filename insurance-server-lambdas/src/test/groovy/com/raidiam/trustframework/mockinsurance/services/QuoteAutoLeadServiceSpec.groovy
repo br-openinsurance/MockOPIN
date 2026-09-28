@@ -8,6 +8,8 @@ import com.raidiam.trustframework.mockinsurance.models.generated.QuoteStatusEnum
 import com.raidiam.trustframework.mockinsurance.models.generated.RevokePatchPayload
 import com.raidiam.trustframework.mockinsurance.models.generated.RevokePatchPayloadData
 import com.raidiam.trustframework.mockinsurance.models.generated.RevokePatchPayloadDataAuthor
+import io.micronaut.http.HttpStatus
+import io.micronaut.http.exceptions.HttpStatusException
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
 import spock.lang.Stepwise
@@ -55,6 +57,20 @@ public class QuoteAutoLeadServiceSpec extends CleanupSpecification {
         responseAutoLead.quoteId == createdAutoLead.quoteId
         responseAutoLead.consentId == consentId
         responseAutoLead.status == QuoteStatusEnum.CANC.toString()
+    }
+
+    def "We cannot fetch a quote auto lead created by a different client"() {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def createdAutoLead = TestEntityDataFactory.aQuoteAutoLead(consentId)
+        quoteAutoLeadRepository.save(createdAutoLead)
+
+        when:
+        quoteAutoLeadService.getQuote(consentId, "a_different_client_id")
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.getStatus() == HttpStatus.FORBIDDEN
     }
 
     def "enable cleanup"() {

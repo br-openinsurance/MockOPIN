@@ -49,27 +49,6 @@ class PensionPlanControllerSpec extends Specification {
         handler = new ApiGatewayProxyRequestEventFunction(applicationContext)
     }
 
-    def "We can fetch contracts" () {
-        given:
-        def resp = new ResponseInsurancePensionPlan().data(List.of())
-        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
-        pensionPlanService.getContracts(_ as Pageable, _ as String) >> resp
-
-        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-pension-plan/v1/insurance-pension-plan/contracts', HttpMethod.GET)
-                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
-        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-pension-plan consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
-
-        when:
-        def response = handler.handleRequest(event, lambdaContext)
-
-        then:
-        response.statusCode == HttpStatus.OK.code
-        response.body != null
-
-        and:
-        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
-    }
-
     def "We can fetch contracts V2" () {
         given:
         def resp = new ResponseInsurancePensionPlanV2().data(List.of())
@@ -77,27 +56,6 @@ class PensionPlanControllerSpec extends Specification {
         pensionPlanService.getContractsV2(_ as Pageable, _ as String) >> resp
 
         def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-pension-plan/v2/insurance-pension-plan/contracts', HttpMethod.GET)
-                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
-        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-pension-plan consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
-
-        when:
-        def response = handler.handleRequest(event, lambdaContext)
-
-        then:
-        response.statusCode == HttpStatus.OK.code
-        response.body != null
-
-        and:
-        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
-    }
-
-    def "We can fetch a contract info" () {
-        given:
-        def resp = new ResponseInsurancePensionPlanContractInfo().data(new InsurancePensionPlanContractInfo())
-        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
-        pensionPlanService.getContractInfo(_ as String, _ as String) >> resp
-
-        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-pension-plan/v1/insurance-pension-plan/'+UUID.randomUUID().toString()+'/contract-info', HttpMethod.GET)
                 .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-pension-plan consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
 
@@ -133,27 +91,6 @@ class PensionPlanControllerSpec extends Specification {
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
 
-    def "We can fetch a contract's claims" () {
-        given:
-        def resp = new ResponseInsurancePensionPlanClaim().data(List.of())
-        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
-        pensionPlanService.getContractClaims(_ as String, _ as String, _ as Pageable) >> resp
-
-        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-pension-plan/v1/insurance-pension-plan/'+UUID.randomUUID().toString()+'/claim', HttpMethod.GET)
-                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
-        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-pension-plan consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
-
-        when:
-        def response = handler.handleRequest(event, lambdaContext)
-
-        then:
-        response.statusCode == HttpStatus.OK.code
-        response.body != null
-
-        and:
-        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
-    }
-
     def "We can fetch a contract's claims V2" () {
         given:
         def resp = new ResponseInsurancePensionPlanClaimV2().data(List.of())
@@ -161,27 +98,6 @@ class PensionPlanControllerSpec extends Specification {
         pensionPlanService.getContractClaimsV2(_ as String, _ as String, _ as Pageable) >> resp
 
         def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-pension-plan/v2/insurance-pension-plan/'+UUID.randomUUID().toString()+'/claim', HttpMethod.GET)
-                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
-        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-pension-plan consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
-
-        when:
-        def response = handler.handleRequest(event, lambdaContext)
-
-        then:
-        response.statusCode == HttpStatus.OK.code
-        response.body != null
-
-        and:
-        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
-    }
-
-    def "We can fetch a contract's withdrawals" () {
-        given:
-        def resp = new ResponseInsurancePensionPlanWithdrawals().data(List.of())
-        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
-        pensionPlanService.getContractWithdrawals(_ as String, _ as String, _ as Pageable) >> resp
-
-        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-pension-plan/v1/insurance-pension-plan/'+UUID.randomUUID().toString()+'/withdrawals', HttpMethod.GET)
                 .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-pension-plan consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
 
@@ -217,31 +133,6 @@ class PensionPlanControllerSpec extends Specification {
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
 
-    def "We can fetch a contract's movements" () {
-        given:
-        def resp = new ResponseInsurancePensionPlanMovements().data(new InsurancePensionPlanMovements()
-                .movementBenefits(List.of())
-                .movementContributions(List.of())
-        )
-        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
-        pensionPlanService.getContractMovements(_ as String, _ as String, _ as Pageable) >> resp
-
-        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-pension-plan/v1/insurance-pension-plan/'+UUID.randomUUID().toString()+'/movements', HttpMethod.GET)
-                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
-        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-pension-plan consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
-
-        when:
-        def response = handler.handleRequest(event, lambdaContext)
-
-        then:
-        response.statusCode == HttpStatus.OK.code
-        response.body != null
-
-        and:
-        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
-        resp.meta.totalRecords == resp.data.movementBenefits.size() + resp.data.movementContributions.size()
-    }
-
     def "We can fetch a contract's movements V2" () {
         given:
         def resp = new ResponseInsurancePensionPlanMovements().data(new InsurancePensionPlanMovements()
@@ -265,30 +156,6 @@ class PensionPlanControllerSpec extends Specification {
         and:
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
         resp.meta.totalRecords == resp.data.movementBenefits.size() + resp.data.movementContributions.size()
-    }
-
-    def "We can fetch a contract's portabilities" () {
-        given:
-        def resp = new ResponseInsurancePensionPlanPortabilities().data(new InsurancePensionPlanPortability()
-                .hasOccurredPortability(true)
-                .portabilityInfo(List.of())
-        )
-        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
-        pensionPlanService.getContractPortabilities(_ as String, _ as String, _ as Pageable) >> resp
-
-        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-pension-plan/v1/insurance-pension-plan/'+UUID.randomUUID().toString()+'/portabilities', HttpMethod.GET)
-                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
-        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-pension-plan consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
-
-        when:
-        def response = handler.handleRequest(event, lambdaContext)
-
-        then:
-        response.statusCode == HttpStatus.OK.code
-        response.body != null
-
-        and:
-        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
 
     def "We can fetch a contract's portabilities V2" () {

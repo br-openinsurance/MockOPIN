@@ -2,7 +2,12 @@ package com.raidiam.trustframework.mockinsurance.services
 
 import com.raidiam.trustframework.mockinsurance.cleanups.CleanupSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
-import com.raidiam.trustframework.mockinsurance.domain.*
+import com.raidiam.trustframework.mockinsurance.domain.AccountHolderEntity
+import com.raidiam.trustframework.mockinsurance.domain.BusinessIdentificationEntity
+import com.raidiam.trustframework.mockinsurance.domain.BusinessQualificationEntity
+import com.raidiam.trustframework.mockinsurance.domain.ConsentEntity
+import com.raidiam.trustframework.mockinsurance.domain.PersonalIdentificationEntity
+import com.raidiam.trustframework.mockinsurance.domain.PersonalQualificationEntity
 import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentPermission
 import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentStatus
 import io.micronaut.http.HttpStatus
@@ -15,6 +20,10 @@ import spock.lang.Stepwise
 @Stepwise
 @MicronautTest(transactional = false, environments = ["db"])
 class CustomerServiceSpec extends CleanupSpecification {
+
+    private static final String ALPHANUMERIC_CNPJ = "SAZZEED9000169"
+    private static final String V1_NUMERIC_CNPJ = "50685362006768"
+    private static final String COMPANY_CNPJ = "01773247000537"
 
     @Inject
     CustomerService customerService
@@ -49,7 +58,7 @@ class CustomerServiceSpec extends CleanupSpecification {
             consent.setStatus(EnumConsentStatus.AUTHORISED.toString())
             consent = consentRepository.save(consent)
 
-            testBusinessIdentification = businessIdentificationRepository.save(TestEntityDataFactory.aBusinessIdentification(accountHolder.getAccountHolderId(), "00000000"))
+            testBusinessIdentification = businessIdentificationRepository.save(TestEntityDataFactory.aBusinessIdentification(accountHolder.getAccountHolderId(), ALPHANUMERIC_CNPJ))
             testBusinessQualification = businessQualificationRepository.save(TestEntityDataFactory.aBusinessQualification(accountHolder.getAccountHolderId()))
 
             testPersonalIdentification = personalIdentificationRepository.save(TestEntityDataFactory.aPersonalIdentification(accountHolder.getAccountHolderId()))
@@ -89,6 +98,31 @@ class CustomerServiceSpec extends CleanupSpecification {
 
         then:
         responseData.getBusinessId() == testBusinessIdentification.getBusinessIdentificationId().toString()
+    }
+
+    def "given a business identification with an alphanumeric CNPJ, when retrieving the V2 resource, then it responds with the alphanumeric CNPJ"() {
+        given: "the stored entity carries an alphanumeric CNPJ"
+        assert testBusinessIdentification.getCnpjNumber() == ALPHANUMERIC_CNPJ
+
+        when:
+        def data = customerService.getBusinessIdentificationsV2(consent.getConsentId()).getData().first()
+
+        then: "the alphanumeric CNPJ is passed through untouched"
+        data.getDocument().getBusinesscnpjNumber() == ALPHANUMERIC_CNPJ
+        data.getCompanyInfo().getCnpjNumber() == COMPANY_CNPJ
+    }
+
+    def "given a business identification with an alphanumeric CNPJ, when retrieving the V1 resource, then it responds with a numeric CNPJ"() {
+        given: "the stored entity carries an alphanumeric CNPJ"
+        assert testBusinessIdentification.getCnpjNumber() == ALPHANUMERIC_CNPJ
+
+        when:
+        def data = customerService.getBusinessIdentifications(consent.getConsentId()).getData().first()
+
+        then: "v1 returns its own numeric CNPJ, never the alphanumeric column value"
+        data.getDocument().getBusinesscnpjNumber() == V1_NUMERIC_CNPJ
+        data.getDocument().getBusinesscnpjNumber() != testBusinessIdentification.getCnpjNumber()
+        data.getCompanyInfo().getCnpjNumber() == COMPANY_CNPJ
     }
 
     def "we can get business complimentary information" () {
@@ -144,6 +178,20 @@ class CustomerServiceSpec extends CleanupSpecification {
         address.getAllOfAddressAddressTownName() == "Sao Paulo"
         address.getAllOfAddressAddressCountrySubDivision() == "SP"
         address.getAllOfAddressAddressPostCode() == "10000000"
+    }
+
+    def "given a personal identification, when retrieving the V1 and V2 resources, then both respond with the numeric companyInfo CNPJ"() {
+        when:
+        def v1Data = customerService.getPersonalIdentifications(consent.getConsentId()).getData().first()
+
+        then:
+        v1Data.getCompanyInfo().getCnpjNumber() == COMPANY_CNPJ
+
+        when:
+        def v2Data = customerService.getPersonalIdentificationsV2(consent.getConsentId()).getData().first()
+
+        then:
+        v2Data.getCompanyInfo().getCnpjNumber() == COMPANY_CNPJ
     }
 
     def "we can get personal financial-relations" () {

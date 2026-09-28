@@ -12,3 +12,4 @@ cs_config.json
 data/
 .vscode/
 claude.md
+bin/*

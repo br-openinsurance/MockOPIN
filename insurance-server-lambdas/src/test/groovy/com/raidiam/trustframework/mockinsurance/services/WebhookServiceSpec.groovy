@@ -5,12 +5,15 @@ import com.raidiam.trustframework.mockinsurance.domain.WebhookEntity
 import com.raidiam.trustframework.mockinsurance.models.generated.UpdateWebhook
 import io.micronaut.http.HttpRequest
 import io.micronaut.http.HttpResponse
+import io.micronaut.http.HttpStatus
 import io.micronaut.http.client.BlockingHttpClient
 import io.micronaut.http.client.HttpClient
+import io.micronaut.http.exceptions.HttpStatusException
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
 import spock.lang.Stepwise
+import spock.lang.Unroll
 
 @Stepwise
 @MicronautTest(transactional = false, environments = ["db"])
@@ -48,6 +51,27 @@ class WebhookServiceSpec extends CleanupSpecification {
         noExceptionThrown()
         resp.clientId == clientId
         resp.webhookUri == null
+    }
+
+    @Unroll
+    def "updateWebhook rejects an invalid webhook URI - #description"() {
+        when:
+        webhookService.updateWebhook(new UpdateWebhook().webhookUri(invalidUri), UUID.randomUUID().toString())
+
+        then:
+        def ex = thrown(HttpStatusException)
+        ex.status == HttpStatus.BAD_REQUEST
+
+        where:
+        description                              | invalidUri
+        "non-https scheme"                       | "http://example.com/webhook"
+        "missing scheme"                         | "example.com/webhook"
+        "malformed URI"                          | "https://[invalid"
+        "missing host"                           | "https:///path"
+        "localhost hostname"                     | "https://localhost/webhook"
+        "loopback IP literal"                    | "https://127.0.0.1/webhook"
+        "link-local IP literal (cloud metadata)" | "https://169.254.169.254/latest/meta-data"
+        "private IP literal"                     | "https://10.0.0.5/webhook"
     }
 
     def "Sending a notification for an unregistered client doesn't result in error"() {

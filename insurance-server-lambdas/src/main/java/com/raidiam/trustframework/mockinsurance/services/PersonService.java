@@ -33,21 +33,6 @@ public class PersonService extends BaseInsuranceService {
         return personPolicyRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable).getContent();
     }
 
-    public ResponseInsurancePerson getPolicies(Pageable pageable, String consentId) {
-        var policies = getPersonPolicyEntities(pageable, consentId);
-        return new ResponseInsurancePerson()
-                .data(List.of(new ResponseInsurancePersonData()
-                        .brand(new ResponseInsurancePersonBrand()
-                                .name("Mock")
-                                .companies(List.of(new ResponseInsurancePersonBrandCompanies()
-                                        .companyName("Mock Insurer")
-                                        .cnpjNumber("12345678901234")
-                                        .policies(policies.stream().map(PersonPolicyEntity::mapPolicyDTO).toList()))
-                                ))
-                        )
-                );
-    }
-
     public ResponseInsurancePersonV2 getPoliciesV2(Pageable pageable, String consentId) {
         var policies = getPersonPolicyEntities(pageable, consentId);
         return new ResponseInsurancePersonV2()
@@ -78,26 +63,6 @@ public class PersonService extends BaseInsuranceService {
         return policy;
     }
 
-    public ResponseInsurancePersonPolicyInfo getPolicyInfo(UUID policyId, String consentId) {
-        LOG.info("Getting person policy info response for consent id {}", consentId);
-        var policy = getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_PERSON_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PERSON_POLICYINFO_READ);
-        var response = policy.mapPolicyInfoDTO();
-
-        policy.getInsuredIds().forEach(insuredId -> response.getData().addInsuredsItem(personalInfoRepository.findById(insuredId)
-                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Personal info not found for UUID %s", insuredId)))
-                .mapDTO()));
-
-        policy.getBeneficiaryIds().forEach(beneficiaryId -> response.getData().addBeneficiariesItem(beneficiaryInfoRepository.findById(beneficiaryId)
-                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Beneficiary not found for UUID %s", beneficiaryId)))
-                .mapDTO()));
-
-        policy.getIntermediaryIds().forEach(intermediaryId -> response.getData().addIntermediariesItem(intermediaryRepository.findById(intermediaryId)
-                .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Intermediary not found for UUID %s", intermediaryId)))
-                .mapDTO()));
-
-        return response;
-    }
-
     public ResponseInsurancePersonPolicyInfoV2 getPolicyInfoV2(UUID policyId, String consentId) {
         LOG.info("Getting person policy info response for consent id {}", consentId);
         var policy = getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_PERSON_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PERSON_POLICYINFO_READ);
@@ -116,17 +81,6 @@ public class PersonService extends BaseInsuranceService {
                 .mapDTOV2()));
 
         return response;
-    }
-
-    public ResponseInsurancePersonClaims getPolicyClaims(UUID policyId, String consentId, Pageable pageable) {
-        LOG.info("Getting person policy claims response for consent id {}", consentId);
-        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_PERSON_CLAIM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PERSON_CLAIM_READ);
-
-        var claims = personPolicyClaimRepository.findByPersonPolicyId(policyId, pageable);
-        var resp = new ResponseInsurancePersonClaims()
-                .data(claims.getContent().stream().map(PersonPolicyClaimEntity::mapDTO).toList());
-        resp.setMeta(InsuranceLambdaUtils.getMeta(claims, false));
-        return resp;
     }
 
     public ResponseInsurancePersonClaimsV2 getPolicyClaimsV2(UUID policyId, String consentId, Pageable pageable) {

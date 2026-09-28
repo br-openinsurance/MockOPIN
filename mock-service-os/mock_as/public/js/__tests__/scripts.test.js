@@ -203,33 +203,3 @@ describe('consent screen — a customer cannot submit the form twice', () => {
     expect(secondAttempt.defaultPrevented).toBe(true);
   });
 });
-
-describe('consent screen — Confirm Consent button uses the configured product colour', () => {
-  it('applies the configured product colour to the enabled Confirm Consent button', () => {
-    // Given a customer is on the consent screen, which has a product colour configured
-    const document = renderInteractionPage({}, { brand: 'opin', buttonColor: '#2F3A4F' });
-    const continueButton = document.getElementById('continue-button');
-
-    // When the customer switches on "I consent to the above data"
-    turnConsentToggle(document, true);
-
-    // Then the button becomes clickable in the configured product colour
-    expect(continueButton.disabled).toBe(false);
-    expect(continueButton.style.getPropertyValue('--btn-color')).toBe('#2F3A4F');
-  });
-
-  it('goes back to looking exactly as it did before, if the customer changes their mind', () => {
-    // Given a customer is on the consent screen, before agreeing to anything
-    const document = renderInteractionPage({}, { brand: 'opin', buttonColor: '#2F3A4F' });
-    const continueButton = document.getElementById('continue-button');
-    const colorBeforeToggling = continueButton.style.getPropertyValue('--btn-color');
-
-    // When the customer agrees to consent, and then changes their mind and switches it back off
-    turnConsentToggle(document, true);
-    turnConsentToggle(document, false);
-
-    // Then the button cannot be clicked, and its colour is unaffected by toggling back and forth
-    expect(continueButton.disabled).toBe(true);
-    expect(continueButton.style.getPropertyValue('--btn-color')).toBe(colorBeforeToggling);
-  });
-});

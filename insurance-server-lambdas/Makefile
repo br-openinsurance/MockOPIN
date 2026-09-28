@@ -1,4 +1,4 @@
-.PHONY: setup setup-cs run run-with-cs image swagger mock-service-os cs cs-config
+.PHONY: setup setup-cs run run-with-cs down down-volumes image swagger mock-service-os cs cs-config
 
 ORGANIZATION_ID=76b370e3-def5-4798-8b6a-915cb5d6dd74
 PATH_TO_MOCK_OS="../mock-service-os"
@@ -36,6 +36,12 @@ build-auth-mtls:
 hosts:
 	@sudo -- sh -c -e "echo '\n127.0.0.1 api.local\n127.0.0.1 matls-api.local\n127.0.0.1 auth.local\n127.0.0.1 matls-auth.local\n127.0.0.1 directory' >> /etc/hosts";
 
+clean-run:
+	@$(MAKE) mock-service-os
+	@$(MAKE) build-auth-mtls
+	@$(MAKE) cs-config
+	@$(MAKE) run-with-cs
+
 run:
 	@$(SHELL) -c '$(MAKE_IMAGE_OPTIONAL)'
 	@docker-compose --profile main up
@@ -43,6 +49,17 @@ run:
 run-with-cs:
 	@$(SHELL) -c '$(MAKE_IMAGE_OPTIONAL)'
 	@docker-compose --profile main --profile cs up
+
+# Stop and remove every container in the project, keeping named volumes.
+# '--profile *' is required: without it compose ignores the profile-gated
+# services and silently tears down nothing.
+down:
+	@docker-compose --profile '*' down --remove-orphans
+
+# As above, but also drops the named volumes (mongo-data, maven-cache).
+down-volumes:
+	@echo "Removing containers and named volumes (mongo-data, maven-cache)"
+	@docker-compose --profile '*' down --remove-orphans --volumes
 
 image:
 	@echo "Building API docker image"
@@ -75,7 +92,7 @@ cs:
 	# Note: The Dockerfile to build the conformance suite jar is missing, then it is being added it manually.
 	@if test ! -d "conformance-suite"; then \
 	  echo "Cloning open insurance conformance suite repository..."; \
-	  git clone --branch main --single-branch --depth=1 https://gitlab.com/raidiam-conformance/open-insurance/open-insurance-brasil.git conformance-suite; \
+	  git clone https://gitlab.com/raidiam-conformance/open-insurance/open-insurance-brasil.git conformance-suite; \
 	  $(MKDIR) conformance-suite/server-dev; \
 	  echo 'FROM openjdk:17-jdk-slim\n\nRUN apt-get update && apt-get install redir' > conformance-suite/server-dev/Dockerfile; \
 	fi
@@ -116,7 +133,7 @@ cs-config:
 	      }, \
 		  "resource": { \
 	        "brazilOrganizationId": $$orgId, \
-	        "consentUrl": "https://api.local/open-insurance/consents/v2/consents", \
+	        "consentUrl": "https://api.local/open-insurance/consents/v3/consents", \
             "brazilCpf": "76109277673" \
 	      }, \
 		  "directory": { \
@@ -127,3 +144,8 @@ cs-config:
 	    }' > cs_config.json
 
 	@echo "New Conformance Suite config successfully written to cs_config.json"
+
+run-for-pipeline:
+	@$(MAKE) image
+	@$(MAKE) build-auth-mtls
+	@docker-compose --profile main up -d
