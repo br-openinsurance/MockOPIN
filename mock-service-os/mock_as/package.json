@@ -37,7 +37,10 @@
     "pino": "8.15.1",
     "pino-debug": "2.0.0",
     "pino-lambda": "4.2.1",
-    "undici": "^7.29.0"
+    "undici": "^7.30.0"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
   },
   "devDependencies": {
     "@babel/parser": "^7.29.8",
