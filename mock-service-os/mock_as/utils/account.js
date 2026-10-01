@@ -82,7 +82,6 @@ class Account {
     const result = await Account.coll().find({ sub: login }).limit(1).next();
 
     if (!result) {
-      log('account not found in collection');
       return undefined;
     }
 
@@ -108,9 +107,14 @@ class Account {
 
   static async authenticate(login, password) {
     const account = await this.findByLogin(login);
+    if (!account) {
+      log(`authentication failed: no account for login=${JSON.stringify(login)}`);
+      return undefined;
+    }
+
     const validCredential = await Credential.validatePassword(DB, account._id, password);
-    console.log(validCredential);
     if (!validCredential) {
+      log(`authentication failed: invalid credential for login=${JSON.stringify(login)}`);
       return undefined;
     }
 

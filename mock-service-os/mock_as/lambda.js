@@ -65,7 +65,7 @@ import forEach from 'lodash/forEach.js';
 import get from 'lodash/get.js';
 import serverlessExpress from '@vendia/serverless-express';
 
-import { Base64 } from 'js-base64';
+import { decodeAlbFormUrlEncodedBody } from './utils/albEvent.js';
 
 let server;
 let initialized;
@@ -124,10 +124,8 @@ export async function handler(event, context) {
       event.queryStringParameters[key] = decodeURIComponent(value).replace('+', ' ');
     });
   }
-  if (get(event, 'requestContext.elb') && get(event, 'path') === '/token') {
-    log('Parsing token request');
-    event.body = Base64.decode(event.body);
-    event.isBase64Encoded = false;
-  }
+
+  decodeAlbFormUrlEncodedBody(event);
+
   return server(event, context);
 }

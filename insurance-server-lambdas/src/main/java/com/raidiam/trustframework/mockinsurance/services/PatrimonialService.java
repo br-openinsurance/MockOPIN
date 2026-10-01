@@ -37,18 +37,6 @@ public class PatrimonialService extends BaseInsuranceService {
         return patrimonialPolicyRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable).getContent();
     }
 
-    public BaseInsuranceResponse getPolicies(String consentId, Pageable pageable) {
-        List<PatrimonialPolicyEntity> policies = getPatrimonialPolicyEntities(pageable, consentId);
-
-        return new BaseInsuranceResponse()
-                .data(List.of(new BaseBrandAndCompanyData()
-                    .brand("Mock")
-                    .companies(List.of(new BaseBrandAndCompanyDataCompanies()
-                            .companyName("Mock Insurer")
-                            .cnpjNumber("12345678901234")
-                            .policies(policies.stream().map(PatrimonialPolicyEntity::mapPolicyDto).toList()))))); 
-    }
-
     public BaseInsuranceResponseV2 getPoliciesV2(String consentId, Pageable pageable) {
         List<PatrimonialPolicyEntity> policies = getPatrimonialPolicyEntities(pageable, consentId);
 
@@ -102,18 +90,6 @@ public class PatrimonialService extends BaseInsuranceService {
         }
     }
     
-    public ResponseInsurancePatrimonialPolicyInfo getPolicyInfo(UUID policyId, String consentId) {
-        LOG.info("Getting patrimonial policy info response for consent id {}", consentId);
-        var policy = getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_PATRIMONIAL_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PATRIMONIAL_POLICYINFO_READ);
-        var response = policy.mapPolicyInfoDto();
-
-        policy.getInsuredIds().forEach(insuredId -> response.getData().addInsuredsItem(personalInfoRepository.findById(insuredId)
-            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Personal info not found for UUID %s", insuredId)))
-            .mapDTO()));
-
-        return response;
-    }
-
     public ResponseInsurancePatrimonialPolicyInfoV2 getPolicyInfoV2(UUID policyId, String consentId) {
         LOG.info("Getting patrimonial policy info response for consent id {}", consentId);
         var policy = getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_PATRIMONIAL_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PATRIMONIAL_POLICYINFO_READ);
@@ -144,17 +120,6 @@ public class PatrimonialService extends BaseInsuranceService {
             response.getData().addPaymentsItem(payment);
         });
         return response;
-    }
-
-    public ResponseInsurancePatrimonialClaims getClaims(UUID policyId, String consentId, Pageable pageable) {
-        LOG.info("Getting patrimonial claims response for consent id {}", consentId);
-        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_PATRIMONIAL_CLAIM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_PATRIMONIAL_CLAIM_READ);
-
-        var claims = patrimonialClaimRepository.findByPolicyId(policyId, pageable);
-        var resp = new ResponseInsurancePatrimonialClaims()
-                .data(claims.getContent().stream().map(PatrimonialClaimEntity::toResponse).toList());
-        resp.setMeta(InsuranceLambdaUtils.getMeta(claims, false));
-        return resp;
     }
 
     public ResponseInsurancePatrimonialClaimsV2 getClaimsV2(UUID policyId, String consentId, Pageable pageable) {

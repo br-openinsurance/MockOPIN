@@ -28,6 +28,19 @@ awslocal ssm put-parameter \
     --overwrite \
     --region "${REGION}"
 awslocal ssm put-parameter \
+    --name "/local/op_fapi_client_config/certificate_authority" \
+    --value "$(cat /init/certs/ca.crt)" \
+    --type "SecureString" \
+    --overwrite \
+    --region "${REGION}"
+# Fresh per LocalStack start; browser sessions from a previous run are invalidated.
+awslocal ssm put-parameter \
+    --name "/local/op_fapi_client_config/cookie_keys" \
+    --value "$(python3 -c 'import json, secrets; print(json.dumps([secrets.token_urlsafe(32)]))')" \
+    --type "SecureString" \
+    --overwrite \
+    --region "${REGION}"
+awslocal ssm put-parameter \
   --name "/mock/ready" \
   --type "SecureString" \
   --value "true" \

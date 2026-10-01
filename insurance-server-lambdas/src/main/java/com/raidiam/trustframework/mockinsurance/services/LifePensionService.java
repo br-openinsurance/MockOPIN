@@ -33,20 +33,6 @@ public class LifePensionService extends BaseInsuranceService {
         return lifePensionContractRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable);
     }
 
-    public ResponseInsuranceLifePension getContracts(Pageable pageable, String consentId) {
-        var contracts = getlLifePensionContractEntities(pageable, consentId);
-        var response = new ResponseInsuranceLifePension()
-                .data(List.of(new ResponseInsuranceLifePensionData()
-                        .brand(new ResponseInsuranceLifePensionBrand()
-                                .name("Mock")
-                                .companies(List.of(new ResponseInsuranceLifePensionBrandCompanies()
-                                        .companyName("Mock Insurer")
-                                        .cnpjNumber("12345678901234")
-                                        .contracts(contracts.getContent().stream().map(LifePensionContractEntity::mapContractDTO).toList()))))));
-        response.setMeta(InsuranceLambdaUtils.getMeta(contracts, false));
-        return response;
-    }
-
     public ResponseInsuranceLifePensionV2 getContractsV2(Pageable pageable, String consentId) {
         var contracts = getlLifePensionContractEntities(pageable, consentId);
         var response = new ResponseInsuranceLifePensionV2()
@@ -76,25 +62,9 @@ public class LifePensionService extends BaseInsuranceService {
         return contract;
     }
 
-    public ResponseInsuranceLifePensionContractInfo getContractInfo(UUID certificateId, String consentId) {
-        LOG.info("Getting life pension contract info response for consent id {}", consentId);
-        return getContract(certificateId, consentId, EnumConsentPermission.LIFE_PENSION_CONTRACTINFO_READ, EnumConsentV3Permission.LIFE_PENSION_CONTRACTINFO_READ).mapContractInfoDTO();
-    }
-
     public ResponseInsuranceLifePensionContractInfoV2 getContractInfoV2(UUID certificateId, String consentId) {
         LOG.info("Getting life pension contract info response for consent id {}", consentId);
         return getContract(certificateId, consentId, EnumConsentPermission.LIFE_PENSION_CONTRACTINFO_READ, EnumConsentV3Permission.LIFE_PENSION_CONTRACTINFO_READ).mapContractInfoDTOV2();
-    }
-
-    public ResponseInsuranceLifePensionWithdrawal getContractWithdrawals(UUID certificateId, String consentId, Pageable pageable) {
-        LOG.info("Getting life pension contract withdrawals response for consent id {}", consentId);
-        getContract(certificateId, consentId, EnumConsentPermission.LIFE_PENSION_WITHDRAWALS_READ, EnumConsentV3Permission.LIFE_PENSION_WITHDRAWALS_READ);
-
-        var withdrawals = lifePensionContractWithdrawalRepository.findByLifePensionContractId(certificateId, pageable);
-        var resp = new ResponseInsuranceLifePensionWithdrawal()
-                .data(withdrawals.getContent().stream().map(LifePensionContractWithdrawalEntity::mapDTO).toList());
-        resp.setMeta(InsuranceLambdaUtils.getMeta(withdrawals, false));
-        return resp;
     }
 
     public ResponseInsuranceLifePensionWithdrawalV2 getContractWithdrawalsV2(UUID certificateId, String consentId, Pageable pageable) {
@@ -108,17 +78,6 @@ public class LifePensionService extends BaseInsuranceService {
         return resp;
     }
 
-    public ResponseInsuranceLifePensionClaim getContractClaims(UUID certificateId, String consentId, Pageable pageable) {
-        LOG.info("Getting life pension contract claims response for consent id {}", consentId);
-        getContract(certificateId, consentId, EnumConsentPermission.LIFE_PENSION_CLAIM, EnumConsentV3Permission.LIFE_PENSION_CLAIM_READ);
-
-        var withdrawals = lifePensionContractClaimRepository.findByLifePensionContractId(certificateId, pageable);
-        var resp = new ResponseInsuranceLifePensionClaim()
-                .data(withdrawals.getContent().stream().map(LifePensionContractClaimEntity::mapDTO).toList());
-        resp.setMeta(InsuranceLambdaUtils.getMeta(withdrawals, false));
-        return resp;
-    }
-
     public ResponseInsuranceLifePensionClaimV2 getContractClaimsV2(UUID certificateId, String consentId, Pageable pageable) {
         LOG.info("Getting life pension contract claims response for consent id {}", consentId);
         getContract(certificateId, consentId, EnumConsentPermission.LIFE_PENSION_CLAIM, EnumConsentV3Permission.LIFE_PENSION_CLAIM_READ);
@@ -127,21 +86,6 @@ public class LifePensionService extends BaseInsuranceService {
         var resp = new ResponseInsuranceLifePensionClaimV2()
                 .data(withdrawals.getContent().stream().map(LifePensionContractClaimEntity::mapDTOV2).toList());
         resp.setMeta(InsuranceLambdaUtils.getMeta(withdrawals, false));
-        return resp;
-    }
-
-    public ResponseInsuranceLifePensionPortabilities getContractPortabilities(UUID certificateId, String consentId,
-                                                                              Pageable pageable) {
-        LOG.info("Getting life pension contract portability response for consent id {}", consentId);
-        getContract(certificateId, consentId, EnumConsentPermission.LIFE_PENSION_PORTABILITIES_READ, EnumConsentV3Permission.LIFE_PENSION_PORTABILITIES_READ);
-
-        var portability = lifePensionContractPortabilityRepository.findByLifePensionContractId(certificateId, pageable);
-        var resp = new ResponseInsuranceLifePensionPortabilities()
-                .data(new InsuranceLifePensionPortability()
-                        .portabilityInfo(portability.getContent().stream().map(LifePensionContractPortabilityInfoEntity::mapDTO).toList())
-                        .hasOccurredPortability(!portability.isEmpty())
-                );
-        resp.setMeta(InsuranceLambdaUtils.getMeta(portability, false));
         return resp;
     }
 

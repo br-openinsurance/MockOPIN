@@ -27,8 +27,14 @@ public abstract class QuoteLeadService<T extends QuoteEntity> extends BaseInsura
     }
 
     public T getQuote(String consentId, String clientId) {
-        return this.getQuoteByConsentId(consentId)
+        T quote = this.getQuoteByConsentId(consentId)
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Quote lead for consent id " + consentId + " not found"));
+
+        if (clientId == null || !clientId.equals(quote.getClientId())) {
+            throw new HttpStatusException(HttpStatus.FORBIDDEN, "NAO_INFORMADO: Requested a consent created with a different oauth client");
+        }
+
+        return quote;
     }
 
     public T patchQuote(RevokePatchPayload req, String consentId, String clientId) {

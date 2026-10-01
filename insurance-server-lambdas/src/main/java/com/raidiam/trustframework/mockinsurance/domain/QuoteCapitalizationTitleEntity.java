@@ -39,27 +39,12 @@ public class QuoteCapitalizationTitleEntity extends QuoteEntity {
             quoteData.getSinglePayment().getUnitType().equals(UnitTypeEnum.PORCENTAGEM);
     }
 
-    public static QuoteCapitalizationTitleEntity fromRequest(QuoteRequestCapitalizationTitle req, String clientId) {
-        QuoteCapitalizationTitleEntity entity = new QuoteCapitalizationTitleEntity();
-        entity.setConsentId(req.getData().getConsentId());
-        entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
-        entity.setClientId(clientId);
-        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
-        entity.setCustomer(req.getData().getQuoteCustomer());
-
-        var data = new QuoteData();
-        data.setV1(req.getData());
-        entity.setData(data);
-
-        return entity;
-    }
-
     public static QuoteCapitalizationTitleEntity fromRequestV2(QuoteRequestCapitalizationTitleV2 req, String clientId) {
         QuoteCapitalizationTitleEntity entity = new QuoteCapitalizationTitleEntity();
         entity.setConsentId(req.getData().getConsentId());
         entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
         entity.setClientId(clientId);
-        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
+        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToInstant(req.getData().getExpirationDateTime()));
         entity.setCustomer(req.getData().getQuoteCustomer());
 
         var data = new QuoteData();
@@ -67,45 +52,6 @@ public class QuoteCapitalizationTitleEntity extends QuoteEntity {
         entity.setData(data);
 
         return entity;
-    }
-
-    public ResponseQuoteCapitalizationTitle toResponse() {
-        var quoteData = new ResponseQuoteCapitalizationTitleData();
-        quoteData.setStatus(StatusEnum.fromValue(this.getStatus()));
-        quoteData.setStatusUpdateDateTime(InsuranceLambdaUtils.dateToOffsetDate(this.getUpdatedAt()));
-
-        if (QuoteStatusEnum.ACPT.toString().equals(this.getStatus())) {
-            var customer = new QuoteCustomer();
-            customer.setIdentification(this.getData().getV1().getQuoteCustomer().getIdentificationData());
-            customer.setQualification(this.getData().getV1().getQuoteCustomer().getQualificationData());
-            customer.setComplimentaryInfo(this.getData().getV1().getQuoteCustomer().getComplimentaryInformationData());
-
-            var quote = new QuoteStatusCapitalizationTitleQuotes();
-            quote.setInsurerQuoteId(this.getQuoteId().toString());
-            quote.setSusepProcessNumber("9456248756872356");
-            quote.setPlanId("id");
-            quote.setModality(ModalityEnum.valueOf(this.getData().getV1().getQuoteData().getModality().toString()));
-            quote.setPeriod("36");
-            quote.setGrouperCode("37846584765");
-            quote.setRaffle(List.of());
-            quote.setPaymentType(PaymentTypeEnum.valueOf(this.getData().getV1().getQuoteData().getPaymentType().toString()));
-
-            var quoteInfo = new QuoteStatusCapitalizationTitle();
-            quoteInfo.setQuoteCustomer(customer);
-            quoteInfo.setQuoteData(this.getData().getV1().getQuoteData());
-            quoteInfo.setQuoteCustomData(this.getData().getV1().getQuoteCustomData());
-            quoteInfo.setQuotes(List.of(quote));
-
-            quoteData.setQuoteInfo(quoteInfo);
-        }
-
-        if (QuoteStatusEnum.RJCT.toString().equals(this.getStatus())) {
-            quoteData.setRejectionReason("The quote was rejected");
-        }
-
-        var resp = new ResponseQuoteCapitalizationTitle();
-        resp.setData(quoteData);
-        return resp;
     }
 
     public ResponseQuoteCapitalizationTitleV2 toResponseV2() {

@@ -1311,16 +1311,294 @@ CREATE OR REPLACE FUNCTION addAutoPolicyClaim(claimId varchar, policyId varchar,
     RETURNING auto_policy_claim_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addTransportPolicy(docId varchar, policyId varchar, s varchar, docType varchar, proposalId varchar) RETURNS varchar AS $$
-    INSERT INTO transport_policies(account_holder_id, transport_policy_id, status, document_type, proposal_id, created_at, created_by, updated_at, updated_by)
-    VALUES (getAccountHolderId(docId), policyId, s, docType, proposalId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+DROP FUNCTION IF EXISTS addTransportPolicy(varchar, varchar, varchar, varchar, varchar);
+CREATE OR REPLACE FUNCTION addTransportPolicy(
+    docId varchar,
+    policyId varchar,
+    s varchar,
+    docType varchar,
+    proposalId varchar,
+    productName varchar DEFAULT 'Mock Insurer Transport Policy Plan',
+    susepProcessNumber varchar DEFAULT '12345',
+    groupCertificateId varchar DEFAULT 'string',
+    issuanceType varchar DEFAULT 'EMISSAO_PROPRIA',
+    issuanceDate date DEFAULT '2022-12-31',
+    termStartDate date DEFAULT '2022-12-31',
+    termEndDate date DEFAULT '2023-12-31',
+    leadInsurerCode varchar DEFAULT 'string',
+    leadInsurerPolicyId varchar DEFAULT 'string',
+    maxLMGAmount varchar DEFAULT '100.00',
+    maxLMGUnitType varchar DEFAULT 'MONETARIO',
+    maxLMGUnitTypeOthers varchar DEFAULT 'string',
+    maxLMGUnitCode varchar DEFAULT 'Br',
+    maxLMGUnitDescription varchar DEFAULT 'BRL',
+    maxLMGCurrency varchar DEFAULT 'BRL',
+    coinsuranceRetainedPercentage varchar DEFAULT '100.00'
+) RETURNS varchar AS $$
+    INSERT INTO transport_policies(account_holder_id, transport_policy_id, status, document_type, proposal_id,
+    product_name, susep_process_number, group_certificate_id, issuance_type, issuance_date, term_start_date,
+    term_end_date, lead_insurer_code, lead_insurer_policy_id, max_lmg_amount, max_lmg_unit_type,
+    max_lmg_unit_type_others, max_lmg_unit_code, max_lmg_unit_description, max_lmg_currency,
+    coinsurance_retained_percentage, created_at, created_by, updated_at, updated_by)
+    VALUES (getAccountHolderId(docId), policyId, s, docType, proposalId, productName, susepProcessNumber,
+    groupCertificateId, issuanceType, issuanceDate, termStartDate, termEndDate, leadInsurerCode, leadInsurerPolicyId,
+    maxLMGAmount, maxLMGUnitType, maxLMGUnitTypeOthers, maxLMGUnitCode, maxLMGUnitDescription, maxLMGCurrency,
+    coinsuranceRetainedPercentage, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING transport_policy_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION addTransportPolicyClaim(policyId varchar, s varchar) RETURNS varchar AS $$
-    INSERT INTO transport_policy_claims(transport_policy_claim_id, status, created_at, created_by, updated_at, updated_by)
-    VALUES (policyId, s, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+-- transport_policies has a VARCHAR primary key, so it cannot share the UUID-keyed
+-- personal_info_ids / beneficiary_info_ids / ... link tables. The linked rows themselves
+-- still come from addPersonalInfo, addBeneficiaryInfo, addPrincipalInfo, addIntermediaryInfo
+-- and addCoinsurer.
+CREATE OR REPLACE FUNCTION addTransportPersonalInfoIds(reference_id varchar, ids UUID[])
+RETURNS void AS $$
+BEGIN
+  INSERT INTO transport_personal_info_ids(reference_id, personal_id)
+  SELECT reference_id, unnest(ids);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION addTransportBeneficiaryInfoIds(reference_id varchar, ids UUID[])
+RETURNS void AS $$
+BEGIN
+  INSERT INTO transport_beneficiary_info_ids(reference_id, beneficiary_id)
+  SELECT reference_id, unnest(ids);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION addTransportPrincipalInfoIds(reference_id varchar, ids UUID[])
+RETURNS void AS $$
+BEGIN
+  INSERT INTO transport_principal_info_ids(reference_id, principal_id)
+  SELECT reference_id, unnest(ids);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION addTransportIntermediaryInfoIds(reference_id varchar, ids UUID[])
+RETURNS void AS $$
+BEGIN
+  INSERT INTO transport_intermediary_info_ids(reference_id, intermediary_id)
+  SELECT reference_id, unnest(ids);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION addTransportCoinsurerIds(reference_id varchar, ids UUID[])
+RETURNS void AS $$
+BEGIN
+  INSERT INTO transport_coinsurer_ids(reference_id, coinsurer_id)
+  SELECT reference_id, unnest(ids);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION addTransportPolicyCoverage(
+    policyId varchar,
+    deductibleId uuid,
+    posId uuid,
+    branch varchar DEFAULT '0320',
+    code varchar DEFAULT 'ACIDENTES_PESSOAIS_COM_PASSAGEIROS',
+    description varchar DEFAULT 'string'
+) RETURNS uuid AS $$
+    INSERT INTO transport_policy_coverages(transport_policy_id, branch, code, description, deductible_id, pos_id,
+    created_at, created_by, updated_at, updated_by)
+    VALUES (policyId, branch, code, description, deductibleId, posId, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING transport_policy_coverage_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addTransportPolicyPremium(
+    policyId varchar,
+    paymentsQuantity integer DEFAULT 3,
+    amount varchar DEFAULT '100.00',
+    unitType varchar DEFAULT 'MONETARIO',
+    unitTypeOthers varchar DEFAULT 'string',
+    unitCode varchar DEFAULT 'Br',
+    unitDescription varchar DEFAULT 'BRL',
+    currency varchar DEFAULT 'BRL'
+) RETURNS uuid AS $$
+    INSERT INTO transport_policy_premiums(transport_policy_id, payments_quantity, amount, unit_type,
+    unit_type_others, unit_code, unit_description, currency, created_at, created_by, updated_at, updated_by)
+    VALUES (policyId, paymentsQuantity, amount, unitType, unitTypeOthers, unitCode, unitDescription, currency,
+    NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING transport_policy_premium_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addTransportPolicyPremiumCoverage(
+    premiumId uuid,
+    branch varchar DEFAULT '0320',
+    code varchar DEFAULT 'ACIDENTES_PESSOAIS_COM_PASSAGEIROS',
+    description varchar DEFAULT 'string',
+    premiumAmount varchar DEFAULT '100.00',
+    premiumUnitType varchar DEFAULT 'MONETARIO',
+    premiumUnitTypeOthers varchar DEFAULT 'string',
+    premiumUnitCode varchar DEFAULT 'Br',
+    premiumUnitDescription varchar DEFAULT 'BRL',
+    premiumCurrency varchar DEFAULT 'BRL'
+) RETURNS uuid AS $$
+    INSERT INTO transport_policy_premium_coverages(transport_policy_premium_id, branch, code, description,
+    premium_amount, premium_unit_type, premium_unit_type_others, premium_unit_code, premium_unit_description,
+    premium_currency, created_at, created_by, updated_at, updated_by)
+    VALUES (premiumId, branch, code, description, premiumAmount, premiumUnitType, premiumUnitTypeOthers,
+    premiumUnitCode, premiumUnitDescription, premiumCurrency, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING transport_policy_premium_coverage_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addTransportPolicyInsuredObject(
+    policyId varchar,
+    identification varchar DEFAULT 'string',
+    type varchar DEFAULT 'CONTRATO',
+    typeAdditionalInfo varchar DEFAULT 'string',
+    description varchar DEFAULT 'contrato',
+    amount varchar DEFAULT '100.00',
+    unitType varchar DEFAULT 'MONETARIO',
+    unitTypeOthers varchar DEFAULT 'string',
+    unitCode varchar DEFAULT 'Br',
+    unitDescription varchar DEFAULT 'BRL',
+    currency varchar DEFAULT 'BRL'
+) RETURNS uuid AS $$
+    INSERT INTO transport_policy_insured_objects(transport_policy_id, identification, type, type_additional_info,
+    description, amount, unit_type, unit_type_others, unit_code, unit_description, currency, created_at, created_by,
+    updated_at, updated_by)
+    VALUES (policyId, identification, type, typeAdditionalInfo, description, amount, unitType, unitTypeOthers,
+    unitCode, unitDescription, currency, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING transport_policy_insured_object_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addTransportPolicyInsuredObjectCoverage(
+    insuredObjectId uuid,
+    branch varchar DEFAULT '0320',
+    code varchar DEFAULT 'ACIDENTES_PESSOAIS_COM_PASSAGEIROS',
+    description varchar DEFAULT 'string',
+    internalCode varchar DEFAULT 'string',
+    susepProcessNumber varchar DEFAULT '12345',
+    lmiAmount varchar DEFAULT '100',
+    lmiUnitType varchar DEFAULT 'PORCENTAGEM',
+    lmiUnitTypeOthers varchar DEFAULT 'string',
+    lmiUnitCode varchar DEFAULT 'Br',
+    lmiUnitDescription varchar DEFAULT 'BRL',
+    lmiCurrency varchar DEFAULT 'BRL',
+    lmiSublimit boolean DEFAULT true,
+    termStartDate date DEFAULT '2022-12-31',
+    termEndDate date DEFAULT '2023-12-31',
+    mainCoverage boolean DEFAULT true,
+    feature varchar DEFAULT 'MASSIFICADOS',
+    type varchar DEFAULT 'PARAMETRICO',
+    gracePeriod integer DEFAULT 10,
+    gracePeriodicity varchar DEFAULT 'DIA',
+    gracePeriodCountingMethod varchar DEFAULT 'DIAS_UTEIS',
+    gracePeriodStartDate date DEFAULT '2022-12-31',
+    gracePeriodEndDate date DEFAULT '2023-12-31',
+    premiumPeriodicity varchar DEFAULT 'MENSAL',
+    premiumPeriodicityOthers varchar DEFAULT 'string'
+) RETURNS uuid AS $$
+    INSERT INTO transport_policy_insured_object_coverages(transport_policy_insured_object_id, branch, code,
+    description, internal_code, susep_process_number, lmi_amount, lmi_unit_type, lmi_unit_type_others, lmi_unit_code,
+    lmi_unit_description, lmi_currency, is_lmi_sublimit, term_start_date, term_end_date, is_main_coverage, feature,
+    type, grace_period, grace_periodicity, grace_period_counting_method, grace_period_start_date,
+    grace_period_end_date, premium_periodicity, premium_periodicity_others, created_at, created_by, updated_at,
+    updated_by)
+    VALUES (insuredObjectId, branch, code, description, internalCode, susepProcessNumber, lmiAmount, lmiUnitType,
+    lmiUnitTypeOthers, lmiUnitCode, lmiUnitDescription, lmiCurrency, lmiSublimit, termStartDate, termEndDate,
+    mainCoverage, feature, type, gracePeriod, gracePeriodicity, gracePeriodCountingMethod, gracePeriodStartDate,
+    gracePeriodEndDate, premiumPeriodicity, premiumPeriodicityOthers, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING transport_policy_insured_object_coverage_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addTransportPolicyEndorsement(
+    policyId varchar,
+    travelType varchar DEFAULT 'INTERNACIONAL_IMPORTACAO',
+    transportType varchar DEFAULT 'AEREO',
+    shipmentsNumber integer DEFAULT 10,
+    branch varchar DEFAULT '0320',
+    shipmentsPremiumAmount varchar DEFAULT '100',
+    shipmentsPremiumUnitType varchar DEFAULT 'PORCENTAGEM',
+    shipmentsPremiumUnitTypeOthers varchar DEFAULT 'string',
+    shipmentsPremiumUnitCode varchar DEFAULT 'Br',
+    shipmentsPremiumUnitDescription varchar DEFAULT 'BRL',
+    shipmentsPremiumCurrency varchar DEFAULT 'BRL',
+    shipmentsPremiumBRL varchar DEFAULT '2000.00',
+    shipmentsInsuredsAmount varchar DEFAULT '100',
+    shipmentsInsuredsUnitType varchar DEFAULT 'PORCENTAGEM',
+    shipmentsInsuredsUnitTypeOthers varchar DEFAULT 'string',
+    shipmentsInsuredsUnitCode varchar DEFAULT 'Br',
+    shipmentsInsuredsUnitDescription varchar DEFAULT 'BRL',
+    shipmentsInsuredsCurrency varchar DEFAULT 'BRL',
+    minInsuredAmount varchar DEFAULT '100',
+    minInsuredUnitType varchar DEFAULT 'PORCENTAGEM',
+    minInsuredUnitTypeOthers varchar DEFAULT 'string',
+    minInsuredUnitCode varchar DEFAULT 'Br',
+    minInsuredUnitDescription varchar DEFAULT 'BRL',
+    minInsuredCurrency varchar DEFAULT 'BRL',
+    maxInsuredAmount varchar DEFAULT '100',
+    maxInsuredUnitType varchar DEFAULT 'PORCENTAGEM',
+    maxInsuredUnitTypeOthers varchar DEFAULT 'string',
+    maxInsuredUnitCode varchar DEFAULT 'Br',
+    maxInsuredUnitDescription varchar DEFAULT 'BRL',
+    maxInsuredCurrency varchar DEFAULT 'BRL'
+) RETURNS uuid AS $$
+    INSERT INTO transport_policy_endorsements(transport_policy_id, travel_type, transport_type, shipments_number,
+    branch, shipments_premium_amount, shipments_premium_unit_type, shipments_premium_unit_type_others,
+    shipments_premium_unit_code, shipments_premium_unit_description, shipments_premium_currency,
+    shipments_premium_brl, shipments_insureds_amount, shipments_insureds_unit_type,
+    shipments_insureds_unit_type_others, shipments_insureds_unit_code, shipments_insureds_unit_description,
+    shipments_insureds_currency, min_insured_amount, min_insured_unit_type, min_insured_unit_type_others,
+    min_insured_unit_code, min_insured_unit_description, min_insured_currency, max_insured_amount,
+    max_insured_unit_type, max_insured_unit_type_others, max_insured_unit_code, max_insured_unit_description,
+    max_insured_currency, created_at, created_by, updated_at, updated_by)
+    VALUES (policyId, travelType, transportType, shipmentsNumber, branch, shipmentsPremiumAmount,
+    shipmentsPremiumUnitType, shipmentsPremiumUnitTypeOthers, shipmentsPremiumUnitCode,
+    shipmentsPremiumUnitDescription, shipmentsPremiumCurrency, shipmentsPremiumBRL, shipmentsInsuredsAmount,
+    shipmentsInsuredsUnitType, shipmentsInsuredsUnitTypeOthers, shipmentsInsuredsUnitCode,
+    shipmentsInsuredsUnitDescription, shipmentsInsuredsCurrency, minInsuredAmount, minInsuredUnitType,
+    minInsuredUnitTypeOthers, minInsuredUnitCode, minInsuredUnitDescription, minInsuredCurrency, maxInsuredAmount,
+    maxInsuredUnitType, maxInsuredUnitTypeOthers, maxInsuredUnitCode, maxInsuredUnitDescription,
+    maxInsuredCurrency, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING transport_policy_endorsement_id
+$$ LANGUAGE SQL;
+
+DROP FUNCTION IF EXISTS addTransportPolicyClaim(varchar, varchar);
+CREATE OR REPLACE FUNCTION addTransportPolicyClaim(
+    claimId varchar,
+    policyId varchar,
+    s varchar,
+    identification varchar DEFAULT 'string',
+    documentationDeliveryDate date DEFAULT '2022-12-31',
+    statusAlterationDate date DEFAULT '2022-12-31',
+    occurrenceDate date DEFAULT '2022-12-31',
+    warningDate date DEFAULT '2022-12-31',
+    thirdPartyClaimDate date DEFAULT '2022-12-31',
+    amount varchar DEFAULT '100.00',
+    unitType varchar DEFAULT 'MONETARIO',
+    unitTypeOthers varchar DEFAULT 'string',
+    unitCode varchar DEFAULT 'Br',
+    unitDescription varchar DEFAULT 'BRL',
+    currency varchar DEFAULT 'BRL',
+    denialJustification varchar DEFAULT 'PRESCRICAO',
+    denialJustificationDescription varchar DEFAULT 'string'
+) RETURNS varchar AS $$
+    INSERT INTO transport_policy_claims(transport_policy_claim_id, transport_policy_id, status, identification,
+    documentation_delivery_date, status_alteration_date, occurrence_date, warning_date, third_party_claim_date,
+    amount, unit_type, unit_type_others, unit_code, unit_description, currency, denial_justification,
+    denial_justification_description, created_at, created_by, updated_at, updated_by)
+    VALUES (claimId, policyId, s, identification, documentationDeliveryDate, statusAlterationDate, occurrenceDate,
+    warningDate, thirdPartyClaimDate, amount, unitType, unitTypeOthers, unitCode, unitDescription, currency,
+    denialJustification, denialJustificationDescription, NOW(), 'PREPOPULATE', NOW(), 'PREPOPULATE')
     RETURNING transport_policy_claim_id
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION addTransportPolicyClaimCoverage(
+    claimId varchar,
+    insuredObjectId varchar DEFAULT 'string',
+    branch varchar DEFAULT '0111',
+    code varchar DEFAULT 'ACIDENTES_PESSOAIS_COM_PASSAGEIROS',
+    description varchar DEFAULT 'string',
+    warningDate date DEFAULT '2022-12-31',
+    thirdPartyClaimDate date DEFAULT '2022-12-31'
+) RETURNS uuid AS $$
+    INSERT INTO transport_policy_claim_coverages(transport_policy_claim_id, insured_object_id, branch, code,
+    description, warning_date, third_party_claim_date, created_at, created_by, updated_at, updated_by)
+    VALUES (claimId, insuredObjectId, branch, code, description, warningDate, thirdPartyClaimDate, NOW(),
+    'PREPOPULATE', NOW(), 'PREPOPULATE')
+    RETURNING transport_policy_claim_coverage_id
 $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION addDynamicField(apiName varchar) RETURNS uuid AS $$

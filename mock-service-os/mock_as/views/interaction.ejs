@@ -1,6 +1,7 @@
 <% let isConsent = !!(details.consent.consentId || details.consent.recurringConsentId); %>
 <% let isEnrollment = !!(details.consent.enrollmentId); %>
 <% let isOptimizedJourney = !!(details.consent.journey && details.consent.journey.isLinked); %>
+<% let requester = locals.requester || ''; %>
 <%
   // authBase lets the decoupled CIBA approval flow reuse this view: it defaults
   // to the redirect interaction path but can be overridden (e.g. /ciba/authorize/<id>).
@@ -228,6 +229,9 @@
       <h3 class="font-semibold text-gray-800">Consent Status:</h3>
       <p class="text-gray-600 text-sm"><strong>Status:</strong> <%= details.consent.status %></p>
       <p class="text-gray-600 text-sm"><strong>Expiration Date:</strong> <%= details.consent.expirationDateTime %></p>
+      <% if (requester) { %>
+      <p id="requester-name" class="text-gray-600 text-sm"><strong>Requested by:</strong> <%= requester %></p>
+      <% } %>
     </div>
   <% } %>
   <% if (isEnrollment) { %>
@@ -251,6 +255,26 @@
                title="Format: YYYY-MM-DDTHH:MM"
                value="<%= details.consent.expirationDateTime ?
                        new Date(details.consent.expirationDateTime).toISOString().slice(0,16) : '' %>" />
+      </div>
+      <div class="mb-2">
+        <label class="block text-gray-600 text-sm font-medium mb-1" for="enrollment-transaction-limit">Transaction Limit (R$):</label>
+        <input type="text" id="enrollment-transaction-limit" name="transactionLimit"
+               class="text-sm border border-gray-300 rounded px-2 py-1 w-full bg-white"
+               placeholder="1000.00"
+               maxlength="19"
+               pattern="\d{1,16}\.\d{2}"
+               title="Format: 1000.00 - two decimal places are required"
+               value="<%= details.consent.transactionLimit || '' %>" />
+      </div>
+      <div class="mb-2">
+        <label class="block text-gray-600 text-sm font-medium mb-1" for="enrollment-daily-limit">Daily Limit (R$):</label>
+        <input type="text" id="enrollment-daily-limit" name="dailyLimit"
+               class="text-sm border border-gray-300 rounded px-2 py-1 w-full bg-white"
+               placeholder="1000.00"
+               maxlength="19"
+               pattern="\d{1,16}\.\d{2}"
+               title="Format: 1000.00 - two decimal places are required"
+               value="<%= details.consent.dailyLimit || '' %>" />
       </div>
     </div>
   <% } %>

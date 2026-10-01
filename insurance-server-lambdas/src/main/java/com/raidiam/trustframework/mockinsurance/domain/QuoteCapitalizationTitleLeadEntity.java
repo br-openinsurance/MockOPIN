@@ -20,23 +20,12 @@ public class QuoteCapitalizationTitleLeadEntity extends QuoteEntity {
         return false;
     }
 
-    public static QuoteCapitalizationTitleLeadEntity fromRequest(QuoteRequestCapitalizationTitleLead req, String clientId) {
-        QuoteCapitalizationTitleLeadEntity entity = new QuoteCapitalizationTitleLeadEntity();
-        entity.setConsentId(req.getData().getConsentId());
-        entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
-        entity.setClientId(clientId);
-        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
-        entity.setCustomer(req.getData().getQuoteCustomer());
-
-        return entity;
-    }
-
     public static QuoteCapitalizationTitleLeadEntity fromRequestV2(QuoteRequestCapitalizationTitleLeadV2 req, String clientId) {
         QuoteCapitalizationTitleLeadEntity entity = new QuoteCapitalizationTitleLeadEntity();
         entity.setConsentId(req.getData().getConsentId());
         entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
         entity.setClientId(clientId);
-        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
+        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToInstant(req.getData().getExpirationDateTime()));
         entity.setCustomer(req.getData().getQuoteCustomer());
 
         return entity;

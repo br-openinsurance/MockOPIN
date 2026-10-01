@@ -83,7 +83,7 @@ services:
     profiles:
       - main
       - dev
-    image: localstack/localstack
+    image: localstack/localstack:4.14.0
     ports:
       - "4566:4566"
     environment:
@@ -97,6 +97,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ../mock-service-os/certs/op.key:/init/certs/client.key
       - ../mock-service-os/certs/op.crt:/init/certs/client.crt
+      - ../mock-service-os/certs/ca.crt:/init/certs/ca.crt
     healthcheck:
       test: bash -c 'awslocal ssm get-parameter --name /mock/ready >/dev/null 2>&1'
       interval: 5s

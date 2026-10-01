@@ -1,5 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.controllers;
 
+import com.raidiam.trustframework.mockinsurance.aop.LogInvocation;
 import com.raidiam.trustframework.mockinsurance.auth.AuthenticationGrant;
 import com.raidiam.trustframework.mockinsurance.auth.RequiredAuthenticationGrant;
 import com.raidiam.trustframework.mockinsurance.fapi.ResponseErrorWithRequestDateTime;
@@ -17,8 +18,6 @@ import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
@@ -26,7 +25,6 @@ import java.util.UUID;
 @Secured({"FINANCIAL_RISK_MANAGE"})
 @Controller("/open-insurance/insurance-financial-risk")
 public class FinancialRiskController extends BaseInsuranceController {
-    private static final Logger LOG = LoggerFactory.getLogger(FinancialRiskController.class);
 
     @Inject
     private FinancialRiskService service;
@@ -35,13 +33,11 @@ public class FinancialRiskController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    @LogInvocation
     public BaseInsuranceResponse getPolicies(Pageable pageable, @NotNull HttpRequest<?> request) {
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Getting policies for consent id {} v1", consentId);
         BaseInsuranceResponse response = service.getPolicies(pageable, consentId);
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
-        LOG.info("Retrieved policies for consent id {}", consentId);
-        InsuranceLambdaUtils.logObject(mapper, response);
         return response;
     }
 
@@ -49,13 +45,11 @@ public class FinancialRiskController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    @LogInvocation
     public BaseInsuranceResponseV2 getPoliciesV2(Pageable pageable, @NotNull HttpRequest<?> request) {
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Getting policies for consent id {} v1", consentId);
         BaseInsuranceResponseV2 response = service.getPoliciesV2(pageable, consentId);
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
-        LOG.info("Retrieved policies for consent id {}", consentId);
-        InsuranceLambdaUtils.logObject(mapper, response);
         return response;
     }
 
@@ -63,14 +57,12 @@ public class FinancialRiskController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    @LogInvocation
     public ResponseInsuranceFinancialRiskPolicyInfo getPersonalQualifications(@NotNull HttpRequest<?> request,
                                                                               @PathVariable UUID policyId) {
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Getting policy info for policy id {} v1", consentId);
         ResponseInsuranceFinancialRiskPolicyInfo response = service.getPolicyInfo(policyId, consentId);
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
-        LOG.info("Retrieved policy info for policy id {}", policyId);
-        InsuranceLambdaUtils.logObject(mapper, response);
         return response;
     }
 
@@ -78,14 +70,12 @@ public class FinancialRiskController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    @LogInvocation
     public ResponseInsuranceFinancialRiskPolicyInfoV2 getPersonalQualificationsV2(@NotNull HttpRequest<?> request,
                                                                               @PathVariable UUID policyId) {
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Getting policy info for policy id {} v1", consentId);
         ResponseInsuranceFinancialRiskPolicyInfoV2 response = service.getPolicyInfoV2(policyId, consentId);
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
-        LOG.info("Retrieved policy info for policy id {}", policyId);
-        InsuranceLambdaUtils.logObject(mapper, response);
         return response;
     }
 
@@ -93,13 +83,11 @@ public class FinancialRiskController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    @LogInvocation
     public ResponseInsuranceFinancialRiskPremium getPremium(@NotNull HttpRequest<?> request, @PathVariable UUID policyId) {
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Getting premium for policy id {} v1", consentId);
         ResponseInsuranceFinancialRiskPremium response = service.getPolicyPremium(policyId, consentId);
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
-        LOG.info("Retrieved premium for policy id {}", policyId);
-        InsuranceLambdaUtils.logObject(mapper, response);
         return response;
     }
 
@@ -107,13 +95,11 @@ public class FinancialRiskController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    @LogInvocation
     public ResponseInsuranceFinancialRiskPremiumV2 getPremiumV2(@NotNull HttpRequest<?> request, @PathVariable UUID policyId) {
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Getting premium for policy id {} v1", consentId);
         ResponseInsuranceFinancialRiskPremiumV2 response = service.getPolicyPremiumV2(policyId, consentId);
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
-        LOG.info("Retrieved premium for policy id {}", policyId);
-        InsuranceLambdaUtils.logObject(mapper, response);
         return response;
     }
 
@@ -121,14 +107,12 @@ public class FinancialRiskController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    @LogInvocation
     public ResponseInsuranceFinancialRiskClaims getClaims(Pageable pageable, @NotNull HttpRequest<?> request,
                                                                  @PathVariable UUID policyId) {
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Getting claims for policy id {} v1", consentId);
         ResponseInsuranceFinancialRiskClaims response = service.getPolicyClaims(policyId, consentId, pageable);
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
-        LOG.info("Retrieved claims for policy id {}", policyId);
-        InsuranceLambdaUtils.logObject(mapper, response);
         return response;
     }
 
@@ -136,14 +120,12 @@ public class FinancialRiskController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    @LogInvocation
     public ResponseInsuranceFinancialRiskClaimsV2 getClaimsV2(Pageable pageable, @NotNull HttpRequest<?> request,
                                                           @PathVariable UUID policyId) {
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Getting claims for policy id {} v1", consentId);
         ResponseInsuranceFinancialRiskClaimsV2 response = service.getPolicyClaimsV2(policyId, consentId, pageable);
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
-        LOG.info("Retrieved claims for policy id {}", policyId);
-        InsuranceLambdaUtils.logObject(mapper, response);
         return response;
     }
 }

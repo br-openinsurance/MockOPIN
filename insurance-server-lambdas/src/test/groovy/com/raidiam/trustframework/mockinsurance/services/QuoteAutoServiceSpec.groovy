@@ -134,6 +134,20 @@ class QuoteAutoServiceSpec extends CleanupSpecification {
         e.getMessage().startsWith("NAO_INFORMADO")
     }
 
+    def "We cannot fetch a quote created by a different client"() {
+        given:
+        def consentId = TestEntityDataFactory.aConsentId()
+        def quote = TestEntityDataFactory.aQuoteAuto(consentId)
+        quoteAutoRepository.save(quote)
+
+        when:
+        quoteAutoService.getQuote(consentId, "a_different_client_id")
+
+        then:
+        def e = thrown(HttpStatusException)
+        e.getStatus() == HttpStatus.FORBIDDEN
+    }
+
     def "We can cancel a quote"() {
         given:
         def consentId = TestEntityDataFactory.aConsentId()

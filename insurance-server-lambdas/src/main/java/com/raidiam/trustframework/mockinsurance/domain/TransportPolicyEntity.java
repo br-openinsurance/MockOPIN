@@ -1,13 +1,33 @@
 package com.raidiam.trustframework.mockinsurance.domain;
 
-import com.raidiam.trustframework.mockinsurance.models.generated.*;
-import jakarta.persistence.*;
+import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails;
+import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetailsUnit;
+import com.raidiam.trustframework.mockinsurance.models.generated.BaseBrandAndCompanyDataPolicies;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceTransportPolicyInfoData;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceTransportPolicyInfoDataV2;
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceTransportSpecificPolicyInfo;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseInsuranceTransportPolicyInfo;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseInsuranceTransportPolicyInfoV2;
+import com.raidiam.trustframework.mockinsurance.models.generated.ResponseResourceListData;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,11 +45,59 @@ public class TransportPolicyEntity extends BaseEntity implements HasStatusInterf
     @Column(name = "status")
     private String status;
 
+    @Column(name = "product_name")
+    private String productName;
+
     @Column(name = "document_type")
     private String documentType;
 
+    @Column(name = "susep_process_number")
+    private String susepProcessNumber;
+
+    @Column(name = "group_certificate_id")
+    private String groupCertificateId;
+
+    @Column(name = "issuance_type")
+    private String issuanceType;
+
+    @Column(name = "issuance_date")
+    private LocalDate issuanceDate;
+
+    @Column(name = "term_start_date")
+    private LocalDate termStartDate;
+
+    @Column(name = "term_end_date")
+    private LocalDate termEndDate;
+
+    @Column(name = "lead_insurer_code")
+    private String leadInsurerCode;
+
+    @Column(name = "lead_insurer_policy_id")
+    private String leadInsurerPolicyId;
+
+    @Column(name = "max_lmg_amount")
+    private String maxLMGAmount;
+
+    @Column(name = "max_lmg_unit_type")
+    private String maxLMGUnitType;
+
+    @Column(name = "max_lmg_unit_type_others")
+    private String maxLMGUnitTypeOthers;
+
+    @Column(name = "max_lmg_unit_code")
+    private String maxLMGUnitCode;
+
+    @Column(name = "max_lmg_unit_description")
+    private String maxLMGUnitDescription;
+
+    @Column(name = "max_lmg_currency")
+    private String maxLMGCurrency;
+
     @Column(name = "proposal_id")
     private String proposalId;
+
+    @Column(name = "coinsurance_retained_percentage")
+    private String coinsuranceRetainedPercentage;
 
     @Column(name = "account_holder_id")
     private UUID accountHolderId;
@@ -40,10 +108,53 @@ public class TransportPolicyEntity extends BaseEntity implements HasStatusInterf
     @JoinColumn(name = "account_holder_id", referencedColumnName = "account_holder_id", insertable = false, nullable = false, updatable = false)
     private AccountHolderEntity accountHolder;
 
+    @ElementCollection
+    @CollectionTable(name = "transport_personal_info_ids", joinColumns = @JoinColumn(name = "reference_id", referencedColumnName = "transport_policy_id"))
+    @Column(name = "personal_id")
+    private List<UUID> insuredIds;
+
+    @ElementCollection
+    @CollectionTable(name = "transport_beneficiary_info_ids", joinColumns = @JoinColumn(name = "reference_id", referencedColumnName = "transport_policy_id"))
+    @Column(name = "beneficiary_id")
+    private List<UUID> beneficiaryIds;
+
+    @ElementCollection
+    @CollectionTable(name = "transport_principal_info_ids", joinColumns = @JoinColumn(name = "reference_id", referencedColumnName = "transport_policy_id"))
+    @Column(name = "principal_id")
+    private List<UUID> principalIds;
+
+    @ElementCollection
+    @CollectionTable(name = "transport_intermediary_info_ids", joinColumns = @JoinColumn(name = "reference_id", referencedColumnName = "transport_policy_id"))
+    @Column(name = "intermediary_id")
+    private List<UUID> intermediaryIds;
+
+    @ElementCollection
+    @CollectionTable(name = "transport_coinsurer_ids", joinColumns = @JoinColumn(name = "reference_id", referencedColumnName = "transport_policy_id"))
+    @Column(name = "coinsurer_id")
+    private List<UUID> coinsurerIds;
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @NotAudited
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "transportPolicy")
+    private List<TransportPolicyInsuredObjectEntity> insuredObjects = new ArrayList<>();
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @NotAudited
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "transportPolicy")
+    private List<TransportPolicyCoverageEntity> coverages = new ArrayList<>();
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @NotAudited
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "transportPolicy")
+    private List<TransportPolicyEndorsementEntity> endorsements = new ArrayList<>();
+
     public BaseBrandAndCompanyDataPolicies mapPolicyDto() {
         return new BaseBrandAndCompanyDataPolicies()
                 .policyId(this.getTransportPolicyId())
-                .productName("Mock Insurer Transport Policy Plan");
+                .productName(this.getProductName());
     }
 
     public ResponseInsuranceTransportPolicyInfo mapInfoDto() {
@@ -51,50 +162,21 @@ public class TransportPolicyEntity extends BaseEntity implements HasStatusInterf
                 .data(new InsuranceTransportPolicyInfoData()
                         .documentType(InsuranceTransportPolicyInfoData.DocumentTypeEnum.fromValue(this.getDocumentType()))
                         .policyId(this.getTransportPolicyId())
-                        .issuanceType(InsuranceTransportPolicyInfoData.IssuanceTypeEnum.EMISSAO_PROPRIA)
-                        .issuanceDate(LocalDate.now())
-                        .termStartDate(LocalDate.now().minusDays(10))
-                        .termEndDate(LocalDate.now().plusDays(10))
-                        .maxLMG(new AmountDetails().amount("100.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
+                        .susepProcessNumber(this.getSusepProcessNumber())
+                        .groupCertificateId(this.getGroupCertificateId())
+                        .issuanceType(InsuranceTransportPolicyInfoData.IssuanceTypeEnum.fromValue(this.getIssuanceType()))
+                        .issuanceDate(this.getIssuanceDate())
+                        .termStartDate(this.getTermStartDate())
+                        .termEndDate(this.getTermEndDate())
+                        .leadInsurerCode(this.getLeadInsurerCode())
+                        .leadInsurerPolicyId(this.getLeadInsurerPolicyId())
+                        .maxLMG(this.mapMaxLMG())
                         .proposalId(this.getProposalId())
-                        .insureds(List.of(new PersonalInfo()
-                                .identification(this.getAccountHolder().getDocumentIdentification())
-                                .identificationType(PersonalInfo.IdentificationTypeEnum.CPF)
-                                .name(this.getAccountHolder().getAccountHolderName())
-                                .birthDate(LocalDate.of(2000, 1, 1))
-                                .postCode("10000000")
-                                .city("Sao Paulo")
-                                .state(PersonalInfo.StateEnum.SP)
-                                .country(PersonalInfo.CountryEnum.BRA)
-                                .address("Av Naburo Ykesaki, 1270")))
-                        .insuredObjects(List.of(new InsuranceTransportInsuredObject()
-                                .identification(this.getAccountHolder().getDocumentIdentification())
-                                .type(InsuranceTransportInsuredObject.TypeEnum.CONTRATO)
-                                .description("contrato")
-                                .coverages(List.of(new InsuranceTransportInsuredObjectCoverage()
-                                        .branch("0320")
-                                        .code(InsuranceTransportInsuredObjectCoverage.CodeEnum.ACIDENTES_PESSOAIS_COM_PASSAGEIROS)
-                                        .susepProcessNumber("12345")
-                                        .LMI(new AmountDetails().amount("100").unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM))
-                                        .termStartDate(LocalDate.now().minusDays(10))
-                                        .termEndDate(LocalDate.now().plusDays(10))
-                                        .isMainCoverage(true)
-                                        .feature(InsuranceTransportInsuredObjectCoverage.FeatureEnum.MASSIFICADOS)
-                                        .type(InsuranceTransportInsuredObjectCoverage.TypeEnum.PARAMETRICO)
-                                        .premiumPeriodicity(InsuranceTransportInsuredObjectCoverage.PremiumPeriodicityEnum.MENSAL)))))
+                        .insuredObjects(this.getInsuredObjects().stream().map(TransportPolicyInsuredObjectEntity::mapDto).toList())
+                        .coverages(this.getCoverages().stream().map(TransportPolicyCoverageEntity::mapDto).toList())
+                        .coinsuranceRetainedPercentage(this.getCoinsuranceRetainedPercentage())
                         .branchInfo(new InsuranceTransportSpecificPolicyInfo()
-                                .addEndorsementsItem(new InsuranceTransportSpecificPolicyInfoEndorsements()
-                                        .travelType(InsuranceTransportSpecificPolicyInfoEndorsements.TravelTypeEnum.INTERNACIONAL_IMPORTACAO)
-                                        .transportType(InsuranceTransportSpecificPolicyInfoEndorsements.TransportTypeEnum.AEREO)
-                                        .shipmentsNumber(10)
-                                        .branch("0320")
-                                        .shipmentsPremium(new AmountDetails().amount("100").unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM))
-                                        .shipmentsPremiumBRL("2000.00")
-                                        .shipmentsInsuredsAmount(new AmountDetails().amount("100").unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM))
-                                        .minInsuredAmount(new AmountDetails().amount("100").unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM))
-                                        .maxInsuredAmount(new AmountDetails().amount("100").unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM))
-                                )
-                        ));
+                                .endorsements(this.getEndorsements().stream().map(TransportPolicyEndorsementEntity::mapDto).toList())));
     }
 
     public ResponseInsuranceTransportPolicyInfoV2 mapInfoDtoV2() {
@@ -102,84 +184,36 @@ public class TransportPolicyEntity extends BaseEntity implements HasStatusInterf
                 .data(new InsuranceTransportPolicyInfoDataV2()
                         .documentType(InsuranceTransportPolicyInfoDataV2.DocumentTypeEnum.fromValue(this.getDocumentType()))
                         .policyId(this.getTransportPolicyId())
-                        .issuanceType(InsuranceTransportPolicyInfoDataV2.IssuanceTypeEnum.EMISSAO_PROPRIA)
-                        .issuanceDate(LocalDate.now())
-                        .termStartDate(LocalDate.now().minusDays(10))
-                        .termEndDate(LocalDate.now().plusDays(10))
-                        .maxLMG(new AmountDetails().amount("100.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
+                        .susepProcessNumber(this.getSusepProcessNumber())
+                        .groupCertificateId(this.getGroupCertificateId())
+                        .issuanceType(InsuranceTransportPolicyInfoDataV2.IssuanceTypeEnum.fromValue(this.getIssuanceType()))
+                        .issuanceDate(this.getIssuanceDate())
+                        .termStartDate(this.getTermStartDate())
+                        .termEndDate(this.getTermEndDate())
+                        .leadInsurerCode(this.getLeadInsurerCode())
+                        .leadInsurerPolicyId(this.getLeadInsurerPolicyId())
+                        .maxLMG(this.mapMaxLMG())
                         .proposalId(this.getProposalId())
-                        .insureds(List.of(new PersonalInfoV2()
-                                .identification(this.getAccountHolder().getDocumentIdentification())
-                                .identificationType(PersonalInfoV2.IdentificationTypeEnum.CPF)
-                                .name(this.getAccountHolder().getAccountHolderName())
-                                .birthDate(LocalDate.of(2000, 1, 1))
-                                .address(new Address()
-                                        .flagPostCode(Address.FlagPostCodeEnum.NACIONAL)
-                                        .address((AllOfAddressAddress) new AllOfAddressAddress()
-                                                .allOfAddressAddressName("Naburo Ykesaki")
-                                                .allOfAddressAddressNumber("1270")
-                                                .allOfAddressAddressAddressComplementaryInfo("Fundos")
-                                                .allOfAddressAddressTownName("Sao Paulo")
-                                                .allOfAddressAddressCountrySubDivision(EnumCountrySubDivision.SP.toString())
-                                                .allOfAddressAddressPostCode("10000000")
-                                                .type(NationalAddress.TypeEnum.AVENIDA)
-                                                .name("Naburo Ykesaki")
-                                                .number("1270")
-                                                .addressComplementaryInfo("Fundos")
-                                                .districtName("Liberdade")
-                                                .townName("Sao Paulo")
-                                                .ibgeTownCode("5002704")
-                                                .countrySubDivision(EnumCountrySubDivision.SP)
-                                                .postCode("10000000")))))
-                        .insuredObjects(List.of(new InsuranceTransportInsuredObjectV2()
-                                .identification(this.getAccountHolder().getDocumentIdentification())
-                                .type(InsuranceTransportInsuredObjectV2.TypeEnum.CONTRATO)
-                                .description("contrato")
-                                .coverages(List.of(new InsuranceTransportInsuredObjectCoverage()
-                                        .branch("0320")
-                                        .code(InsuranceTransportInsuredObjectCoverage.CodeEnum.ACIDENTES_PESSOAIS_COM_PASSAGEIROS)
-                                        .susepProcessNumber("12345")
-                                        .LMI(new AmountDetails().amount("100").unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM))
-                                        .termStartDate(LocalDate.now().minusDays(10))
-                                        .termEndDate(LocalDate.now().plusDays(10))
-                                        .isMainCoverage(true)
-                                        .feature(InsuranceTransportInsuredObjectCoverage.FeatureEnum.MASSIFICADOS)
-                                        .type(InsuranceTransportInsuredObjectCoverage.TypeEnum.PARAMETRICO)
-                                        .premiumPeriodicity(InsuranceTransportInsuredObjectCoverage.PremiumPeriodicityEnum.MENSAL)))))
+                        .insuredObjects(this.getInsuredObjects().stream().map(TransportPolicyInsuredObjectEntity::mapDtoV2).toList())
+                        .coverages(this.getCoverages().stream().map(TransportPolicyCoverageEntity::mapDtoV2).toList())
+                        .coinsuranceRetainedPercentage(this.getCoinsuranceRetainedPercentage())
                         .branchInfo(new InsuranceTransportSpecificPolicyInfo()
-                                .addEndorsementsItem(new InsuranceTransportSpecificPolicyInfoEndorsements()
-                                        .travelType(InsuranceTransportSpecificPolicyInfoEndorsements.TravelTypeEnum.INTERNACIONAL_IMPORTACAO)
-                                        .transportType(InsuranceTransportSpecificPolicyInfoEndorsements.TransportTypeEnum.AEREO)
-                                        .shipmentsNumber(10)
-                                        .branch("0320")
-                                        .shipmentsPremium(new AmountDetails().amount("100").unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM))
-                                        .shipmentsPremiumBRL("2000.00")
-                                        .shipmentsInsuredsAmount(new AmountDetails().amount("100").unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM))
-                                        .minInsuredAmount(new AmountDetails().amount("100").unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM))
-                                        .maxInsuredAmount(new AmountDetails().amount("100").unitType(AmountDetails.UnitTypeEnum.PORCENTAGEM))
-                                )
-                        ));
-    }
-
-    public ResponseInsuranceTransportPremium mapPremiumDto() {
-        return new ResponseInsuranceTransportPremium()
-                .data(new InsuranceTransportPremium()
-                        .paymentsQuantity(3)
-                        .amount(new AmountDetails().amount("100.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
-                        .coverages(List.of(new InsuranceTransportPremiumCoverage()
-                                .branch("0320")
-                                .code(InsuranceTransportPremiumCoverage.CodeEnum.ACIDENTES_PESSOAIS_COM_PASSAGEIROS)
-                                .premiumAmount(new AmountDetails().amount("100.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))))
-                        .payments(List.of(new Payment()
-                                .movementDate(LocalDate.now().minusDays(5))
-                                .movementType(Payment.MovementTypeEnum.LIQUIDACAO_DE_RESTITUICAO_DE_PREMIO)
-                                .movementPaymentsNumber("1")
-                                .amount(new AmountDetails().amount("100.00").unitType(AmountDetails.UnitTypeEnum.MONETARIO))
-                                .maturityDate(LocalDate.now()))));
+                                .endorsements(this.getEndorsements().stream().map(TransportPolicyEndorsementEntity::mapDto).toList())));
     }
 
     public ResponseResourceListData mapResourceDTO() {
         return new ResponseResourceListData()
                 .resourceId(this.getTransportPolicyId());
+    }
+
+    private AmountDetails mapMaxLMG() {
+        return new AmountDetails()
+                .amount(this.getMaxLMGAmount())
+                .unitType(AmountDetails.UnitTypeEnum.fromValue(this.getMaxLMGUnitType()))
+                .unitTypeOthers(this.getMaxLMGUnitTypeOthers())
+                .unit(new AmountDetailsUnit()
+                        .code(this.getMaxLMGUnitCode())
+                        .description(AmountDetailsUnit.DescriptionEnum.fromValue(this.getMaxLMGUnitDescription())))
+                .currency(AmountDetails.CurrencyEnum.fromValue(this.getMaxLMGCurrency()));
     }
 }

@@ -1,5 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.services;
 
+import com.google.common.base.Strings;
 import com.raidiam.trustframework.mockinsurance.domain.WebhookEntity;
 import com.raidiam.trustframework.mockinsurance.exceptions.TrustframeworkException;
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseWebhook;
@@ -7,16 +8,21 @@ import com.raidiam.trustframework.mockinsurance.models.generated.UpdateWebhook;
 import com.raidiam.trustframework.mockinsurance.utils.InsuranceLambdaUtils;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.annotation.Client;
-import jakarta.inject.Inject;
+import io.micronaut.http.exceptions.HttpStatusException;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -29,14 +35,21 @@ public class WebhookService extends BaseInsuranceService {
     public static final int MAX_WEBHOOK_NOTIFICATION_TRIES = 3;
     public static final long NOTIFICATION_DELAY_MILLIS = 100;
     private static final Logger LOG = LoggerFactory.getLogger(WebhookService.class);
-    @Inject
-    @Client
-    private HttpClient httpClient;
+    private final HttpClient httpClient;
 
     private static final String SWAGGER_VERSION = "1.0.0";
 
+    public WebhookService(@Client HttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
+
     public ResponseWebhook updateWebhook(UpdateWebhook req, String clientId) {
         LOG.info("Saving req URI for client {}", clientId);
+
+        if (!Strings.isNullOrEmpty(req.getWebhookUri())) {
+            validateWebhookUri(req.getWebhookUri());
+        }
+
         webhookRepository.findByClientId(clientId).ifPresentOrElse(
                 e -> {
                     LOG.info("Client {} webhook uri already exists, updating it", clientId);
@@ -52,6 +65,38 @@ public class WebhookService extends BaseInsuranceService {
         return webhookRepository.findByClientId(clientId)
                 .orElseThrow(() -> new TrustframeworkException("Could not find recently saved WebhookEntity"))
                 .toResponse();
+    }
+
+    private void validateWebhookUri(String webhookUri) {
+        URI uri;
+        try {
+            uri = new URI(webhookUri);
+        } catch (URISyntaxException e) {
+            throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Webhook URI is malformed");
+        }
+
+        if (!"https".equalsIgnoreCase(uri.getScheme())) {
+            throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Webhook URI must use https");
+        }
+
+        String host = uri.getHost();
+        if (Strings.isNullOrEmpty(host)) {
+            throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Webhook URI must have a host");
+        }
+
+        InetAddress[] addresses;
+        try {
+            addresses = InetAddress.getAllByName(host);
+        } catch (UnknownHostException e) {
+            throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Webhook URI host could not be resolved");
+        }
+
+        for (InetAddress address : addresses) {
+            if (address.isLoopbackAddress() || address.isLinkLocalAddress() || address.isSiteLocalAddress()
+                    || address.isAnyLocalAddress() || address.isMulticastAddress()) {
+                throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Webhook URI resolves to a disallowed address");
+            }
+        }
     }
 
     public void notify(String clientId, String path) {

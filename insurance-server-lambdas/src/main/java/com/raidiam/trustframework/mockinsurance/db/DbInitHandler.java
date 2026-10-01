@@ -75,7 +75,7 @@ public class DbInitHandler implements RequestHandler<Map<String, Object>, String
         }
 
         try (var factory = new DatasourceFactory(null, null)) {
-            var placeholders = Map.of("mockbank-url", System.getenv("MOCKSERVICE_URL") != null ? System.getenv("MOCKSERVICE_URL") : "http://matls-api.local");
+            var placeholders = Map.of("mockbank-url", System.getenv("MOCKSERVICE_URL") != null ? System.getenv("MOCKSERVICE_URL") : "http://matls-api.mockbank.poc.raidiam.io");
             Flyway schemaFlyway = Flyway.configure()
                     .dataSource(factory.dataSource(config))
                     .placeholders(placeholders)

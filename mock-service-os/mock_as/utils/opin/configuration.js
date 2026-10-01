@@ -2,10 +2,11 @@ import { insurerAdapter } from './adapter.js';
 import { getConsentId } from './helpers.js';
 
 import { errors } from 'oidc-provider';
-import pkg from 'jose';
-const { JWT } = pkg;
 
 import Debug from 'debug';
+
+import { INTERACTION_TTL_SECONDS } from './interactionTtl.js';
+
 const log = Debug('raidiam:server:info');
 const err = Debug('raidiam:server:error');
 
@@ -90,9 +91,6 @@ export default function (mtlsIssuer, ssaJwks) {
         return `/interaction/${interaction.uid}`;
       },
     },
-    cookies: {
-      keys: ['some secret key', 'and also the old rotated away some time ago', 'and one more'],
-    },
     claims: {
       address: ['address'],
       email: ['email', 'email_verified'],
@@ -159,7 +157,7 @@ export default function (mtlsIssuer, ssaJwks) {
         return 157680000; /* 5 years in seconds */
       },
       IdToken: 3600 /* 1 hour in seconds */,
-      Interaction: 600 /* 1 hour in seconds */,
+      Interaction: INTERACTION_TTL_SECONDS,
       RefreshToken: function RefreshTokenTTL(ctx, token, client) {
         if (
           ctx &&
@@ -315,13 +313,18 @@ export default function (mtlsIssuer, ssaJwks) {
           }
           let payload;
           try {
-            // extraClientMetadata.validator must be sync :sadface:
-            payload = JWT.verify(value, ssaJwks, {
-              algorithms: ['PS256'],
-              issuer: process.env.TRUSTFRAMEWORK_SSA_ISS,
-              maxTokenAge: '5 days',
-              typ: 'JWT',
-            });
+            // extraClientMetadata.validator must be sync — signature verification
+            // (jose's jwtVerify is async-only) already happened in
+            // addSoftwareStatementVerificationMiddleware, which stashed the outcome on ctx.state.
+            if (ctx.state?.softwareStatementError) {
+              throw ctx.state.softwareStatementError;
+            }
+            payload = ctx.state?.softwareStatementPayload;
+            if (!payload) {
+              throw new errors.InvalidSoftwareStatement(
+                'could not verify software_statement: no verification result available',
+              );
+            }
 
             // This has the double benefit of also ensuring that the DCR is presented over a mtls link
             const subject = ctx.get('X-BANK-Certificate-DN');
@@ -471,15 +474,15 @@ export default function (mtlsIssuer, ssaJwks) {
               client_description: software_client_description,
               jwks_uri: software_jwks_uri,
               application_type: 'web',
-              client_name: software_client_name,
+              client_name: software_client_name || metadata.client_name || org_name || 'Client',
               id_token_signed_response_alg: 'PS256',
               request_object_signing_alg: 'PS256',
               authorization_signed_response_alg: 'PS256',
-              tos_uri: software_tos_uri,
-              logo_uri: software_logo_uri,
+              tos_uri: software_tos_uri || 'https://example.com/tos',
+              logo_uri: software_logo_uri || metadata.logo_uri || 'https://example.com/logo.png',
               request_object_encryption_alg: 'RSA-OAEP',
               request_object_encryption_enc: 'A256GCM',
-              policy_uri: software_policy_uri,
+              policy_uri: software_policy_uri || 'https://example.com/policy',
               default_max_age: 0,
               require_signed_request_object: true,
               subject_type: 'public',
@@ -487,7 +490,7 @@ export default function (mtlsIssuer, ssaJwks) {
               ...(!requestedArray && { scope: scopes.join(' ') }),
               response_types: ['code id_token', 'code'],
               grant_types: ['client_credentials', 'authorization_code', 'refresh_token', 'implicit'],
-              client_uri: software_client_uri,
+              client_uri: software_client_uri || metadata.client_uri || 'https://example.com',
               tls_client_certificate_bound_access_tokens: true,
             });
 
@@ -495,12 +498,14 @@ export default function (mtlsIssuer, ssaJwks) {
             delete metadata.software_statement;
           } catch (error) {
             err(`${error.message}: ${JSON.stringify(metadata)}`);
-            if (error.code === 'ERR_JWT_EXPIRED' || error.code === 'ERR_JWS_VERIFICATION_FAILED') {
+            if (error.code === 'ERR_JWT_EXPIRED' || error.code === 'ERR_JWS_SIGNATURE_VERIFICATION_FAILED') {
               console.log(error);
               throw new errors.InvalidSoftwareStatement(`could not verify software_statement: ${error.message}`, error);
             } else if (error instanceof errors.InvalidClientMetadata) {
               throw error;
             } else if (error instanceof errors.InvalidSoftwareStatement) {
+              throw error;
+            } else if (error instanceof errors.UnapprovedSoftwareStatement) {
               throw error;
             } else console.log(error);
             throw new errors.InvalidClientMetadata(

@@ -21,23 +21,12 @@ public class QuoteAutoLeadEntity extends QuoteEntity {
         return false;
     }
 
-    public static QuoteAutoLeadEntity fromRequest(QuoteRequestAutoLead req, String clientId) {
-        QuoteAutoLeadEntity entity = new QuoteAutoLeadEntity();
-        entity.setConsentId(req.getData().getConsentId());
-        entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
-        entity.setClientId(clientId);
-        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
-        entity.setCustomer(req.getData().getQuoteCustomer());
-
-        return entity;
-    }
-
     public static QuoteAutoLeadEntity fromRequestV2(QuoteRequestAutoLeadV2 req, String clientId) {
         QuoteAutoLeadEntity entity = new QuoteAutoLeadEntity();
         entity.setConsentId(req.getData().getConsentId());
         entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
         entity.setClientId(clientId);
-        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
+        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToInstant(req.getData().getExpirationDateTime()));
         entity.setCustomer(req.getData().getQuoteCustomer());
 
         return entity;

@@ -2,7 +2,34 @@ package com.raidiam.trustframework.mockinsurance.services
 
 import com.raidiam.trustframework.mockinsurance.cleanups.CleanupSpecification
 import com.raidiam.trustframework.mockinsurance.TestEntityDataFactory
-import com.raidiam.trustframework.mockinsurance.domain.*
+import com.raidiam.trustframework.mockinsurance.domain.AcceptanceAndBranchesAbroadPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.AccountHolderEntity
+import com.raidiam.trustframework.mockinsurance.domain.AutoPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.CapitalizationTitlePlanEntity
+import com.raidiam.trustframework.mockinsurance.domain.ConsentAcceptanceAndBranchesAbroadPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.ConsentAutoPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.ConsentCapitalizationTitlePlanEntity
+import com.raidiam.trustframework.mockinsurance.domain.ConsentEntity
+import com.raidiam.trustframework.mockinsurance.domain.ConsentFinancialAssistanceContractEntity
+import com.raidiam.trustframework.mockinsurance.domain.ConsentFinancialRiskPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.ConsentHousingPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.ConsentLifePensionContractEntity
+import com.raidiam.trustframework.mockinsurance.domain.ConsentPatrimonialPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.ConsentPensionPlanContractEntity
+import com.raidiam.trustframework.mockinsurance.domain.ConsentPersonPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.ConsentResponsibilityPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.ConsentRuralPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.ConsentTransportPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.FinancialAssistanceContractEntity
+import com.raidiam.trustframework.mockinsurance.domain.FinancialRiskPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.HousingPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.LifePensionContractEntity
+import com.raidiam.trustframework.mockinsurance.domain.PatrimonialPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.PensionPlanContractEntity
+import com.raidiam.trustframework.mockinsurance.domain.PersonPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.ResponsibilityPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.RuralPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.TransportPolicyEntity
 import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentPermission
 import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentV3Permission
 import com.raidiam.trustframework.mockinsurance.models.generated.ResponseResourceList
@@ -127,6 +154,7 @@ class ResourceServiceSpec extends CleanupSpecification {
             testConsent.setPermissions(List.of(
                     EnumConsentPermission.RESOURCES_READ.toString()
             ))
+            testConsent.setStatus("AUTHORISED")
             testConsent = consentRepository.save(testConsent)
 
             testAuthorisedConsent = TestEntityDataFactory.aConsent(testAccountHolder.getAccountHolderId())
@@ -575,6 +603,40 @@ class ResourceServiceSpec extends CleanupSpecification {
         HttpStatusException e = thrown()
         e.getStatus() == HttpStatus.FORBIDDEN
         e.getLocalizedMessage() == "You do not have the correct permission"
+    }
+
+    def "we get a 401 when the consent is not authorised"() {
+        given:
+        def unauthorisedConsent = TestEntityDataFactory.aConsent(testAccountHolder.getAccountHolderId())
+        unauthorisedConsent.setPermissions(List.of(
+                EnumConsentPermission.RESOURCES_READ.toString()
+        ))
+        unauthorisedConsent.setStatus("AWAITING_AUTHORISATION")
+        unauthorisedConsent = consentRepository.save(unauthorisedConsent)
+
+        when:
+        resourcesService.getResourceList(Pageable.unpaged(), unauthorisedConsent.getConsentId())
+
+        then:
+        HttpStatusException e = thrown()
+        e.getStatus() == HttpStatus.UNAUTHORIZED
+    }
+
+    def "we get a 401 when the consent is not authorised in V3"() {
+        given:
+        def unauthorisedConsent = TestEntityDataFactory.aConsent(testAccountHolder.getAccountHolderId())
+        unauthorisedConsent.setPermissions(List.of(
+                EnumConsentV3Permission.RESOURCES_READ.toString()
+        ))
+        unauthorisedConsent.setStatus("AWAITING_AUTHORISATION")
+        unauthorisedConsent = consentRepository.save(unauthorisedConsent)
+
+        when:
+        resourcesService.getResourceListV3(Pageable.unpaged(), unauthorisedConsent.getConsentId())
+
+        then:
+        HttpStatusException e = thrown()
+        e.getStatus() == HttpStatus.UNAUTHORIZED
     }
 
     def "enable cleanup"() {

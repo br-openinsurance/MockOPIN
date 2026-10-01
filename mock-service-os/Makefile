@@ -12,12 +12,13 @@ endif
 setup:
 	@$(MAKE) certs
 
+build-auth-mtls:
+	@docker-compose build auth
+	@docker-compose build mtls
+
 run:
 	@docker-compose build && docker-compose up
 
 certs:
 	@echo "Making new certs"
 	@$(SHELL) -c '$(MAKE_CERTS)'
-
-certmaker:
-	@docker-compose build certmaker

@@ -47,11 +47,8 @@ class ErrorResponseHandlerSpec extends Specification {
             description                     | path                                                          | expectArray
             "withdrawal v1"                 | "/open-insurance/withdrawal/v1/capitalization-title/request" | false
             "withdrawal v2"                 | "/open-insurance/withdrawal/v2/capitalization-title/request" | true
-            "claim-notification v1"         | "/open-insurance/claim-notification/v1/request/damage/abc"   | false
             "claim-notification v2"         | "/open-insurance/claim-notification/v2/request/damage/abc"   | true
-            "endorsement v1"                | "/open-insurance/endorsement/v1/request/abc"                 | false
             "endorsement v2"                | "/open-insurance/endorsement/v2/request/abc"                 | true
-            "quote- v1 (pre-existing rule)" | "/open-insurance/quote-auto/v1/request"                      | false
             "quote- v2 (pre-existing rule)" | "/open-insurance/quote-auto/v2/request"                      | true
             "unrelated domain"              | "/open-insurance/policy-info/v1/policies"                    | true
     }
