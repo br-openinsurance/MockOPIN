@@ -66,20 +66,10 @@ image:
 	@$(SHELL) -c '$(MAKE_IMAGE)'
 
 swagger:
-	@if test ! -d "$(PATH_TO_SWAGGER)"; then \
-	  echo "Cloning the insurance-swagger repo"; \
-	  git clone git@github.com:raidiam/insurance-swagger.git $(PATH_TO_SWAGGER); \
-	fi
-
 	@echo "Building Swagger JAR"
 	@$(SHELL) -c '$(MAKE_SWAGGER)'
 
 mock-service-os:
-	@if test ! -d "$(PATH_TO_MOCK_OS)"; then \
-	  echo "Cloning the mock-service-os repo"; \
-	  git clone git@github.com:raidiam/mock-service-os.git $(PATH_TO_MOCK_OS); \
-	fi
-
 	@echo "Setting Up the Mock Service OS"
 	@ORG_ID="OPIBR-$(ORGANIZATION_ID)" $(MAKE) -C $(PATH_TO_MOCK_OS) setup
 

@@ -2,11 +2,11 @@
 
 This project is a Micronaut-based resource server designed to serve mock data for Open Insurance APIs. It uses a PostgreSQL database to store the data and its componentes are containerized through docker.
 
-It also depends on two extra repositories:
+It also depends on two sibling projects, both included in this repository:
 
-- [insurance-swagger](https://github.com/raidiam/insurance-swagger): Responsible for managing the swagger file and generating all required models and clients.
+- `insurance-swagger`: Responsible for managing the swagger file and generating all required models and clients.
 
-- [mock-service-os](https://github.com/raidiam/mock-service-os): Responsible for providing a complete local instance of Mock mTLS gateway and OpenID Provider, including all components needed to adhere to FAPI standards.
+- `mock-service-os`: Responsible for providing a complete local instance of Mock mTLS gateway and OpenID Provider, including all components needed to adhere to FAPI standards.
 
 ## Setup
 

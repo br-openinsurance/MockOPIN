@@ -1,6 +1,6 @@
 # Raidiam Mock Insurance Swagger
 
-This project manages the Raidiam Mock Insurance Swagger and is responsible for generating all required models and clients for the [insurance-server-lambdas repository](https://github.com/raidiam/insurance-server-lambdas).
+This project manages the Raidiam Mock Insurance Swagger and is responsible for generating all required models and clients for the `insurance-server-lambdas` project in this repository.
 
 ## Requirements
 
