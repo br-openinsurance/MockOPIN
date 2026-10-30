@@ -205,7 +205,7 @@ func (h *logCtxHandler) Handle(ctx context.Context, r slog.Record) error {
 func middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.Header.Get("Authorization"), "Basic ") {
-			slog.Error("basic authentication is not supported", "authorization", r.Header.Get("Authorization"))
+			slog.Error("basic authentication is not supported")
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
@@ -220,7 +220,6 @@ func middleware(next http.Handler) http.Handler {
 		if cert := r.Header.Get(HeaderClientCert); cert != "" {
 			cert = normalizeCertificate(cert)
 			r.Header.Set(HeaderClientCert, cert)
-			slog.InfoContext(ctx, "client certificate", slog.String("cert", cert))
 		}
 
 		start := time.Now().UTC()
@@ -338,9 +337,11 @@ func introspect(r *http.Request, token string) (string, error) {
 		return "", fmt.Errorf("failed to unmarshal introspection response: %w", err)
 	}
 
-	slog.InfoContext(r.Context(), "introspection response", slog.Any("response", introspectionResponse))
+	active, _ := introspectionResponse["active"].(bool)
+	clientID, _ := introspectionResponse["client_id"].(string)
+	slog.InfoContext(r.Context(), "introspection response", slog.Bool("active", active), slog.String("client_id", clientID))
 
-	if active, ok := introspectionResponse["active"].(bool); !ok || !active {
+	if !active {
 		return "", fmt.Errorf("token is not active")
 	}
 
@@ -471,7 +472,7 @@ func directoryHandler() http.Handler {
 	mux.HandleFunc("/jwks", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(jose.JSONWebKeySet{Keys: []jose.JSONWebKey{jwk}})
+		_ = json.NewEncoder(w).Encode(jose.JSONWebKeySet{Keys: []jose.JSONWebKey{jwk.Public()}})
 	})
 
 	mux.HandleFunc("/organisations/{org_id}/softwarestatements/{ss_id}/assertion", func(w http.ResponseWriter, r *http.Request) {

@@ -17,6 +17,9 @@ import java.util.UUID;
 @Audited
 @Table(name = "business_identifications")
 public class BusinessIdentificationEntity extends BaseEntity {
+
+    private static final String TOWN_NAME = "Sao Paulo";
+
     @Id
     @GeneratedValue
     @Column(name = "business_identification_id", unique = true, nullable = false, updatable = false, columnDefinition = "uuid DEFAULT uuid_generate_v4()")
@@ -40,15 +43,16 @@ public class BusinessIdentificationEntity extends BaseEntity {
                 .businessId(this.getBusinessIdentificationId().toString())
                 .brandName("MockOPIN")
                 .companyInfo(new CompanyInfo()
-                        .cnpjNumber("01773247000563")
+                        .cnpjNumber("01773247000537")
                         .name("MockOPIN"))
                 .businessName("Luiza e Benjamin Assessoria Jurídica Ltda")
                 .document(new BusinessDocument()
-                        .businesscnpjNumber(this.getCnpjNumber()))
+                        // v1 requires a numeric CNPJ (^\d{14}$)
+                        .businesscnpjNumber("50685362006768"))
                 .contact(new BusinessContact()
                         .postalAddresses(List.of(new BusinessPostalAddress()
                                 .address("Av Naburo Ykesaki, 1270")
-                                .townName("Sao Paulo")
+                                .townName(TOWN_NAME)
                                 .countrySubDivision(EnumCountrySubDivision.SP)
                                 .postCode("17500001")
                                 .country("Brasil"))));
@@ -60,7 +64,7 @@ public class BusinessIdentificationEntity extends BaseEntity {
                 .businessId(this.getBusinessIdentificationId().toString())
                 .brandName("MockOPIN")
                 .companyInfo(new CompanyInfoV2()
-                        .cnpjNumber("01773247000563")
+                        .cnpjNumber("01773247000537")
                         .name("MockOPIN"))
                 .businessName("Luiza e Benjamin Assessoria Jurídica Ltda")
                 .document(new BusinessDocumentV2()
@@ -72,14 +76,14 @@ public class BusinessIdentificationEntity extends BaseEntity {
                                         .address((AllOfAddressAddress) new AllOfAddressAddress()
                                                 .allOfAddressAddressName("Naburo Ykesaki")
                                                 .allOfAddressAddressNumber("1270")
-                                                .allOfAddressAddressTownName("Sao Paulo")
+                                                .allOfAddressAddressTownName(TOWN_NAME)
                                                 .allOfAddressAddressCountrySubDivision("SP")
                                                 .allOfAddressAddressPostCode("10000000")
                                                 .type(NationalAddress.TypeEnum.AVENIDA)
                                                 .name("Naburo Ykesaki")
                                                 .number("1270")
                                                 .districtName("Liberdade")
-                                                .townName("Sao Paulo")
+                                                .townName(TOWN_NAME)
                                                 .ibgeTownCode("5002704")
                                                 .countrySubDivision(EnumCountrySubDivision.SP)
                                                 .postCode("10000000"))))));

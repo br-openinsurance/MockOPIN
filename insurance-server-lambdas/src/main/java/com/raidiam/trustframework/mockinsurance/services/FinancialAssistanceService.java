@@ -31,18 +31,6 @@ public class FinancialAssistanceService extends BaseInsuranceService {
         return financialAssistanceContractRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable).getContent();
     }
 
-    public ResponseInsuranceFinancialAssistance getContracts(Pageable pageable, String consentId) {
-        var contracts = getFinancialAssistanceContractEntities(pageable, consentId);
-        return new ResponseInsuranceFinancialAssistance()
-                .data(List.of(new ResponseInsuranceFinancialAssistanceData()
-                        .brand(new ResponseInsuranceFinancialAssistanceBrand()
-                                .name("Mock")
-                                .companies(List.of(new ResponseInsuranceFinancialAssistanceBrandCompanies()
-                                        .companyName("Mock Insurer")
-                                        .cnpjNumber("12345678901234")
-                                        .contracts(contracts.stream().map(FinancialAssistanceContractEntity::mapContractDto).toList()))))));
-    }
-
     public ResponseInsuranceFinancialAssistanceV2 getContractsV2(Pageable pageable, String consentId) {
         var contracts = getFinancialAssistanceContractEntities(pageable, consentId);
         return new ResponseInsuranceFinancialAssistanceV2()
@@ -53,10 +41,6 @@ public class FinancialAssistanceService extends BaseInsuranceService {
                                         .companyName("Mock Insurer")
                                         .cnpjNumber("12345678901234")
                                         .contracts(contracts.stream().map(FinancialAssistanceContractEntity::mapContractDto).toList()))))));
-    }
-
-    public ResponseInsuranceFinancialAssistanceContractInfo getContractInfo(String contractId, String consentId) {
-        return this.getContract(contractId, consentId, EnumConsentPermission.FINANCIAL_ASSISTANCE_CONTRACTINFO_READ, EnumConsentV3Permission.FINANCIAL_ASSISTANCE_CONTRACTINFO_READ).mapContractInfoDto();
     }
 
     public ResponseInsuranceFinancialAssistanceContractInfoV2 getContractInfoV2(String contractId, String consentId) {

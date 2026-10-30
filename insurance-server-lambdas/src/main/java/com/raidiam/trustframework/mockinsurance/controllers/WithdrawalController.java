@@ -1,5 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.controllers;
 
+import com.raidiam.trustframework.mockinsurance.aop.LogInvocation;
 import com.raidiam.trustframework.mockinsurance.auth.AuthenticationGrant;
 import com.raidiam.trustframework.mockinsurance.auth.RequiredAuthenticationGrant;
 import com.raidiam.trustframework.mockinsurance.domain.WithdrawalCapitalizationTitleEntity;
@@ -18,14 +19,10 @@ import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import jakarta.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ExecuteOn(TaskExecutors.BLOCKING)
 @Controller("/open-insurance/withdrawal")
 public class WithdrawalController extends BaseInsuranceController {
-
-    private static final Logger LOG = LoggerFactory.getLogger(WithdrawalController.class);
 
     private static final String REDIRECT_LINK = "https://www.raidiam.com/";
 
@@ -38,11 +35,11 @@ public class WithdrawalController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    @LogInvocation
     public ResponseWithdrawalLead createWithdrawalLeadV1(@Body RequestPensionWithdrawal body, HttpRequest<?> request) {
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         String clientId = callerInfo.getClientId();
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Creating new withdrawal lead v1 for client {}", clientId);
 
         var entity = WithdrawalPensionLeadEntity.fromRequest(body, consentId, clientId);
         var resp = withdrawalService.createPensionWithdrawalLead(entity).toResponse();
@@ -56,11 +53,11 @@ public class WithdrawalController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    @LogInvocation
     public ResponsePensionWithdrawal createPensionWithdrawalV1(@Body RequestPensionWithdrawal body, HttpRequest<?> request) {
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         String clientId = callerInfo.getClientId();
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Creating new pension withdrawal v1 for client {}", clientId);
 
         var entity = WithdrawalPensionEntity.fromRequest(body, consentId, clientId);
         var resp = withdrawalService.createPensionWithdrawal(entity).toResponse(REDIRECT_LINK);
@@ -74,11 +71,11 @@ public class WithdrawalController extends BaseInsuranceController {
     @XFapiInteractionIdRequired
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    @LogInvocation
     public ResponseCapitalizationTitleWithdrawal createCapitalizationTitleWithdrawalV1(@Body RequestCapitalizationTitleWithdrawal body, HttpRequest<?> request) {
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         String clientId = callerInfo.getClientId();
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Creating new capitalization title withdrawal v1 for client {}", clientId);
 
         var entity = WithdrawalCapitalizationTitleEntity.fromRequest(body, consentId, clientId);
         var resp = withdrawalService.createCapitalizationTitleWithdrawal(entity).toResponse(REDIRECT_LINK);
@@ -93,11 +90,11 @@ public class WithdrawalController extends BaseInsuranceController {
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
     @ResponseErrorWithRequestDateTime
+    @LogInvocation
     public ResponseWithdrawalLeadV2 createWithdrawalLeadV2(@Body RequestPensionWithdrawalV2 body, HttpRequest<?> request) {
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         String clientId = callerInfo.getClientId();
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Creating new withdrawal lead v2 for client {}", clientId);
 
         var entity = WithdrawalPensionLeadEntity.fromRequestV2(body, consentId, clientId);
         var saved = withdrawalService.createPensionWithdrawalLead(entity);
@@ -113,11 +110,11 @@ public class WithdrawalController extends BaseInsuranceController {
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
     @ResponseErrorWithRequestDateTime
+    @LogInvocation
     public ResponsePensionWithdrawalV2 createPensionWithdrawalV2(@Body RequestPensionWithdrawalV2 body, HttpRequest<?> request) {
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         String clientId = callerInfo.getClientId();
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Creating new pension withdrawal v2 for client {}", clientId);
 
         var entity = WithdrawalPensionEntity.fromRequestV2(body, consentId, clientId);
         var resp = withdrawalService.createPensionWithdrawal(entity).toResponseV2(REDIRECT_LINK);
@@ -132,11 +129,11 @@ public class WithdrawalController extends BaseInsuranceController {
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
     @ResponseErrorWithRequestDateTime
+    @LogInvocation
     public ResponseCapitalizationTitleWithdrawalV2 createCapitalizationTitleWithdrawalV2(@Body RequestCapitalizationTitleWithdrawalV2 body, HttpRequest<?> request) {
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         String clientId = callerInfo.getClientId();
         String consentId = InsuranceLambdaUtils.getConsentIdFromRequest(request);
-        LOG.info("Creating new capitalization title withdrawal v2 for client {}", clientId);
 
         var entity = WithdrawalCapitalizationTitleEntity.fromRequestV2(body, consentId, clientId);
         var resp = withdrawalService.createCapitalizationTitleWithdrawal(entity).toResponseV2(REDIRECT_LINK);

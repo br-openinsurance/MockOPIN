@@ -38,6 +38,7 @@ mockinsurance:
   mockinsuranceUrl: "https://mockinsurance.com/api"
   jwks-url: https://keystore.sandbox.directory.openbankingbrasil.org.br/%s/application.jwks
   max-page-size: 25
+  operatorClientId: client1
 
 trustframework:
   issuer: mockbank

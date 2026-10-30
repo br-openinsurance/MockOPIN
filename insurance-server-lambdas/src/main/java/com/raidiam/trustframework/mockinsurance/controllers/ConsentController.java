@@ -1,5 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.controllers;
 
+import com.raidiam.trustframework.mockinsurance.aop.LogInvocation;
 import com.raidiam.trustframework.mockinsurance.auth.AuthenticationGrant;
 import com.raidiam.trustframework.mockinsurance.auth.RequiredAuthenticationGrant;
 import com.raidiam.trustframework.mockinsurance.fapi.Idempotent;
@@ -42,11 +43,10 @@ public class ConsentController extends BaseInsuranceController {
     @ResponseErrorWithRequestDateTime
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @LogInvocation
     public ResponseConsent createConsent(@Body CreateConsent body, HttpRequest<?> request) {
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         String clientId = callerInfo.getClientId();
-        LOG.info("Creating new consent for client {} v2", clientId);
-        InsuranceLambdaUtils.logObject(mapper, body);
         ResponseConsent response = service.createConsent(body, clientId).toResponse();
         InsuranceLambdaUtils.decorateResponse(response::setLinks, appBaseUrl + request.getPath() + "/" + response.getData().getConsentId());
         return response;
@@ -57,14 +57,12 @@ public class ConsentController extends BaseInsuranceController {
     @ResponseErrorWithRequestDateTime
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @LogInvocation
     public ResponseConsentV3 createConsentV3(@Body CreateConsentV3 body, HttpRequest<?> request) {
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         String clientId = callerInfo.getClientId();
-        LOG.info("Creating new consent for client {} v3", clientId);
-        InsuranceLambdaUtils.logObject(mapper, body);
         ResponseConsentV3 response = service.createConsentV3(body, clientId).toResponseV3();
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath() + "/" + response.getData().getConsentId());
-        InsuranceLambdaUtils.logObject(mapper, response);
         return response;
     }
 
@@ -72,78 +70,67 @@ public class ConsentController extends BaseInsuranceController {
     @Secured({"CONSENTS_FULL_MANAGE"})
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @LogInvocation
     public ResponseConsent putConsentV2(@PathVariable("consentId") String consentId, @Body UpdateConsent request) {
-        LOG.info("Updating consent {} v2", consentId);
-        InsuranceLambdaUtils.logObject(mapper, request);
-        var resp = service.updateConsent(consentId, request);
-        InsuranceLambdaUtils.logObject(mapper, resp);
-        return resp;
+        return service.updateConsent(consentId, request);
     }
 
     @Put("/v3/consents/{consentId}")
     @Secured({"CONSENTS_FULL_MANAGE"})
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @LogInvocation
     public ResponseConsentV3 putConsentV3(@PathVariable("consentId") String consentId, @Body UpdateConsent request) {
-        LOG.info("Updating consent {} v3", consentId);
-        InsuranceLambdaUtils.logObject(mapper, request);
-        var resp = service.updateConsentV3(consentId, request);
-        InsuranceLambdaUtils.logObject(mapper, resp);
-        return resp;
+        return service.updateConsentV3(consentId, request);
     }
 
     @Get("/v2/consents/{consentId}")
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @LogInvocation
     public ResponseConsent getConsent(@PathVariable("consentId") String consentId, HttpRequest<?> request) {
-        LOG.info("Looking up consent {} v2", consentId);
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         List<String> roles = callerInfo.getRoles();
         if (roles.contains("CONSENTS_FULL_MANAGE")) {
             LOG.info("OP making call - return full response");
             var response = service.getFullConsent(consentId);
             InsuranceLambdaUtils.decorateResponse(response::setLinks, appBaseUrl + request.getPath());
-            InsuranceLambdaUtils.logObject(mapper, response);
             return response;
         }
 
         var response = service.getConsent(consentId, callerInfo.getClientId());
         InsuranceLambdaUtils.decorateResponse(response::setLinks, appBaseUrl + request.getPath());
         LOG.info("External client making call - return partial response");
-        InsuranceLambdaUtils.logObject(mapper, response);
         return response;
     }
 
     @Get("/v3/consents/{consentId}")
     @ResponseErrorWithRequestDateTime
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @LogInvocation
     public ResponseConsentV3 getConsentV3(@PathVariable("consentId") String consentId, HttpRequest<?> request) {
-        LOG.info("Looking up consent {} v3", consentId);
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         List<String> roles = callerInfo.getRoles();
         if (roles.contains("CONSENTS_FULL_MANAGE")) {
             LOG.info("OP making call - return full response");
             var response = service.getFullConsentV3(consentId);
             InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
-            InsuranceLambdaUtils.logObject(mapper, response);
             return response;
         }
 
         var response = service.getConsentV3(consentId, callerInfo.getClientId());
         InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(response::setLinks, response::setMeta, appBaseUrl + request.getPath());
         LOG.info("External client making call - return partial response");
-        InsuranceLambdaUtils.logObject(mapper, response);
         return response;
     }
 
     @Delete("/v{version}/consents/{consentId}")
     @Status(HttpStatus.NO_CONTENT)
     @RequiredAuthenticationGrant(AuthenticationGrant.CLIENT_CREDENTIALS)
+    @LogInvocation
     public HttpResponse<Object> delete(@PathVariable("version") @Min(1) @Max(3) int version, @PathVariable("consentId") String consentId, HttpRequest<?> request) {
-        LOG.info("Deleting consent v{} {}", version, consentId);
         InsuranceLambdaUtils.RequestMeta requestMeta = InsuranceLambdaUtils.getRequestMeta(request);
         service.deleteConsent(consentId, requestMeta.getClientId());
-        LOG.info("Returning 204 No Content");
         return HttpResponse.noContent();
     }
 }

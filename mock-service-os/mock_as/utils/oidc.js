@@ -1,12 +1,13 @@
 import Debug from 'debug';
+import { UnsecuredJWT, decodeJwt, jwtVerify } from 'jose';
 
 const log = Debug('raidiam:server:info');
 
 function getDynamicScopeFromArray(scopes, dynamicScopePrefix) {
   // eslint-disable-next-line no-shadow
   const result = scopes.filter((s) => {
-    if (s.name && s.name.startsWith(dynamicScopePrefix)) return true;
-    if (!s.name && s.startsWith(dynamicScopePrefix)) return true;
+    if (s?.name?.startsWith(dynamicScopePrefix)) return true;
+    if (typeof s === 'string' && s.startsWith(dynamicScopePrefix)) return true;
     return false;
   });
   if (result.length === 0) {
@@ -101,4 +102,111 @@ export function addWebhookMiddleware(oidcProvider, adapter) {
       await adapter.deleteWebhook(clientId);
     }
   });
+}
+
+async function readRawJsonBody(ctx) {
+  const chunks = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const chunk of ctx.req) {
+    chunks.push(chunk);
+  }
+  return JSON.parse(Buffer.concat(chunks).toString(ctx.charset || 'utf8'));
+}
+
+// jose's jwtVerify is async-only, but extraClientMetadata.validator (the brand's
+// configuration.js) is called synchronously from inside the Client constructor, so it
+// can't await it directly. This middleware does the actual signature verification ahead
+// of time and stashes the outcome on ctx.state, where the sync validator picks it up.
+export function addSoftwareStatementVerificationMiddleware(oidcProvider, ssaJwks) {
+  oidcProvider.use(async (ctx, next) => {
+    if (!(ctx.path.startsWith('/reg') && ['PUT', 'POST'].includes(ctx.method))) {
+      await next();
+      return;
+    }
+
+    let body = ctx.req.body || ctx.request.body;
+    if (typeof body?.software_statement !== 'string' && ctx.req.readable) {
+      try {
+        body = await readRawJsonBody(ctx);
+        ctx.req.body = body;
+      } catch (error) {
+        log(`Failed to read raw /reg request body: ${error.message}`);
+      }
+    }
+    const softwareStatement = body?.software_statement;
+
+    if (typeof softwareStatement === 'string') {
+      try {
+        const { payload } = await jwtVerify(softwareStatement, ssaJwks, {
+          algorithms: ['PS256'],
+          issuer: process.env.TRUSTFRAMEWORK_SSA_ISS,
+          maxTokenAge: '5 days',
+          typ: 'JWT',
+        });
+        ctx.state.softwareStatementPayload = payload;
+      } catch (error) {
+        ctx.state.softwareStatementError = error;
+      }
+    }
+
+    await next();
+  });
+}
+
+// FAPI-BR 2.2.1 (5.1, item 17) requires 120s; oidc-provider hard-codes MAX_TTL = 60 with no config knob.
+export const PAR_REQUEST_URI_TTL_SECONDS = 120;
+
+function extendedRequestObject(request, clientPushedIt, ttlSeconds, now) {
+  // A client-signed request object cannot be re-signed, so its own exp caps ours.
+  if (clientPushedIt) {
+    const remaining = decodeJwt(request).exp - now;
+    return Number.isInteger(remaining) ? { request, ttl: Math.min(remaining, ttlSeconds) } : null;
+  }
+
+  return {
+    request: new UnsecuredJWT({ ...decodeJwt(request), exp: now + ttlSeconds }).encode(),
+    ttl: ttlSeconds,
+  };
+}
+
+export function enforceParRequestUriLifecycle(oidcProvider, ttlSeconds = PAR_REQUEST_URI_TTL_SECONDS) {
+  oidcProvider.use(async (ctx, next) => {
+    await next();
+
+    if (ctx.oidc?.route !== 'pushed_authorization_request') {
+      return;
+    }
+
+    const par = ctx.oidc.entities?.PushedAuthorizationRequest;
+    if (!par || typeof ctx.body?.expires_in !== 'number' || ctx.body.expires_in >= ttlSeconds) {
+      return;
+    }
+
+    const extended = extendedRequestObject(
+      par.request,
+      Boolean(ctx.oidc.body?.request),
+      ttlSeconds,
+      Math.floor(Date.now() / 1000),
+    );
+    if (!extended || extended.ttl <= ctx.body.expires_in) {
+      log(`Leaving request_uri at ${ctx.body.expires_in}s: the request object expires first`);
+      return;
+    }
+
+    // save() reuses the existing jti, so the request_uri stays valid - only its expiry moves.
+    par.request = extended.request;
+    await par.save(extended.ttl);
+    ctx.body.expires_in = extended.ttl;
+    log(`Raised request_uri validity to ${extended.ttl}s`);
+  });
+}
+
+export async function consumeRequestUri(oidcProvider, parJti, uid, ledger) {
+  if (!(await ledger.claim(parJti, uid))) {
+    log(`request_uri ${parJti} was already spent by another interaction`);
+    return false;
+  }
+
+  await oidcProvider.PushedAuthorizationRequest.adapter.destroy(parJti);
+  return true;
 }

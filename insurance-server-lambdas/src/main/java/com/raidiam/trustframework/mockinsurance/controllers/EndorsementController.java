@@ -1,7 +1,6 @@
 package com.raidiam.trustframework.mockinsurance.controllers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.raidiam.trustframework.mockinsurance.aop.LogInvocation;
 
 import com.raidiam.trustframework.mockinsurance.auth.AuthenticationGrant;
 import com.raidiam.trustframework.mockinsurance.auth.RequiredAuthenticationGrant;
@@ -29,28 +28,11 @@ import jakarta.inject.Inject;
 @ExecuteOn(TaskExecutors.BLOCKING)
 @Controller("/open-insurance/endorsement")
 public class EndorsementController extends BaseInsuranceController {
-     private static final Logger LOG = LoggerFactory.getLogger(EndorsementController.class);
 
     private static final String REDIRECT_LINK = "https://www.raidiam.com/";
 
     @Inject
     private EndorsementService endorsementService;
-
-    @Post("/v1/request/{consentId}")
-    @Status(HttpStatus.CREATED)
-    @Secured({"ENDORSEMENT_REQUEST_MANAGE"})
-    @XFapiInteractionIdRequired
-    @Idempotent
-    @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
-    public ResponseEndorsement createEndorsement(@Body CreateEndorsement body, @PathVariable("consentId") String consentId, HttpRequest<?> request) {
-
-        var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
-        String clientId = callerInfo.getClientId();
-        LOG.info("Creating new endorsement for client {}", clientId);
-        InsuranceLambdaUtils.logObject(mapper, body);
-
-        return endorsementService.createEndorsement(EndorsementEntity.fromRequest(body, consentId, clientId)).toResponse(REDIRECT_LINK);
-    }
 
     @Post("/v2/request/{consentId}")
     @Status(HttpStatus.CREATED)
@@ -59,12 +41,11 @@ public class EndorsementController extends BaseInsuranceController {
     @ResponseErrorWithRequestDateTime
     @Idempotent
     @RequiredAuthenticationGrant(AuthenticationGrant.AUTHORISATION_CODE)
+    @LogInvocation
     public ResponseEndorsement createEndorsementV2(@Body CreateEndorsement body, @PathVariable("consentId") String consentId, HttpRequest<?> request) {
 
         var callerInfo = InsuranceLambdaUtils.getRequestMeta(request);
         String clientId = callerInfo.getClientId();
-        LOG.info("Creating new endorsement for client {}", clientId);
-        InsuranceLambdaUtils.logObject(mapper, body);
 
         return endorsementService.createEndorsement(EndorsementEntity.fromRequest(body, consentId, clientId)).toResponse(REDIRECT_LINK);
     }

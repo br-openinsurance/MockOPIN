@@ -11,6 +11,7 @@ import io.micronaut.data.model.Pageable
 import io.micronaut.http.HttpRequest
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.exceptions.HttpStatusException
+import io.micronaut.security.authentication.Authentication
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
 import spock.lang.Shared
@@ -527,6 +528,67 @@ class InsuranceLambdaUtilsSpec extends CleanupSpecification {
         then:
         TrustframeworkException e = thrown()
         e.message == "dateNames parameter should contain the following - fromDateName, fromDate, toDateName, toDate strings"
+    }
+
+    @Unroll
+    def "castToStringList casts lists and returns null otherwise"() {
+        expect:
+        InsuranceLambdaUtils.castToStringList(value) == expected
+
+        where:
+        value                 | expected
+        ["a", "b"]            | ["a", "b"]
+        []                    | []
+        null                  | null
+        "not a list"          | null
+        42                    | null
+    }
+
+    def "getRequestMeta returns empty meta when there is no authentication on the request"() {
+        given:
+        def request = HttpRequest.GET("https://www.example.com/examplepage")
+
+        when:
+        def meta = InsuranceLambdaUtils.getRequestMeta(request)
+
+        then:
+        meta.roles == []
+        meta.clientId == null
+        meta.consentId == null
+        meta.jti == null
+        meta.jwtPayload == null
+    }
+
+    def "getRequestMeta populates all attributes when authentication is present"() {
+        given:
+        def authentication = Authentication.build("someone", [roles: ["CONSENTS_MANAGE", "RESOURCES_READ"]])
+        def request = HttpRequest.GET("https://www.example.com/examplepage")
+        request.setAttribute("micronaut.AUTHENTICATION", authentication)
+        request.setAttribute("clientId", "client1")
+        request.setAttribute("consentId", "consent1")
+
+        when:
+        def meta = InsuranceLambdaUtils.getRequestMeta(request)
+
+        then:
+        meta.roles == ["CONSENTS_MANAGE", "RESOURCES_READ"]
+        meta.clientId == "client1"
+        meta.consentId == "consent1"
+    }
+
+    def "getRequestMeta falls back to empty meta when authentication is present but the token had no client id"() {
+        given:
+        def authentication = Authentication.build("someone", [roles: ["CONSENTS_MANAGE"]])
+        def request = HttpRequest.GET("https://www.example.com/examplepage")
+        request.setAttribute("micronaut.AUTHENTICATION", authentication)
+
+        when:
+        def meta = InsuranceLambdaUtils.getRequestMeta(request)
+
+        then:
+        noExceptionThrown()
+        meta.roles == []
+        meta.clientId == null
     }
 
     def "enable cleanup"() {

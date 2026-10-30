@@ -12,7 +12,11 @@ import bodyParser from 'body-parser';
 
 import Account from './utils/account.js';
 import BRAND_NAME from './utils/brandHelper.js';
-import { supportDynamicScopes, ensureTokenEndpointAsAudience } from './utils/oidc.js';
+import {
+  supportDynamicScopes,
+  ensureTokenEndpointAsAudience,
+  addSoftwareStatementVerificationMiddleware,
+} from './utils/oidc.js';
 import { loadParameters, prepareOidcConfiguration } from './utils/startup.js';
 
 const log = Debug('raidiam:server:info');
@@ -42,6 +46,15 @@ async function loadSupportFunctions(provider, dynamicScopes) {
   ensureTokenEndpointAsAudience(provider);
 }
 
+function buildContentSecurityPolicyDirectives() {
+  const directives = helmet.contentSecurityPolicy.getDefaultDirectives();
+  // Unrestricted here: oidc-provider's form_post/JARM response posts to the client's
+  // external redirect_uri. form-action 'self' is scoped to our own pages instead, in utils/layoutRenderer.js (INCM-149).
+  delete directives['form-action'];
+  directives['script-src'] = ["'self'", (req, res) => `'nonce-${res.locals.nonce}'`];
+  return directives;
+}
+
 async function main() {
   const app = express();
 
@@ -49,14 +62,11 @@ async function main() {
     res.locals.nonce = randomBytes(16).toString('base64');
     next();
   });
-  const directives = helmet.contentSecurityPolicy.getDefaultDirectives();
-  delete directives['form-action'];
-  directives['script-src'] = ["'self'", (req, res) => `'nonce-${res.locals.nonce}'`];
   app.use(
     helmet({
       contentSecurityPolicy: {
         useDefaults: false,
-        directives,
+        directives: buildContentSecurityPolicyDirectives(),
       },
     }),
   );
@@ -83,7 +93,7 @@ async function main() {
   // and the Mongo connection above instead of waiting for the SSM lookup first.
   const oidcConfigFactoryPromise = prepareOidcConfiguration(config.brand);
 
-  const { issuer, clientCert, clientCertKey } = await loadParameters();
+  const { issuer, clientCert, clientCertKey, caCert, cookieKeys } = await loadParameters();
 
   let mtlsIssuer = new URL(issuer);
   mtlsIssuer.host = `matls-${mtlsIssuer.host}`;
@@ -94,7 +104,13 @@ async function main() {
   log(`Issuer: ${issuer}, mTLS Issuer: ${mtlsIssuer}, API Host: ${apiUrl}`);
 
   const [oidcConfigFactory, adapter] = await Promise.all([oidcConfigFactoryPromise, adapterPromise]);
-  const oidcConfig = oidcConfigFactory(mtlsIssuer, clientCert, clientCertKey);
+  const { configuration: oidcConfig, ssaJwks } = oidcConfigFactory(
+    mtlsIssuer,
+    clientCert,
+    clientCertKey,
+    caCert,
+    cookieKeys,
+  );
 
   let provider = new Provider(issuer, {
     adapter,
@@ -127,7 +143,9 @@ async function main() {
 
   log(`Init Adapter for ${BRAND || 'Default'}`);
   const { init } = await import(`./utils/${config.brand}/adapter.js`);
-  init(apiUrl, provider, 'openid-provider-client', clientCert, clientCertKey);
+  init(apiUrl, provider, 'openid-provider-client', clientCert, clientCertKey, caCert);
+
+  addSoftwareStatementVerificationMiddleware(provider, ssaJwks);
 
   loadSupportFunctions(provider, config.dynamicScopesSupported);
 
@@ -215,4 +233,4 @@ async function run() {
   };
 }
 
-export { run };
+export { run, buildContentSecurityPolicyDirectives };

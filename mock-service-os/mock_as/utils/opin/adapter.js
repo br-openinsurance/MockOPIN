@@ -2,6 +2,7 @@ import { errors } from 'oidc-provider';
 import axios from 'axios';
 import { randomUUID } from 'crypto';
 import https from 'https';
+import tls from 'tls';
 import NodeCache from 'node-cache';
 import crypto from 'crypto';
 import Debug from 'debug';
@@ -422,11 +423,12 @@ export class InsurerAdapter {
 
 export let insurerAdapter = undefined;
 
-export function init(baseUrl, oidcProvider, clientId, clientCert, clientCertKey) {
+export function init(baseUrl, oidcProvider, clientId, clientCert, clientCertKey, caCert) {
   const httpsAgent = new https.Agent({
     key: clientCertKey,
     cert: clientCert,
-    rejectUnauthorized: false,
+    ca: caCert ? [...tls.rootCertificates, caCert] : undefined,
+    keepAlive: true,
   });
 
   const instance = axios.create({ baseURL: baseUrl, httpsAgent: httpsAgent });

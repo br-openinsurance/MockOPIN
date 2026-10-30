@@ -49,27 +49,6 @@ class HousingControllerSpec extends Specification {
         handler = new ApiGatewayProxyRequestEventFunction(applicationContext)
     }
 
-    def "We can fetch policies" () {
-        given:
-        def resp = new BaseInsuranceResponse().data(List.of())
-        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
-        housingService.getPolicies(_ as Pageable, _ as String) >> resp
-
-        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-housing/v1/insurance-housing', HttpMethod.GET)
-                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
-        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-housing consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
-
-        when:
-        def response = handler.handleRequest(event, lambdaContext)
-
-        then:
-        response.statusCode == HttpStatus.OK.code
-        response.body != null
-
-        and:
-        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
-    }
-
     def "We can fetch policies V2" () {
         given:
         def resp = new BaseInsuranceResponseV2().data(List.of())
@@ -77,29 +56,6 @@ class HousingControllerSpec extends Specification {
         housingService.getPoliciesV2(_ as Pageable, _ as String) >> resp
 
         def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-housing/v2/insurance-housing', HttpMethod.GET)
-                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
-        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-housing consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
-
-        when:
-        def response = handler.handleRequest(event, lambdaContext)
-
-        then:
-        response.statusCode == HttpStatus.OK.code
-        response.body != null
-
-        and:
-        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
-    }
-
-    def "We can fetch a policy info" () {
-        given:
-        def resp = new ResponseInsuranceHousingPolicyInfo().data(
-                new InsuranceHousingPolicyInfoData()
-        )
-        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
-        housingService.getPolicyInfo(_ as UUID, _ as String) >> resp
-
-        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-housing/v1/insurance-housing/'+UUID.randomUUID().toString()+'/policy-info', HttpMethod.GET)
                 .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-housing consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
 
@@ -137,27 +93,6 @@ class HousingControllerSpec extends Specification {
         response.multiValueHeaders.containsKey('x-fapi-interaction-id')
     }
 
-    def "We can fetch a policy's claims" () {
-        given:
-        def resp = new ResponseInsuranceHousingClaims().data(List.of())
-        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
-        housingService.getPolicyClaims(_ as UUID, _ as String, _ as Pageable) >> resp
-
-        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-housing/v1/insurance-housing/'+UUID.randomUUID().toString()+'/claim', HttpMethod.GET)
-                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
-        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-housing consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
-
-        when:
-        def response = handler.handleRequest(event, lambdaContext)
-
-        then:
-        response.statusCode == HttpStatus.OK.code
-        response.body != null
-
-        and:
-        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
-    }
-
     def "We can fetch a policy's claims V2" () {
         given:
         def resp = new ResponseInsuranceHousingClaimsV2().data(List.of())
@@ -165,29 +100,6 @@ class HousingControllerSpec extends Specification {
         housingService.getPolicyClaimsV2(_ as UUID, _ as String, _ as Pageable) >> resp
 
         def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-housing/v2/insurance-housing/'+UUID.randomUUID().toString()+'/claim', HttpMethod.GET)
-                .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
-        AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-housing consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
-
-        when:
-        def response = handler.handleRequest(event, lambdaContext)
-
-        then:
-        response.statusCode == HttpStatus.OK.code
-        response.body != null
-
-        and:
-        response.multiValueHeaders.containsKey('x-fapi-interaction-id')
-    }
-
-    def "We can fetch a policy's premium" () {
-        given:
-        def resp = new ResponseInsuranceHousingPremium().data(
-                new InsuranceHousingPremium()
-        )
-        InsuranceLambdaUtils.decorateResponseSimpleLinkMeta(resp::setLinks, resp::setMeta, "https://example.com")
-        housingService.getPolicyPremium(_ as UUID, _ as String) >> resp
-
-        def event = AwsProxyHelper.buildBasicEvent('/open-insurance/insurance-housing/v1/insurance-housing/'+UUID.randomUUID().toString()+'/premium', HttpMethod.GET)
                 .withHeaders(Map.of( "x-fapi-interaction-id", UUID.randomUUID().toString()))
         AuthHelper.authorizeAuthorizationCodeGrant(scopes: "insurance-housing consent:urn:raidiaminsurance:bf43d0e5-7bc2-4a5b-b6da-19d43fabd991", event)
 

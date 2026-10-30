@@ -1,4 +1,4 @@
-import { renderEnrollmentInteraction } from './renderInteraction.js';
+import { renderEnrollmentInteraction, renderConsentInteraction } from './renderInteraction.js';
 
 describe('interaction.ejs — enrollment expiration input', () => {
   it('rejects a non-date string via native constraint validation', () => {
@@ -106,5 +106,230 @@ describe('interaction.ejs — enrollment name input', () => {
 
     // Then it still posts as "name", matching the PUT /enrollments update schema
     expect(nameInput.name).toBe('name');
+  });
+});
+
+describe('interaction.ejs — enrollment transaction limit input', () => {
+  it('rejects a whole number, since the bank requires two decimal places', () => {
+    // Given the transaction limit input rendered by the view
+    const document = renderEnrollmentInteraction();
+    const limitInput = document.getElementById('enrollment-transaction-limit');
+
+    // When a user types an amount without cents
+    limitInput.value = '450';
+
+    // Then the browser reports it as invalid, before the bank rejects it for
+    // failing its own ^\d{1,16}\.\d{2}$ constraint
+    expect(limitInput.checkValidity()).toBe(false);
+    expect(limitInput.validity.patternMismatch).toBe(true);
+  });
+
+  it('rejects a non-numeric value', () => {
+    // Given the transaction limit input rendered by the view
+    const document = renderEnrollmentInteraction();
+    const limitInput = document.getElementById('enrollment-transaction-limit');
+
+    // When a user types something that is not an amount
+    limitInput.value = 'abcdefghijklmnop';
+
+    // Then the browser reports it as invalid
+    expect(limitInput.checkValidity()).toBe(false);
+    expect(limitInput.validity.patternMismatch).toBe(true);
+  });
+
+  it('accepts a well-formatted amount', () => {
+    // Given the transaction limit input rendered by the view
+    const document = renderEnrollmentInteraction();
+    const limitInput = document.getElementById('enrollment-transaction-limit');
+
+    // When a user types an amount with two decimal places
+    limitInput.value = '450.00';
+
+    // Then the browser reports it as valid
+    expect(limitInput.checkValidity()).toBe(true);
+  });
+
+  it('accepts an empty value, since the transaction limit is optional', () => {
+    // Given the transaction limit input rendered by the view
+    const document = renderEnrollmentInteraction();
+    const limitInput = document.getElementById('enrollment-transaction-limit');
+
+    // When the field is left empty
+    limitInput.value = '';
+
+    // Then the browser does not enforce the pattern on an optional empty field
+    expect(limitInput.checkValidity()).toBe(true);
+  });
+
+  it('does not enforce the 500 BRL ceiling, which depends on businessEntity', () => {
+    // Given the transaction limit input rendered by the view
+    const document = renderEnrollmentInteraction();
+    const limitInput = document.getElementById('enrollment-transaction-limit');
+
+    // When a user types an amount above 500
+    limitInput.value = '75000.00';
+
+    // Then the form still accepts it: the ceiling only applies when the enrollment
+    // carries no businessEntity, which this page cannot know
+    expect(limitInput.checkValidity()).toBe(true);
+  });
+
+  it('loads a previously persisted transaction limit', () => {
+    // Given the enrollment response carries a persisted limit
+    const document = renderEnrollmentInteraction({ transactionLimit: '450.00' });
+
+    // When the view renders the transaction limit field
+    const limitInput = document.getElementById('enrollment-transaction-limit');
+
+    // Then the input is pre-filled with that value
+    expect(limitInput.value).toBe('450.00');
+  });
+
+  it('renders an empty value when no transaction limit has been persisted', () => {
+    // Given the enrollment has no persisted limit
+    const document = renderEnrollmentInteraction();
+
+    // When the view renders the transaction limit field
+    const limitInput = document.getElementById('enrollment-transaction-limit');
+
+    // Then the input is empty
+    expect(limitInput.value).toBe('');
+  });
+
+  it('submits the field under the update-schema key, transactionLimit', () => {
+    // Given the enrollment interaction form
+    const document = renderEnrollmentInteraction();
+
+    // When checking how the field is wired for submission
+    const limitInput = document.getElementById('enrollment-transaction-limit');
+
+    // Then it posts as "transactionLimit", matching the PUT /enrollments update schema
+    expect(limitInput.name).toBe('transactionLimit');
+  });
+});
+
+describe('interaction.ejs — enrollment daily limit input', () => {
+  it('rejects a whole number, since the bank requires two decimal places', () => {
+    // Given the daily limit input rendered by the view
+    const document = renderEnrollmentInteraction();
+    const limitInput = document.getElementById('enrollment-daily-limit');
+
+    // When a user types an amount without cents
+    limitInput.value = '1500';
+
+    // Then the browser reports it as invalid, before the bank rejects it for
+    // failing its own ^\d{1,16}\.\d{2}$ constraint
+    expect(limitInput.checkValidity()).toBe(false);
+    expect(limitInput.validity.patternMismatch).toBe(true);
+  });
+
+  it('rejects a non-numeric value', () => {
+    // Given the daily limit input rendered by the view
+    const document = renderEnrollmentInteraction();
+    const limitInput = document.getElementById('enrollment-daily-limit');
+
+    // When a user types something that is not an amount
+    limitInput.value = 'abcdefghijklmnop';
+
+    // Then the browser reports it as invalid
+    expect(limitInput.checkValidity()).toBe(false);
+    expect(limitInput.validity.patternMismatch).toBe(true);
+  });
+
+  it('accepts a well-formatted amount', () => {
+    // Given the daily limit input rendered by the view
+    const document = renderEnrollmentInteraction();
+    const limitInput = document.getElementById('enrollment-daily-limit');
+
+    // When a user types an amount with two decimal places
+    limitInput.value = '1500.00';
+
+    // Then the browser reports it as valid
+    expect(limitInput.checkValidity()).toBe(true);
+  });
+
+  it('accepts an empty value, since the daily limit is optional', () => {
+    // Given the daily limit input rendered by the view
+    const document = renderEnrollmentInteraction();
+    const limitInput = document.getElementById('enrollment-daily-limit');
+
+    // When the field is left empty
+    limitInput.value = '';
+
+    // Then the browser does not enforce the pattern on an optional empty field
+    expect(limitInput.checkValidity()).toBe(true);
+  });
+
+  it('loads a previously persisted daily limit', () => {
+    // Given the enrollment response carries a persisted limit
+    const document = renderEnrollmentInteraction({ dailyLimit: '1500.00' });
+
+    // When the view renders the daily limit field
+    const limitInput = document.getElementById('enrollment-daily-limit');
+
+    // Then the input is pre-filled with that value
+    expect(limitInput.value).toBe('1500.00');
+  });
+
+  it('renders an empty value when no daily limit has been persisted', () => {
+    // Given the enrollment has no persisted limit
+    const document = renderEnrollmentInteraction();
+
+    // When the view renders the daily limit field
+    const limitInput = document.getElementById('enrollment-daily-limit');
+
+    // Then the input is empty
+    expect(limitInput.value).toBe('');
+  });
+
+  it('submits the field under the update-schema key, dailyLimit', () => {
+    // Given the enrollment interaction form
+    const document = renderEnrollmentInteraction();
+
+    // When checking how the field is wired for submission
+    const limitInput = document.getElementById('enrollment-daily-limit');
+
+    // Then it posts as "dailyLimit", matching the PUT /enrollments update schema
+    expect(limitInput.name).toBe('dailyLimit');
+  });
+
+  it('renders as a field separate from the transaction limit', () => {
+    // Given an enrollment carrying different values for each limit
+    const document = renderEnrollmentInteraction({ transactionLimit: '450.00', dailyLimit: '1500.00' });
+
+    // When the view renders both limit fields
+    const dailyInput = document.getElementById('enrollment-daily-limit');
+    const transactionInput = document.getElementById('enrollment-transaction-limit');
+
+    // Then each shows its own persisted value, so the two are never conflated
+    expect(dailyInput.value).toBe('1500.00');
+    expect(transactionInput.value).toBe('450.00');
+  });
+});
+
+describe('interaction.ejs — CIBA requester name', () => {
+  it('shows the name of the person who asked for the consent', () => {
+    const document = renderConsentInteraction({}, {}, { requester: 'Joaquim Silva' });
+
+    expect(document.getElementById('requester-name').textContent).toContain('Joaquim Silva');
+  });
+
+  it('shows no requester line on a journey that passes none, even when the consent carries a name', () => {
+    const document = renderConsentInteraction({ loggedUser: { name: 'Joaquim Silva' } });
+
+    expect(document.getElementById('requester-name')).toBeNull();
+  });
+
+  it('shows no requester line when there is no name anywhere', () => {
+    const document = renderConsentInteraction();
+
+    expect(document.getElementById('requester-name')).toBeNull();
+  });
+
+  it('escapes the name, which the receiver controls', () => {
+    const document = renderConsentInteraction({}, {}, { requester: '<script>alert(1)</script>' });
+
+    expect(document.querySelector('#requester-name script')).toBeNull();
+    expect(document.getElementById('requester-name').textContent).toContain('<script>alert(1)</script>');
   });
 });

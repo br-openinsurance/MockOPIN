@@ -2,11 +2,6 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-        classpath 'software.amazon.awssdk:auth:2.20.133'
-        classpath 'software.amazon.awssdk:sso:2.20.133'
-        classpath 'software.amazon.awssdk:sts:2.20.133'
-    }
 }
 
 plugins {
@@ -25,10 +20,30 @@ ext {
     dirSizeLimit = 230
     isTestMode = project.hasProperty('testMode') ? project.property('testMode').toBoolean() : false
 }
+task installProdNodeModules(type: Exec) {
+    def stagingDir = file("$buildDir/prodModules")
+
+    doFirst {
+        stagingDir.mkdirs()
+        copy {
+            from file('package.json')
+            from file('package-lock.json')
+            into stagingDir
+        }
+    }
+
+    workingDir = stagingDir
+    commandLine 'npm', 'ci', '--omit=dev'
+
+    inputs.file file('package.json')
+    inputs.file file('package-lock.json')
+    outputs.dir file("$buildDir/prodModules/node_modules")
+}
 
 task checkSize {
+    dependsOn installProdNodeModules
     doLast {
-        File dir = new File('node_modules')
+        File dir = file("$buildDir/prodModules/node_modules")
         long size = 0
         dir.eachFileRecurse(groovy.io.FileType.FILES) { file ->
             size += file.length()
@@ -43,4 +58,35 @@ task checkSize {
 
     }
     onlyIf { !isTestMode }
+}
+
+task packageLayer(type: Zip) {
+    dependsOn installProdNodeModules
+    destinationDirectory = file("$buildDir/dists")
+    archiveClassifier = 'layer'
+
+    from file("$buildDir/prodModules/node_modules")
+    into 'nodejs/node_modules'
+}
+
+task packageAssets(type: Zip) {
+    destinationDirectory = file("$buildDir/dists")
+    archiveClassifier = 'ui'
+
+    from("public")
+}
+
+task packageApp(type: Zip) {
+    destinationDirectory = file("$buildDir/dists")
+
+    from('utils'){
+        into 'utils'
+    }
+    from('views'){
+        into 'views'
+    }
+
+    from file('lambda.js')
+    from file('express.js')
+    from file('package.json')
 }

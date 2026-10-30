@@ -33,17 +33,6 @@ public class HousingService extends BaseInsuranceService {
         return housingPolicyRepository.findByAccountHolderAccountHolderId(consentEntity.getAccountHolderId(), pageable).getContent();
     }
 
-    public BaseInsuranceResponse getPolicies(Pageable pageable, String consentId) {
-        var policies = getHousingPolicyEntities(pageable, consentId);
-        return new BaseInsuranceResponse()
-                .data(List.of(new BaseBrandAndCompanyData()
-                        .brand("Mock")
-                        .companies(List.of(new BaseBrandAndCompanyDataCompanies()
-                                        .companyName("Mock Insurer")
-                                        .cnpjNumber("12345678901234")
-                                        .policies(policies.stream().map(HousingPolicyEntity::mapPolicyDTO).toList())))));
-    }
-
     public BaseInsuranceResponseV2 getPoliciesV2(Pageable pageable, String consentId) {
         var policies = getHousingPolicyEntities(pageable, consentId);
         return new BaseInsuranceResponseV2()
@@ -70,26 +59,6 @@ public class HousingService extends BaseInsuranceService {
         return policy;
     }
 
-    public ResponseInsuranceHousingPolicyInfo getPolicyInfo(UUID policyId, String consentId) {
-        LOG.info("Getting housing policy info response for consent id {}", consentId);
-        var policy =  getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_HOUSING_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_HOUSING_POLICYINFO_READ);
-        var response = policy.mapPolicyInfoDTO();
-
-        policy.getBeneficiaryIds().forEach(beneficiaryId -> response.getData().addBeneficiariesItem(beneficiaryInfoRepository.findById(beneficiaryId)
-            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Beneficiary not found for UUID %s", beneficiaryId)))
-            .mapDTO()));
-
-        policy.getInsuredIds().forEach(insuredIds -> response.getData().addInsuredsItem(personalInfoRepository.findById(insuredIds)
-            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Personal info not found for UUID %s", insuredIds)))
-            .mapDTO()));
-
-        policy.getIntermediaryIds().forEach(intermediaryId -> response.getData().addIntermediariesItem(intermediaryRepository.findById(intermediaryId)
-            .orElseThrow(() -> new HttpStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("Intermediary not found for UUID %s", intermediaryId)))
-            .mapDTO()));
-
-        return response;
-    }
-
     public ResponseInsuranceHousingPolicyInfoV2 getPolicyInfoV2(UUID policyId, String consentId) {
         LOG.info("Getting housing policy info response for consent id {}", consentId);
         var policy =  getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_HOUSING_POLICYINFO_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_HOUSING_POLICYINFO_READ);
@@ -108,17 +77,6 @@ public class HousingService extends BaseInsuranceService {
             .mapDTOV2()));
 
         return response;
-    }
-
-    public ResponseInsuranceHousingClaims getPolicyClaims(UUID policyId, String consentId, Pageable pageable) {
-        LOG.info("Getting housing policy claims response for consent id {}", consentId);
-        getPolicy(policyId, consentId, EnumConsentPermission.DAMAGES_AND_PEOPLE_HOUSING_CLAIM_READ, EnumConsentV3Permission.DAMAGES_AND_PEOPLE_HOUSING_CLAIM_READ);
-
-        var claims = housingPolicyClaimRepository.findByHousingPolicyId(policyId, pageable);
-        var resp = new ResponseInsuranceHousingClaims()
-                .data(claims.getContent().stream().map(HousingPolicyClaimEntity::mapDTO).toList());
-        resp.setMeta(InsuranceLambdaUtils.getMeta(claims, false));
-        return resp;
     }
 
     public ResponseInsuranceHousingClaimsV2 getPolicyClaimsV2(UUID policyId, String consentId, Pageable pageable) {

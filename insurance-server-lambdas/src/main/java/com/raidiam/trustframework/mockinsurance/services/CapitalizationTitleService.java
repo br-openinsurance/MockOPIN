@@ -25,36 +25,6 @@ public class CapitalizationTitleService extends BaseInsuranceService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CapitalizationTitleService.class);
 
-    public ResponseInsuranceCapitalizationTitle getPlans(String consentId, Pageable pageable) {
-        LOG.info("Getting capitalization title plans response for consent id {}", consentId);
-
-        var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
-
-        InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
-        InsuranceLambdaUtils.checkConsentPermissions(consentEntity, EnumConsentPermission.CAPITALIZATION_TITLE_READ, EnumConsentV3Permission.CAPITALIZATION_TITLE_READ);
-
-        var consentPlans = consentCapitalizationTitlePlanRepository.findByConsentConsentIdOrderByCreatedAtAsc(consentId, pageable);
-        this.checkConsentOwnerIsPlanOwner(consentPlans, consentEntity);
-
-        var response = new ResponseInsuranceCapitalizationTitle()
-                .data(List.of(new ResponseInsuranceCapitalizationTitleData()
-                        .brand(new ResponseInsuranceCapitalizationTitleBrand()
-                                .name("Mock")
-                                .companies(List.of(new ResponseInsuranceCapitalizationTitleBrandCompanies()
-                                        .companyName("Mock Insurer")
-                                        .cnpjNumber("12345678901234")
-                                        .products(consentPlans.getContent()
-                                                .stream()
-                                                .map(consentAccountEntity -> {
-                                                    resourcesService.checkStatusAvailable(consentAccountEntity.getCapitalizationTitlePlan(), consentEntity);
-                                                    return consentAccountEntity.getCapitalizationTitlePlan();
-                                                })
-                                                .map(CapitalizationTitlePlanEntity::mapProductDto)
-                                                .toList()))))));
-        response.setMeta(InsuranceLambdaUtils.getMeta(consentPlans, false));
-        return response;
-    }
-
     public ResponseInsuranceCapitalizationTitleV2 getPlansV2(String consentId, Pageable pageable) {
         LOG.info("Getting capitalization title plans response for consent id {}", consentId);
 
@@ -83,11 +53,6 @@ public class CapitalizationTitleService extends BaseInsuranceService {
                                                 .toList()))))));
         response.setMeta(InsuranceLambdaUtils.getMeta(consentPlans, false));
         return response;
-    }
-
-    public ResponseInsuranceCapitalizationTitlePlanInfo getPlanInfo(UUID planId, String consentId) {
-        LOG.info("Getting capitalization title plan info response for consent id {}", consentId);
-        return getPlan(planId, consentId, EnumConsentPermission.CAPITALIZATION_TITLE_PLANINFO_READ, EnumConsentV3Permission.CAPITALIZATION_TITLE_PLANINFO_READ).mapPlanInfoDto();
     }
 
     public ResponseInsuranceCapitalizationTitlePlanInfoV2 getPlanInfoV2(UUID planId, String consentId) {

@@ -111,9 +111,18 @@ public class ResourcesService extends BaseInsuranceService {
             Map.entry(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO, EnumConsentV3Permission.CUSTOMERS_BUSINESS_ADDITIONALINFO_READ)
     );
 
+    private static boolean hasResourcePermission(ResourceType resourceType,
+                                                 Set<EnumConsentPermission> permissions,
+                                                 Set<EnumConsentV3Permission> permissionsV3) {
+        return permissions.contains(PERMISSION_MAP.get(resourceType))
+                || permissionsV3.contains(PERMISSION_MAP_V3.get(resourceType));
+    }
+
     public ResponseResourceList getResourceList(Pageable pageable, @NotNull String consentId) {
         LOG.info("Getting resources response for consent id {}", consentId);
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
+
+        InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
 
         LOG.info("Checking permissions for consent id {}", consentId);
 
@@ -127,73 +136,73 @@ public class ResourcesService extends BaseInsuranceService {
 
         var capitalizationTitlePlans = consentEntity.getCapitalizationTitlePlans();
         LOG.info("Found {} capitalization title plans to include in resource response", capitalizationTitlePlans.size());
-        addCapitalizationTitlePlansToResources(capitalizationTitlePlans, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CAPITALIZATION_TITLES)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CAPITALIZATION_TITLES))));
+        addCapitalizationTitlePlansToResources(capitalizationTitlePlans, consentEntity, responseMap, hasResourcePermission(ResourceType.CAPITALIZATION_TITLES, permissions, permissionsV3));
         
         var acceptanceAndBranchesAbroadPolicies = consentEntity.getAcceptanceAndBranchesAbroadPolicies();
         LOG.info("Found {} acceptance and branches abroad policies to include in resource response", acceptanceAndBranchesAbroadPolicies.size());
-        addAcceptanceAndBranchesAbroadPoliciesToResources(acceptanceAndBranchesAbroadPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD))));
+        addAcceptanceAndBranchesAbroadPoliciesToResources(acceptanceAndBranchesAbroadPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD, permissions, permissionsV3));
         
         var patrimonialPolicies = consentEntity.getPatrimonialPolicies();
         LOG.info("Found {} patrimonial policies to include in resource response", patrimonialPolicies.size());
-        addPatrimonialPoliciesToResources(patrimonialPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_PATRIMONIAL)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_PATRIMONIAL))));
+        addPatrimonialPoliciesToResources(patrimonialPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_PATRIMONIAL, permissions, permissionsV3));
         
         var ruralPolicies = consentEntity.getRuralPolicies();
         LOG.info("Found {} rural policies to include in resource response", ruralPolicies.size());
-        addRuralPoliciesToResources(ruralPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_RURAL)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_RURAL))));
+        addRuralPoliciesToResources(ruralPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_RURAL, permissions, permissionsV3));
 
         var financialRiskPolicies = consentEntity.getFinancialRiskPolicies();
         LOG.info("Found {} financial risk policies to include in resource response", financialRiskPolicies.size());
-        addFinancialRiskPoliciesToResources(financialRiskPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS))));
+        addFinancialRiskPoliciesToResources(financialRiskPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS, permissions, permissionsV3));
 
         var housingPolicies = consentEntity.getHousingPolicies();
         LOG.info("Found {} housing policies to include in resource response", housingPolicies.size());
-        addHousingPoliciesToResources(housingPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_HOUSING)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_HOUSING))));
+        addHousingPoliciesToResources(housingPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_HOUSING, permissions, permissionsV3));
 
         var responsibilityPolicies = consentEntity.getResponsibilityPolicies();
         LOG.info("Found {} responsibility policies to include in resource response", responsibilityPolicies.size());
-        addResponsibilityPoliciesToResources(responsibilityPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_RESPONSIBILITY)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_RESPONSIBILITY))));
+        addResponsibilityPoliciesToResources(responsibilityPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_RESPONSIBILITY, permissions, permissionsV3));
 
         var personPolicies = consentEntity.getPersonPolicies();
         LOG.info("Found {} person policies to include in resource response", personPolicies.size());
-        addPersonPoliciesToResources(personPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_PERSON)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_PERSON))));
+        addPersonPoliciesToResources(personPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_PERSON, permissions, permissionsV3));
 
         var lifePensionContracts = consentEntity.getLifePensionContracts();
         LOG.info("Found {} life pension contracts to include in resource response", lifePensionContracts.size());
-        addLifePensionContractsToResources(lifePensionContracts, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.LIFE_PENSION)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.LIFE_PENSION))));
+        addLifePensionContractsToResources(lifePensionContracts, consentEntity, responseMap, hasResourcePermission(ResourceType.LIFE_PENSION, permissions, permissionsV3));
 
         var pensionPlanContracts = consentEntity.getPensionPlanContracts();
         LOG.info("Found {} pension plan contracts to include in resource response", pensionPlanContracts.size());
-        addPensionPlanContractsToResources(pensionPlanContracts, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.PENSION_PLAN)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.PENSION_PLAN))));
+        addPensionPlanContractsToResources(pensionPlanContracts, consentEntity, responseMap, hasResourcePermission(ResourceType.PENSION_PLAN, permissions, permissionsV3));
 
         var financialAssistanceContracts = consentEntity.getFinancialAssistanceContracts();
         LOG.info("Found {} financial assistance contracts to include in resource response", financialAssistanceContracts.size());
-        addFinancialAssistanceContractsToResources(financialAssistanceContracts, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.FINANCIAL_ASSISTANCE)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.FINANCIAL_ASSISTANCE))));
+        addFinancialAssistanceContractsToResources(financialAssistanceContracts, consentEntity, responseMap, hasResourcePermission(ResourceType.FINANCIAL_ASSISTANCE, permissions, permissionsV3));
 
         var autoPolicies = consentEntity.getAutoPolicies();
         LOG.info("Found {} auto policies to include in resource response", autoPolicies.size());
-        addAutoPoliciesToResources(autoPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_AUTO)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_AUTO))));
+        addAutoPoliciesToResources(autoPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_AUTO, permissions, permissionsV3));
 
         var transportPolicies = consentEntity.getTransportPolicies();
         LOG.info("Found {} transport policies to include in resource response", transportPolicies.size());
-        addTransportPoliciesToResources(transportPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_TRANSPORT)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_TRANSPORT))));
+        addTransportPoliciesToResources(transportPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_TRANSPORT, permissions, permissionsV3));
 
         LOG.info("Including customer personal identifications in resource response");
-        addCustomerPersonalIdentificationsToResources(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_PERSONAL_IDENTIFICATIONS)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_PERSONAL_IDENTIFICATIONS))));
+        addCustomerPersonalIdentificationsToResources(consentEntity, responseMap, hasResourcePermission(ResourceType.CUSTOMERS_PERSONAL_IDENTIFICATIONS, permissions, permissionsV3));
 
         LOG.info("Including customer personal qualifications in resource response");
-        addCustomerPersonalQualificationsToResources(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_PERSONAL_QUALIFICATION)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_PERSONAL_QUALIFICATION))));
+        addCustomerPersonalQualificationsToResources(consentEntity, responseMap, hasResourcePermission(ResourceType.CUSTOMERS_PERSONAL_QUALIFICATION, permissions, permissionsV3));
 
         LOG.info("Including customer personal additional info in resource response");
-        addCustomerPersonalAdditionalInfoToResources(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_PERSONAL_ADDITIONALINFO)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_PERSONAL_ADDITIONALINFO))));
+        addCustomerPersonalAdditionalInfoToResources(consentEntity, responseMap, hasResourcePermission(ResourceType.CUSTOMERS_PERSONAL_ADDITIONALINFO, permissions, permissionsV3));
 
         LOG.info("Including customer business identifications in resource response");
-        addCustomerBusinessIdentificationsToResources(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_BUSINESS_IDENTIFICATIONS)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_BUSINESS_IDENTIFICATIONS))));
+        addCustomerBusinessIdentificationsToResources(consentEntity, responseMap, hasResourcePermission(ResourceType.CUSTOMERS_BUSINESS_IDENTIFICATIONS, permissions, permissionsV3));
 
         LOG.info("Including customer business qualifications in resource response");
-        addCustomerBusinessQualificationsToResources(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_BUSINESS_QUALIFICATION)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_BUSINESS_QUALIFICATION))));
+        addCustomerBusinessQualificationsToResources(consentEntity, responseMap, hasResourcePermission(ResourceType.CUSTOMERS_BUSINESS_QUALIFICATION, permissions, permissionsV3));
 
         LOG.info("Including customer business additional info in resource response");
-        addCustomerBusinessAdditionalInfoToResources(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO))));
+        addCustomerBusinessAdditionalInfoToResources(consentEntity, responseMap, hasResourcePermission(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO, permissions, permissionsV3));
 
         var resourcePage = getPage(responseMap, pageable);
         LOG.info("Building response with resources");
@@ -205,6 +214,8 @@ public class ResourcesService extends BaseInsuranceService {
     public ResponseResourceListV3 getResourceListV3(Pageable pageable, @NotNull String consentId) {
         LOG.info("Getting resources response for consent id {}", consentId);
         var consentEntity = InsuranceLambdaUtils.getConsent(consentId, consentRepository);
+
+        InsuranceLambdaUtils.checkAuthorisationStatus(consentEntity);
 
         LOG.info("Checking permissions for consent id {}", consentId);
 
@@ -218,73 +229,73 @@ public class ResourcesService extends BaseInsuranceService {
 
         var capitalizationTitlePlans = consentEntity.getCapitalizationTitlePlans();
         LOG.info("Found {} capitalization title plans to include in resource response", capitalizationTitlePlans.size());
-        addCapitalizationTitlePlansToResourcesV3(capitalizationTitlePlans, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CAPITALIZATION_TITLES)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CAPITALIZATION_TITLES))));
+        addCapitalizationTitlePlansToResourcesV3(capitalizationTitlePlans, consentEntity, responseMap, hasResourcePermission(ResourceType.CAPITALIZATION_TITLES, permissions, permissionsV3));
         
         var acceptanceAndBranchesAbroadPolicies = consentEntity.getAcceptanceAndBranchesAbroadPolicies();
         LOG.info("Found {} acceptance and branches abroad policies to include in resource response", acceptanceAndBranchesAbroadPolicies.size());
-        addAcceptanceAndBranchesAbroadPoliciesToResourcesV3(acceptanceAndBranchesAbroadPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD))));
+        addAcceptanceAndBranchesAbroadPoliciesToResourcesV3(acceptanceAndBranchesAbroadPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_ACCEPTANCE_AND_BRANCHES_ABROAD, permissions, permissionsV3));
         
         var patrimonialPolicies = consentEntity.getPatrimonialPolicies();
         LOG.info("Found {} patrimonial policies to include in resource response", patrimonialPolicies.size());
-        addPatrimonialPoliciesToResourcesV3(patrimonialPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_PATRIMONIAL)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_PATRIMONIAL))));
+        addPatrimonialPoliciesToResourcesV3(patrimonialPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_PATRIMONIAL, permissions, permissionsV3));
         
         var ruralPolicies = consentEntity.getRuralPolicies();
         LOG.info("Found {} rural policies to include in resource response", ruralPolicies.size());
-        addRuralPoliciesToResourcesV3(ruralPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_RURAL)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_RURAL))));
+        addRuralPoliciesToResourcesV3(ruralPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_RURAL, permissions, permissionsV3));
 
         var financialRiskPolicies = consentEntity.getFinancialRiskPolicies();
         LOG.info("Found {} financial risk policies to include in resource response", financialRiskPolicies.size());
-        addFinancialRiskPoliciesToResourcesV3(financialRiskPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS))));
+        addFinancialRiskPoliciesToResourcesV3(financialRiskPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_FINANCIAL_RISKS, permissions, permissionsV3));
 
         var housingPolicies = consentEntity.getHousingPolicies();
         LOG.info("Found {} housing policies to include in resource response", housingPolicies.size());
-        addHousingPoliciesToResourcesV3(housingPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_HOUSING)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_HOUSING))));
+        addHousingPoliciesToResourcesV3(housingPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_HOUSING, permissions, permissionsV3));
 
         var responsibilityPolicies = consentEntity.getResponsibilityPolicies();
         LOG.info("Found {} responsibility policies to include in resource response", responsibilityPolicies.size());
-        addResponsibilityPoliciesToResourcesV3(responsibilityPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_RESPONSIBILITY)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_RESPONSIBILITY))));
+        addResponsibilityPoliciesToResourcesV3(responsibilityPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_RESPONSIBILITY, permissions, permissionsV3));
 
         var personPolicies = consentEntity.getPersonPolicies();
         LOG.info("Found {} person policies to include in resource response", personPolicies.size());
-        addPersonPoliciesToResourcesV3(personPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_PERSON)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_PERSON))));
+        addPersonPoliciesToResourcesV3(personPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_PERSON, permissions, permissionsV3));
 
         var lifePensionContracts = consentEntity.getLifePensionContracts();
         LOG.info("Found {} life pension contracts to include in resource response", lifePensionContracts.size());
-        addLifePensionContractsToResourcesV3(lifePensionContracts, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.LIFE_PENSION)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.LIFE_PENSION))));
+        addLifePensionContractsToResourcesV3(lifePensionContracts, consentEntity, responseMap, hasResourcePermission(ResourceType.LIFE_PENSION, permissions, permissionsV3));
 
         var pensionPlanContracts = consentEntity.getPensionPlanContracts();
         LOG.info("Found {} pension plan contracts to include in resource response", pensionPlanContracts.size());
-        addPensionPlanContractsToResourcesV3(pensionPlanContracts, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.PENSION_PLAN)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.PENSION_PLAN))));
+        addPensionPlanContractsToResourcesV3(pensionPlanContracts, consentEntity, responseMap, hasResourcePermission(ResourceType.PENSION_PLAN, permissions, permissionsV3));
 
         var financialAssistanceContracts = consentEntity.getFinancialAssistanceContracts();
         LOG.info("Found {} financial assistance contracts to include in resource response", financialAssistanceContracts.size());
-        addFinancialAssistanceContractsToResourcesV3(financialAssistanceContracts, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.FINANCIAL_ASSISTANCE)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.FINANCIAL_ASSISTANCE))));
+        addFinancialAssistanceContractsToResourcesV3(financialAssistanceContracts, consentEntity, responseMap, hasResourcePermission(ResourceType.FINANCIAL_ASSISTANCE, permissions, permissionsV3));
 
         var autoPolicies = consentEntity.getAutoPolicies();
         LOG.info("Found {} auto policies to include in resource response", autoPolicies.size());
-        addAutoPoliciesToResourcesV3(autoPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_AUTO)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_AUTO))));
+        addAutoPoliciesToResourcesV3(autoPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_AUTO, permissions, permissionsV3));
 
         var transportPolicies = consentEntity.getTransportPolicies();
         LOG.info("Found {} transport policies to include in resource response", transportPolicies.size());
-        addTransportPoliciesToResourcesV3(transportPolicies, consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.DAMAGES_AND_PEOPLE_TRANSPORT)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.DAMAGES_AND_PEOPLE_TRANSPORT))));
+        addTransportPoliciesToResourcesV3(transportPolicies, consentEntity, responseMap, hasResourcePermission(ResourceType.DAMAGES_AND_PEOPLE_TRANSPORT, permissions, permissionsV3));
 
         LOG.info("Including customer personal identifications in resource response");
-        addCustomerPersonalIdentificationsToResourcesV3(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_PERSONAL_IDENTIFICATIONS)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_PERSONAL_IDENTIFICATIONS))));
+        addCustomerPersonalIdentificationsToResourcesV3(consentEntity, responseMap, hasResourcePermission(ResourceType.CUSTOMERS_PERSONAL_IDENTIFICATIONS, permissions, permissionsV3));
 
         LOG.info("Including customer personal qualifications in resource response");
-        addCustomerPersonalQualificationsToResourcesV3(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_PERSONAL_QUALIFICATION)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_PERSONAL_QUALIFICATION))));
+        addCustomerPersonalQualificationsToResourcesV3(consentEntity, responseMap, hasResourcePermission(ResourceType.CUSTOMERS_PERSONAL_QUALIFICATION, permissions, permissionsV3));
 
         LOG.info("Including customer personal additional info in resource response");
-        addCustomerPersonalAdditionalInfoToResourcesV3(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_PERSONAL_ADDITIONALINFO)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_PERSONAL_ADDITIONALINFO))));
+        addCustomerPersonalAdditionalInfoToResourcesV3(consentEntity, responseMap, hasResourcePermission(ResourceType.CUSTOMERS_PERSONAL_ADDITIONALINFO, permissions, permissionsV3));
 
         LOG.info("Including customer business identifications in resource response");
-        addCustomerBusinessIdentificationsToResourcesV3(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_BUSINESS_IDENTIFICATIONS)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_BUSINESS_IDENTIFICATIONS))));
+        addCustomerBusinessIdentificationsToResourcesV3(consentEntity, responseMap, hasResourcePermission(ResourceType.CUSTOMERS_BUSINESS_IDENTIFICATIONS, permissions, permissionsV3));
 
         LOG.info("Including customer business qualifications in resource response");
-        addCustomerBusinessQualificationsToResourcesV3(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_BUSINESS_QUALIFICATION)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_BUSINESS_QUALIFICATION))));
+        addCustomerBusinessQualificationsToResourcesV3(consentEntity, responseMap, hasResourcePermission(ResourceType.CUSTOMERS_BUSINESS_QUALIFICATION, permissions, permissionsV3));
 
         LOG.info("Including customer business additional info in resource response");
-        addCustomerBusinessAdditionalInfoToResourcesV3(consentEntity, responseMap, (permissions.contains(PERMISSION_MAP.get(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO)) || permissionsV3.contains(PERMISSION_MAP_V3.get(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO))));
+        addCustomerBusinessAdditionalInfoToResourcesV3(consentEntity, responseMap, hasResourcePermission(ResourceType.CUSTOMERS_BUSINESS_ADDITIONALINFO, permissions, permissionsV3));
 
         var resourcePage = getPage(responseMap, pageable);
         LOG.info("Building response with resources");

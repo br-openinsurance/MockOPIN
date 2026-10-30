@@ -68,7 +68,7 @@ public class ResponsibilityPolicyPremiumEntity extends BaseEntity {
                         .maturityDate(LocalDate.of(2023, 10, 1))
                         .tellerId("string")
                         .tellerIdType(Payment.TellerIdTypeEnum.CPF)
-                        .tellerIdTypeOthers("RNE")
+                        .tellerIdOthers("RNE")
                         .tellerName("string")
                         .financialInstitutionCode("string")
                         .paymentType(Payment.PaymentTypeEnum.BOLETO)

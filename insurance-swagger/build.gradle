@@ -3,15 +3,11 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath group: 'org.yaml', name: 'snakeyaml', version: '2.0'
-    classpath 'software.amazon.awssdk:auth:2.20.133'
-    classpath 'software.amazon.awssdk:sso:2.20.133'
-    classpath 'software.amazon.awssdk:sts:2.20.133'
+    classpath 'org.yaml:snakeyaml:2.0'
   }
 }
 
 plugins {
-  id 'org.hidetake.swagger.generator' version '2.19.2'
   id 'java'
   id 'maven-publish'
 }
@@ -22,63 +18,90 @@ String buildNumber = System.getenv("BUILD_NUMBER")
 group = 'com.raidiam.trustframework.mockinsurance'
 version = System.getenv("CHANGE_ID") ? "${System.getenv("BRANCH_NAME")}-SNAPSHOT" : "${cfg.info.version}.${buildNumber}"
 println version
+
 repositories {
   mavenCentral()
 }
 
+configurations {
+  swaggerCodegen
+}
+
+def swaggerOutputDir = layout.buildDirectory.dir("generated/swagger").get().asFile
+
 dependencies {
-  annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
-  annotationProcessor "io.micronaut:micronaut-inject-java"
-  annotationProcessor "io.micronaut:micronaut-validation"
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.61'
 
-  implementation platform("io.micronaut:micronaut-bom:$micronautVersion")
-  implementation "io.micronaut:micronaut-inject"
-  implementation "io.micronaut:micronaut-validation"
-  implementation "io.micronaut:micronaut-runtime"
-  implementation "io.swagger.core.v3:swagger-annotations:2.2.22"
+    annotationProcessor "io.micronaut:micronaut-inject-java:$micronautVersion"
+    annotationProcessor "io.micronaut.validation:micronaut-validation:$micronautValidationVersion"
 
-  implementation 'jakarta.inject:jakarta.inject-api:2.0.1'
-  implementation 'jakarta.validation:jakarta.validation-api:3.1.0'
+    implementation "io.micronaut:micronaut-inject:$micronautVersion"
+    implementation "io.micronaut.validation:micronaut-validation:$micronautValidationVersion"
+    implementation "io.micronaut:micronaut-runtime:$micronautVersion"
 
-  swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.61'
+    implementation "io.swagger.core.v3:swagger-annotations:2.2.22"
+
+    implementation 'jakarta.inject:jakarta.inject-api:2.0.1'
+    implementation 'jakarta.validation:jakarta.validation-api:3.1.0'
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.0"
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
+}
+
+tasks.register('generateSwaggerCode', JavaExec) {
+  description = 'Generate code from swagger.yaml using Swagger Codegen'
+  group = 'build'
+
+  inputs.file('swagger.yaml')
+  inputs.file('micronaut-config.json')
+  inputs.dir('templates')
+  outputs.dir(swaggerOutputDir)
+
+  classpath = configurations.swaggerCodegen
+  mainClass = 'io.swagger.codegen.v3.cli.SwaggerCodegen'
+
+  args = [
+          'generate',
+          '-i', file('swagger.yaml').absolutePath,
+          '-l', 'micronaut',
+          '-o', swaggerOutputDir.absolutePath,
+          '-c', file('micronaut-config.json').absolutePath,
+          '-t', file('templates').absolutePath,
+  ]
+
+  doFirst {
+    swaggerOutputDir.mkdirs()
+  }
 }
 
 java {
   withSourcesJar()
-  sourceCompatibility = JavaVersion.VERSION_11
-  targetCompatibility = JavaVersion.VERSION_11
+  sourceCompatibility = JavaVersion.VERSION_21
+  targetCompatibility = JavaVersion.VERSION_21
 }
+
+sourceSets.main.java.srcDir "${swaggerOutputDir}/src/main/java"
+sourceSets.main.resources.srcDir "${swaggerOutputDir}/src/main/resources"
+
+sourceSets {
+  main {
+    java {
+      exclude '**/io/swagger/**'
+    }
+  }
+}
+
+compileJava.dependsOn generateSwaggerCode
+processResources.dependsOn generateSwaggerCode
+sourcesJar.dependsOn generateSwaggerCode
 
 publishing {
   publications {
     mavenJava(MavenPublication) {
       from components.java
       artifact(file('swagger.yaml')) {
-        classifier 'swagger'
-        extension 'yaml'
+        classifier = 'swagger'
+        extension = 'yaml'
       }
     }
   }
 }
-
-swaggerSources {
-  mockinsurance {
-    inputFile = file('swagger.yaml')
-    code {
-      language = 'micronaut'
-      components = [
-          models    : true,
-          modelDocs : true,
-          apiDocs   : false,
-          modelTests: true,
-      ]
-      configFile = file("micronaut-config.json")
-      templateDir = file("templates")
-    }
-  }
-}
-
-sourcesJar.dependsOn swaggerSources.mockinsurance.code
-compileJava.dependsOn swaggerSources.mockinsurance.code
-sourceSets.main.java.srcDir "${swaggerSources.mockinsurance.code.outputDir}/src/main/java"
-sourceSets.main.resources.srcDir "${swaggerSources.mockinsurance.code.outputDir}/src/main/resources"

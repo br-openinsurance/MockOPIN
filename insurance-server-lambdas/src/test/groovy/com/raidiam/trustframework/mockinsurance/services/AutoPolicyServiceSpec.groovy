@@ -51,16 +51,6 @@ class AutoPolicyServiceSpec extends CleanupSpecification {
         }
     }
 
-    def "we can get policies" () {
-        when:
-        def response = autoPolicyService.getPolicies(testConsent.getConsentId().toString(), Pageable.from(0, 1))
-
-        then:
-        response.getData()
-        response.getData().size() == 1
-        response.getData().first()
-    }
-
     def "we can get policies V2" () {
         when:
         def response = autoPolicyService.getPoliciesV2(testConsent.getConsentId().toString(), Pageable.from(0, 1))
@@ -71,14 +61,6 @@ class AutoPolicyServiceSpec extends CleanupSpecification {
         response.getData().first()
     }
 
-    def "we can get a policy info" () {
-        when:
-        def response = autoPolicyService.getPolicyInfo(testAutoPolicy.getAutoPolicyId(), testConsent.getConsentId().toString())
-
-        then:
-        response.getData() != null
-    }
-
     def "we can get a policy info V2" () {
         when:
         def response = autoPolicyService.getPolicyInfoV2(testAutoPolicy.getAutoPolicyId(), testConsent.getConsentId().toString())
@@ -87,25 +69,9 @@ class AutoPolicyServiceSpec extends CleanupSpecification {
         response.getData() != null
     }
 
-    def "we can get a policy's premium" () {
-        when:
-        def response = autoPolicyService.getPolicyPremium(testAutoPolicy.getAutoPolicyId(), testConsent.getConsentId().toString())
-
-        then:
-        response.getData() != null
-    }
-
     def "we can get a policy's premium V2" () {
         when:
         def response = autoPolicyService.getPolicyPremiumV2(testAutoPolicy.getAutoPolicyId(), testConsent.getConsentId().toString())
-
-        then:
-        response.getData() != null
-    }
-
-    def "we can get a policy's claims" () {
-        when:
-        def response = autoPolicyService.getPolicyClaims(testAutoPolicy.getAutoPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
 
         then:
         response.getData() != null

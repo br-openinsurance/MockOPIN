@@ -1,8 +1,200 @@
 package com.raidiam.trustframework.mockinsurance
 
 import com.raidiam.trustframework.mockinsurance.cleanups.CleanupSpecification
-import com.raidiam.trustframework.mockinsurance.domain.*
-import com.raidiam.trustframework.mockinsurance.models.generated.*
+import com.raidiam.trustframework.mockinsurance.domain.AcceptanceAndBranchesAbroadClaimEntity
+import com.raidiam.trustframework.mockinsurance.domain.AcceptanceAndBranchesAbroadPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.AccountHolderEntity
+import com.raidiam.trustframework.mockinsurance.domain.AutoPolicyClaimEntity
+import com.raidiam.trustframework.mockinsurance.domain.AutoPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.BeneficiaryInfoEntity
+import com.raidiam.trustframework.mockinsurance.domain.BusinessComplimentaryInformationEntity
+import com.raidiam.trustframework.mockinsurance.domain.BusinessIdentificationEntity
+import com.raidiam.trustframework.mockinsurance.domain.BusinessQualificationEntity
+import com.raidiam.trustframework.mockinsurance.domain.CapitalizationTitlePlanBrokerEntity
+import com.raidiam.trustframework.mockinsurance.domain.CapitalizationTitlePlanEntity
+import com.raidiam.trustframework.mockinsurance.domain.CapitalizationTitlePlanEventEntity
+import com.raidiam.trustframework.mockinsurance.domain.CapitalizationTitlePlanHolderEntity
+import com.raidiam.trustframework.mockinsurance.domain.CapitalizationTitlePlanQuotaEntity
+import com.raidiam.trustframework.mockinsurance.domain.CapitalizationTitlePlanSeriesEntity
+import com.raidiam.trustframework.mockinsurance.domain.CapitalizationTitlePlanSettlementEntity
+import com.raidiam.trustframework.mockinsurance.domain.CapitalizationTitlePlanSubscriberEntity
+import com.raidiam.trustframework.mockinsurance.domain.CapitalizationTitlePlanTechnicalProvisionsEntity
+import com.raidiam.trustframework.mockinsurance.domain.CapitalizationTitlePlanTitleEntity
+import com.raidiam.trustframework.mockinsurance.domain.CapitalizationTitleRaffleEntity
+import com.raidiam.trustframework.mockinsurance.domain.ClaimNotificationDamageEntity
+import com.raidiam.trustframework.mockinsurance.domain.ClaimNotificationPersonEntity
+import com.raidiam.trustframework.mockinsurance.domain.CoinsurerEntity
+import com.raidiam.trustframework.mockinsurance.domain.ConsentEntity
+import com.raidiam.trustframework.mockinsurance.domain.DeductibleEntity
+import com.raidiam.trustframework.mockinsurance.domain.EndorsementEntity
+import com.raidiam.trustframework.mockinsurance.domain.FinancialAssistanceContractEntity
+import com.raidiam.trustframework.mockinsurance.domain.FinancialAssistanceContractInsuredEntity
+import com.raidiam.trustframework.mockinsurance.domain.FinancialAssistanceContractMovementEntity
+import com.raidiam.trustframework.mockinsurance.domain.FinancialRiskPolicyClaimCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.FinancialRiskPolicyClaimEntity
+import com.raidiam.trustframework.mockinsurance.domain.FinancialRiskPolicyCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.FinancialRiskPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.FinancialRiskPolicyInsuredObjectCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.FinancialRiskPolicyInsuredObjectEntity
+import com.raidiam.trustframework.mockinsurance.domain.FinancialRiskPolicyPremiumCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.FinancialRiskPolicyPremiumEntity
+import com.raidiam.trustframework.mockinsurance.domain.HousingPolicyBranchInsuredEntity
+import com.raidiam.trustframework.mockinsurance.domain.HousingPolicyBranchInsuredObjectEntity
+import com.raidiam.trustframework.mockinsurance.domain.HousingPolicyBranchInsuredObjectLenderEntity
+import com.raidiam.trustframework.mockinsurance.domain.HousingPolicyClaimCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.HousingPolicyClaimEntity
+import com.raidiam.trustframework.mockinsurance.domain.HousingPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.HousingPolicyInsuredObjectCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.HousingPolicyInsuredObjectEntity
+import com.raidiam.trustframework.mockinsurance.domain.HousingPolicyPremiumCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.HousingPolicyPremiumEntity
+import com.raidiam.trustframework.mockinsurance.domain.IntermediaryEntity
+import com.raidiam.trustframework.mockinsurance.domain.LifePensionContractClaimEntity
+import com.raidiam.trustframework.mockinsurance.domain.LifePensionContractEntity
+import com.raidiam.trustframework.mockinsurance.domain.LifePensionContractMovementBenefitEntity
+import com.raidiam.trustframework.mockinsurance.domain.LifePensionContractMovementContributionEntity
+import com.raidiam.trustframework.mockinsurance.domain.LifePensionContractPortabilityInfoEntity
+import com.raidiam.trustframework.mockinsurance.domain.LifePensionContractWithdrawalEntity
+import com.raidiam.trustframework.mockinsurance.domain.POSEntity
+import com.raidiam.trustframework.mockinsurance.domain.PatrimonialClaimEntity
+import com.raidiam.trustframework.mockinsurance.domain.PatrimonialInsuredObjectCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.PatrimonialInsuredObjectEntity
+import com.raidiam.trustframework.mockinsurance.domain.PatrimonialPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.PatrimonialPremiumCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.PatrimonialPremiumEntity
+import com.raidiam.trustframework.mockinsurance.domain.PaymentEntity
+import com.raidiam.trustframework.mockinsurance.domain.PensionPlanContractClaimEntity
+import com.raidiam.trustframework.mockinsurance.domain.PensionPlanContractDocumentCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.PensionPlanContractDocumentEntity
+import com.raidiam.trustframework.mockinsurance.domain.PensionPlanContractDocumentInsuredEntity
+import com.raidiam.trustframework.mockinsurance.domain.PensionPlanContractEntity
+import com.raidiam.trustframework.mockinsurance.domain.PensionPlanContractMovementBenefitEntity
+import com.raidiam.trustframework.mockinsurance.domain.PensionPlanContractMovementContributionEntity
+import com.raidiam.trustframework.mockinsurance.domain.PensionPlanContractPortabilityInfoEntity
+import com.raidiam.trustframework.mockinsurance.domain.PensionPlanContractWithdrawalEntity
+import com.raidiam.trustframework.mockinsurance.domain.PersonPolicyClaimCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.PersonPolicyClaimEntity
+import com.raidiam.trustframework.mockinsurance.domain.PersonPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.PersonPolicyInsuredObjectCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.PersonPolicyInsuredObjectEntity
+import com.raidiam.trustframework.mockinsurance.domain.PersonPolicyPremiumCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.PersonPolicyPremiumEntity
+import com.raidiam.trustframework.mockinsurance.domain.PersonalComplimentaryInformationEntity
+import com.raidiam.trustframework.mockinsurance.domain.PersonalIdentificationEntity
+import com.raidiam.trustframework.mockinsurance.domain.PersonalInfoEntity
+import com.raidiam.trustframework.mockinsurance.domain.PersonalQualificationEntity
+import com.raidiam.trustframework.mockinsurance.domain.PrincipalInfoEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuoteAcceptanceAndBranchesAbroadLeadEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuoteAutoEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuoteAutoLeadEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuoteCapitalizationTitleEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuoteCapitalizationTitleLeadEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuoteFinancialRiskLeadEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuoteHousingLeadEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuoteLifePensionEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuoteLifePensionLeadEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuotePatrimonialBusinessEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuotePatrimonialCondominiumEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuotePatrimonialDiverseRisksEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuotePatrimonialHomeEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuotePatrimonialLeadEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuotePersonLeadEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuotePersonLifeEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuotePersonTravelEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuoteResponsibilityLeadEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuoteRuralLeadEntity
+import com.raidiam.trustframework.mockinsurance.domain.QuoteTransportLeadEntity
+import com.raidiam.trustframework.mockinsurance.domain.ResponsibilityPolicyClaimEntity
+import com.raidiam.trustframework.mockinsurance.domain.ResponsibilityPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.ResponsibilityPolicyPremiumEntity
+import com.raidiam.trustframework.mockinsurance.domain.RuralPolicyBranchInsuredObjectEntity
+import com.raidiam.trustframework.mockinsurance.domain.RuralPolicyClaimCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.RuralPolicyClaimEntity
+import com.raidiam.trustframework.mockinsurance.domain.RuralPolicyCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.RuralPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.RuralPolicyInsuredObjectCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.RuralPolicyInsuredObjectEntity
+import com.raidiam.trustframework.mockinsurance.domain.RuralPolicyPremiumCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.RuralPolicyPremiumEntity
+import com.raidiam.trustframework.mockinsurance.domain.TransportPolicyClaimCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.TransportPolicyClaimEntity
+import com.raidiam.trustframework.mockinsurance.domain.TransportPolicyCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.TransportPolicyEndorsementEntity
+import com.raidiam.trustframework.mockinsurance.domain.TransportPolicyEntity
+import com.raidiam.trustframework.mockinsurance.domain.TransportPolicyInsuredObjectCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.TransportPolicyInsuredObjectEntity
+import com.raidiam.trustframework.mockinsurance.domain.TransportPolicyPremiumCoverageEntity
+import com.raidiam.trustframework.mockinsurance.domain.TransportPolicyPremiumEntity
+import com.raidiam.trustframework.mockinsurance.domain.WebhookEntity
+import com.raidiam.trustframework.mockinsurance.domain.WithdrawalCapitalizationTitleEntity
+import com.raidiam.trustframework.mockinsurance.domain.WithdrawalPensionEntity
+import com.raidiam.trustframework.mockinsurance.domain.WithdrawalPensionLeadEntity
+import com.raidiam.trustframework.mockinsurance.models.generated.AllOfQuoteDataProductLifePensionInnerInitialContribution
+import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetails
+import com.raidiam.trustframework.mockinsurance.models.generated.AmountDetailsUnit
+import com.raidiam.trustframework.mockinsurance.models.generated.ClaimNotificationDamageData
+import com.raidiam.trustframework.mockinsurance.models.generated.ClaimNotificationData
+import com.raidiam.trustframework.mockinsurance.models.generated.ClaimNotificationPersonData
+import com.raidiam.trustframework.mockinsurance.models.generated.CreateEndorsementData
+import com.raidiam.trustframework.mockinsurance.models.generated.CreateEndorsementDataCustomData
+import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentPermission
+import com.raidiam.trustframework.mockinsurance.models.generated.EnumConsentStatus
+import com.raidiam.trustframework.mockinsurance.models.generated.GeneralInfoPensionWithdrawal
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceFinancialRiskPolicyInfoData
+import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePatrimonialCoverageCode
+import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePatrimonialInsuredObject
+import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePatrimonialInsuredObjectCoverage
+import com.raidiam.trustframework.mockinsurance.models.generated.InsurancePatrimonialPolicyInfo
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralClaim
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralClaimCoverage
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralCoverage
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralInsuredObject
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralInsuredObjectCoverage
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralPolicyInfo
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralPremiumCoverage
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralSpecificClaim
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceRuralSpecificInsuredObject
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceTransportClaim
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceTransportClaimCoverage
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceTransportCoverage
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceTransportInsuredObject
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceTransportInsuredObjectCoverage
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceTransportPolicyInfoData
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceTransportPremiumCoverage
+import com.raidiam.trustframework.mockinsurance.models.generated.InsuranceTransportSpecificPolicyInfoEndorsements
+import com.raidiam.trustframework.mockinsurance.models.generated.ProductInformationCapitalizationTitleWithdrawal
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteAutoData
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteCapitalizationTitleData
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteDataAuto
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteDataCapitalizationTitle
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteDataComplementaryIdentificationLifePension
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteDataLifePension
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteDataPatrimonialBusiness
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteDataPatrimonialCondominium
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteDataPatrimonialDiverseRisks
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteDataPatrimonialHome
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteDataPersonLife
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteDataPersonTravel
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteDataProductLifePension
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteDataProductLifePensionInner
+import com.raidiam.trustframework.mockinsurance.models.generated.QuotePatrimonialBusinessData
+import com.raidiam.trustframework.mockinsurance.models.generated.QuotePatrimonialCondominiumData
+import com.raidiam.trustframework.mockinsurance.models.generated.QuotePatrimonialDiverseRisksData
+import com.raidiam.trustframework.mockinsurance.models.generated.QuotePatrimonialHomeData
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteRequestPersonLifeData
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteRequestPersonTravelData
+import com.raidiam.trustframework.mockinsurance.models.generated.QuoteStatusEnum
+import com.raidiam.trustframework.mockinsurance.models.generated.RaffleCustomData
+import com.raidiam.trustframework.mockinsurance.models.generated.RequestCapitalizationTitleRaffleData
+import com.raidiam.trustframework.mockinsurance.models.generated.RequestCapitalizationTitleWithdrawalData
+import com.raidiam.trustframework.mockinsurance.models.generated.RequestContractLifePensionData
+import com.raidiam.trustframework.mockinsurance.models.generated.RequestPensionWithdrawalData
+import com.raidiam.trustframework.mockinsurance.models.generated.RequestPensionWithdrawalV2Data
+import com.raidiam.trustframework.mockinsurance.models.generated.WithdrawalCustomDataCapitalization
+import com.raidiam.trustframework.mockinsurance.models.generated.WithdrawalCustomDataPension
+import com.raidiam.trustframework.mockinsurance.models.generated.WithdrawalInfoPensionWithdrawal
+import com.raidiam.trustframework.mockinsurance.models.generated.WithdrawalInfoPensionWithdrawalV2
+import com.raidiam.trustframework.mockinsurance.models.generated.WithdrawalInformationCapitalizationTitleWithdrawal
 import com.raidiam.trustframework.mockinsurance.utils.PermissionGroup
 import jakarta.inject.Singleton
 
@@ -135,7 +327,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "123456789"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         quote
     }
 
@@ -150,7 +342,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "random_cpf"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         var data = new QuotePatrimonialBusinessEntity.QuoteData()
         data.setV1(new QuotePatrimonialBusinessData()
                 .quoteData(new QuoteDataPatrimonialBusiness().policyId("random_policy_id")
@@ -177,7 +369,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "random_cpf"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         quote.data = new QuotePatrimonialHomeEntity.QuoteData()
         quote.data.setV1(new QuotePatrimonialHomeData()
                 .quoteData(new QuoteDataPatrimonialHome().policyId("random_policy_id")
@@ -203,7 +395,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "random_cpf"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         quote.data = new QuotePatrimonialCondominiumEntity.QuoteData()
         quote.data.setV1(new QuotePatrimonialCondominiumData()
                 .quoteData(new QuoteDataPatrimonialCondominium().policyId("random_policy_id")
@@ -229,7 +421,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "random_cpf"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         quote.data = new QuotePatrimonialDiverseRisksEntity.QuoteData()
         quote.data.setV1(new QuotePatrimonialDiverseRisksData()
                 .quoteData(new QuoteDataPatrimonialDiverseRisks().policyId("random_policy_id")
@@ -266,7 +458,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "123456789"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         quote
     }
 
@@ -281,7 +473,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "123456789"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         quote
     }
     static QuoteHousingLeadEntity aQuoteHousingLead(String consentId) {
@@ -295,7 +487,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "123456789"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         quote
     }
 
@@ -311,7 +503,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "123456789"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         quote
     }
 
@@ -327,7 +519,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "random_cpf"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
 
         QuoteDataProductLifePension products = new QuoteDataProductLifePension()
         QuoteDataProductLifePensionInner product = new QuoteDataProductLifePensionInner()
@@ -372,7 +564,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "123456789"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         quote
     }
 
@@ -388,7 +580,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "random_cpf"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
 
         quote.data = new QuotePersonLifeEntity.QuoteData()
         quote.data.v1 = new QuoteRequestPersonLifeData().quoteData(new QuoteDataPersonLife())
@@ -408,7 +600,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "random_cpf"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
 
         quote.data = new QuotePersonTravelEntity.QuoteData()
         quote.data.v1 = new QuoteRequestPersonTravelData().quoteData(new QuoteDataPersonTravel())
@@ -427,7 +619,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "123456789"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         quote
     }
 
@@ -442,7 +634,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "123456789"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         quote
     }
 
@@ -457,7 +649,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "123456789"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         quote
     }
 
@@ -472,7 +664,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "123456789"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         quote
     }
 
@@ -487,7 +679,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "123456789"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         var data = new QuoteAutoEntity.QuoteData()
         data.setV1(new QuoteAutoData()
                 .quoteData(new QuoteDataAuto()
@@ -510,7 +702,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "123456789"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         quote
     }
 
@@ -525,7 +717,7 @@ class TestEntityDataFactory extends CleanupSpecification {
         quote.status = QuoteStatusEnum.RCVD.toString()
         quote.personCpf = "123456789"
         quote.clientId = "random_client_id"
-        quote.expirationDateTime = new Date()
+        quote.expirationDateTime = Instant.now()
         var data = new QuoteCapitalizationTitleEntity.QuoteData()
         data.v1 = new QuoteCapitalizationTitleData()
                 .quoteData(new QuoteDataCapitalizationTitle()
@@ -2022,16 +2214,217 @@ static aHousingPolicy(UUID accountHolderId) {
     }
 
     static aTransportPolicy(UUID accountHolderId, String policyId = "transport-policy-1") {
+        aTransportPolicy(accountHolderId, policyId, null, null, null, null, null)
+    }
+
+    static aTransportPolicy(UUID accountHolderId, String policyId, List<UUID> insuredIds, List<UUID> beneficiaryIds,
+                            List<UUID> principalIds, List<UUID> intermediaryIds, List<UUID> coinsurerIds) {
         def policy = new TransportPolicyEntity()
         policy.setTransportPolicyId(policyId)
         policy.setAccountHolderId(accountHolderId)
+        policy.setProductName("Mock Insurer Transport Policy Plan")
+        policy.setDocumentType(InsuranceTransportPolicyInfoData.DocumentTypeEnum.APOLICE_INDIVIDUAL.toString())
+        policy.setSusepProcessNumber("12345")
+        policy.setGroupCertificateId("string")
+        policy.setIssuanceType(InsuranceTransportPolicyInfoData.IssuanceTypeEnum.EMISSAO_PROPRIA.toString())
+        policy.setIssuanceDate(LocalDate.of(2022, 12, 31))
+        policy.setTermStartDate(LocalDate.of(2022, 12, 31))
+        policy.setTermEndDate(LocalDate.of(2023, 12, 31))
+        policy.setLeadInsurerCode("string")
+        policy.setLeadInsurerPolicyId("string")
+        policy.setMaxLMGAmount("100.00")
+        policy.setMaxLMGUnitType(AmountDetails.UnitTypeEnum.MONETARIO.toString())
+        policy.setMaxLMGUnitTypeOthers("string")
+        policy.setMaxLMGUnitCode("Br")
+        policy.setMaxLMGUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        policy.setMaxLMGCurrency(AmountDetails.CurrencyEnum.BRL.toString())
+        policy.setProposalId("mock-transport-policy-proposal-1")
+        policy.setCoinsuranceRetainedPercentage("100.00")
+        policy.setInsuredIds(insuredIds)
+        policy.setBeneficiaryIds(beneficiaryIds)
+        policy.setPrincipalIds(principalIds)
+        policy.setIntermediaryIds(intermediaryIds)
+        policy.setCoinsurerIds(coinsurerIds)
         policy
     }
 
-    static aTransportPolicyClaim(String policyId) {
+    static aTransportPolicyPremium(String policyId) {
+        aTransportPolicyPremium(policyId, null)
+    }
+
+    static aTransportPolicyPremium(String policyId, List<UUID> paymentIds) {
+        def premium = new TransportPolicyPremiumEntity()
+        premium.setTransportPolicyId(policyId)
+        premium.setPaymentsQuantity(3)
+        premium.setAmount("100.00")
+        premium.setUnitType(AmountDetails.UnitTypeEnum.MONETARIO.toString())
+        premium.setUnitTypeOthers("string")
+        premium.setUnitCode("Br")
+        premium.setUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        premium.setCurrency(AmountDetails.CurrencyEnum.BRL.toString())
+        premium.setPaymentIds(paymentIds)
+        premium
+    }
+
+    static aTransportPolicyPremiumCoverage(UUID premiumId) {
+        def coverage = new TransportPolicyPremiumCoverageEntity()
+        coverage.setTransportPolicyPremiumId(premiumId)
+        coverage.setBranch("0320")
+        coverage.setCode(InsuranceTransportPremiumCoverage.CodeEnum.ACIDENTES_PESSOAIS_COM_PASSAGEIROS.toString())
+        coverage.setDescription("string")
+        coverage.setPremiumAmount("100.00")
+        coverage.setPremiumUnitType(AmountDetails.UnitTypeEnum.MONETARIO.toString())
+        coverage.setPremiumUnitTypeOthers("string")
+        coverage.setPremiumUnitCode("Br")
+        coverage.setPremiumUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        coverage.setPremiumCurrency(AmountDetails.CurrencyEnum.BRL.toString())
+        coverage
+    }
+
+    static aTransportPolicyInsuredObject(String policyId) {
+        def insuredObject = new TransportPolicyInsuredObjectEntity()
+        insuredObject.setTransportPolicyId(policyId)
+        insuredObject.setIdentification("string")
+        insuredObject.setType(InsuranceTransportInsuredObject.TypeEnum.CONTRATO.toString())
+        insuredObject.setTypeAdditionalInfo("string")
+        insuredObject.setDescription("contrato")
+        insuredObject.setAmount("100.00")
+        insuredObject.setUnitType(AmountDetails.UnitTypeEnum.MONETARIO.toString())
+        insuredObject.setUnitTypeOthers("string")
+        insuredObject.setUnitCode("Br")
+        insuredObject.setUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        insuredObject.setCurrency(AmountDetails.CurrencyEnum.BRL.toString())
+        insuredObject
+    }
+
+    static aTransportPolicyInsuredObjectCoverage(UUID insuredObjectId) {
+        def coverage = new TransportPolicyInsuredObjectCoverageEntity()
+        coverage.setTransportInsuredObjectId(insuredObjectId)
+        coverage.setBranch("0320")
+        coverage.setCode(InsuranceTransportInsuredObjectCoverage.CodeEnum.ACIDENTES_PESSOAIS_COM_PASSAGEIROS.toString())
+        coverage.setDescription("string")
+        coverage.setInternalCode("string")
+        coverage.setSusepProcessNumber("12345")
+        coverage.setLmiAmount("100")
+        coverage.setLmiUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        coverage.setLmiUnitTypeOthers("string")
+        coverage.setLmiUnitCode("Br")
+        coverage.setLmiUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        coverage.setLmiCurrency(AmountDetails.CurrencyEnum.BRL.toString())
+        coverage.setIsLMISublimit(true)
+        coverage.setTermStartDate(LocalDate.of(2022, 12, 31))
+        coverage.setTermEndDate(LocalDate.of(2023, 12, 31))
+        coverage.setIsMainCoverage(true)
+        coverage.setFeature(InsuranceTransportInsuredObjectCoverage.FeatureEnum.MASSIFICADOS.toString())
+        coverage.setType(InsuranceTransportInsuredObjectCoverage.TypeEnum.PARAMETRICO.toString())
+        coverage.setGracePeriod(10)
+        coverage.setGracePeriodicity(InsuranceTransportInsuredObjectCoverage.GracePeriodicityEnum.DIA.toString())
+        coverage.setGracePeriodCountingMethod(InsuranceTransportInsuredObjectCoverage.GracePeriodCountingMethodEnum.UTEIS.toString())
+        coverage.setGracePeriodStartDate(LocalDate.of(2022, 12, 31))
+        coverage.setGracePeriodEndDate(LocalDate.of(2023, 12, 31))
+        coverage.setPremiumPeriodicity(InsuranceTransportInsuredObjectCoverage.PremiumPeriodicityEnum.MENSAL.toString())
+        coverage.setPremiumPeriodicityOthers("string")
+        coverage
+    }
+
+    static aTransportPolicyCoverage(String policyId, UUID deductibleId, UUID posId) {
+        def coverage = new TransportPolicyCoverageEntity()
+        coverage.setTransportPolicyId(policyId)
+        coverage.setDeductibleId(deductibleId)
+        coverage.setPosId(posId)
+        coverage.setBranch("0320")
+        coverage.setCode(InsuranceTransportCoverage.CodeEnum.ACIDENTES_PESSOAIS_COM_PASSAGEIROS.toString())
+        coverage.setDescription("string")
+        coverage
+    }
+
+    static aTransportPolicyEndorsement(String policyId) {
+        def endorsement = new TransportPolicyEndorsementEntity()
+        endorsement.setTransportPolicyId(policyId)
+        endorsement.setTravelType(InsuranceTransportSpecificPolicyInfoEndorsements.TravelTypeEnum.INTERNACIONAL_IMPORTACAO.toString())
+        endorsement.setTransportType(InsuranceTransportSpecificPolicyInfoEndorsements.TransportTypeEnum.AEREO.toString())
+        endorsement.setShipmentsNumber(10)
+        endorsement.setBranch("0320")
+        endorsement.setShipmentsPremiumAmount("100")
+        endorsement.setShipmentsPremiumUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        endorsement.setShipmentsPremiumUnitTypeOthers("string")
+        endorsement.setShipmentsPremiumUnitCode("Br")
+        endorsement.setShipmentsPremiumUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        endorsement.setShipmentsPremiumCurrency(AmountDetails.CurrencyEnum.BRL.toString())
+        endorsement.setShipmentsPremiumBRL("2000.00")
+        endorsement.setShipmentsInsuredsAmount("100")
+        endorsement.setShipmentsInsuredsUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        endorsement.setShipmentsInsuredsUnitTypeOthers("string")
+        endorsement.setShipmentsInsuredsUnitCode("Br")
+        endorsement.setShipmentsInsuredsUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        endorsement.setShipmentsInsuredsCurrency(AmountDetails.CurrencyEnum.BRL.toString())
+        endorsement.setMinInsuredAmount("100")
+        endorsement.setMinInsuredUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        endorsement.setMinInsuredUnitTypeOthers("string")
+        endorsement.setMinInsuredUnitCode("Br")
+        endorsement.setMinInsuredUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        endorsement.setMinInsuredCurrency(AmountDetails.CurrencyEnum.BRL.toString())
+        endorsement.setMaxInsuredAmount("100")
+        endorsement.setMaxInsuredUnitType(AmountDetails.UnitTypeEnum.PORCENTAGEM.toString())
+        endorsement.setMaxInsuredUnitTypeOthers("string")
+        endorsement.setMaxInsuredUnitCode("Br")
+        endorsement.setMaxInsuredUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        endorsement.setMaxInsuredCurrency(AmountDetails.CurrencyEnum.BRL.toString())
+        endorsement
+    }
+
+    static aTransportPolicyInsured() {
+        def insured = new PersonalInfoEntity()
+        insured.setIdentification("12345678900")
+        insured.setIdentificationType("CPF")
+        insured.setIdentificationTypeOthers("RNE")
+        insured.setName("Nome Sobrenome")
+        insured.setBirthDate(LocalDate.of(2000, 1, 1))
+        insured.setPostCode("10000000")
+        insured.setEmail("email@example.com")
+        insured.setCity("Sao Paulo")
+        insured.setState("SP")
+        insured.setCountry("BRA")
+        insured.setAddress("Avenida Naburo Ykesaki, 1270")
+        insured.setAddressAdditionalInfo("Fundos")
+        insured.setFlagPostCode("NACIONAL")
+        insured.setDistrictName("Liberdade")
+        insured.setTownCode("5002704")
+        insured
+    }
+
+    static aTransportPolicyClaim(String claimId, String policyId) {
         def claim = new TransportPolicyClaimEntity()
-        claim.setTransportPolicyClaimId(policyId)
+        claim.setTransportPolicyClaimId(claimId)
+        claim.setTransportPolicyId(policyId)
+        claim.setIdentification("string")
+        claim.setDocumentationDeliveryDate(LocalDate.of(2022, 12, 31))
+        claim.setStatus(InsuranceTransportClaim.StatusEnum.ABERTO.toString())
+        claim.setStatusAlterationDate(LocalDate.of(2022, 12, 31))
+        claim.setOccurrenceDate(LocalDate.of(2022, 12, 31))
+        claim.setWarningDate(LocalDate.of(2022, 12, 31))
+        claim.setThirdPartyClaimDate(LocalDate.of(2022, 12, 31))
+        claim.setAmount("100.00")
+        claim.setUnitType(AmountDetails.UnitTypeEnum.MONETARIO.toString())
+        claim.setUnitTypeOthers("string")
+        claim.setUnitCode("Br")
+        claim.setUnitDescription(AmountDetailsUnit.DescriptionEnum.BRL.toString())
+        claim.setCurrency(AmountDetails.CurrencyEnum.BRL.toString())
+        claim.setDenialJustification(InsuranceTransportClaim.DenialJustificationEnum.PRESCRICAO.toString())
+        claim.setDenialJustificationDescription("string")
         claim
+    }
+
+    static aTransportPolicyClaimCoverage(String claimId) {
+        def coverage = new TransportPolicyClaimCoverageEntity()
+        coverage.setTransportPolicyClaimId(claimId)
+        coverage.setInsuredObjectId("string")
+        coverage.setBranch("0111")
+        coverage.setCode(InsuranceTransportClaimCoverage.CodeEnum.ACIDENTES_PESSOAIS_COM_PASSAGEIROS.toString())
+        coverage.setDescription("string")
+        coverage.setWarningDate(LocalDate.of(2022, 12, 31))
+        coverage.setThirdPartyClaimDate(LocalDate.of(2022, 12, 31))
+        coverage
     }
 
     static WithdrawalPensionEntity aWithdrawalPension(String clientId, String consentId) {

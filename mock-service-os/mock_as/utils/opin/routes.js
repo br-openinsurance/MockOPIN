@@ -1,8 +1,5 @@
 import { strict as assert } from 'node:assert';
-import * as querystring from 'node:querystring';
-import { inspect } from 'node:util';
 
-import isEmpty from 'lodash/isEmpty.js';
 import { urlencoded } from 'express';
 
 import Account from '../account.js';
@@ -13,44 +10,18 @@ import layout from './layout.js';
 import { addWebhookMiddleware } from '../oidc.js';
 import Debug from 'debug';
 import { requestSentLock } from '../requestSentLock.js';
+import { parseSkippedUrlencodedBody } from '../albUrlencodedBodyCompat.js';
+import { debug } from '../debugPanel.js';
+import { installLayoutRenderer } from '../layoutRenderer.js';
 
-const body = urlencoded({ extended: false });
+const body = [urlencoded({ extended: false }), parseSkippedUrlencodedBody];
 const log = Debug('raidiam:server:info');
+const warn = Debug('raidiam:server:warn');
 
-const keys = new Set();
-const debug = (obj) =>
-  querystring.stringify(
-    Object.entries(obj).reduce((acc, [key, value]) => {
-      keys.add(key);
-      if (isEmpty(value)) return acc;
-      acc[key] = inspect(value, { depth: null });
-      return acc;
-    }, {}),
-    '<br/>',
-    ': ',
-    {
-      encodeURIComponent(value) {
-        return keys.has(value) ? `<strong>${value}</strong>` : value;
-      },
-    },
-  );
+export { debug };
 const { SessionNotFound } = errors;
 export default (app, provider) => {
-  app.use((req, res, next) => {
-    const orig = res.render;
-    // you'll probably want to use a full blown render engine capable of layouts
-    res.render = (view, locals) => {
-      app.render(view, locals, (err, html) => {
-        if (err) throw err;
-        orig.call(res, '_layout', {
-          ...locals,
-          layout,
-          body: html,
-        });
-      });
-    };
-    next();
-  });
+  installLayoutRenderer(app, layout);
 
   function setNoCache(req, res, next) {
     res.set('cache-control', 'no-store');
@@ -280,15 +251,14 @@ export default (app, provider) => {
   });
 
   app.use((err, req, res, next) => {
-    log(`Error: ${JSON.stringify(err)}`);
     if (err instanceof SessionNotFound) {
-      const orig = res.render;
-      // you'll probably want to use a full blown render engine capable of layouts
-      res.render('error', {
+      warn(`interaction session not found or expired uid=${req.params.uid} path=${req.path}`);
+      return res.status(400).render('error', {
         title: 'Error',
         message: 'No session found. Either the token was already used or it is expired. Please try again.',
       });
     }
+    log(`unhandled interaction error: ${err.message}`);
     next(err);
   });
 

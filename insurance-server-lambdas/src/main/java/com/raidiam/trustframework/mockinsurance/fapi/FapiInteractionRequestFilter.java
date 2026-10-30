@@ -39,10 +39,12 @@ public class FapiInteractionRequestFilter implements HttpServerFilter {
 
     @PostConstruct
     private void init() {
+        LOG.info("Registering required x-fapi-interaction-id header for annotated controller methods");
         AnnotationsUtil.performActionsOnControllerMethodByAnnotation(applicationContext, XFapiInteractionIdRequired.class, (fullPath, httpMethod, extractedAnnotation) -> {
             requiredXFapiRegexes.add(Pair.of(httpMethod, fullPath));
-            LOG.info("Added required x-fapi-interaction-id header regex {} - {}", httpMethod, fullPath);
+            LOG.debug("Added required x-fapi-interaction-id header regex {} - {}", httpMethod, fullPath);
         });
+        LOG.info("Registered {} x-fapi-interaction-id header required routes", requiredXFapiRegexes.size());
     }
 
     private boolean isRequired(HttpRequest<?> request) {
@@ -51,7 +53,7 @@ public class FapiInteractionRequestFilter implements HttpServerFilter {
             String regex = requiredXFapiRule.getRight();
             String requestPath = request.getPath();
             if (request.getMethod() == method && requestPath.matches(regex)) {
-                LOG.info("found matching pattern - {} - {} for path {}", method, regex, requestPath);
+                LOG.debug("found matching pattern - {} - {} for path {}", method, regex, requestPath);
                 return true;
             }
         }
@@ -60,7 +62,7 @@ public class FapiInteractionRequestFilter implements HttpServerFilter {
     }
 
     private void validate(String interactionId){
-        LOG.info("Validating {} - {}", X_FAPI_INTERACTION_ID, interactionId);
+        LOG.debug("Validating {} - {}", X_FAPI_INTERACTION_ID, interactionId);
 
         if (!interactionId.matches(INTERACTION_ID_VALIDATION_REGEX)) {
             throw new HttpStatusException(HttpStatus.BAD_REQUEST, String.format("%s: x-fapi-interaction-id - %s is invalid","PARAMETRO_INVALIDO", interactionId));
@@ -77,13 +79,13 @@ public class FapiInteractionRequestFilter implements HttpServerFilter {
         if (isRequired(request)) {
             LOG.info("Request path matched the required list - checking {} header", X_FAPI_INTERACTION_ID);
             interactionIdOptional.ifPresentOrElse(
-                    interactionId -> LOG.info("Payment request has {} header - {}", X_FAPI_INTERACTION_ID, interactionId),
+                    interactionId -> LOG.info("Request has {} header - {}", X_FAPI_INTERACTION_ID, interactionId),
                     () -> {
                         throw new HttpStatusException(HttpStatus.BAD_REQUEST, "No x-fapi-interaction-id in the request");
                     }
             );
         } else {
-            LOG.info("Request is not the payment, skipping {} header check", X_FAPI_INTERACTION_ID);
+            LOG.info("Request does not require the x-fapi-interaction-id, skipping {} header check", X_FAPI_INTERACTION_ID);
         }
         return chain.proceed(request);
     }

@@ -101,19 +101,22 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
 
     @PostConstruct
     private void init() {
+        LOG.info("Registering authentication grant requirements for annotated controller methods");
         AnnotationsUtil.performActionsOnControllerMethodByAnnotation(applicationContext, RequiredAuthenticationGrant.class, (fullPath, httpMethod, extractedAnnotation) ->
                 extractedAnnotation.enumValue("value", AuthenticationGrant.class).ifPresent(grant -> {
                     switch (grant) {
                         case AUTHORISATION_CODE:
                             requiredAuthorisationCodeRegexes.add(Pair.of(httpMethod, fullPath));
-                            LOG.info("Added required authorisation code regex {} - {}", httpMethod, fullPath);
+                            LOG.debug("Added required authorisation code regex {} - {}", httpMethod, fullPath);
                             break;
                         case CLIENT_CREDENTIALS:
                             requiredClientCredentialsRegexes.add(Pair.of(httpMethod, fullPath));
-                            LOG.info("Added required client credentials regex {} - {}", httpMethod, fullPath);
+                            LOG.debug("Added required client credentials regex {} - {}", httpMethod, fullPath);
                             break;
                     }
                 }));
+        LOG.info("Registered {} authorisation-code and {} client-credentials protected routes",
+                requiredAuthorisationCodeRegexes.size(), requiredClientCredentialsRegexes.size());
     }
 
     @Override
@@ -131,7 +134,7 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
     }
 
     private Authentication handleLambdaRequest(ApiGatewayProxyServletRequest<?> request) {
-        LOG.info("We're a lambda");
+        LOG.info("Handling {} {} as an API Gateway proxy request", request.getMethod(), request.getPath());
         Map<String, Object> authorizer = null;
         try {
             authorizer = getAuthContext(request);
@@ -149,6 +152,7 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
     }
 
     private Authentication handleHttpRequest(HttpRequest<?> request) {
+        LOG.info("Handling {} {} as a plain HttpRequest request", request.getMethod(), request.getPath());
         String token = request.getHeaders().get("access_token");
         if (token == null || token.isEmpty()) {
             token = request.getHeaders().get("Authorization");
@@ -190,8 +194,6 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
         String ssId = deserialized.get("software_id");
         String subject = deserialized.get("sub");
         checkAuthenticationGrant(request, subject);
-        LOG.info("Scopes in token: {}", String.join(",", scopes));
-        LOG.info("Org ID in token: {}", orgId);
         setRequestCallerInfo(request, scopes, clientId, subject, orgId, ssId);
         LOG.info("Returning new Client Authentication");
         try {
@@ -224,13 +226,12 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
     }
 
     private List<String> getRoles (String[] scopes) {
-        LOG.info("Scopes in token: {}", String.join(",", scopes));
-        List<String> roles = Arrays.stream(scopes)
+        var strScopes = String.join(",", scopes);
+        LOG.info("Scopes in token: {}", strScopes);
+        return Arrays.stream(scopes)
                 .map(scopesToRoles::get)
                 .filter(Objects::nonNull)
                 .toList();
-        LOG.info("Roles inferred: {}", String.join(",", roles));
-        return roles;
     }
 
     private void setRequestCallerInfo(HttpRequest<?> request, String[] scopes, String clientId, String subject, String orgId, String ssId){
@@ -239,25 +240,25 @@ public class SimpleAuthorisation implements AuthenticationFetcher<HttpRequest<?>
                 .filter(a -> !a.isEmpty())
                 .filter(a -> a.startsWith("consent:urn:raidiaminsurance:"))
                 .findFirst().orElse(null);
-        LOG.info("Consent id inferred: {}", consentId);
+        LOG.debug("Consent id inferred: {}", consentId);
         if(consentId != null) {
             consentId = consentId.replace("consent:", "");
             request.setAttribute("consentId", consentId);
         }
 
-        LOG.info("Setting clientId: {}", clientId);
+        LOG.debug("Setting clientId: {}", clientId);
         request.setAttribute("clientId", clientId);
         if(orgId != null) {
-            LOG.info("Setting orgId: {}", clientId);
+            LOG.debug("Setting orgId: {}", clientId);
             request.setAttribute("orgId", orgId);
         }
         if(ssId != null) {
-            LOG.info("Setting software statement id: {}", ssId);
+            LOG.debug("Setting software statement id: {}", ssId);
             request.setAttribute("ssId", ssId);
         }
 
         if(subject != null) {
-            LOG.info("Setting subject: {}", subject);
+            LOG.debug("Setting subject: {}", subject);
             request.setAttribute("sub", subject);
         }
 

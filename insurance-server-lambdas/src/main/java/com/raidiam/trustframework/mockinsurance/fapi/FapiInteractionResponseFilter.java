@@ -23,21 +23,21 @@ public class FapiInteractionResponseFilter implements HttpServerFilter {
     @Override
     public Publisher<MutableHttpResponse<?>> doFilter(HttpRequest<?> request, ServerFilterChain chain) {
         return Publishers.map(chain.proceed(request), response -> {
-            String interactionId = request.getHeaders().findFirst(X_FAPI_INTERACTION_ID).orElse(generateId());
+            String interactionId = request.getHeaders().findFirst(X_FAPI_INTERACTION_ID).orElseGet(this::generateId);
 
             if(!interactionId.matches(INTERACTION_ID_VALIDATION_REGEX)){
-                LOG.info("fapi interaction is invalid - generating a new one");
+                LOG.warn("Rejected fapi interaction id '{}' - not a valid UUIDv4, generating a new one", interactionId);
                 interactionId = generateId();
             }
 
-            LOG.info("Fapi interaction id: {}", interactionId);
+            LOG.debug("Fapi interaction id: {}", interactionId);
             response.header(X_FAPI_INTERACTION_ID, interactionId);
             return response;
         });
     }
 
     private String generateId() {
-        LOG.info("No fapi interaction id provided: generating one");
+        LOG.debug("No fapi interaction id provided, generating one");
         return UUID.randomUUID().toString();
     }
 

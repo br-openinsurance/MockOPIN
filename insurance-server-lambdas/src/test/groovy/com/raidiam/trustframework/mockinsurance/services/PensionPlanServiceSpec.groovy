@@ -75,16 +75,6 @@ class PensionPlanServiceSpec extends CleanupSpecification {
         }
     }
 
-    def "we can get contracts" () {
-        when:
-        def response = pensionPlanService.getContracts(Pageable.from(0, 1), testConsent.getConsentId().toString())
-
-        then:
-        response.getData()
-        response.getData().size() == 1
-        response.getData().first()
-    }
-
     def "we can get contracts V2" () {
         when:
         def response = pensionPlanService.getContractsV2(Pageable.from(0, 1), testConsent.getConsentId().toString())
@@ -93,50 +83,6 @@ class PensionPlanServiceSpec extends CleanupSpecification {
         response.getData()
         response.getData().size() == 1
         response.getData().first()
-    }
-
-    def "we can get a contract info" () {
-        when:
-        def response = pensionPlanService.getContractInfo(testPensionPlanContract.getPensionPlanContractId(), testConsent.getConsentId().toString())
-
-        then:
-        response.getData() != null
-        response.getData().getContractingType().toString() == "INDIVIDUAL"
-        def document = response.getData().getDocuments().first()
-        document.getCertificateId() == "67"
-        document.getEffectiveDateStart().toString() == "2021-05-21"
-        document.getEffectiveDateEnd().toString() == "2023-05-21"
-        document.getProposalId() == "987"
-        def insured = document.getInsureds().first()
-        insured.getDocumentType().toString() == "CPF"
-        insured.getDocumentNumber() == "12345678910"
-        insured.getName() == "JOAO DA SILVA"
-        insured.getBirthDate().toString() == "2021-05-01"
-        insured.getGender().toString() == "FEMININO"
-        insured.getPostCode() == "10000000"
-        insured.getTownName() == "Sao Paulo"
-        insured.getCountrySubDivision().toString() == "SP"
-        insured.getCountryCode().toString() == "BRA"
-        insured.getAddress() == "Av Naburo Ykesaki, 1270"
-        def coverage = document.getPlans().getCoverages().first()
-        coverage.getCoverageCode() == "1999"
-        coverage.getSusepProcessNumber() == "12345"
-        coverage.getStructureModality().toString() == "BENEFICIO_DEFINIDO"
-        coverage.getBenefitAmount().getAmount() == "100.00"
-        coverage.getBenefitAmount().getUnitType().toString() == "PORCENTAGEM"
-        coverage.getPeriodicity().toString() == "MENSAL"
-        coverage.getCoverageName() == "coverage"
-        coverage.isLockedPlan() == false
-        coverage.getTermStartDate().toString() == "2021-05-21"
-        coverage.getTermEndDate().toString() == "2023-05-21"
-        coverage.getFinancialRegime().toString() == "CAPITALIZACAO"
-        coverage.getPricingMethod().toString() == "POR_IDADE"
-        coverage.getUpdateIndex().toString() == "IGPM-FGV"
-        coverage.getUpdateIndexLagging() == 1
-        coverage.getContributionAmount().getAmount() == "100.00"
-        coverage.getBenefitPaymentAmount().getAmount() == "100.00"
-        coverage.getBenefitPaymentMethod().toString() == "UNICO"
-        coverage.getChargedAmount().getAmount() == "100.00"
     }
 
     def "we can get a contract info V2" () {
@@ -158,34 +104,6 @@ class PensionPlanServiceSpec extends CleanupSpecification {
         coverage.getChargedAmount().getAmount() == "100.00"
     }
 
-    def "we can get a contract's claims" () {
-        when:
-        def response = pensionPlanService.getContractClaims(testPensionPlanContract.getPensionPlanContractId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
-
-        then:
-        response.getData() != null
-        def claim = response.getData().first()
-        claim.getEventInfo().getEventStatus().toString() == "ABERTO"
-        claim.getEventInfo().getEventAlertDate().toString() == "2021-05-01"
-        claim.getEventInfo().getEventRegisterDate().toString() == "2021-05-01"
-        claim.getIncomeInfo().getBeneficiaryDocument() == "12345678910"
-        claim.getIncomeInfo().getBeneficiaryDocumentType().toString() == "CPF"
-        claim.getIncomeInfo().getBeneficiaryName() == "NOME BENEFICIARIO"
-        claim.getIncomeInfo().getBeneficiaryCategory().toString() == "SEGURADO"
-        claim.getIncomeInfo().getBeneficiaryBirthDate().toString() == "1990-01-01"
-        claim.getIncomeInfo().getIncomeType().toString() == "PAGAMENTO_UNICO"
-        claim.getIncomeInfo().isReversedIncome() == false
-        claim.getIncomeInfo().getIncomeAmount().getAmount() == "10000.00"
-        claim.getIncomeInfo().getIncomeAmount().getUnitType().toString() == "MONETARIO"
-        claim.getIncomeInfo().getIncomeAmount().getUnit().getCode() == "Br"
-        claim.getIncomeInfo().getIncomeAmount().getUnit().getDescription().toString() == "BRL"
-        claim.getIncomeInfo().getPaymentTerms() == "PRAZO"
-        claim.getIncomeInfo().getBenefitAmount() == 1000
-        claim.getIncomeInfo().getGrantedDate().toString() == "2021-05-01"
-        claim.getIncomeInfo().getMonetaryUpdateIndex().toString() == "IPC-FGV"
-        claim.getIncomeInfo().getLastUpdateDate().toString() == "2021-05-01"
-    }
-
     def "we can get a contract's claims V2" () {
         when:
         def response = pensionPlanService.getContractClaimsV2(testPensionPlanContract.getPensionPlanContractId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
@@ -199,24 +117,6 @@ class PensionPlanServiceSpec extends CleanupSpecification {
         claim.getIncomeInfo().getIncomeAmount().getUnit().getDescription().toString() == "BRL"
         claim.getIncomeInfo().getMonetaryUpdateIndex().toString() == "IPC-FGV"
         claim.getIncomeInfo().getLastUpdateDate().toString() == "2021-05-01"
-    }
-
-    def "we can get a contract's withdrawals" () {
-        when:
-        def response = pensionPlanService.getContractWithdrawals(testPensionPlanContract.getPensionPlanContractId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
-
-        then:
-        response.getData() != null
-        def withdrawal = response.getData().first()
-        withdrawal.isWithdrawalOccurence() == true
-        withdrawal.getType().toString() == "PARCIAL"
-        withdrawal.getNature().toString() == "RESGATE_REGULAR"
-        withdrawal.getRequestDate() == java.time.OffsetDateTime.parse("2022-05-20T08:30:00Z")
-        withdrawal.getLiquidationDate() == java.time.OffsetDateTime.parse("2022-05-20T08:30:00Z")
-        withdrawal.getAmount().getAmount() == "90.85"
-        withdrawal.getAmount().getUnitType().toString() == "PORCENTAGEM"
-        withdrawal.getPostedChargedAmount().getAmount() == "90.85"
-        withdrawal.getPostedChargedAmount().getUnitType().toString() == "PORCENTAGEM"
     }
 
     def "we can get a contract's withdrawals V2" () {

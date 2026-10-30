@@ -1,5 +1,11 @@
 {
   "software_id": "client_one",
+  "software_client_name": "Raidiam Mock Insurance Internal Client - Local",
+  "software_client_uri": "https://localhost.emobix.co.uk:8443",
+  "software_client_description": "Local mock insurance client",
+  "software_tos_uri": "https://localhost.emobix.co.uk:8443/tos",
+  "software_policy_uri": "https://localhost.emobix.co.uk:8443/policy",
+  "software_logo_uri": "https://localhost.emobix.co.uk:8443/logo.svg",
   "software_redirect_uris": [
     "https://localhost.emobix.co.uk:8443/test/a/mock/callback"
   ],

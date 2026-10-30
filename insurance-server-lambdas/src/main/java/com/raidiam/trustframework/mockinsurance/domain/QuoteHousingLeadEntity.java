@@ -14,24 +14,12 @@ import org.hibernate.envers.Audited;
 @Table(name = "quote_housing_leads")
 public class QuoteHousingLeadEntity extends QuoteEntity {
 
-    public static QuoteHousingLeadEntity fromRequest(QuoteRequestHousingLead req, String clientId) {
-        QuoteHousingLeadEntity entity = new QuoteHousingLeadEntity();
-        entity.setConsentId(req.getData().getConsentId());
-        entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
-        entity.setClientId(clientId);
-        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
-
-        entity.setCustomer(req.getData().getQuoteCustomer());
-
-        return entity;
-    }
-
     public static QuoteHousingLeadEntity fromRequestV2(QuoteRequestHousingLeadV2 req, String clientId) {
         QuoteHousingLeadEntity entity = new QuoteHousingLeadEntity();
         entity.setConsentId(req.getData().getConsentId());
         entity.setStatus(QuoteStatus.StatusEnum.RCVD.toString());
         entity.setClientId(clientId);
-        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToDate(req.getData().getExpirationDateTime()));
+        entity.setExpirationDateTime(InsuranceLambdaUtils.offsetDateToInstant(req.getData().getExpirationDateTime()));
 
         entity.setCustomer(req.getData().getQuoteCustomer());
 

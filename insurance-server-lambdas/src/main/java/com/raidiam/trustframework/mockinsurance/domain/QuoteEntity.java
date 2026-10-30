@@ -11,7 +11,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.envers.Audited;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.UUID;
 
 @Data
@@ -41,7 +41,7 @@ public abstract class QuoteEntity extends BaseEntity {
 
     @EqualsAndHashCode.Exclude
     @Column(name = "expiration_date_time")
-    private Date expirationDateTime;
+    private Instant expirationDateTime;
 
     public abstract boolean shouldReject();
 
@@ -71,6 +71,22 @@ public abstract class QuoteEntity extends BaseEntity {
         }
 
         var resp = new ResponsePatch();
+        resp.setData(patchData);
+        return resp;
+    }
+
+    public ResponsePatchRedirectLink toRedirectLinkPatchResponse(String redirectLink) {
+        var patchData = new ResponsePatchRedirectLinkData();
+        patchData.setStatus(ResponsePatchRedirectLinkData.StatusEnum.fromValue(this.getStatus()));
+
+        if (QuoteStatusEnum.ACKN.toString().equals(this.getStatus())) {
+            patchData.setInsurerQuoteId(this.getQuoteId().toString());
+            patchData.setProtocolNumber("12345678");
+            patchData.setProtocolDateTime(InsuranceLambdaUtils.dateToOffsetDate(this.getUpdatedAt()));
+            patchData.setRedirectLink(redirectLink);
+        }
+
+        var resp = new ResponsePatchRedirectLink();
         resp.setData(patchData);
         return resp;
     }

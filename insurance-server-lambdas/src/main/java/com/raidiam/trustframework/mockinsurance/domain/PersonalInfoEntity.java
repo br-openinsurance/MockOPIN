@@ -65,7 +65,6 @@ public class PersonalInfoEntity extends BaseIdEntity {
     public PersonalInfo mapDTO() {
         return new PersonalInfo()
                 .address(this.getAddress())
-                .addressAdditionalInfo(this.getAddressAdditionalInfo())
                 .city(this.getCity())
                 .email(this.getEmail())
                 .country(PersonalInfo.CountryEnum.fromValue(this.getCountry()))

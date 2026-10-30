@@ -343,6 +343,27 @@ abstract class BaseInsuranceService {
     TransportPolicyClaimRepository transportPolicyClaimRepository;
 
     @Inject
+    TransportPolicyClaimCoverageRepository transportPolicyClaimCoverageRepository;
+
+    @Inject
+    TransportPolicyPremiumRepository transportPolicyPremiumRepository;
+
+    @Inject
+    TransportPolicyPremiumCoverageRepository transportPolicyPremiumCoverageRepository;
+
+    @Inject
+    TransportPolicyInsuredObjectRepository transportPolicyInsuredObjectRepository;
+
+    @Inject
+    TransportPolicyInsuredObjectCoverageRepository transportPolicyInsuredObjectCoverageRepository;
+
+    @Inject
+    TransportPolicyCoverageRepository transportPolicyCoverageRepository;
+
+    @Inject
+    TransportPolicyEndorsementRepository transportPolicyEndorsementRepository;
+
+    @Inject
     ConsentTransportPolicyRepository consentTransportPolicyRepository;
 
     @Inject

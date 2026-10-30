@@ -59,16 +59,6 @@ class PatrimonialServiceSpec extends CleanupSpecification {
         }
     }
 
-    def "we can get policies" () {
-        when:
-        def response = patrimonialService.getPolicies(testConsent.getConsentId().toString(), Pageable.from(0, 1))
-
-        then:
-        response.getData()
-        response.getData().size() == 1
-        response.getData().first()
-    }
-
     def "we can get policies V2" () {
         when:
         def response = patrimonialService.getPoliciesV2(testConsent.getConsentId().toString(), Pageable.from(0, 1))
@@ -77,28 +67,6 @@ class PatrimonialServiceSpec extends CleanupSpecification {
         response.getData()
         response.getData().size() == 1
         response.getData().first()
-    }
-
-    def "we can get a policy info" () {
-        when:
-        def response = patrimonialService.getPolicyInfo(testPatrimonialPolicy.getPolicyId(), testConsent.getConsentId().toString())
-
-        then:
-        response.getData() != null
-        response.getData().getDocumentType().toString() == "APOLICE_INDIVIDUAL"
-        response.getData().getIssuanceType().toString() == "EMISSAO_PROPRIA"
-        response.getData().getIssuanceDate().toString() == "2022-12-31"
-        response.getData().getTermStartDate().toString() == "2022-12-31"
-        response.getData().getTermEndDate().toString() == "2023-12-31"
-        response.getData().getProposalId() == "123456"
-        response.getData().getMaxLMG().getAmount() == "2000.00"
-        response.getData().getMaxLMG().getCurrency().toString() == "BRL"
-        response.getData().getMaxLMG().getUnitType() == null
-        response.getData().getInsureds().size() == 1
-        response.getData().getInsureds().first().getName() == "Nome Sobrenome"
-        response.getData().getInsuredObjects().size() == 1
-        response.getData().getInsuredObjects().first().getCoverages().size() == 1
-        response.getData().getInsuredObjects().first().getCoverages().first().getBranch() == "0114"
     }
 
     def "we can get a policy info V2" () {
@@ -128,14 +96,6 @@ class PatrimonialServiceSpec extends CleanupSpecification {
         response.getData().getPayments().first().getAmount().getCurrency().toString() == "BRL"
         response.getData().getPayments().first().getAmount().getUnitType() == null
         response.getData().getPayments().first().getAmount().getUnit() == null
-    }
-
-    def "we can get a policy's claims" () {
-        when:
-        def response = patrimonialService.getClaims(testPatrimonialPolicy.getPolicyId(), testConsent.getConsentId().toString(), Pageable.from(0, 1))
-
-        then:
-        response.getData() != null
     }
 
     def "we can get a policy's claims V2" () {

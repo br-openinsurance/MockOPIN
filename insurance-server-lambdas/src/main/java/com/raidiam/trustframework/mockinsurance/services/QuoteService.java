@@ -49,6 +49,10 @@ public abstract class QuoteService<T extends QuoteEntity> extends BaseInsuranceS
         T quote = this.getQuoteByConsentId(consentId)
                 .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Quote for consent id " + consentId + " not found"));
 
+        if (clientId == null || !clientId.equals(quote.getClientId())) {
+            throw new HttpStatusException(HttpStatus.FORBIDDEN, "NAO_INFORMADO: Requested a consent created with a different oauth client");
+        }
+
         if (QuoteStatusEnum.RCVD.toString().equals(quote.getStatus())) {
             this.getLogger().info("quote status is RCVD");
 
